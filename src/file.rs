@@ -13,7 +13,16 @@ pub fn run() {
 
     let header = serde_json::from_str::<Header>(&contents).unwrap();
 
-    println!("{}", header.to_string())
+    println!("{}", header.to_string());
+
+    let mut f = File::open("./files/satellite/score.json").unwrap();
+    let mut c = String::new();
+    f.read_to_string(&mut c).unwrap();
+    let h = serde_json::from_str::<Vec<Chart>>(&c).unwrap();
+
+    for i in h {
+        println!("{}", i.title)
+    }
 }
 
 #[derive(Deserialize)]
@@ -26,5 +35,18 @@ struct Header {
 impl Header {
     fn to_string(&self) -> String {
         format!("{} {} {} ", self.name, self.symbol, self.data_url)
+    }
+}
+
+#[derive(Deserialize)]
+struct Chart {
+    title: String,
+    artist: String,
+    md5: String,
+}
+
+impl Chart {
+    fn to_string(&self) -> String {
+        format!("{} {} {}", self.title, self.artist, self.md5)
     }
 }
