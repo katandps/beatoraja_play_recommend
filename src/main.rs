@@ -1,3 +1,7 @@
+mod file;
+
+use file::run;
+
 fn main() {
-    println!("Hello, world!");
+    run();
 }
