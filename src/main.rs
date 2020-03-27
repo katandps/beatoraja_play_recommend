@@ -4,7 +4,7 @@ mod db;
 pub mod schema;
 pub mod model;
 pub mod table;
-pub mod score;
+pub mod whole_score;
 
 #[macro_use]
 extern crate diesel;

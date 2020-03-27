@@ -8,7 +8,11 @@ use diesel::prelude::*;
 use diesel::sqlite::SqliteConnection;
 
 use crate::model::player::Player;
-use crate::score::{WholeScore, Scores, Score, SongId, ClearType};
+use crate::whole_score::WholeScore;
+use crate::whole_score::scores::Scores;
+use crate::whole_score::scores::score::Score;
+use crate::whole_score::scores::score::song_id::SongId;
+use crate::whole_score::scores::score::clear_type::ClearType;
 
 pub fn run()
 {
