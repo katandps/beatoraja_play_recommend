@@ -20,13 +20,13 @@ table! {
         minbp -> Integer,
         playcount -> Integer,
         clearcount -> Integer,
-        history -> Integer,
+        //history -> Integer, nullが入っていたりする
         scorehash -> Text,
         option -> Integer,
         random -> Integer,
         date -> Integer,
         state -> Integer,
-        trophy -> Text,
-        ghost -> Text,
+        //trophy -> Text,
+        //ghost -> Text,
     }
 }
