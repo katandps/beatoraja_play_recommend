@@ -1,3 +1,5 @@
+use std::fmt;
+
 pub enum ClearType {
     NoPlay,
     Failed,
@@ -28,6 +30,25 @@ impl ClearType {
             9 => ClearType::Perfect,
             10 => ClearType::Max,
             _ => ClearType::Unknown
+        }
+    }
+}
+
+impl fmt::Display for ClearType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            ClearType::NoPlay => write!(f, "NoPlay"),
+            ClearType::Failed => write!(f, "Failed"),
+            ClearType::AssistEasy => write!(f, "AssistEasy"),
+            ClearType::LightAssistEasy => write!(f, "LightAssistEasy"),
+            ClearType::Easy => write!(f, "Easy"),
+            ClearType::Normal => write!(f, "Normal"),
+            ClearType::Hard => write!(f, "Hard"),
+            ClearType::ExHard => write!(f, "ExHard"),
+            ClearType::FullCombo => write!(f, "FullCombo"),
+            ClearType::Perfect => write!(f, "Perfect"),
+            ClearType::Max => write!(f, "Max"),
+            ClearType::Unknown => write!(f, "Unknown"),
         }
     }
 }

@@ -13,6 +13,8 @@ use crate::whole_score::scores::Scores;
 use crate::whole_score::scores::score::Score;
 use crate::whole_score::scores::score::song_id::SongId;
 use crate::whole_score::scores::score::clear_type::ClearType;
+use crate::whole_score::scores::score::updated_at::UpdatedAt;
+use chrono::{DateTime, Local, TimeZone};
 
 pub fn run()
 {
@@ -44,19 +46,20 @@ pub fn score() -> WholeScore {
         .load::<crate::model::score::Score>(&connection)
         .expect("Error loading schema");
 
-    WholeScore::new(
-        Scores::new(
-            results
-                .iter()
-                .map(
-                    |s|
-                        Score::new(
-                            SongId::new((&s.sha256).parse().unwrap(), s.mode),
-                            ClearType::from_integer(s.clear),
-                        )
-                ).collect()
+    WholeScore::new(Scores::new(results.iter().map(make_score()).collect()))
+}
+
+fn make_score() -> Box<dyn FnMut(&crate::model::score::Score) -> Score> {
+    Box::new(|score| {
+        Score::new(
+            SongId::new((score.sha256).parse().unwrap(), score.mode),
+            ClearType::from_integer(score.clear),
+            UpdatedAt::new(
+                DateTime::from(Local.timestamp(score.date as i64, 0)
+                )
+            ),
         )
-    )
+    })
 }
 
 pub fn establish_connection(url: String) -> SqliteConnection {

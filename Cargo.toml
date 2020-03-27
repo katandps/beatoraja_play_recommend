@@ -7,8 +7,16 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+# 環境変数
+dotenv = "0.10"
+
+# SqLiteへのアクセス
 diesel = { version = "1.4", features = ["sqlite"]}
 #diesel_codegen = {version = "0.16", features = ["sqlite"]}
-dotenv = "0.10"
+
+# JSONのパース
 serde = {version = "1.0", features= ["derive"]}
 serde_json = "1.0"
+
+# 日時を扱う
+chrono = "0.4.11"

@@ -15,5 +15,5 @@ fn main() {
     let table = file::get_table();
     println!("{}", table.string());
     let ws = db::score();
-    println!("{}", ws.count())
+    println!("{}", ws)
 }
