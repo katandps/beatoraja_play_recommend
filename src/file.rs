@@ -2,27 +2,39 @@ use std::fs::File;
 use std::io::Read;
 use serde::Deserialize;
 
+use super::table;
+
 extern crate serde;
 extern crate serde_json;
 
-pub fn run() {
+pub fn get_table() -> table::Table {
+    let header = get_header();
+    let chart = get_charts();
+    table::Table::new(
+        header.name,
+        header.symbol,
+        table::Charts::new(
+            chart.iter().map(|c| c.to_chart()).collect(),
+        ),
+    )
+}
+
+fn get_header() -> Header {
     let mut file = File::open("./files/satellite/header.json").unwrap();
 
     let mut contents = String::new();
     file.read_to_string(&mut contents).unwrap();
 
-    let header = serde_json::from_str::<Header>(&contents).unwrap();
+    serde_json::from_str::<Header>(&contents).unwrap()
+}
 
-    println!("{}", header.to_string());
-
+fn get_charts() -> Vec<Chart> {
     let mut f = File::open("./files/satellite/score.json").unwrap();
+
     let mut c = String::new();
     f.read_to_string(&mut c).unwrap();
-    let h = serde_json::from_str::<Vec<Chart>>(&c).unwrap();
 
-    for i in h {
-        //println!("{}", i.to_string())
-    }
+    serde_json::from_str::<Vec<Chart>>(&c).unwrap()
 }
 
 #[derive(Deserialize)]
@@ -30,12 +42,6 @@ struct Header {
     name: String,
     symbol: String,
     data_url: String,
-}
-
-impl Header {
-    fn to_string(&self) -> String {
-        format!("{} {} {} ", self.name, self.symbol, self.data_url)
-    }
 }
 
 #[derive(Deserialize)]
@@ -46,7 +52,11 @@ struct Chart {
 }
 
 impl Chart {
-    fn to_string(&self) -> String {
-        format!("{} {} {}", self.title, self.artist, self.md5)
+    fn to_chart(&self) -> table::Chart {
+        table::Chart::new(
+            (&self.title).parse().unwrap(),
+            (&self.artist).parse().unwrap(),
+            (&self.md5).parse().unwrap(),
+        )
     }
 }

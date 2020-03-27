@@ -3,6 +3,7 @@ mod db;
 
 pub mod schema;
 pub mod model;
+pub mod table;
 
 #[macro_use]
 extern crate diesel;
@@ -10,6 +11,7 @@ extern crate diesel;
 pub use diesel::prelude::*;
 
 fn main() {
-    file::run();
+    let table = file::get_table();
+    println!("{}", table.string());
     db::run();
 }
