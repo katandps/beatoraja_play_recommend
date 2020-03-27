@@ -1,7 +1,15 @@
 mod file;
+mod db;
 
-use file::run;
+pub mod schema;
+pub mod models;
+
+#[macro_use]
+extern crate diesel;
+
+pub use diesel::prelude::*;
 
 fn main() {
-    run();
+    file::run();
+    db::run();
 }

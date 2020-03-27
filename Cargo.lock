@@ -36,7 +36,6 @@ name = "beatoraja_play_recommend"
 version = "0.1.0"
 dependencies = [
  "diesel",
- "diesel_codegen",
  "dotenv",
  "serde",
  "serde_json",
@@ -72,36 +71,24 @@ dependencies = [
 
 [[package]]
 name = "diesel"
-version = "0.15.2"
+version = "1.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67f5b7408ddb7a834c0f191fb49b4398ccae19b226afafeeff5cb1eaac768b89"
+checksum = "33d7ca63eb2efea87a7f56a283acc49e2ce4b2bd54adf7465dc1d81fef13d8fc"
 dependencies = [
  "byteorder",
+ "diesel_derives",
  "libsqlite3-sys",
 ]
 
 [[package]]
-name = "diesel_codegen"
-version = "0.15.0"
+name = "diesel_derives"
+version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "044abc50a0ee67e195b0ae95c9ffe6903748434294636dd67808301b7df1902f"
+checksum = "45f5098f628d02a7a0f68ddba586fb61e80edec3bdc1be3b921f4ceec60858d3"
 dependencies = [
- "diesel",
- "diesel_infer_schema",
- "dotenv",
- "quote 0.3.15",
- "syn 0.11.11",
-]
-
-[[package]]
-name = "diesel_infer_schema"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf0e5b3d40abfc2eadba06df2c1b93b61be579390f4dba620f08e8172cce30c4"
-dependencies = [
- "diesel",
- "quote 0.3.15",
- "syn 0.11.11",
+ "proc-macro2",
+ "quote 1.0.3",
+ "syn 1.0.17",
 ]
 
 [[package]]
