@@ -21,7 +21,7 @@ pub fn run() {
     let h = serde_json::from_str::<Vec<Chart>>(&c).unwrap();
 
     for i in h {
-        println!("{}", i.title)
+        //println!("{}", i.to_string())
     }
 }
 

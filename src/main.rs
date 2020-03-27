@@ -2,7 +2,7 @@ mod file;
 mod db;
 
 pub mod schema;
-pub mod models;
+pub mod model;
 
 #[macro_use]
 extern crate diesel;

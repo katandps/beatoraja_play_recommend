@@ -4,7 +4,7 @@ extern crate dotenv;
 use diesel::prelude::*;
 use dotenv::dotenv;
 use std::env;
-use super::models::Player;
+use super::model::player::Player;
 use self::diesel::sqlite::SqliteConnection;
 
 pub fn run()
