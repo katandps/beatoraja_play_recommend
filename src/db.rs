@@ -15,6 +15,7 @@ use crate::whole_score::scores::score::song_id::SongId;
 use crate::whole_score::scores::score::clear_type::ClearType;
 use crate::whole_score::scores::score::updated_at::UpdatedAt;
 use chrono::{DateTime, Local, TimeZone};
+use std::collections::HashMap;
 
 pub fn run()
 {
@@ -46,20 +47,18 @@ pub fn score() -> WholeScore {
         .load::<crate::model::score::Score>(&connection)
         .expect("Error loading schema");
 
-    WholeScore::new(Scores::new(results.iter().map(make_score()).collect()))
+    make_whole_score(results)
 }
 
-fn make_score() -> Box<dyn FnMut(&crate::model::score::Score) -> Score> {
-    Box::new(|score| {
-        Score::new(
-            SongId::new((score.sha256).parse().unwrap(), score.mode),
-            ClearType::from_integer(score.clear),
-            UpdatedAt::new(
-                DateTime::from(Local.timestamp(score.date as i64, 0)
-                )
-            ),
-        )
-    })
+fn make_whole_score(record: Vec<crate::model::score::Score>) -> WholeScore {
+    let mut scores = HashMap::new();
+    for row in record {
+        let song_id = SongId::new(row.sha256, row.mode);
+        let clear = ClearType::from_integer(row.clear);
+        let updated_at = UpdatedAt::new(DateTime::from(Local.timestamp(row.date as i64, 0)));
+        scores.insert(song_id, Score::from_data(clear, updated_at));
+    }
+    WholeScore::new(Scores::new(scores))
 }
 
 pub fn establish_connection(url: String) -> SqliteConnection {

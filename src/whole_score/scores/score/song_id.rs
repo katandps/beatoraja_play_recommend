@@ -1,5 +1,6 @@
 use std::fmt;
 
+#[derive(PartialEq, Eq, Hash)]
 pub struct SongId {
     sha256: String,
     mode: i32,
