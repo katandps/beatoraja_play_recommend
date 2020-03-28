@@ -1,6 +1,7 @@
 use std::fmt;
 use chrono::{DateTime, Local};
 
+#[derive(Clone)]
 pub struct UpdatedAt {
     updated_at: DateTime<Local>
 }

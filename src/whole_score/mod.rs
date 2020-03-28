@@ -5,6 +5,9 @@ use std::fmt;
 use scores::Scores;
 use crate::whole_score::scores::score::song_id::SongId;
 use crate::whole_score::scores::score::Score;
+use crate::table::Table;
+use crate::scored_table::ScoredTable;
+use crate::song_data::SongData;
 
 pub struct WholeScore {
     scores: Scores
@@ -15,6 +18,9 @@ impl WholeScore {
     pub fn count(&self) -> usize { self.scores.count() }
     pub fn get_score(&self, song_id: &SongId) -> Option<&Score> {
         self.scores.get_score(&song_id)
+    }
+    pub fn merge_score(&self, table: &Table, song_data: &SongData) -> ScoredTable {
+        self.scores.merge_score(table, song_data)
     }
 }
 

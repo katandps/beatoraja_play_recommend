@@ -8,7 +8,7 @@ pub struct Table {
 }
 
 pub struct Charts {
-    charts: Vec<Chart>
+    pub charts: Vec<Chart>
 }
 
 #[derive(Clone)]
@@ -16,7 +16,7 @@ pub struct Chart
 {
     title: String,
     artist: String,
-    md5: HashMd5,
+    pub md5: HashMd5,
     level: String,
 }
 
@@ -27,6 +27,8 @@ impl Table {
     pub fn level_specified(&self, level: String) -> Table {
         Table::new(&self.name, &self.symbol, self.charts.level_specified(level))
     }
+
+    pub fn get_charts(&self) -> &Vec<Chart> { &self.charts.charts }
 }
 
 impl fmt::Display for Table {
@@ -62,5 +64,11 @@ impl Chart {
 
     pub fn string(&self) -> String {
         format!("{}: {}, {}", self.title, self.artist, self.md5)
+    }
+}
+
+impl fmt::Display for Chart {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} {}", self.level, self.title)
     }
 }

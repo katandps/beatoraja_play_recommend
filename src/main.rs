@@ -8,6 +8,7 @@ pub mod table;
 pub mod whole_score;
 pub mod song_data;
 pub mod song;
+pub mod scored_table;
 
 #[macro_use]
 extern crate diesel;

@@ -5,6 +5,9 @@ use std::fmt;
 use score::Score;
 use crate::whole_score::scores::score::song_id::SongId;
 use std::collections::HashMap;
+use crate::table::Table;
+use crate::scored_table::{ScoredTable, ScoredChart};
+use crate::song_data::SongData;
 
 pub struct Scores {
     scores: HashMap<SongId, Score>
@@ -15,6 +18,24 @@ impl Scores {
     pub fn count(&self) -> usize { self.scores.len() }
     pub fn get_score(&self, song_id: &SongId) -> Option<&Score> {
         self.scores.get(song_id)
+    }
+    pub fn merge_score(&self, table: &Table, song_data: &SongData) -> ScoredTable {
+        let mut charts = Vec::new();
+        for chart in table.get_charts() {
+            // todo 難易度表にある曲を持ってないと落ちる
+            let sha256 = song_data.get_sha256(&chart.md5);
+            if !sha256.is_some() { continue; }
+            let song_id = SongId::new(sha256.unwrap(), 0);
+            // todo 難易度表にある曲にスコアがついてないと落ちる
+            let score = self.get_score(&song_id).unwrap();
+            let scored_chart = ScoredChart::new(
+                song_id,
+                chart.clone(),
+                score.clone(),
+            );
+            charts.push(scored_chart);
+        }
+        ScoredTable::new(charts)
     }
 }
 

@@ -1,5 +1,6 @@
 use std::fmt;
 
+#[derive(Clone)]
 pub enum ClearType {
     NoPlay,
     Failed,

@@ -7,6 +7,7 @@ use std::fmt;
 use clear_type::ClearType;
 use updated_at::UpdatedAt;
 
+#[derive(Clone)]
 pub struct Score {
     clear: ClearType,
     updated_at: UpdatedAt,
