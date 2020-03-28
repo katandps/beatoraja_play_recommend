@@ -17,7 +17,7 @@ use crate::whole_score::scores::score::updated_at::UpdatedAt;
 use chrono::{DateTime, Local, TimeZone};
 use std::collections::HashMap;
 use crate::song_data::SongData;
-use crate::song::HashSha256;
+use crate::song::{HashSha256, HashMd5};
 
 pub fn run()
 {
@@ -77,5 +77,15 @@ pub fn song_data() -> SongData {
     let results = song
         .load::<crate::model::song::Song>(&connection)
         .expect("Error loading schema");
-    SongData {}
+    make_song_data(results)
+}
+
+fn make_song_data(record: Vec<crate::model::song::Song>) -> SongData {
+    let mut md5_to_sha256 = HashMap::new();
+    let mut sha256_to_md5 = HashMap::new();
+    for row in record {
+        md5_to_sha256.insert(HashMd5::new(row.md5.clone()), HashSha256::new(row.sha256.clone()));
+        sha256_to_md5.insert(HashSha256::new(row.sha256), HashMd5::new(row.md5));
+    }
+    SongData::new(md5_to_sha256, sha256_to_md5)
 }

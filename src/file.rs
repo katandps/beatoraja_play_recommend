@@ -3,6 +3,7 @@ use std::io::Read;
 use serde::Deserialize;
 
 use super::table;
+use crate::song::HashMd5;
 
 extern crate serde;
 extern crate serde_json;
@@ -49,6 +50,7 @@ struct Chart {
     title: String,
     artist: String,
     md5: String,
+    level: String,
 }
 
 impl Chart {
@@ -56,7 +58,8 @@ impl Chart {
         table::Chart::new(
             (&self.title).parse().unwrap(),
             (&self.artist).parse().unwrap(),
-            (&self.md5).parse().unwrap(),
+            HashMd5::new((&self.md5).parse().unwrap()),
+            (&self.level).parse().unwrap(),
         )
     }
 }

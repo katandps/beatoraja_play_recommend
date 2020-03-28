@@ -1,11 +1,11 @@
 use std::fmt;
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub struct HashMd5 {
     md5: String
 }
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub struct HashSha256 {
     sha256: String
 }
