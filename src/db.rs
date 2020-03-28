@@ -16,6 +16,8 @@ use crate::whole_score::scores::score::clear_type::ClearType;
 use crate::whole_score::scores::score::updated_at::UpdatedAt;
 use chrono::{DateTime, Local, TimeZone};
 use std::collections::HashMap;
+use crate::song_data::SongData;
+use crate::song::HashSha256;
 
 pub fn run()
 {
@@ -41,7 +43,7 @@ pub fn score() -> WholeScore {
     use super::schema::score::score::dsl::*;
     dotenv().ok();
 
-    let database_url = env::var("SCORE_DATABASE_URL").expect("DATABASE_URL must be set");
+    let database_url = env::var("SCORE_DATABASE_URL").expect("SCORE_DATABASE_URL must be set");
     let connection = establish_connection(database_url);
     let results = score
         .load::<crate::model::score::Score>(&connection)
@@ -53,7 +55,7 @@ pub fn score() -> WholeScore {
 fn make_whole_score(record: Vec<crate::model::score::Score>) -> WholeScore {
     let mut scores = HashMap::new();
     for row in record {
-        let song_id = SongId::new(row.sha256, row.mode);
+        let song_id = SongId::new(HashSha256::new(row.sha256), row.mode);
         let clear = ClearType::from_integer(row.clear);
         let updated_at = UpdatedAt::new(DateTime::from(Local.timestamp(row.date as i64, 0)));
         scores.insert(song_id, Score::from_data(clear, updated_at));
@@ -64,4 +66,16 @@ fn make_whole_score(record: Vec<crate::model::score::Score>) -> WholeScore {
 pub fn establish_connection(url: String) -> SqliteConnection {
     SqliteConnection::establish(&url)
         .unwrap_or_else(|_| panic!("Error connection to {}", &url))
+}
+
+pub fn song_data() -> SongData {
+    use super::schema::song::song::dsl::*;
+    dotenv().ok();
+
+    let database_url = env::var("SONG_DATABASE_URL").expect("SONG_DATABASE_URL must be set");
+    let connection = establish_connection(database_url);
+    let results = song
+        .load::<crate::model::song::Song>(&connection)
+        .expect("Error loading schema");
+    SongData {}
 }

@@ -1,13 +1,14 @@
 use std::fmt;
+use crate::song::HashSha256;
 
 #[derive(PartialEq, Eq, Hash)]
 pub struct SongId {
-    sha256: String,
+    sha256: HashSha256,
     mode: i32,
 }
 
 impl SongId {
-    pub fn new(sha256: String, mode: i32) -> SongId { SongId { sha256, mode } }
+    pub fn new(sha256: HashSha256, mode: i32) -> SongId { SongId { sha256, mode } }
 }
 
 impl fmt::Display for SongId {
