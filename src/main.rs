@@ -4,11 +4,11 @@ mod file;
 
 pub mod model;
 pub mod schema;
+pub mod score;
 pub mod scored_table;
 pub mod song;
 pub mod song_data;
 pub mod table;
-pub mod whole_score;
 
 #[macro_use]
 extern crate diesel;

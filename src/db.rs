@@ -8,14 +8,13 @@ use diesel::sqlite::SqliteConnection;
 use dotenv::dotenv;
 
 use crate::model::player::Player;
+use crate::score::clear_type::ClearType;
+use crate::score::scores::Scores;
+use crate::score::song_id::SongId;
+use crate::score::updated_at::UpdatedAt;
+use crate::score::Score;
 use crate::song::{HashMd5, HashSha256};
 use crate::song_data::SongData;
-use crate::whole_score::scores::score::clear_type::ClearType;
-use crate::whole_score::scores::score::song_id::SongId;
-use crate::whole_score::scores::score::updated_at::UpdatedAt;
-use crate::whole_score::scores::score::Score;
-use crate::whole_score::scores::Scores;
-use crate::whole_score::WholeScore;
 use chrono::{DateTime, Local, TimeZone};
 use std::collections::HashMap;
 
@@ -38,7 +37,7 @@ pub fn run() {
     }
 }
 
-pub fn score() -> WholeScore {
+pub fn score() -> Scores {
     use super::schema::score::score::dsl::*;
     dotenv().ok();
 
@@ -51,7 +50,7 @@ pub fn score() -> WholeScore {
     make_whole_score(results)
 }
 
-fn make_whole_score(record: Vec<crate::model::score::Score>) -> WholeScore {
+fn make_whole_score(record: Vec<crate::model::score::Score>) -> Scores {
     let mut scores = HashMap::new();
     for row in record {
         let song_id = SongId::new(HashSha256::new(row.sha256), row.mode);
@@ -59,7 +58,7 @@ fn make_whole_score(record: Vec<crate::model::score::Score>) -> WholeScore {
         let updated_at = UpdatedAt::new(DateTime::from(Local.timestamp(row.date as i64, 0)));
         scores.insert(song_id, Score::from_data(clear, updated_at));
     }
-    WholeScore::new(Scores::new(scores))
+    Scores::new(scores)
 }
 
 pub fn establish_connection(url: String) -> SqliteConnection {

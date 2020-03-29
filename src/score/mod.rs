@@ -1,4 +1,5 @@
 pub mod clear_type;
+pub mod scores;
 pub mod song_id;
 pub mod updated_at;
 

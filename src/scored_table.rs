@@ -1,9 +1,9 @@
 use std::cmp::Ordering;
 use std::fmt;
 
+use crate::score::song_id::SongId;
+use crate::score::Score;
 use crate::table::Chart;
-use crate::whole_score::scores::score::song_id::SongId;
-use crate::whole_score::scores::score::Score;
 
 pub struct ScoredTable {
     charts: Vec<ScoredChart>,

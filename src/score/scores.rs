@@ -1,12 +1,10 @@
-pub mod score;
-
 use std::fmt;
 
+use crate::score::song_id::SongId;
+use crate::score::Score;
 use crate::scored_table::{ScoredChart, ScoredTable};
 use crate::song_data::SongData;
 use crate::table::Table;
-use crate::whole_score::scores::score::song_id::SongId;
-use score::Score;
 use std::collections::HashMap;
 
 pub struct Scores {
