@@ -42,7 +42,7 @@ fn get_charts() -> Vec<Chart> {
 struct Header {
     name: String,
     symbol: String,
-    data_url: String,
+    //data_url: String,
 }
 
 #[derive(Deserialize)]

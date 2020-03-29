@@ -11,7 +11,7 @@ pub struct Charts {
     pub charts: Vec<Chart>
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct Chart
 {
     title: String,
@@ -49,6 +49,8 @@ impl Charts {
         Charts::new(charts)
     }
 }
+
+impl Eq for Chart {}
 
 impl fmt::Display for Charts {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

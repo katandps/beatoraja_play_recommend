@@ -1,9 +1,4 @@
-use crate::file;
-use crate::db;
-
 pub use diesel::prelude::*;
-use crate::whole_score::scores::score::song_id::SongId;
-use crate::song::HashSha256;
 
 pub struct App {
     pub table: crate::table::Table,
@@ -13,10 +8,25 @@ pub struct App {
 
 impl App {
     pub fn run(&self) {
-        let level = "12";
-        println!("{}", self.table.level_specified(level.parse().unwrap()));
-        //println!("{}", ws);
-        let scored_table = self.whole_score.merge_score(&self.table, &self.song_data);
-        println!("{}", scored_table)
+        let mut levels = Vec::new();
+        levels.push("0");
+        levels.push("1");
+        levels.push("2");
+        levels.push("3");
+        levels.push("4");
+        levels.push("5");
+        levels.push("6");
+        levels.push("7");
+        levels.push("8");
+        levels.push("9");
+        levels.push("10");
+        levels.push("11");
+        levels.push("12");
+
+        for level in levels {
+            let spec = self.table.level_specified(level.parse().unwrap());
+            let scored = self.whole_score.merge_score(&spec, &self.song_data);
+            println!("{}", scored.recent_updated())
+        }
     }
 }
