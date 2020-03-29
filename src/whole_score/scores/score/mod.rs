@@ -1,9 +1,9 @@
-pub mod song_id;
 pub mod clear_type;
+pub mod song_id;
 pub mod updated_at;
 
-use std::fmt;
 use std::cmp::Ordering;
+use std::fmt;
 
 use clear_type::ClearType;
 use updated_at::UpdatedAt;
@@ -15,7 +15,9 @@ pub struct Score {
 }
 
 impl Score {
-    pub fn from_data(clear: ClearType, updated_at: UpdatedAt) -> Score { Score { clear, updated_at } }
+    pub fn from_data(clear: ClearType, updated_at: UpdatedAt) -> Score {
+        Score { clear, updated_at }
+    }
 }
 
 impl Ord for Score {

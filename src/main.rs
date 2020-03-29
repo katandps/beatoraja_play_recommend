@@ -1,14 +1,14 @@
-mod file;
-mod db;
 mod app;
+mod db;
+mod file;
 
-pub mod schema;
 pub mod model;
+pub mod schema;
+pub mod scored_table;
+pub mod song;
+pub mod song_data;
 pub mod table;
 pub mod whole_score;
-pub mod song_data;
-pub mod song;
-pub mod scored_table;
 
 #[macro_use]
 extern crate diesel;

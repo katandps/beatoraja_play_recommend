@@ -1,6 +1,6 @@
+use serde::Deserialize;
 use std::fs::File;
 use std::io::Read;
-use serde::Deserialize;
 
 use super::table;
 use crate::song::HashMd5;
@@ -14,9 +14,7 @@ pub fn get_table() -> table::Table {
     table::Table::new(
         header.name,
         header.symbol,
-        table::Charts::new(
-            chart.iter().map(|c| c.to_chart()).collect(),
-        ),
+        table::Charts::new(chart.iter().map(|c| c.to_chart()).collect()),
     )
 }
 

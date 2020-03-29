@@ -2,20 +2,24 @@ pub mod scores;
 
 use std::fmt;
 
-use scores::Scores;
-use crate::whole_score::scores::score::song_id::SongId;
-use crate::whole_score::scores::score::Score;
-use crate::table::Table;
 use crate::scored_table::ScoredTable;
 use crate::song_data::SongData;
+use crate::table::Table;
+use crate::whole_score::scores::score::song_id::SongId;
+use crate::whole_score::scores::score::Score;
+use scores::Scores;
 
 pub struct WholeScore {
-    scores: Scores
+    scores: Scores,
 }
 
 impl WholeScore {
-    pub fn new(scores: Scores) -> WholeScore { WholeScore { scores } }
-    pub fn count(&self) -> usize { self.scores.count() }
+    pub fn new(scores: Scores) -> WholeScore {
+        WholeScore { scores }
+    }
+    pub fn count(&self) -> usize {
+        self.scores.count()
+    }
     pub fn get_score(&self, song_id: &SongId) -> Option<&Score> {
         self.scores.get_score(&song_id)
     }

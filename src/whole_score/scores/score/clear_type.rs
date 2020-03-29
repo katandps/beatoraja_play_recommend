@@ -30,7 +30,7 @@ impl ClearType {
             8 => ClearType::FullCombo,
             9 => ClearType::Perfect,
             10 => ClearType::Max,
-            _ => ClearType::Unknown
+            _ => ClearType::Unknown,
         }
     }
 }

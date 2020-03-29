@@ -1,20 +1,24 @@
-use std::fmt;
 use std::cmp::Ordering;
+use std::fmt;
 
-use chrono::{DateTime, Local, Datelike};
+use chrono::{DateTime, Datelike, Local};
 
 #[derive(Clone, Eq)]
 pub struct UpdatedAt {
-    updated_at: DateTime<Local>
+    updated_at: DateTime<Local>,
 }
 
 impl UpdatedAt {
-    pub fn new(updated_at: DateTime<Local>) -> UpdatedAt { UpdatedAt { updated_at } }
+    pub fn new(updated_at: DateTime<Local>) -> UpdatedAt {
+        UpdatedAt { updated_at }
+    }
 }
 
 impl Ord for UpdatedAt {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.updated_at.num_days_from_ce().cmp(&other.updated_at.num_days_from_ce())
+        self.updated_at
+            .num_days_from_ce()
+            .cmp(&other.updated_at.num_days_from_ce())
     }
 }
 

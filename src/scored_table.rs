@@ -1,12 +1,12 @@
-use std::fmt;
 use std::cmp::Ordering;
+use std::fmt;
 
+use crate::table::Chart;
 use crate::whole_score::scores::score::song_id::SongId;
 use crate::whole_score::scores::score::Score;
-use crate::table::Chart;
 
 pub struct ScoredTable {
-    charts: Vec<ScoredChart>
+    charts: Vec<ScoredChart>,
 }
 
 impl ScoredTable {
@@ -16,13 +16,7 @@ impl ScoredTable {
     pub fn recent_updated(&self) -> ScoredTable {
         let mut vec: Vec<ScoredChart> = self.charts.iter().cloned().collect();
         vec.sort();
-        ScoredTable::new(
-            vec
-                .iter()
-                .take(3)
-                .cloned()
-                .collect()
-        )
+        ScoredTable::new(vec.iter().take(3).cloned().collect())
     }
 }
 
@@ -45,7 +39,11 @@ pub struct ScoredChart {
 
 impl ScoredChart {
     pub fn new(song_id: SongId, chart: Chart, score: Score) -> ScoredChart {
-        ScoredChart { song_id, chart, score }
+        ScoredChart {
+            song_id,
+            chart,
+            score,
+        }
     }
 }
 

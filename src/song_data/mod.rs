@@ -11,7 +11,10 @@ impl SongData {
         md5_to_sha256: HashMap<HashMd5, HashSha256>,
         sha256_to_md5: HashMap<HashSha256, HashMd5>,
     ) -> SongData {
-        SongData { md5_to_sha256, sha256_to_md5 }
+        SongData {
+            md5_to_sha256,
+            sha256_to_md5,
+        }
     }
 
     pub fn get_md5(&self, sha256: &HashSha256) -> Option<HashMd5> {

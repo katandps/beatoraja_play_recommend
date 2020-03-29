@@ -1,5 +1,5 @@
-use std::fmt;
 use crate::song::HashMd5;
+use std::fmt;
 
 pub struct Table {
     name: String,
@@ -8,12 +8,11 @@ pub struct Table {
 }
 
 pub struct Charts {
-    pub charts: Vec<Chart>
+    pub charts: Vec<Chart>,
 }
 
 #[derive(Clone, PartialEq)]
-pub struct Chart
-{
+pub struct Chart {
     title: String,
     artist: String,
     pub md5: HashMd5,
@@ -22,13 +21,19 @@ pub struct Chart
 
 impl Table {
     pub fn new(name: impl Into<String>, symbol: impl Into<String>, charts: Charts) -> Table {
-        Table { name: name.into(), symbol: symbol.into(), charts }
+        Table {
+            name: name.into(),
+            symbol: symbol.into(),
+            charts,
+        }
     }
     pub fn level_specified(&self, level: String) -> Table {
         Table::new(&self.name, &self.symbol, self.charts.level_specified(level))
     }
 
-    pub fn get_charts(&self) -> &Vec<Chart> { &self.charts.charts }
+    pub fn get_charts(&self) -> &Vec<Chart> {
+        &self.charts.charts
+    }
 }
 
 impl fmt::Display for Table {
@@ -42,7 +47,9 @@ impl Charts {
         Charts { charts }
     }
     pub fn level_specified(&self, level: String) -> Charts {
-        let charts = self.charts.iter()
+        let charts = self
+            .charts
+            .iter()
             .filter_map(|c| if c.level == level { Some(c) } else { None })
             .cloned()
             .collect();
@@ -61,7 +68,12 @@ impl fmt::Display for Charts {
 
 impl Chart {
     pub fn new(title: String, artist: String, md5: HashMd5, level: String) -> Chart {
-        Chart { title, artist, md5, level }
+        Chart {
+            title,
+            artist,
+            md5,
+            level,
+        }
     }
 
     pub fn string(&self) -> String {
