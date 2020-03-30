@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::score::song_id::SongId;
+use crate::score::song_id::{SongId, PlayMode};
 use crate::score::Score;
 use crate::scored_table::{ScoredChart, ScoredTable};
 use crate::song_data::SongData;
@@ -29,7 +29,7 @@ impl Scores {
             if !sha256.is_some() {
                 continue;
             }
-            let song_id = SongId::new(sha256.unwrap(), 0);
+            let song_id = SongId::new(sha256.unwrap(), PlayMode::new(0));
             // todo 難易度表にある曲にスコアがついてないと落ちる
             let score = self.get_score(&song_id).unwrap();
             let scored_chart = ScoredChart::new(song_id, chart.clone(), score.clone());

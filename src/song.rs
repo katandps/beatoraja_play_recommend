@@ -1,4 +1,6 @@
 use std::fmt;
+use std::str;
+use std::string::ParseError;
 
 #[derive(PartialEq, Eq, Hash, Clone)]
 pub struct HashMd5 {
@@ -25,6 +27,13 @@ impl HashSha256 {
 impl fmt::Display for HashSha256 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write! {f, "{}", self.sha256}
+    }
+}
+
+impl str::FromStr for HashSha256 {
+    type Err = ParseError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(HashSha256 { sha256: s.parse().unwrap() })
     }
 }
 

@@ -10,7 +10,7 @@ use dotenv::dotenv;
 use crate::model::player::Player;
 use crate::score::clear_type::ClearType;
 use crate::score::scores::Scores;
-use crate::score::song_id::SongId;
+use crate::score::song_id::{SongId, PlayMode};
 use crate::score::updated_at::UpdatedAt;
 use crate::score::Score;
 use crate::song::{HashMd5, HashSha256};
@@ -53,7 +53,7 @@ pub fn score() -> Scores {
 fn make_whole_score(record: Vec<crate::model::score::Score>) -> Scores {
     let mut scores = HashMap::new();
     for row in record {
-        let song_id = SongId::new(HashSha256::new(row.sha256), row.mode);
+        let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
         let clear = ClearType::from_integer(row.clear);
         let updated_at = UpdatedAt::new(DateTime::from(Local.timestamp(row.date as i64, 0)));
         scores.insert(song_id, Score::from_data(clear, updated_at));
