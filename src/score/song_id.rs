@@ -14,7 +14,7 @@ impl SongId {
 }
 
 impl fmt::Display for SongId {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "[{} {}]", self.sha256, self.mode)
     }
 }
@@ -31,7 +31,7 @@ impl PlayMode {
 }
 
 impl fmt::Display for PlayMode {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.mode)
     }
 }

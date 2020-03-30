@@ -1,11 +1,10 @@
-extern crate diesel;
-extern crate dotenv;
+use diesel;
+use dotenv;
 
 use std::env;
 
 use diesel::prelude::*;
 use diesel::sqlite::SqliteConnection;
-use dotenv::dotenv;
 
 use crate::model::player::Player;
 use crate::score::clear_type::ClearType;
@@ -20,7 +19,7 @@ use std::collections::HashMap;
 
 pub fn run() {
     use super::schema::player::player::dsl::*;
-    dotenv().ok();
+    dotenv::dotenv().ok();
 
     let database_url = env::var("SCORE_DATABASE_URL").expect("DATABASE_URL must be set");
     let connection = establish_connection(database_url);
@@ -39,7 +38,7 @@ pub fn run() {
 
 pub fn score() -> Scores {
     use super::schema::score::score::dsl::*;
-    dotenv().ok();
+    dotenv::dotenv().ok();
 
     let database_url = env::var("SCORE_DATABASE_URL").expect("SCORE_DATABASE_URL must be set");
     let connection = establish_connection(database_url);
@@ -67,7 +66,7 @@ pub fn establish_connection(url: String) -> SqliteConnection {
 
 pub fn song_data() -> SongData {
     use super::schema::song::song::dsl::*;
-    dotenv().ok();
+    dotenv::dotenv().ok();
 
     let database_url = env::var("SONG_DATABASE_URL").expect("SONG_DATABASE_URL must be set");
     let connection = establish_connection(database_url);

@@ -35,7 +35,7 @@ impl PartialEq for UpdatedAt {
 }
 
 impl fmt::Display for UpdatedAt {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.updated_at)
     }
 }

@@ -5,8 +5,8 @@ use std::io::Read;
 use super::table;
 use crate::song::HashMd5;
 
-extern crate serde;
-extern crate serde_json;
+use serde;
+use serde_json;
 
 pub fn get_table() -> table::Table {
     let header = get_header();

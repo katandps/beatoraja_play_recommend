@@ -37,7 +37,7 @@ impl Table {
 }
 
 impl fmt::Display for Table {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} [{}] {}", self.name, self.symbol, self.charts)
     }
 }
@@ -60,7 +60,7 @@ impl Charts {
 impl Eq for Chart {}
 
 impl fmt::Display for Charts {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let vec: Vec<String> = self.charts.iter().map(|c| c.string()).collect();
         write!(f, "{}", vec.join("\n"))
     }
@@ -82,7 +82,7 @@ impl Chart {
 }
 
 impl fmt::Display for Chart {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", self.level, self.title)
     }
 }

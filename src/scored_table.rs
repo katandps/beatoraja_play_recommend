@@ -21,7 +21,7 @@ impl ScoredTable {
 }
 
 impl fmt::Display for ScoredTable {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut s = String::new();
         for chart in &self.charts {
             s.push_str(format!("{}\n", chart).as_ref())
@@ -66,7 +66,7 @@ impl PartialEq for ScoredChart {
 }
 
 impl fmt::Display for ScoredChart {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}\n{}", self.chart, self.score)
     }
 }

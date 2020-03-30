@@ -25,7 +25,7 @@ impl HashSha256 {
 }
 
 impl fmt::Display for HashSha256 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write! {f, "{}", self.sha256}
     }
 }
@@ -38,7 +38,7 @@ impl str::FromStr for HashSha256 {
 }
 
 impl fmt::Display for HashMd5 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write! {f, "{}", self.md5}
     }
 }
