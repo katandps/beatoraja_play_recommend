@@ -16,6 +16,7 @@ use crate::song::{HashMd5, HashSha256};
 use crate::song_data::SongData;
 use chrono::{DateTime, Local, TimeZone};
 use std::collections::HashMap;
+use crate::score::judge::Judge;
 
 pub fn run() {
     use super::schema::player::player::dsl::*;
@@ -55,7 +56,21 @@ fn make_whole_score(record: Vec<crate::model::score::Score>) -> Scores {
         let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
         let clear = ClearType::from_integer(row.clear);
         let updated_at = UpdatedAt::new(DateTime::from(Local.timestamp(row.date as i64, 0)));
-        scores.insert(song_id, Score::from_data(clear, updated_at));
+        let judge = Judge::new(
+            row.epg,
+            row.lpg,
+            row.egr,
+            row.lgr,
+            row.egd,
+            row.lgd,
+            row.ebd,
+            row.lbd,
+            row.epr,
+            row.lpr,
+            row.ems,
+            row.lms,
+        );
+        scores.insert(song_id, Score::from_data(clear, updated_at, judge));
     }
     Scores::new(scores)
 }

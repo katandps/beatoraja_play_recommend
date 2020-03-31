@@ -2,22 +2,25 @@ pub mod clear_type;
 pub mod scores;
 pub mod song_id;
 pub mod updated_at;
+pub mod judge;
 
 use std::cmp::Ordering;
 use std::fmt;
 
 use clear_type::ClearType;
 use updated_at::UpdatedAt;
+use crate::score::judge::Judge;
 
 #[derive(Clone)]
 pub struct Score {
     clear: ClearType,
     updated_at: UpdatedAt,
+    judge: Judge,
 }
 
 impl Score {
-    pub fn from_data(clear: ClearType, updated_at: UpdatedAt) -> Score {
-        Score { clear, updated_at }
+    pub fn from_data(clear: ClearType, updated_at: UpdatedAt, judge: Judge) -> Score {
+        Score { clear, updated_at, judge }
     }
 }
 
