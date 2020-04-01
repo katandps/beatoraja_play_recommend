@@ -13,7 +13,7 @@ use crate::score::song_id::{SongId, PlayMode};
 use crate::score::updated_at::UpdatedAt;
 use crate::score::Score;
 use crate::song::{HashMd5, HashSha256};
-use crate::song_data::SongData;
+use crate::song_data::{SongData, Builder};
 use chrono::{DateTime, Local, TimeZone};
 use std::collections::HashMap;
 use crate::score::judge::Judge;
@@ -92,14 +92,9 @@ pub fn song_data() -> SongData {
 }
 
 fn make_song_data(record: Vec<crate::model::song::Song>) -> SongData {
-    let mut md5_to_sha256 = HashMap::new();
-    let mut sha256_to_md5 = HashMap::new();
+    let mut builder = Builder::new();
     for row in record {
-        md5_to_sha256.insert(
-            HashMd5::new(row.md5.clone()),
-            HashSha256::new(row.sha256.clone()),
-        );
-        sha256_to_md5.insert(HashSha256::new(row.sha256), HashMd5::new(row.md5));
+        builder.push(HashMd5::new(row.md5), HashSha256::new(row.sha256));
     }
-    SongData::new(md5_to_sha256, sha256_to_md5)
+    Builder::build(builder)
 }
