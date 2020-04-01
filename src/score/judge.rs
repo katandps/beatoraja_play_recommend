@@ -46,3 +46,14 @@ impl Judge {
     }
     pub fn score(&self) -> i32 { self.early_pgreat * 2 + self.late_pgreat * 2 + self.early_great + self.late_great }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::score::judge::Judge;
+
+    #[test]
+    fn score() {
+        let obj = Judge::new(1, 3, 10, 30, 100, 300, 1000, 3000, 10000, 30000, 100000, 300000);
+        assert_eq!(obj.score(), 48)
+    }
+}
