@@ -7,7 +7,10 @@ pub struct SongData {
 }
 
 impl SongData {
-    pub fn new(md5_to_sha256: HashMap<HashMd5, HashSha256>, sha256_to_md5: HashMap<HashSha256, HashMd5>) -> SongData {
+    pub fn new(
+        md5_to_sha256: HashMap<HashMd5, HashSha256>,
+        sha256_to_md5: HashMap<HashSha256, HashMd5>,
+    ) -> SongData {
         SongData {
             md5_to_sha256,
             sha256_to_md5,
@@ -48,8 +51,8 @@ impl Builder {
 
 #[cfg(test)]
 mod test {
-    use crate::song_data::Builder;
     use crate::song::{HashMd5, HashSha256};
+    use crate::song_data::Builder;
 
     #[test]
     fn get() {

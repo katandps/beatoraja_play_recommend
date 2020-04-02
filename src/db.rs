@@ -8,15 +8,19 @@ use diesel::sqlite::SqliteConnection;
 
 use crate::model::player::Player;
 use crate::score::clear_type::ClearType;
+use crate::score::judge::Judge;
+use crate::score::max_combo::MaxCombo;
+use crate::score::min_bp::MinBP;
+use crate::score::play_count::PlayCount;
 use crate::score::scores::Scores;
-use crate::score::song_id::{SongId, PlayMode};
+use crate::score::song_id::{PlayMode, SongId};
 use crate::score::updated_at::UpdatedAt;
 use crate::score::Score;
 use crate::song::{HashMd5, HashSha256};
-use crate::song_data::{SongData, Builder};
+use crate::song_data::{Builder, SongData};
 use chrono::{DateTime, Local, TimeZone};
+use std::cmp::min;
 use std::collections::HashMap;
-use crate::score::judge::Judge;
 
 pub fn run() {
     use super::schema::player::player::dsl::*;
@@ -57,20 +61,16 @@ fn make_whole_score(record: Vec<crate::model::score::Score>) -> Scores {
         let clear = ClearType::from_integer(row.clear);
         let updated_at = UpdatedAt::new(DateTime::from(Local.timestamp(row.date as i64, 0)));
         let judge = Judge::new(
-            row.epg,
-            row.lpg,
-            row.egr,
-            row.lgr,
-            row.egd,
-            row.lgd,
-            row.ebd,
-            row.lbd,
-            row.epr,
-            row.lpr,
-            row.ems,
-            row.lms,
+            row.epg, row.lpg, row.egr, row.lgr, row.egd, row.lgd, row.ebd, row.lbd, row.epr,
+            row.lpr, row.ems, row.lms,
         );
-        scores.insert(song_id, Score::from_data(clear, updated_at, judge));
+        let max_combo = MaxCombo::new(row.combo);
+        let play_count = PlayCount::new(row.playcount);
+        let min_bp = MinBP::new(row.minbp);
+        scores.insert(
+            song_id,
+            Score::from_data(clear, updated_at, judge, max_combo, play_count, min_bp),
+        );
     }
     Scores::new(scores)
 }

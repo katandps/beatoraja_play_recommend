@@ -33,14 +33,18 @@ impl fmt::Display for HashSha256 {
 impl str::FromStr for HashSha256 {
     type Err = ParseError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(HashSha256 { sha256: s.parse().unwrap() })
+        Ok(HashSha256 {
+            sha256: s.parse().unwrap(),
+        })
     }
 }
 
 impl str::FromStr for HashMd5 {
     type Err = ParseError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(HashMd5 { md5: s.parse().unwrap() })
+        Ok(HashMd5 {
+            md5: s.parse().unwrap(),
+        })
     }
 }
 

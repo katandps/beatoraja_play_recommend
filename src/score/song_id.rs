@@ -21,7 +21,7 @@ impl fmt::Display for SongId {
 
 #[derive(Eq, PartialEq, Hash, Clone)]
 pub struct PlayMode {
-    mode: i32
+    mode: i32,
 }
 
 impl PlayMode {

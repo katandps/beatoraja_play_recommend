@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::score::song_id::{SongId, PlayMode};
+use crate::score::song_id::{PlayMode, SongId};
 use crate::score::Score;
 use crate::scored_table::{ScoredChart, ScoredTable};
 use crate::song_data::SongData;
