@@ -31,7 +31,7 @@ fn get_charts() -> Vec<Chart> {
     let mut f = File::open("./files/satellite/score.json").unwrap();
 
     let mut c = String::new();
-    f.read_to_string(&mut c).unwrap();
+    f.read_to_string(&mut c);
 
     serde_json::from_str::<Vec<Chart>>(&c).unwrap()
 }
@@ -54,10 +54,10 @@ struct Chart {
 impl Chart {
     fn to_chart(&self) -> table::Chart {
         table::Chart::new(
-            (&self.title).parse().unwrap(),
-            (&self.artist).parse().unwrap(),
-            HashMd5::new((&self.md5).parse().unwrap()),
-            (&self.level).parse().unwrap(),
+            self.title.clone(),
+            self.artist.clone(),
+            (&self.md5).parse().unwrap(),
+            self.level.clone(),
         )
     }
 }

@@ -21,7 +21,6 @@ use crate::score_log;
 use crate::score_log::SnapShot;
 use crate::song::{HashMd5, HashSha256};
 use crate::song_data;
-use chrono::{DateTime, Local, TimeZone};
 use std::collections::HashMap;
 
 fn establish_connection(env_key: &str) -> SqliteConnection {
