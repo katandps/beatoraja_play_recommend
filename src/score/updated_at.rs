@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use std::fmt;
 
-use chrono::{DateTime, Datelike, Local};
+use chrono::{DateTime, Datelike, Local, TimeZone};
 
 #[derive(Clone, Eq)]
 pub struct UpdatedAt {
@@ -11,6 +11,10 @@ pub struct UpdatedAt {
 impl UpdatedAt {
     pub fn new(updated_at: DateTime<Local>) -> UpdatedAt {
         UpdatedAt { updated_at }
+    }
+
+    pub fn from_timestamp(timestamp: i32) -> UpdatedAt {
+        UpdatedAt::new(DateTime::from(Local.timestamp(timestamp as i64, 0)))
     }
 }
 

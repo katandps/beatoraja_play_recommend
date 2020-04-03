@@ -1,4 +1,5 @@
 pub mod clear_type;
+pub mod ex_score;
 pub mod judge;
 pub mod max_combo;
 pub mod min_bp;

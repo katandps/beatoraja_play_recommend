@@ -4,6 +4,7 @@ pub struct App {
     pub table: crate::table::Table,
     pub whole_score: crate::score::scores::Scores,
     pub song_data: crate::song_data::SongData,
+    pub score_log: crate::score_log::ScoreLog,
 }
 
 impl App {
