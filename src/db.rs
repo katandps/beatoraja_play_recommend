@@ -22,12 +22,15 @@ use chrono::{DateTime, Local, TimeZone};
 use std::cmp::min;
 use std::collections::HashMap;
 
+fn establish_connection(env_key: &str) -> SqliteConnection {
+    dotenv::dotenv().ok();
+    let url = env::var(env_key).expect(format!("{} must be set", env_key).as_ref());
+    SqliteConnection::establish(&url).unwrap_or_else(|_| panic!("Error connection to {}", &url))
+}
+
 pub fn run() {
     use super::schema::player::player::dsl::*;
-    dotenv::dotenv().ok();
-
-    let database_url = env::var("SCORE_DATABASE_URL").expect("DATABASE_URL must be set");
-    let connection = establish_connection(database_url);
+    let connection = establish_connection("SCORE_DATABASE_URL");
     let results: Vec<Player> = player
         .limit(5)
         .load::<Player>(&connection)
@@ -43,10 +46,7 @@ pub fn run() {
 
 pub fn score() -> Scores {
     use super::schema::score::score::dsl::*;
-    dotenv::dotenv().ok();
-
-    let database_url = env::var("SCORE_DATABASE_URL").expect("SCORE_DATABASE_URL must be set");
-    let connection = establish_connection(database_url);
+    let connection = establish_connection("SCORE_DATABASE_URL");
     let results = score
         .load::<crate::model::score::Score>(&connection)
         .expect("Error loading schema");
@@ -75,16 +75,9 @@ fn make_whole_score(record: Vec<crate::model::score::Score>) -> Scores {
     Scores::new(scores)
 }
 
-pub fn establish_connection(url: String) -> SqliteConnection {
-    SqliteConnection::establish(&url).unwrap_or_else(|_| panic!("Error connection to {}", &url))
-}
-
 pub fn song_data() -> SongData {
     use super::schema::song::song::dsl::*;
-    dotenv::dotenv().ok();
-
-    let database_url = env::var("SONG_DATABASE_URL").expect("SONG_DATABASE_URL must be set");
-    let connection = establish_connection(database_url);
+    let connection = establish_connection("SONG_DATABASE_URL");
     let results = song
         .load::<crate::model::song::Song>(&connection)
         .expect("Error loading schema");
