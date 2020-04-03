@@ -1,3 +1,4 @@
+use crate::lamp::Lamp;
 use crate::score::clear_type::ClearType;
 use crate::score::ex_score::ExScore;
 use crate::score::max_combo::MaxCombo;
@@ -90,6 +91,12 @@ impl SnapShot {
             min_bp,
             updated_at,
         }
+    }
+}
+
+impl Lamp for SnapShot {
+    fn clear_type(&self) -> &ClearType {
+        &self.clear_type
     }
 }
 

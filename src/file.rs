@@ -21,7 +21,7 @@ fn get_header() -> Header {
     let mut file = File::open("./files/satellite/header.json").unwrap();
 
     let mut contents = String::new();
-    file.read_to_string(&mut contents).unwrap();
+    file.read_to_string(&mut contents);
 
     serde_json::from_str::<Header>(&contents).unwrap()
 }

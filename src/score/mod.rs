@@ -11,6 +11,7 @@ pub mod updated_at;
 use std::cmp::Ordering;
 use std::fmt;
 
+use crate::lamp::Lamp;
 use crate::score::judge::Judge;
 use crate::score::max_combo::MaxCombo;
 use crate::score::min_bp::MinBP;
@@ -79,5 +80,11 @@ impl fmt::Display for Score {
             self.min_bp,
             self.max_combo
         )
+    }
+}
+
+impl Lamp for Score {
+    fn clear_type(&self) -> &ClearType {
+        &self.clear
     }
 }

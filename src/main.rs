@@ -2,6 +2,7 @@ mod app;
 mod db;
 mod file;
 
+pub mod lamp;
 pub mod schema;
 pub mod score;
 pub mod score_log;
