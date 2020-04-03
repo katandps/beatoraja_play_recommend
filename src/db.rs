@@ -67,9 +67,9 @@ fn make_whole_score(record: Vec<crate::schema::score::Score>) -> Scores {
                     row.epg, row.lpg, row.egr, row.lgr, row.egd, row.lgd, row.ebd, row.lbd,
                     row.epr, row.lpr, row.ems, row.lms,
                 ),
-                MaxCombo::new(row.combo),
+                MaxCombo::from_combo(row.combo),
                 PlayCount::new(row.playcount),
-                MinBP::new(row.minbp),
+                MinBP::from_bp(row.minbp),
             ),
         );
     }
@@ -106,12 +106,12 @@ fn make_score_log(record: Vec<crate::schema::score_log::ScoreLog>) -> score_log:
     let mut builder = score_log::Builder::new();
     for row in record {
         let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
-        let snapshot = SnapShot::new(
+        let snapshot = SnapShot::from_data(
             song_id.clone(),
             ClearType::from_integer(row.clear),
-            ExScore::make_by_score(row.score),
-            MaxCombo::new(row.combo),
-            MinBP::new(row.minbp),
+            ExScore::from_score(row.score),
+            MaxCombo::from_combo(row.combo),
+            MinBP::from_bp(row.minbp),
             UpdatedAt::from_timestamp(row.date),
         );
         builder.push(song_id, snapshot)

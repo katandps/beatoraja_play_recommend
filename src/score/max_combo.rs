@@ -1,12 +1,15 @@
 use std::fmt;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MaxCombo {
     combo: i32,
 }
 
 impl MaxCombo {
-    pub fn new(combo: i32) -> MaxCombo {
+    pub fn new() -> MaxCombo {
+        MaxCombo { combo: 0 }
+    }
+    pub fn from_combo(combo: i32) -> MaxCombo {
         MaxCombo { combo }
     }
 }

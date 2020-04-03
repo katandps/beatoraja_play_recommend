@@ -16,21 +16,44 @@ impl ScoreLog {
             log: HashMap::new(),
         }
     }
-    pub fn get_snap() -> SnapShot {
-        unimplemented!()
+    pub fn get_snap(&mut self, song_id: SongId, date: &UpdatedAt) -> SnapShot {
+        if !self.log.contains_key(&song_id) {
+            self.log
+                .insert(song_id.clone(), SnapShots::new(song_id.clone()));
+        }
+        self.log.get(&song_id).unwrap().get_snap(date)
     }
 }
 
 struct SnapShots {
+    song_id: SongId,
     snapshots: Vec<SnapShot>,
 }
 
 impl SnapShots {
+    fn new(song_id: SongId) -> SnapShots {
+        let mut snapshots = Vec::new();
+        snapshots.push(SnapShot::new(song_id.clone()));
+        SnapShots { song_id, snapshots }
+    }
+
     fn add(&mut self, snapshot: SnapShot) {
         self.snapshots.push(snapshot)
     }
+
+    fn get_snap(&self, date: &UpdatedAt) -> SnapShot {
+        let mut ret = SnapShot::new(self.song_id.clone());
+        for ss in self.snapshots.iter() {
+            if ss.updated_at.gt(date) {
+                break;
+            }
+            ret = ss.clone();
+        }
+        ret
+    }
 }
 
+#[derive(Clone, Debug)]
 pub struct SnapShot {
     song_id: SongId,
     clear_type: ClearType,
@@ -41,7 +64,17 @@ pub struct SnapShot {
 }
 
 impl SnapShot {
-    pub fn new(
+    pub fn new(song_id: SongId) -> SnapShot {
+        SnapShot {
+            song_id,
+            clear_type: ClearType::NoPlay,
+            score: ExScore::new(),
+            max_combo: MaxCombo::new(),
+            min_bp: MinBP::new(),
+            updated_at: UpdatedAt::new(),
+        }
+    }
+    pub fn from_data(
         song_id: SongId,
         clear_type: ClearType,
         score: ExScore,
@@ -76,11 +109,12 @@ impl Builder {
             self.log.insert(
                 song_id.clone(),
                 SnapShots {
+                    song_id: song_id.clone(),
                     snapshots: Vec::new(),
                 },
             );
         }
-        let mut snapshots = self.log.get_mut(&song_id).unwrap();
+        let snapshots = self.log.get_mut(&song_id).unwrap();
         snapshots.add(snapshot);
     }
 

@@ -1,12 +1,15 @@
 use std::fmt;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MinBP {
     bp: i32,
 }
 
 impl MinBP {
-    pub fn new(bp: i32) -> MinBP {
+    pub fn new() -> MinBP {
+        MinBP { bp: 0 }
+    }
+    pub fn from_bp(bp: i32) -> MinBP {
         MinBP { bp }
     }
 }

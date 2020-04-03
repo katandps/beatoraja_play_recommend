@@ -1,7 +1,7 @@
 use crate::song::HashSha256;
 use std::fmt;
 
-#[derive(PartialEq, Eq, Hash, Clone)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct SongId {
     sha256: HashSha256,
     mode: PlayMode,
@@ -19,7 +19,7 @@ impl fmt::Display for SongId {
     }
 }
 
-#[derive(Eq, PartialEq, Hash, Clone)]
+#[derive(Eq, PartialEq, Hash, Clone, Debug)]
 pub struct PlayMode {
     mode: i32,
 }

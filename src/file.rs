@@ -3,7 +3,6 @@ use std::fs::File;
 use std::io::Read;
 
 use super::table;
-use crate::song::HashMd5;
 
 use serde;
 use serde_json;

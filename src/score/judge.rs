@@ -47,7 +47,7 @@ impl Judge {
         }
     }
     pub fn ex_score(&self) -> ExScore {
-        ExScore::new(
+        ExScore::from_judge(
             self.early_pgreat,
             self.late_pgreat,
             self.early_great,

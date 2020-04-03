@@ -3,18 +3,21 @@ use std::fmt;
 
 use chrono::{DateTime, Datelike, Local, TimeZone};
 
-#[derive(Clone, Eq)]
+#[derive(Clone, Eq, Debug)]
 pub struct UpdatedAt {
     updated_at: DateTime<Local>,
 }
 
 impl UpdatedAt {
-    pub fn new(updated_at: DateTime<Local>) -> UpdatedAt {
-        UpdatedAt { updated_at }
+    pub fn new() -> UpdatedAt {
+        UpdatedAt {
+            updated_at: DateTime::from(Local.timestamp(0, 0)),
+        }
     }
-
     pub fn from_timestamp(timestamp: i32) -> UpdatedAt {
-        UpdatedAt::new(DateTime::from(Local.timestamp(timestamp as i64, 0)))
+        UpdatedAt {
+            updated_at: DateTime::from(Local.timestamp(timestamp as i64, 0)),
+        }
     }
 }
 

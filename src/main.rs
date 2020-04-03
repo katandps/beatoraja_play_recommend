@@ -16,7 +16,7 @@ extern crate diesel;
 use crate::app::App;
 
 fn main() {
-    let app = App {
+    let mut app = App {
         table: file::get_table(),
         whole_score: db::score(),
         song_data: db::song_data(),
