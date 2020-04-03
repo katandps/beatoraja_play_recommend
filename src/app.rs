@@ -35,7 +35,7 @@ impl App {
                 lamp_sum.push(&snap);
                 //println!("{:?}", snap)
             }
-            println!("{:?}", lamp_sum)
+            println!("{}", lamp_sum.format())
         }
     }
 }

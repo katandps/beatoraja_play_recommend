@@ -33,6 +33,28 @@ impl ClearType {
             _ => ClearType::Unknown,
         }
     }
+
+    pub fn vec() -> Vec<ClearType> {
+        (0..11).map(|x| ClearType::from_integer(x)).collect()
+    }
+
+    pub fn coloring(&self, s: String) -> String {
+        const ESC: &str = "\u{001b}";
+        match self {
+            ClearType::NoPlay => format!("{}", s),
+            ClearType::Failed => format!("{ESC}[00;31m{}{ESC}[00m", s, ESC = ESC),
+            ClearType::AssistEasy => format!("{ESC}[00;34m{}{ESC}[00m", s, ESC = ESC),
+            ClearType::LightAssistEasy => format!("\u{001b}[00;35m{}\u{001b}[00m", s),
+            ClearType::Easy => format!("\u{001b}[00;32m{}\u{001b}[00m", s),
+            ClearType::Normal => format!("\u{001b}[00;36m{}\u{001b}[00m", s),
+            ClearType::Hard => format!("\u{001b}[00;40m{}\u{001b}[00m", s),
+            ClearType::ExHard => format!("\u{001b}[00;33m{}\u{001b}[00m", s),
+            ClearType::FullCombo => format!("\u{001b}[00;1;46m{}\u{001b}[00m", s),
+            ClearType::Perfect => format!("\u{001b}[00;1;43m{}\u{001b}[00m", s),
+            ClearType::Max => format!("\u{001b}[00;1m{}\u{001b}[00m", s),
+            ClearType::Unknown => format!("{}", s),
+        }
+    }
 }
 
 impl fmt::Display for ClearType {

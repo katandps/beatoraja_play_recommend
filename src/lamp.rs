@@ -17,6 +17,19 @@ impl LampSum {
         let count = self.sum.entry(lamp.clear_type().clone()).or_insert(0);
         *count += 1;
     }
+
+    pub fn format(&self) -> String {
+        let mut ret = String::new();
+        for c in ClearType::vec() {
+            if !self.sum.contains_key(&c) {
+                ret.push_str(c.coloring(format!("[   ]")).as_str());
+            } else {
+                ret.push_str(c.coloring(format!("[{:>3}]", self.sum[&c])).as_str());
+            }
+            ret.push_str(" ");
+        }
+        ret
+    }
 }
 
 pub trait Lamp {
