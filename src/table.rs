@@ -20,7 +20,14 @@ pub struct Chart {
 }
 
 impl Table {
-    pub fn new(name: impl Into<String>, symbol: impl Into<String>, charts: Charts) -> Table {
+    pub fn new() -> Table {
+        Table {
+            name: "Not Loaded".to_string(),
+            symbol: "".to_string(),
+            charts: Charts { charts: Vec::new() },
+        }
+    }
+    pub fn make(name: impl Into<String>, symbol: impl Into<String>, charts: Charts) -> Table {
         Table {
             name: name.into(),
             symbol: symbol.into(),
@@ -28,11 +35,14 @@ impl Table {
         }
     }
     pub fn level_specified(&self, level: String) -> Table {
-        Table::new(&self.name, &self.symbol, self.charts.level_specified(level))
+        Table::make(&self.name, &self.symbol, self.charts.level_specified(level))
     }
 
     pub fn get_charts(&self) -> &Vec<Chart> {
         &self.charts.charts
+    }
+    pub fn name(&self) -> &str {
+        &self.name
     }
 }
 

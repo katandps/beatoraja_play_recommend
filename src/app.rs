@@ -3,15 +3,17 @@ use crate::score::song_id::{PlayMode, SongId};
 use crate::score::updated_at::UpdatedAt;
 pub use diesel::prelude::*;
 
-pub struct App {
+pub struct App<'a> {
     pub table: crate::table::Table,
-    pub whole_score: crate::score::scores::Scores,
-    pub song_data: crate::song_data::SongData,
-    pub score_log: crate::score_log::ScoreLog,
+    pub whole_score: &'a crate::score::scores::Scores,
+    pub song_data: &'a crate::song_data::SongData,
+    pub score_log: &'a mut crate::score_log::ScoreLog,
 }
 
-impl App {
+impl<'a> App<'a> {
     pub fn run(&mut self) {
+        println!("{}", self.table.name());
+
         let levels = [
             "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
         ];
@@ -35,7 +37,8 @@ impl App {
                 lamp_sum.push(&snap);
                 //println!("{:?}", snap)
             }
-            println!("{}", lamp_sum.format())
+            println!("{}", lamp_sum.format());
         }
+        println!();
     }
 }
