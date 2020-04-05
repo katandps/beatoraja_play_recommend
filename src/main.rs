@@ -8,7 +8,6 @@ pub mod score;
 pub mod score_log;
 pub mod scored_table;
 pub mod song;
-pub mod song_data;
 pub mod table;
 
 #[macro_use]
@@ -19,15 +18,12 @@ use crate::app::App;
 use crate::file::{Chart, Header};
 use crate::table::Table;
 use scraper::{Html, Selector};
-use std::cell::RefCell;
-use std::default::Default;
 use std::env;
-use std::io::{self, Write};
-use std::rc::Rc;
 use url::Url;
 
 fn main() {
     env_logger::init();
+    db::player();
 
     //    get_tables();
     let whole_score = db::score();
@@ -46,7 +42,7 @@ fn main() {
 
 fn get_tables() -> Vec<Table> {
     dotenv::dotenv().ok();
-    let mut ret = (1..10)
+    let ret = (1..10)
         .flat_map(|i| {
             let url_key = format!("TABLE_URL{}", i);
             let url = env::var(&url_key);

@@ -3,7 +3,7 @@ use std::fmt;
 use crate::score::song_id::{PlayMode, SongId};
 use crate::score::Score;
 use crate::scored_table::{ScoredChart, ScoredTable};
-use crate::song_data::SongData;
+use crate::song::hash_converter::Converter;
 use crate::table::Table;
 use std::collections::HashMap;
 
@@ -21,18 +21,19 @@ impl Scores {
     pub fn get_score(&self, song_id: &SongId) -> Option<&Score> {
         self.scores.get(song_id)
     }
-    pub fn merge_score(&self, table: &Table, song_data: &SongData) -> ScoredTable {
+    pub fn merge_score(&self, table: &Table, song_data: &Converter) -> ScoredTable {
         let mut charts = Vec::new();
         for chart in table.get_charts() {
-            // todo 難易度表にある曲を持ってないと落ちる
             let sha256 = song_data.get_sha256(&chart.md5);
             if !sha256.is_some() {
                 continue;
             }
             let song_id = SongId::new(sha256.unwrap(), PlayMode::new(0));
-            // todo 難易度表にある曲にスコアがついてないと落ちる
-            let score = self.get_score(&song_id).unwrap();
-            let scored_chart = ScoredChart::new(song_id, chart.clone(), score.clone());
+            let score = self.get_score(&song_id);
+            if score.is_none() {
+                continue;
+            }
+            let scored_chart = ScoredChart::new(song_id, chart.clone(), score.unwrap().clone());
             charts.push(scored_chart);
         }
         ScoredTable::new(charts)

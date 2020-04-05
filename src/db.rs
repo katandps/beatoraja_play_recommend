@@ -7,20 +7,13 @@ use diesel::prelude::*;
 use diesel::sqlite::SqliteConnection;
 
 use crate::schema::player::Player;
-use crate::score::clear_type::ClearType;
-use crate::score::ex_score::ExScore;
-use crate::score::judge::Judge;
-use crate::score::max_combo::MaxCombo;
-use crate::score::min_bp::MinBP;
-use crate::score::play_count::PlayCount;
 use crate::score::scores::Scores;
 use crate::score::song_id::{PlayMode, SongId};
-use crate::score::updated_at::UpdatedAt;
 use crate::score::Score;
 use crate::score_log;
 use crate::score_log::SnapShot;
-use crate::song::{HashMd5, HashSha256};
-use crate::song_data;
+use crate::song::hash::{HashMd5, HashSha256};
+use crate::song::hash_converter;
 use std::collections::HashMap;
 
 fn establish_connection(env_key: &str) -> SqliteConnection {
@@ -29,20 +22,17 @@ fn establish_connection(env_key: &str) -> SqliteConnection {
     SqliteConnection::establish(&url).unwrap_or_else(|_| panic!("Error connection to {}", &url))
 }
 
-pub fn run() {
+pub fn player() {
     use super::schema::player::player::dsl::*;
     let connection = establish_connection("SCORE_DATABASE_URL");
     let results: Vec<Player> = player
-        .limit(5)
         .load::<Player>(&connection)
         .expect("Error loading schema");
 
-    println!("Displaying {} schema", results.len());
-    for result in results {
-        println!("{}", result.playcount);
-        println!("{}", result.clear);
-        println!(" ")
-    }
+    let last = results.last().unwrap();
+    println!("{}", last.playcount);
+    println!("{}", last.clear);
+    println!(" ")
 }
 
 pub fn score() -> Scores {
@@ -61,22 +51,30 @@ fn make_whole_score(record: Vec<crate::schema::score::Score>) -> Scores {
         scores.insert(
             SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode)),
             Score::from_data(
-                ClearType::from_integer(row.clear),
-                UpdatedAt::from_timestamp(row.date),
-                Judge::new(
-                    row.epg, row.lpg, row.egr, row.lgr, row.egd, row.lgd, row.ebd, row.lbd,
-                    row.epr, row.lpr, row.ems, row.lms,
-                ),
-                MaxCombo::from_combo(row.combo),
-                PlayCount::new(row.playcount),
-                MinBP::from_bp(row.minbp),
+                row.clear,
+                row.date,
+                row.epg,
+                row.lpg,
+                row.egr,
+                row.lgr,
+                row.egd,
+                row.lgd,
+                row.ebd,
+                row.lbd,
+                row.epr,
+                row.lpr,
+                row.ems,
+                row.lms,
+                row.combo,
+                row.playcount,
+                row.minbp,
             ),
         );
     }
     Scores::new(scores)
 }
 
-pub fn song_data() -> song_data::SongData {
+pub fn song_data() -> hash_converter::Converter {
     use super::schema::song::song::dsl::*;
     let connection = establish_connection("SONG_DATABASE_URL");
     let results = song
@@ -85,12 +83,12 @@ pub fn song_data() -> song_data::SongData {
     make_song_data(results)
 }
 
-fn make_song_data(record: Vec<crate::schema::song::Song>) -> song_data::SongData {
-    let mut builder = song_data::Builder::new();
+fn make_song_data(record: Vec<crate::schema::song::Song>) -> hash_converter::Converter {
+    let mut builder = hash_converter::Builder::new();
     for row in record {
         builder.push(HashMd5::new(row.md5), HashSha256::new(row.sha256));
     }
-    song_data::Builder::build(builder)
+    hash_converter::Builder::build(builder)
 }
 
 pub fn score_log() -> score_log::ScoreLog {
@@ -103,18 +101,18 @@ pub fn score_log() -> score_log::ScoreLog {
 }
 
 fn make_score_log(record: Vec<crate::schema::score_log::ScoreLog>) -> score_log::ScoreLog {
-    let mut builder = score_log::Builder::new();
+    let mut builder = score_log::ScoreLog::builder();
     for row in record {
         let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
         let snapshot = SnapShot::from_data(
             song_id.clone(),
-            ClearType::from_integer(row.clear),
-            ExScore::from_score(row.score),
-            MaxCombo::from_combo(row.combo),
-            MinBP::from_bp(row.minbp),
-            UpdatedAt::from_timestamp(row.date),
+            row.clear,
+            row.score,
+            row.combo,
+            row.minbp,
+            row.date,
         );
         builder.push(song_id, snapshot)
     }
-    score_log::Builder::build(builder)
+    score_log::ScoreLog::build(builder)
 }

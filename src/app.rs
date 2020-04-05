@@ -6,7 +6,7 @@ pub use diesel::prelude::*;
 pub struct App<'a> {
     pub table: crate::table::Table,
     pub whole_score: &'a crate::score::scores::Scores,
-    pub song_data: &'a crate::song_data::SongData,
+    pub song_data: &'a crate::song::hash_converter::Converter,
     pub score_log: &'a mut crate::score_log::ScoreLog,
 }
 
@@ -18,9 +18,9 @@ impl<'a> App<'a> {
             "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
         ];
         for level in levels.iter() {
-            // let spec = self.table.level_specified(level.parse().unwrap());
-            // let scored = self.whole_score.merge_score(&spec, &self.song_data);
-            // println!("{}", scored.recent_updated())
+            let spec = self.table.level_specified(level.parse().unwrap());
+            let scored = self.whole_score.merge_score(&spec, &self.song_data);
+            println!("{}", scored.recent_updated());
 
             //let level = "1";
             let spec = self.table.level_specified(level.parse().unwrap());
@@ -37,7 +37,7 @@ impl<'a> App<'a> {
                 lamp_sum.push(&snap);
                 //println!("{:?}", snap)
             }
-            println!("{}", lamp_sum.format());
+            //println!("{}", lamp_sum.format());
         }
         println!();
     }

@@ -1,17 +1,17 @@
-use crate::song::{HashMd5, HashSha256};
+use crate::song::hash::{HashMd5, HashSha256};
 use std::collections::HashMap;
 
-pub struct SongData {
+pub struct Converter {
     md5_to_sha256: HashMap<HashMd5, HashSha256>,
     sha256_to_md5: HashMap<HashSha256, HashMd5>,
 }
 
-impl SongData {
+impl Converter {
     pub fn new(
         md5_to_sha256: HashMap<HashMd5, HashSha256>,
         sha256_to_md5: HashMap<HashSha256, HashMd5>,
-    ) -> SongData {
-        SongData {
+    ) -> Converter {
+        Converter {
             md5_to_sha256,
             sha256_to_md5,
         }
@@ -44,15 +44,15 @@ impl Builder {
         self.md5_to_sha256.insert(md5, sha256);
     }
 
-    pub fn build(builder: Self) -> SongData {
-        SongData::new(builder.md5_to_sha256, builder.sha256_to_md5)
+    pub fn build(builder: Self) -> Converter {
+        Converter::new(builder.md5_to_sha256, builder.sha256_to_md5)
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::song::{HashMd5, HashSha256};
-    use crate::song_data::Builder;
+    use crate::song::hash::{HashMd5, HashSha256};
+    use crate::song::hash_converter::Builder;
 
     #[test]
     fn get() {

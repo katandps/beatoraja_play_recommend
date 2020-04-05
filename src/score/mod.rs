@@ -31,20 +31,31 @@ pub struct Score {
 
 impl Score {
     pub fn from_data(
-        clear: ClearType,
-        updated_at: UpdatedAt,
-        judge: Judge,
-        max_combo: MaxCombo,
-        play_count: PlayCount,
-        min_bp: MinBP,
+        clear: i32,
+        timestamp: i32,
+        epg: i32,
+        lpg: i32,
+        egr: i32,
+        lgr: i32,
+        egd: i32,
+        lgd: i32,
+        ebd: i32,
+        lbd: i32,
+        epr: i32,
+        lpr: i32,
+        ems: i32,
+        lms: i32,
+        combo: i32,
+        playcount: i32,
+        minbp: i32,
     ) -> Score {
         Score {
-            clear,
-            updated_at,
-            judge,
-            max_combo,
-            play_count,
-            min_bp,
+            clear: ClearType::from_integer(clear),
+            updated_at: UpdatedAt::from_timestamp(timestamp),
+            judge: Judge::new(epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms),
+            max_combo: MaxCombo::from_combo(combo),
+            play_count: PlayCount::new(playcount),
+            min_bp: MinBP::from_bp(minbp),
         }
     }
 }

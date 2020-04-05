@@ -1,40 +1,7 @@
-use serde::{Deserialize, Deserializer};
-use std::fs::File;
-use std::io::Read;
-
 use super::table;
+use serde::Deserialize;
 
 use serde;
-use serde_json;
-use serde_json::Value;
-
-pub fn get_table() -> table::Table {
-    let header = get_header();
-    let chart = get_charts();
-    table::Table::make(
-        header.name,
-        header.symbol,
-        table::Charts::new(chart.iter().map(|c| c.to_chart()).collect()),
-    )
-}
-
-fn get_header() -> Header {
-    let mut file = File::open("./files/satellite/header.json").unwrap();
-
-    let mut contents = String::new();
-    file.read_to_string(&mut contents);
-
-    serde_json::from_str::<Header>(&contents).unwrap()
-}
-
-fn get_charts() -> Vec<Chart> {
-    let mut f = File::open("./files/satellite/score.json").unwrap();
-
-    let mut c = String::new();
-    f.read_to_string(&mut c);
-
-    serde_json::from_str::<Vec<Chart>>(&c).unwrap()
-}
 
 #[derive(Deserialize, Debug)]
 pub struct Header {

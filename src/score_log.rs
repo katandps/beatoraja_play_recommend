@@ -24,6 +24,16 @@ impl ScoreLog {
         }
         self.log.get(&song_id).unwrap().get_snap(date)
     }
+
+    pub fn builder() -> Builder {
+        Builder {
+            log: HashMap::new(),
+        }
+    }
+
+    pub fn build(builder: Builder) -> ScoreLog {
+        ScoreLog { log: builder.log }
+    }
 }
 
 struct SnapShots {
@@ -77,19 +87,19 @@ impl SnapShot {
     }
     pub fn from_data(
         song_id: SongId,
-        clear_type: ClearType,
-        score: ExScore,
-        max_combo: MaxCombo,
-        min_bp: MinBP,
-        updated_at: UpdatedAt,
+        clear_type: i32,
+        score: i32,
+        combo: i32,
+        minbp: i32,
+        timestamp: i32,
     ) -> SnapShot {
         SnapShot {
             song_id,
-            clear_type,
-            score,
-            max_combo,
-            min_bp,
-            updated_at,
+            clear_type: ClearType::from_integer(clear_type),
+            score: ExScore::from_score(score),
+            max_combo: MaxCombo::from_combo(combo),
+            min_bp: MinBP::from_bp(minbp),
+            updated_at: UpdatedAt::from_timestamp(timestamp),
         }
     }
 }
@@ -105,12 +115,6 @@ pub struct Builder {
 }
 
 impl Builder {
-    pub fn new() -> Builder {
-        Builder {
-            log: HashMap::new(),
-        }
-    }
-
     pub fn push(&mut self, song_id: SongId, snapshot: SnapShot) {
         if !self.log.contains_key(&song_id) {
             self.log.insert(
@@ -123,9 +127,5 @@ impl Builder {
         }
         let snapshots = self.log.get_mut(&song_id).unwrap();
         snapshots.add(snapshot);
-    }
-
-    pub fn build(builder: Self) -> ScoreLog {
-        ScoreLog { log: builder.log }
     }
 }

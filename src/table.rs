@@ -1,4 +1,4 @@
-use crate::song::HashMd5;
+use crate::song::hash::HashMd5;
 use std::fmt;
 
 pub struct Table {
