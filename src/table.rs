@@ -152,8 +152,13 @@ pub async fn make_table(table_url: String) -> Result<Table, reqwest::Error> {
 mod text {
     use crate::table::make_table;
 
-    #[test]
+//    #[test]
     fn test() {
-        //let table = make_table("http://rattoto10.jounin.jp/table.html".parse().unwrap());
-    }
+    let table = make_table(
+        "http://walkure.net/hakkyou/for_glassist/bms/?lamp=fc"
+            .parse()
+            .unwrap(),
+    ).unwrap();
+    println!("{}", table.name())
+}
 }

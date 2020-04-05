@@ -18,7 +18,7 @@ pub struct Header {
 #[derive(Deserialize, Debug)]
 pub struct Chart {
     title: String,
-    artist: String,
+    artist: Option<String>,
     md5: String,
     level: String,
 }
@@ -27,7 +27,10 @@ impl Chart {
     pub fn to_chart(&self) -> table::Chart {
         table::Chart::new(
             self.title.clone(),
-            self.artist.clone(),
+            match &self.artist {
+                Some(a) => a.clone(),
+                _ => "".to_string(),
+            },
             (&self.md5).parse().unwrap(),
             self.level.clone(),
         )
