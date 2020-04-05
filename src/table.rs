@@ -1,6 +1,10 @@
 use crate::file;
+use crate::song::artist::Artist;
 use crate::song::hash::HashMd5;
+use crate::song::level::Level;
+use crate::song::title::Title;
 use scraper::{Html, Selector};
+use std::collections::HashSet;
 use std::fmt;
 use url::Url;
 
@@ -16,10 +20,10 @@ pub struct Charts {
 
 #[derive(Clone, PartialEq)]
 pub struct Chart {
-    title: String,
-    artist: String,
+    title: Title,
+    artist: Artist,
     pub md5: HashMd5,
-    level: String,
+    level: Level,
 }
 
 impl Table {
@@ -37,8 +41,12 @@ impl Table {
             charts,
         }
     }
-    pub fn level_specified(&self, level: String) -> Table {
+    pub fn level_specified(&self, level: &Level) -> Table {
         Table::make(&self.name, &self.symbol, self.charts.level_specified(level))
+    }
+
+    pub fn get_levels(&self) -> Vec<Level> {
+        self.charts.get_levels()
     }
 
     pub fn get_charts(&self) -> &Vec<Chart> {
@@ -59,14 +67,24 @@ impl Charts {
     pub fn new(charts: Vec<Chart>) -> Charts {
         Charts { charts }
     }
-    pub fn level_specified(&self, level: String) -> Charts {
+    pub fn level_specified(&self, level: &Level) -> Charts {
         let charts = self
             .charts
             .iter()
-            .filter_map(|c| if c.level == level { Some(c) } else { None })
+            .filter_map(|c| if &c.level == level { Some(c) } else { None })
             .cloned()
             .collect();
         Charts::new(charts)
+    }
+
+    pub fn get_levels(&self) -> Vec<Level> {
+        let mut set = HashSet::new();
+        for level in self.charts.iter().map(|c| c.level.clone()) {
+            set.insert(level);
+        }
+        let mut vec: Vec<Level> = set.iter().cloned().collect();
+        vec.sort_unstable();
+        vec
     }
 }
 
@@ -82,10 +100,10 @@ impl fmt::Display for Charts {
 impl Chart {
     pub fn new(title: String, artist: String, md5: HashMd5, level: String) -> Chart {
         Chart {
-            title,
-            artist,
+            title: Title::make(title),
+            artist: Artist::make(artist),
             md5,
-            level,
+            level: Level::make(level),
         }
     }
 

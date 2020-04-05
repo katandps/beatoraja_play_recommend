@@ -30,9 +30,10 @@ pub fn player() {
         .expect("Error loading schema");
 
     let last = results.last().unwrap();
-    println!("{}", last.playcount);
-    println!("{}", last.clear);
-    println!(" ")
+    println!("PlayCount: {}", last.playcount);
+    println!("ClearCount: {}", last.clear);
+    println!("PlayTime: {}", last.playtime);
+    println!()
 }
 
 pub fn score() -> Scores {
