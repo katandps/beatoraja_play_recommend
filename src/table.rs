@@ -1,5 +1,8 @@
+use crate::file;
 use crate::song::hash::HashMd5;
+use scraper::{Html, Selector};
 use std::fmt;
+use url::Url;
 
 pub struct Table {
     name: String,
@@ -95,4 +98,35 @@ impl fmt::Display for Chart {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", self.level, self.title)
     }
+}
+
+#[tokio::main]
+pub async fn make_table(table_url: String) -> Result<Table, reqwest::Error> {
+    let res = reqwest::get(&table_url).await?;
+    let body = res.text().await?;
+
+    let selector = Selector::parse(r#"meta[name="bmstable"]"#).unwrap();
+    let document = Html::parse_document(&body);
+    let mut header_url = Url::parse(&table_url).unwrap();
+    for element in document.select(&selector) {
+        let header_url_fragment = element.value().attr("content").unwrap();
+        header_url = header_url.join(header_url_fragment).unwrap();
+    }
+
+    println!("{}", &header_url.to_string());
+    let header = reqwest::get(&header_url.to_string())
+        .await?
+        .json::<file::Header>()
+        .await?;
+    let data_url = header_url.join(header.data_url.as_ref()).unwrap();
+    println!("{}", &data_url.to_string());
+    let data_res = reqwest::get(&data_url.to_string()).await?;
+    let data = data_res.json::<Vec<file::Chart>>().await?;
+
+    let table = Table::make(
+        header.name,
+        header.symbol,
+        Charts::new(data.iter().map(|c| c.to_chart()).collect()),
+    );
+    Ok(table)
 }
