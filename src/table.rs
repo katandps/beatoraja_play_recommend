@@ -131,15 +131,14 @@ pub async fn make_table(table_url: String) -> Result<Table, reqwest::Error> {
         header_url = header_url.join(header_url_fragment).unwrap();
     }
 
-    println!("{}", &header_url.to_string());
-    let header = reqwest::get(&header_url.to_string())
-        .await?
-        .json::<file::Header>()
-        .await?;
+    let header_text: String = reqwest::get(&header_url.to_string()).await?.text().await?;
+    let header: file::Header =
+        serde_json::from_str(header_text.trim_start_matches('\u{feff}')).unwrap();
+
     let data_url = header_url.join(header.data_url.as_ref()).unwrap();
-    println!("{}", &data_url.to_string());
-    let data_res = reqwest::get(&data_url.to_string()).await?;
-    let data = data_res.json::<Vec<file::Chart>>().await?;
+    let data_text = reqwest::get(&data_url.to_string()).await?.text().await?;
+    let data: Vec<file::Chart> =
+        serde_json::from_str(data_text.trim_start_matches('\u{feff}')).unwrap();
 
     let table = Table::make(
         header.name,
@@ -147,4 +146,14 @@ pub async fn make_table(table_url: String) -> Result<Table, reqwest::Error> {
         Charts::new(data.iter().map(|c| c.to_chart()).collect()),
     );
     Ok(table)
+}
+
+#[cfg(test)]
+mod text {
+    use crate::table::make_table;
+
+    #[test]
+    fn test() {
+        //let table = make_table("http://rattoto10.jounin.jp/table.html".parse().unwrap());
+    }
 }
