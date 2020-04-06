@@ -5,6 +5,8 @@ table! {
         md5 -> Text,
         title -> Text,
         subtitle -> Text,
+        artist -> Text,
+        notes -> Integer,
     }
 }
 
@@ -15,4 +17,6 @@ pub struct Song {
     pub md5: String,
     pub title: String,
     pub subtitle: String,
+    pub artist: String,
+    pub notes: i32,
 }

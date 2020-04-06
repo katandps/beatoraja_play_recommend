@@ -12,8 +12,10 @@ use crate::score::song_id::{PlayMode, SongId};
 use crate::score::Score;
 use crate::score_log;
 use crate::score_log::SnapShot;
+use crate::song::artist::Artist;
 use crate::song::hash::{HashMd5, HashSha256};
-use crate::song::hash_converter;
+use crate::song::title::Title;
+use crate::song::{Builder, Songs};
 use std::collections::HashMap;
 
 fn establish_connection(env_key: &str) -> SqliteConnection {
@@ -75,7 +77,7 @@ fn make_whole_score(record: Vec<crate::schema::score::Score>) -> Scores {
     Scores::new(scores)
 }
 
-pub fn song_data() -> hash_converter::Converter {
+pub fn song_data() -> Songs {
     use super::schema::song::song::dsl::*;
     let connection = establish_connection("SONG_DATABASE_URL");
     let results = song
@@ -84,12 +86,18 @@ pub fn song_data() -> hash_converter::Converter {
     make_song_data(results)
 }
 
-fn make_song_data(record: Vec<crate::schema::song::Song>) -> hash_converter::Converter {
-    let mut builder = hash_converter::Builder::new();
+fn make_song_data(record: Vec<crate::schema::song::Song>) -> Songs {
+    let mut builder = Builder::new();
     for row in record {
-        builder.push(HashMd5::new(row.md5), HashSha256::new(row.sha256));
+        builder.push(
+            HashMd5::new(row.md5),
+            HashSha256::new(row.sha256),
+            Title::make(row.title),
+            Artist::make(row.artist),
+            row.notes,
+        );
     }
-    hash_converter::Builder::build(builder)
+    Builder::build(builder)
 }
 
 pub fn score_log() -> score_log::ScoreLog {

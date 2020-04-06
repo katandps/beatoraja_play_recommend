@@ -3,6 +3,7 @@ use crate::song::artist::Artist;
 use crate::song::hash::HashMd5;
 use crate::song::level::Level;
 use crate::song::title::Title;
+use crate::song::{Song, Songs};
 use scraper::{Html, Selector};
 use std::collections::HashSet;
 use std::fmt;
@@ -69,6 +70,10 @@ impl Table {
     pub fn get_charts(&self) -> &Vec<Chart> {
         &self.charts.charts
     }
+
+    pub fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
+        self.charts.get_song(song_data)
+    }
     pub fn name(&self) -> &str {
         &self.name
     }
@@ -102,6 +107,16 @@ impl Charts {
         let mut vec: Vec<Level> = set.iter().cloned().collect();
         vec.sort_unstable();
         vec
+    }
+
+    pub fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
+        self.charts
+            .iter()
+            .flat_map(|c| match song_data.song(&c.md5) {
+                Some(s) => Some(s),
+                _ => None,
+            })
+            .collect()
     }
 }
 

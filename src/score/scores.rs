@@ -3,7 +3,7 @@ use std::fmt;
 use crate::score::song_id::{PlayMode, SongId};
 use crate::score::Score;
 use crate::scored_table::{ScoredChart, ScoredTable};
-use crate::song::hash_converter::Converter;
+use crate::song::Songs;
 use crate::table::Table;
 use std::collections::HashMap;
 
@@ -21,7 +21,7 @@ impl Scores {
     pub fn get_score(&self, song_id: &SongId) -> Option<&Score> {
         self.scores.get(song_id)
     }
-    pub fn merge_score(&self, table: &Table, song_data: &Converter) -> ScoredTable {
+    pub fn merge_score(&self, table: &Table, song_data: &Songs) -> ScoredTable {
         let mut charts = Vec::new();
         for chart in table.get_charts() {
             let sha256 = song_data.get_sha256(&chart.md5);

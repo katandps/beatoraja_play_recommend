@@ -26,33 +26,11 @@ impl Converter {
     }
 }
 
-pub struct Builder {
-    md5_to_sha256: HashMap<HashMd5, HashSha256>,
-    sha256_to_md5: HashMap<HashSha256, HashMd5>,
-}
-
-impl Builder {
-    pub fn new() -> Builder {
-        Builder {
-            md5_to_sha256: HashMap::new(),
-            sha256_to_md5: HashMap::new(),
-        }
-    }
-
-    pub fn push(&mut self, md5: HashMd5, sha256: HashSha256) {
-        self.sha256_to_md5.insert(sha256.clone(), md5.clone());
-        self.md5_to_sha256.insert(md5, sha256);
-    }
-
-    pub fn build(builder: Self) -> Converter {
-        Converter::new(builder.md5_to_sha256, builder.sha256_to_md5)
-    }
-}
-
 #[cfg(test)]
 mod test {
     use crate::song::hash::{HashMd5, HashSha256};
-    use crate::song::hash_converter::Builder;
+    use crate::song::hash_converter::Converter;
+    use std::collections::HashMap;
 
     #[test]
     fn get() {
@@ -75,5 +53,28 @@ mod test {
 
         assert_eq!(obj.get_md5(&s3), None);
         assert_eq!(obj.get_sha256(&m3), None);
+    }
+
+    struct Builder {
+        md5_to_sha256: HashMap<HashMd5, HashSha256>,
+        sha256_to_md5: HashMap<HashSha256, HashMd5>,
+    }
+
+    impl Builder {
+        pub fn new() -> Builder {
+            Builder {
+                md5_to_sha256: HashMap::new(),
+                sha256_to_md5: HashMap::new(),
+            }
+        }
+
+        fn push(&mut self, md5: HashMd5, sha256: HashSha256) {
+            self.sha256_to_md5.insert(sha256.clone(), md5.clone());
+            self.md5_to_sha256.insert(md5, sha256);
+        }
+
+        fn build(builder: Self) -> Converter {
+            Converter::new(builder.md5_to_sha256, builder.sha256_to_md5)
+        }
     }
 }

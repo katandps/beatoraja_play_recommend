@@ -17,7 +17,7 @@ impl ScoreLog {
             log: HashMap::new(),
         }
     }
-    pub fn get_snap(&self, song_id: SongId, date: &UpdatedAt) -> SnapShot {
+    pub fn get_snap(&self, song_id: &SongId, date: &UpdatedAt) -> SnapShot {
         match self.log.get(&song_id) {
             Some(s) => s.get_snap(date),
             _ => SnapShot::new(song_id.clone()),
@@ -86,6 +86,10 @@ impl SnapShot {
             min_bp: MinBP::from_bp(minbp),
             updated_at: UpdatedAt::from_timestamp(timestamp),
         }
+    }
+
+    pub fn score(&self) -> ExScore {
+        self.score.clone()
     }
 }
 

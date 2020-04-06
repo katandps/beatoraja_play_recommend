@@ -4,6 +4,7 @@ mod file;
 
 pub mod config;
 pub mod lamp;
+pub mod rank;
 pub mod schema;
 pub mod score;
 pub mod score_log;
