@@ -39,9 +39,9 @@ impl SnapShots {
         let snap = self
             .snapshots
             .iter()
-            .filter(|s| s.updated_at.lt(date))
+            .filter(|s| s.updated_at.le(date))
             .map(|s| s.clone())
-            .nth(0);
+            .last();
         match snap {
             Some(s) => s,
             _ => SnapShot::new(self.song_id.clone()),

@@ -2,6 +2,7 @@ mod app;
 mod db;
 mod file;
 
+pub mod config;
 pub mod lamp;
 pub mod schema;
 pub mod score;
@@ -17,7 +18,6 @@ extern crate scraper;
 use crate::app::App;
 use crate::table::Table;
 use std::env;
-use std::process::exit;
 
 fn main() {
     env_logger::init();

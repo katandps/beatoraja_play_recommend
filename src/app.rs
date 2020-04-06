@@ -33,7 +33,7 @@ impl<'a> App<'a> {
     }
 
     fn lamp_chart(&self, table: &crate::table::Table) {
-        let updated_at = UpdatedAt::from_timestamp(2000000000);
+        let updated_at = UpdatedAt::from_timestamp(crate::config::config().timestamp);
         let mut lamp_sum = LampSum::new();
         for c in table.get_charts().iter() {
             let sha256 = self.song_data.get_sha256(&c.md5);
