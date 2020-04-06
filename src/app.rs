@@ -16,23 +16,23 @@ impl<'a> App<'a> {
 
         let levels = self.table.get_levels();
         for level in levels.iter() {
-            let spec = self.table.level_specified(level);
+            let spec = &self.table.level_specified(&level);
             self.recommend(spec);
         }
         println!();
 
         for level in levels.iter() {
-            let spec = self.table.level_specified(level);
+            let spec = &self.table.level_specified(&level);
             self.lamp_chart(spec);
         }
         println!();
     }
-    fn recommend(&mut self, table: crate::table::Table) {
-        let scored = self.whole_score.merge_score(&table, &self.song_data);
+    fn recommend(&self, table: &crate::table::Table) {
+        let scored = self.whole_score.merge_score(table, &self.song_data);
         println!("{}", scored.recent_updated());
     }
 
-    fn lamp_chart(&mut self, table: crate::table::Table) {
+    fn lamp_chart(&self, table: &crate::table::Table) {
         let updated_at = UpdatedAt::from_timestamp(2000000000);
         let mut lamp_sum = LampSum::new();
         for c in table.get_charts().iter() {

@@ -17,22 +17,11 @@ impl ScoreLog {
             log: HashMap::new(),
         }
     }
-    pub fn get_snap(&mut self, song_id: SongId, date: &UpdatedAt) -> SnapShot {
-        if !self.log.contains_key(&song_id) {
-            self.log
-                .insert(song_id.clone(), SnapShots::new(song_id.clone()));
+    pub fn get_snap(&self, song_id: SongId, date: &UpdatedAt) -> SnapShot {
+        match self.log.get(&song_id) {
+            Some(s) => s.get_snap(date),
+            _ => SnapShot::new(song_id.clone()),
         }
-        self.log.get(&song_id).unwrap().get_snap(date)
-    }
-
-    pub fn builder() -> Builder {
-        Builder {
-            log: HashMap::new(),
-        }
-    }
-
-    pub fn build(builder: Builder) -> ScoreLog {
-        ScoreLog { log: builder.log }
     }
 }
 
@@ -42,25 +31,21 @@ struct SnapShots {
 }
 
 impl SnapShots {
-    fn new(song_id: SongId) -> SnapShots {
-        let mut snapshots = Vec::new();
-        snapshots.push(SnapShot::new(song_id.clone()));
-        SnapShots { song_id, snapshots }
-    }
-
     fn add(&mut self, snapshot: SnapShot) {
         self.snapshots.push(snapshot)
     }
 
     fn get_snap(&self, date: &UpdatedAt) -> SnapShot {
-        let mut ret = SnapShot::new(self.song_id.clone());
-        for ss in self.snapshots.iter() {
-            if ss.updated_at.gt(date) {
-                break;
-            }
-            ret = ss.clone();
+        let snap = self
+            .snapshots
+            .iter()
+            .filter(|s| s.updated_at.lt(date))
+            .map(|s| s.clone())
+            .nth(0);
+        match snap {
+            Some(s) => s,
+            _ => SnapShot::new(self.song_id.clone()),
         }
-        ret
     }
 }
 
@@ -127,5 +112,15 @@ impl Builder {
         }
         let snapshots = self.log.get_mut(&song_id).unwrap();
         snapshots.add(snapshot);
+    }
+
+    pub fn builder() -> Builder {
+        Builder {
+            log: HashMap::new(),
+        }
+    }
+
+    pub fn build(builder: Builder) -> ScoreLog {
+        ScoreLog { log: builder.log }
     }
 }

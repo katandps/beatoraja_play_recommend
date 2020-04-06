@@ -10,7 +10,7 @@ pub struct Header {
     pub symbol: String,
     grade: Option<Vec<Grade>>,
     course: Option<Vec<Vec<Course>>>,
-    level_order: Option<Vec<String>>,
+    pub level_order: Option<Vec<String>>,
     tag: Option<String>,
     update: Option<i64>,
 }

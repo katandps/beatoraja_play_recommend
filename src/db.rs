@@ -102,7 +102,7 @@ pub fn score_log() -> score_log::ScoreLog {
 }
 
 fn make_score_log(record: Vec<crate::schema::score_log::ScoreLog>) -> score_log::ScoreLog {
-    let mut builder = score_log::ScoreLog::builder();
+    let mut builder = score_log::Builder::builder();
     for row in record {
         let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
         let snapshot = SnapShot::from_data(
@@ -115,5 +115,5 @@ fn make_score_log(record: Vec<crate::schema::score_log::ScoreLog>) -> score_log:
         );
         builder.push(song_id, snapshot)
     }
-    score_log::ScoreLog::build(builder)
+    score_log::Builder::build(builder)
 }

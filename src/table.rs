@@ -12,6 +12,7 @@ pub struct Table {
     name: String,
     symbol: String,
     charts: Charts,
+    levels: Vec<Level>,
 }
 
 pub struct Charts {
@@ -32,21 +33,37 @@ impl Table {
             name: "Not Loaded".to_string(),
             symbol: "".to_string(),
             charts: Charts { charts: Vec::new() },
+            levels: Vec::new(),
         }
     }
-    pub fn make(name: impl Into<String>, symbol: impl Into<String>, charts: Charts) -> Table {
+    pub fn make(
+        name: impl Into<String>,
+        symbol: impl Into<String>,
+        charts: Charts,
+        levels: Option<Vec<String>>,
+    ) -> Table {
+        let levels: Vec<Level> = match levels {
+            Some(l) => l.iter().map(|s| Level::make(s.clone())).collect(),
+            _ => charts.get_levels(),
+        };
         Table {
             name: name.into(),
             symbol: symbol.into(),
             charts,
+            levels,
         }
     }
     pub fn level_specified(&self, level: &Level) -> Table {
-        Table::make(&self.name, &self.symbol, self.charts.level_specified(level))
+        Table::make(
+            &self.name,
+            &self.symbol,
+            self.charts.level_specified(level),
+            None,
+        )
     }
 
-    pub fn get_levels(&self) -> Vec<Level> {
-        self.charts.get_levels()
+    pub fn get_levels(&self) -> &Vec<Level> {
+        &self.levels
     }
 
     pub fn get_charts(&self) -> &Vec<Chart> {
@@ -144,6 +161,7 @@ pub async fn make_table(table_url: String) -> Result<Table, reqwest::Error> {
         header.name,
         header.symbol,
         Charts::new(data.iter().map(|c| c.to_chart()).collect()),
+        header.level_order,
     );
     Ok(table)
 }
@@ -152,13 +170,14 @@ pub async fn make_table(table_url: String) -> Result<Table, reqwest::Error> {
 mod text {
     use crate::table::make_table;
 
-//    #[test]
+    //    #[test]
     fn test() {
-    let table = make_table(
-        "http://walkure.net/hakkyou/for_glassist/bms/?lamp=fc"
-            .parse()
-            .unwrap(),
-    ).unwrap();
-    println!("{}", table.name())
-}
+        let table = make_table(
+            "http://walkure.net/hakkyou/for_glassist/bms/?lamp=fc"
+                .parse()
+                .unwrap(),
+        )
+            .unwrap();
+        println!("{}", table.name())
+    }
 }
