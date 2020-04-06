@@ -4,10 +4,10 @@ use crate::score::updated_at::UpdatedAt;
 pub use diesel::prelude::*;
 
 pub struct App<'a> {
-    pub table: crate::table::Table,
+    pub table: &'a crate::table::Table,
     pub whole_score: &'a crate::score::scores::Scores,
     pub song_data: &'a crate::song::hash_converter::Converter,
-    pub score_log: &'a mut crate::score_log::ScoreLog,
+    pub score_log: &'a crate::score_log::ScoreLog,
 }
 
 impl<'a> App<'a> {
