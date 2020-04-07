@@ -17,20 +17,26 @@ impl RankSum {
         let count = self.sum.entry(rank.clear_rank().clone()).or_insert(0);
         *count += 1;
     }
+}
 
-    pub fn format(&self) -> String {
-        ClearRank::vec()
-            .iter()
-            .map(|rank| {
-                rank.coloring(format!(
-                    "[{:>3}]",
-                    match self.sum.get(&rank) {
-                        Some(i) => i.to_string(),
-                        None => "".to_string(),
-                    }
-                ))
-            })
-            .collect()
+impl fmt::Display for RankSum {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}\n",
+            ClearRank::vec()
+                .iter()
+                .map(|rank| {
+                    rank.coloring(format!(
+                        "[{:>3}]",
+                        match self.sum.get(&rank) {
+                            Some(i) => i.to_string(),
+                            None => "".to_string(),
+                        }
+                    ))
+                })
+                .collect::<String>()
+        )
     }
 }
 

@@ -1,5 +1,6 @@
 use crate::score::clear_type::ClearType;
 use std::collections::HashMap;
+use std::fmt;
 
 #[derive(Debug)]
 pub struct LampSum {
@@ -17,20 +18,26 @@ impl LampSum {
         let count = self.sum.entry(lamp.clear_type().clone()).or_insert(0);
         *count += 1;
     }
+}
 
-    pub fn format(&self) -> String {
-        ClearType::vec()
-            .iter()
-            .map(|lamp| {
-                lamp.coloring(format!(
-                    "[{:>3}]",
-                    match self.sum.get(&lamp) {
-                        Some(i) => i.to_string(),
-                        None => "".to_string(),
-                    }
-                ))
-            })
-            .collect()
+impl fmt::Display for LampSum {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}\n",
+            ClearType::vec()
+                .iter()
+                .map(|lamp| {
+                    lamp.coloring(format!(
+                        "[{:>3}]",
+                        match self.sum.get(&lamp) {
+                            Some(i) => i.to_string(),
+                            None => "".to_string(),
+                        }
+                    ))
+                })
+                .collect::<String>()
+        )
     }
 }
 

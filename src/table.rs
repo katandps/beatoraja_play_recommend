@@ -3,7 +3,7 @@ use crate::score::scores::Scores;
 use crate::scored_table::ScoredTable;
 use crate::song::artist::Artist;
 use crate::song::hash::HashMd5;
-use crate::song::level::Level;
+use crate::song::level::{Level, Levels};
 use crate::song::title::Title;
 use crate::song::{Song, Songs};
 use scraper::{Html, Selector};
@@ -15,7 +15,7 @@ pub struct Table {
     name: String,
     symbol: String,
     charts: Charts,
-    levels: Vec<Level>,
+    levels: Levels,
 }
 
 pub struct Charts {
@@ -36,7 +36,7 @@ impl Table {
             name: "Not Loaded".to_string(),
             symbol: "No".to_string(),
             charts: Charts { charts: Vec::new() },
-            levels: Vec::new(),
+            levels: Levels::new(),
         }
     }
     pub fn make(
@@ -53,7 +53,7 @@ impl Table {
             name: name.into(),
             symbol: symbol.into(),
             charts,
-            levels,
+            levels: Levels::make(levels),
         }
     }
     pub fn level_specified(&self, level: &Level) -> Table {
@@ -65,7 +65,7 @@ impl Table {
         )
     }
 
-    pub fn get_levels(&self) -> &Vec<Level> {
+    pub fn ls(&self) -> &Levels {
         &self.levels
     }
 

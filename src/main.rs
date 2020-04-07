@@ -39,7 +39,7 @@ fn main() {
 
         let mut input = String::new();
         std::io::stdin().read_line(&mut input).ok();
-        let selected: usize = input.trim().parse().ok().unwrap();
+        let selected: usize = input.trim().parse().ok().unwrap_or(tables.len() + 1);
 
         if selected == 0 {
             break;
@@ -48,8 +48,8 @@ fn main() {
         match tables.iter().nth(selected - 1) {
             Some(table) => App {
                 table,
-                whole_score: &whole_score,
-                song_data: &song_data,
+                scores: &whole_score,
+                songs: &song_data,
                 score_log: &score_log,
             }
                 .run(),
