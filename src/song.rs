@@ -34,9 +34,9 @@ impl Songs {
         self.converter.get_sha256(md5)
     }
 
-    pub fn song_id(&self, md5: &HashMd5, mode: PlayMode) -> Option<SongId> {
+    pub fn song_id(&self, md5: &HashMd5) -> Option<SongId> {
         match self.get_sha256(md5) {
-            Some(s) => Some(SongId::new(s, mode)),
+            Some(s) => Some(SongId::new(s, PlayMode::new(0))),
             _ => None,
         }
     }

@@ -1,4 +1,6 @@
 use crate::file;
+use crate::score::scores::Scores;
+use crate::scored_table::ScoredTable;
 use crate::song::artist::Artist;
 use crate::song::hash::HashMd5;
 use crate::song::level::Level;
@@ -32,7 +34,7 @@ impl Table {
     pub fn new() -> Table {
         Table {
             name: "Not Loaded".to_string(),
-            symbol: "".to_string(),
+            symbol: "No".to_string(),
             charts: Charts { charts: Vec::new() },
             levels: Vec::new(),
         }
@@ -67,8 +69,8 @@ impl Table {
         &self.levels
     }
 
-    pub fn get_charts(&self) -> &Vec<Chart> {
-        &self.charts.charts
+    pub fn merge_score(&self, scores: &Scores, song_data: &Songs) -> ScoredTable {
+        self.charts.merge_score(scores, song_data)
     }
 
     pub fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
@@ -107,6 +109,18 @@ impl Charts {
         let mut vec: Vec<Level> = set.iter().cloned().collect();
         vec.sort_unstable();
         vec
+    }
+
+    pub fn merge_score(&self, scores: &Scores, song_data: &Songs) -> ScoredTable {
+        ScoredTable::new(
+            self.charts
+                .iter()
+                .flat_map(|chart| match song_data.song_id(&chart.md5) {
+                    Some(song_id) => scores.merge(song_id, chart),
+                    _ => None,
+                })
+                .collect(),
+        )
     }
 
     pub fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {

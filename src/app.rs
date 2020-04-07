@@ -36,7 +36,7 @@ impl<'a> App<'a> {
         }
     }
     fn recommend(&self, table: &crate::table::Table) {
-        let scored = self.whole_score.merge_score(table, &self.song_data);
+        let scored = table.merge_score(&self.whole_score, &self.song_data);
         println!("{}", scored.recent_updated());
     }
 
