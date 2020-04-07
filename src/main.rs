@@ -2,6 +2,7 @@ mod app;
 mod db;
 mod file;
 
+pub mod command;
 pub mod config;
 pub mod lamp;
 pub mod rank;

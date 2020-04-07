@@ -1,3 +1,4 @@
+use crate::command::Command;
 use crate::score::scores::Scores;
 use crate::score::updated_at::UpdatedAt;
 use crate::score_log::ScoreLog;
@@ -37,25 +38,22 @@ impl Levels {
         Levels { levels }
     }
 
-    pub fn format<F>(
+    pub fn format(
         &self,
-        f: F,
+        command: &Command,
         scores: &Scores,
         songs: &Songs,
         table: &Table,
         score_log: &ScoreLog,
         updated_at: &UpdatedAt,
-    ) -> String
-        where
-            F: Fn(&Scores, &Songs, &crate::table::Table, &ScoreLog, &UpdatedAt) -> String,
-    {
+    ) -> String {
         self.levels
             .iter()
-            .map(|level| {
-                f(
+            .map(|l| {
+                command.func()(
                     scores,
                     songs,
-                    &table.level_specified(level),
+                    &table.level_specified(l),
                     score_log,
                     &updated_at,
                 )
