@@ -19,16 +19,18 @@ impl LampSum {
     }
 
     pub fn format(&self) -> String {
-        let mut ret = String::new();
-        for c in ClearType::vec() {
-            if !self.sum.contains_key(&c) {
-                ret.push_str(c.coloring(format!("[   ]")).as_str());
-            } else {
-                ret.push_str(c.coloring(format!("[{:>3}]", self.sum[&c])).as_str());
-            }
-            ret.push_str(" ");
-        }
-        ret
+        ClearType::vec()
+            .iter()
+            .map(|lamp| {
+                lamp.coloring(format!(
+                    "[{:>3}]",
+                    match self.sum.get(&lamp) {
+                        Some(i) => i.to_string(),
+                        None => "".to_string(),
+                    }
+                ))
+            })
+            .collect()
     }
 }
 

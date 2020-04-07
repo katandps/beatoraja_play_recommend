@@ -19,16 +19,18 @@ impl RankSum {
     }
 
     pub fn format(&self) -> String {
-        let mut ret = String::new();
-        for c in ClearRank::vec() {
-            if !self.sum.contains_key(&c) {
-                ret.push_str(c.coloring(format!("[   ]")).as_str());
-            } else {
-                ret.push_str(c.coloring(format!("[{:>3}]", self.sum[&c])).as_str());
-            }
-            ret.push_str(" ");
-        }
-        ret
+        ClearRank::vec()
+            .iter()
+            .map(|rank| {
+                rank.coloring(format!(
+                    "[{:>3}]",
+                    match self.sum.get(&rank) {
+                        Some(i) => i.to_string(),
+                        None => "".to_string(),
+                    }
+                ))
+            })
+            .collect()
     }
 }
 
