@@ -19,7 +19,6 @@ extern crate scraper;
 
 use crate::app::App;
 use crate::table::Table;
-use std::env;
 
 fn main() {
     db::player();
@@ -58,14 +57,8 @@ fn main() {
 }
 
 fn get_tables() -> Vec<Table> {
-    dotenv::dotenv().ok();
-    (1..10)
-        .flat_map(|i| {
-            let url = env::var(format!("TABLE_URL{}", i));
-            match url {
-                Ok(s) => Some(table::make_table(s).unwrap()),
-                _ => None,
-            }
-        })
+    config::table_urls()
+        .iter()
+        .flat_map(|url| table::make_table(url.parse().unwrap()))
         .collect()
 }

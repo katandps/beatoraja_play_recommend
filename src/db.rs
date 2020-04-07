@@ -1,11 +1,4 @@
-use diesel;
-use dotenv;
-
-use std::env;
-
-use diesel::prelude::*;
-use diesel::sqlite::SqliteConnection;
-
+use crate::config::config;
 use crate::schema::player::Player;
 use crate::score::scores::Scores;
 use crate::score::song_id::{PlayMode, SongId};
@@ -16,17 +9,18 @@ use crate::song::artist::Artist;
 use crate::song::hash::{HashMd5, HashSha256};
 use crate::song::title::Title;
 use crate::song::{Builder, Songs};
+use diesel;
+use diesel::prelude::*;
+use diesel::sqlite::SqliteConnection;
 use std::collections::HashMap;
 
-fn establish_connection(env_key: &str) -> SqliteConnection {
-    dotenv::dotenv().ok();
-    let url = env::var(env_key).expect(format!("{} must be set", env_key).as_ref());
+fn establish_connection(url: &str) -> SqliteConnection {
     SqliteConnection::establish(&url).unwrap_or_else(|_| panic!("Error connection to {}", &url))
 }
 
 pub fn player() {
     use super::schema::player::player::dsl::*;
-    let connection = establish_connection("SCORE_DATABASE_URL");
+    let connection = establish_connection(&config().score_db_url);
     let results: Vec<Player> = player
         .load::<Player>(&connection)
         .expect("Error loading schema");
@@ -40,7 +34,7 @@ pub fn player() {
 
 pub fn score() -> Scores {
     use super::schema::score::score::dsl::*;
-    let connection = establish_connection("SCORE_DATABASE_URL");
+    let connection = establish_connection(&config().score_db_url);
     let results = score
         .load::<crate::schema::score::Score>(&connection)
         .expect("Error loading schema");
@@ -79,7 +73,7 @@ fn make_whole_score(record: Vec<crate::schema::score::Score>) -> Scores {
 
 pub fn song_data() -> Songs {
     use super::schema::song::song::dsl::*;
-    let connection = establish_connection("SONG_DATABASE_URL");
+    let connection = establish_connection(&config().song_db_url);
     let results = song
         .load::<crate::schema::song::Song>(&connection)
         .expect("Error loading schema");
@@ -102,7 +96,7 @@ fn make_song_data(record: Vec<crate::schema::song::Song>) -> Songs {
 
 pub fn score_log() -> score_log::ScoreLog {
     use crate::schema::score_log::scorelog::dsl::*;
-    let connection = establish_connection("SCORELOG_DATABASE_URL");
+    let connection = establish_connection(&config().scorelog_db_url);
     let results = scorelog
         .load::<crate::schema::score_log::ScoreLog>(&connection)
         .expect("Error loading schema");
