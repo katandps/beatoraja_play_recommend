@@ -22,8 +22,6 @@ use crate::table::Table;
 use std::env;
 
 fn main() {
-    env_logger::init();
-
     db::player();
 
     let whole_score = db::score();
