@@ -17,38 +17,42 @@ impl<'a> App<'a> {
         println!("{}", self.table.name());
 
         let levels = self.table.get_levels();
-        for level in levels.iter() {
-            let spec = &self.table.level_specified(&level);
-            self.recommend(spec);
-        }
-        println!("\nLamp chart");
+
+        let recommend: String = levels
+            .iter()
+            .map(|level| self.recommend(&self.table.level_specified(&level)))
+            .collect();
+        println!("Recommend\n{}", recommend);
 
         let updated_at = UpdatedAt::from_timestamp(crate::config::config().timestamp);
 
-        for level in levels.iter() {
-            let spec = &self.table.level_specified(&level);
-            self.lamp_chart(spec, &updated_at);
-        }
-        println!("\nRank chart");
-        for level in levels.iter() {
-            let spec = &self.table.level_specified(&level);
-            self.rank_chart(spec, &updated_at);
-        }
-    }
-    fn recommend(&self, table: &crate::table::Table) {
-        let scored = table.merge_score(&self.whole_score, &self.song_data);
-        println!("{}", scored.recent_updated());
+        let lamp_chart: String = levels
+            .iter()
+            .map(|level| self.lamp_chart(&self.table.level_specified(&level), &updated_at))
+            .collect();
+        println!("Lamp chart\n{}", lamp_chart);
+
+        let rank_chart: String = levels
+            .iter()
+            .map(|level| self.rank_chart(&self.table.level_specified(&level), &updated_at))
+            .collect();
+        println!("Rank chart\n{}", rank_chart);
     }
 
-    fn lamp_chart(&self, table: &crate::table::Table, updated_at: &UpdatedAt) {
+    fn recommend(&self, table: &crate::table::Table) -> String {
+        let scored = table.merge_score(&self.whole_score, &self.song_data);
+        format!("{}\n", scored.recent_updated())
+    }
+
+    fn lamp_chart(&self, table: &crate::table::Table, updated_at: &UpdatedAt) -> String {
         let mut lamp_sum = LampSum::new();
         for s in table.get_song(&self.song_data).iter() {
             lamp_sum.push(self.score_log.get_snap(&s.song_id(), &updated_at).borrow())
         }
-        println!("{}", lamp_sum.format());
+        lamp_sum.format() + "\n"
     }
 
-    fn rank_chart(&self, table: &crate::table::Table, updated_at: &UpdatedAt) {
+    fn rank_chart(&self, table: &crate::table::Table, updated_at: &UpdatedAt) -> String {
         let mut rank_sum = RankSum::new();
         for s in table.get_song(&self.song_data).iter() {
             rank_sum.push(
@@ -59,6 +63,6 @@ impl<'a> App<'a> {
                     .borrow(),
             )
         }
-        println!("{}", rank_sum.format());
+        rank_sum.format() + "\n"
     }
 }
