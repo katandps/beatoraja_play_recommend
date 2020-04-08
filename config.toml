@@ -2,7 +2,7 @@ score_db_url="./files/score.db"
 scorelog_db_url="./files/scorelog.db"
 songdata_db_url="./files/songdata.db"
 
-tables=[
+table_urls=[
 "https://stellabms.xyz/st/table.html",
 "https://stellabms.xyz/sl/table.html",
 "http://www.ribbit.xyz/bms/tables/insane.html",
