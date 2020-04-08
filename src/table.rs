@@ -248,7 +248,7 @@ mod text {
                 .parse()
                 .unwrap(),
         )
-            .unwrap();
+        .unwrap();
         println!("{}", table.name())
     }
 }

@@ -1,9 +1,10 @@
-use crate::lamp::LampSum;
-use crate::rank::RankSum;
+use crate::rank::ClearRank;
+use crate::score::clear_type::ClearType;
 use crate::score::scores::Scores;
 use crate::score::updated_at::UpdatedAt;
 use crate::score_log::ScoreLog;
 use crate::song::{SongWithSnap, Songs};
+use crate::summary::Summary;
 use crate::table::Table;
 pub use diesel::prelude::*;
 use std::borrow::Borrow;
@@ -46,11 +47,15 @@ impl Command {
         score_log: &ScoreLog,
         updated_at: &UpdatedAt,
     ) -> String {
-        let mut lamp_sum = LampSum::new();
-        for s in table.get_song(songs) {
-            lamp_sum.push(score_log.get_snap(&s.song_id(), &updated_at).borrow())
+        let mut summary = Summary::new(ClearType::vec());
+        for song in table.get_song(songs) {
+            summary.push(
+                score_log
+                    .get_snap(&song.song_id(), &updated_at)
+                    .clear_type(),
+            )
         }
-        format!("{}", lamp_sum)
+        format!("{}", summary)
     }
 
     fn rank(
@@ -60,16 +65,16 @@ impl Command {
         score_log: &ScoreLog,
         updated_at: &UpdatedAt,
     ) -> String {
-        let mut rank_sum = RankSum::new();
+        let mut summary = Summary::new(ClearRank::vec());
         for song in table.get_song(songs) {
-            rank_sum.push(
-                SongWithSnap::make(
+            summary.push(
+                &SongWithSnap::make(
                     &song,
                     score_log.get_snap(&song.song_id(), &updated_at).borrow(),
                 )
-                    .borrow(),
+                .clear_rank(),
             )
         }
-        format!("{}", rank_sum)
+        format!("{}", summary)
     }
 }

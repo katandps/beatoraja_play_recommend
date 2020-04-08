@@ -1,48 +1,6 @@
 use crate::score::ex_score::ExScore;
-use std::collections::HashMap;
+use crate::summary::Countable;
 use std::fmt;
-
-pub struct RankSum {
-    sum: HashMap<ClearRank, i32>,
-}
-
-impl RankSum {
-    pub fn new() -> RankSum {
-        RankSum {
-            sum: HashMap::new(),
-        }
-    }
-
-    pub fn push(&mut self, rank: &dyn Rank) {
-        let count = self.sum.entry(rank.clear_rank().clone()).or_insert(0);
-        *count += 1;
-    }
-}
-
-impl fmt::Display for RankSum {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{}\n",
-            ClearRank::vec()
-                .iter()
-                .map(|rank| {
-                    rank.coloring(format!(
-                        "[{:>3}]",
-                        match self.sum.get(&rank) {
-                            Some(i) => i.to_string(),
-                            None => "".to_string(),
-                        }
-                    ))
-                })
-                .collect::<String>()
-        )
-    }
-}
-
-pub trait Rank {
-    fn clear_rank(&self) -> ClearRank;
-}
 
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub enum ClearRank {
@@ -89,8 +47,10 @@ impl ClearRank {
     pub fn vec() -> Vec<ClearRank> {
         (0..8).map(|x| ClearRank::from_integer(x)).collect()
     }
+}
 
-    pub fn coloring(&self, s: String) -> String {
+impl Countable for ClearRank {
+    fn coloring(&self, s: String) -> String {
         const ESC: &str = "\u{001b}";
         match self {
             ClearRank::F => format!("{}", s),

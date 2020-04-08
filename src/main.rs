@@ -4,13 +4,13 @@ mod file;
 
 pub mod command;
 pub mod config;
-pub mod lamp;
 pub mod rank;
 pub mod schema;
 pub mod score;
 pub mod score_log;
 pub mod scored_table;
 pub mod song;
+pub mod summary;
 pub mod table;
 
 #[macro_use]
@@ -51,7 +51,7 @@ fn main() {
                 songs: &song_data,
                 score_log: &score_log,
             }
-                .run(),
+            .run(),
             _ => (),
         }
     }

@@ -1,3 +1,4 @@
+use crate::summary::Countable;
 use std::fmt;
 
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
@@ -37,8 +38,10 @@ impl ClearType {
     pub fn vec() -> Vec<ClearType> {
         (0..11).map(|x| ClearType::from_integer(x)).collect()
     }
+}
 
-    pub fn coloring(&self, s: String) -> String {
+impl Countable for ClearType {
+    fn coloring(&self, s: String) -> String {
         const ESC: &str = "\u{001b}";
         match self {
             ClearType::NoPlay => format!("{}", s),

@@ -1,4 +1,4 @@
-use crate::rank::{ClearRank, Rank};
+use crate::rank::ClearRank;
 use crate::score::song_id::{PlayMode, SongId};
 use crate::score_log::SnapShot;
 use crate::song::artist::Artist;
@@ -107,10 +107,8 @@ impl<'a> SongWithSnap<'a> {
     pub fn make(song: &'a Song, snap: &'a SnapShot) -> SongWithSnap<'a> {
         SongWithSnap { song, snap }
     }
-}
 
-impl<'a> Rank for SongWithSnap<'a> {
-    fn clear_rank(&self) -> ClearRank {
+    pub fn clear_rank(&self) -> ClearRank {
         ClearRank::from_notes_score(self.song.notes, self.snap.score())
     }
 }
