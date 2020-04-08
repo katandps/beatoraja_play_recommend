@@ -204,8 +204,8 @@ pub mod repository {
     use std::fs::File;
     use std::io::{Read, Write};
 
-    pub fn get_tables() -> Vec<Table> {
-        match local() {
+    pub fn get_tables(is_local: bool) -> Vec<Table> {
+        match local(is_local) {
             Ok(t) => t,
             _ => table::repository::get_from_internet(),
         }
@@ -221,7 +221,7 @@ pub mod repository {
         tables
     }
 
-    fn local() -> anyhow::Result<Vec<Table>> {
+    fn local(is_local: bool) -> anyhow::Result<Vec<Table>> {
         fn load() -> anyhow::Result<Vec<Table>> {
             let mut file = File::open(config::config().local_cache_url)?;
             let mut contents = String::new();
@@ -230,7 +230,7 @@ pub mod repository {
             Ok(vec)
         }
 
-        match config::config().local_cache {
+        match is_local {
             true => load(),
             false => Err(anyhow!("No Local Access")),
         }

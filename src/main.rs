@@ -24,27 +24,34 @@ use crate::app::App;
 fn main() {
     db::player();
 
-    let tables = table::repository::get_tables();
+    let mut tables = table::repository::get_tables(true);
     let whole_score = db::score();
     let song_data = db::song_data();
     let score_log = db::score_log();
 
     loop {
-        println!("Select table to display!");
-        println!("0: Exit");
+        println!("Select table to display!\n");
+        println!("q: Exit");
+        print!("r: table reload\n\n");
+
         for i in 0..tables.len() {
-            println!("{}: {}", i + 1, tables.iter().nth(i).unwrap().name());
+            println!("{}: {}", i, tables.iter().nth(i).unwrap().name());
         }
 
         let mut input = String::new();
         std::io::stdin().read_line(&mut input).ok();
-        let selected: usize = input.trim().parse().ok().unwrap_or(tables.len() + 1);
+        let selected: &str = input.trim();
 
-        if selected == 0 {
+        if selected == "q" {
             break;
         }
+        if selected == "r" {
+            tables = table::repository::get_tables(false);
+            continue;
+        }
 
-        match tables.iter().nth(selected - 1) {
+        let index: usize = selected.parse().ok().unwrap_or(tables.len() + 1);
+        match tables.iter().nth(index) {
             Some(table) => App {
                 table,
                 scores: &whole_score,
@@ -52,6 +59,7 @@ fn main() {
                 score_log: &score_log,
             }
             .run(),
+
             _ => (),
         }
     }

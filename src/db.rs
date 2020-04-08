@@ -26,7 +26,7 @@ pub fn player() {
         .expect("Error loading schema");
 
     let last = results.last().unwrap();
-    println!("PlayCount: {}", last.playcount);
+    println!("\nPlayCount: {}", last.playcount);
     println!("ClearCount: {}", last.clear);
     println!("PlayTime: {}", last.playtime);
     println!()
