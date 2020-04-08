@@ -18,11 +18,7 @@ pub type CommandFunc = fn(&Scores, &Songs, &Table, &ScoreLog, &UpdatedAt) -> Str
 
 impl Command {
     pub fn all() -> Vec<Command> {
-        let mut vec = Vec::new();
-        vec.push(Self::Recommend);
-        vec.push(Self::LampGraph);
-        vec.push(Self::RankGraph);
-        vec
+        vec![Self::Recommend, Self::LampGraph, Self::RankGraph]
     }
 
     pub fn func(&self) -> CommandFunc {
@@ -51,7 +47,7 @@ impl Command {
         updated_at: &UpdatedAt,
     ) -> String {
         let mut lamp_sum = LampSum::new();
-        for s in table.get_song(songs).iter() {
+        for s in table.get_song(songs) {
             lamp_sum.push(score_log.get_snap(&s.song_id(), &updated_at).borrow())
         }
         format!("{}", lamp_sum)
@@ -65,7 +61,7 @@ impl Command {
         updated_at: &UpdatedAt,
     ) -> String {
         let mut rank_sum = RankSum::new();
-        for song in table.get_song(songs).iter() {
+        for song in table.get_song(songs) {
             rank_sum.push(
                 SongWithSnap::make(
                     &song,
