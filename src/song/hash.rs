@@ -1,13 +1,14 @@
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str;
 use std::string::ParseError;
 
-#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug, Deserialize, Serialize)]
 pub struct HashMd5 {
     md5: String,
 }
 
-#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug, Deserialize, Serialize)]
 pub struct HashSha256 {
     sha256: String,
 }

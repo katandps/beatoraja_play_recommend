@@ -15,18 +15,19 @@ pub mod table;
 
 #[macro_use]
 extern crate diesel;
+#[macro_use]
+extern crate anyhow;
 extern crate scraper;
 
 use crate::app::App;
-use crate::table::Table;
 
 fn main() {
     db::player();
 
+    let tables = table::repository::get_tables();
     let whole_score = db::score();
     let song_data = db::song_data();
     let score_log = db::score_log();
-    let tables = get_tables();
 
     loop {
         println!("Select table to display!");
@@ -54,11 +55,4 @@ fn main() {
             _ => (),
         }
     }
-}
-
-fn get_tables() -> Vec<Table> {
-    config::table_urls()
-        .iter()
-        .flat_map(|url| table::make_table(url.parse().unwrap()))
-        .collect()
 }

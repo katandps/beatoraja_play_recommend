@@ -4,9 +4,10 @@ use crate::score::updated_at::UpdatedAt;
 use crate::score_log::ScoreLog;
 use crate::song::Songs;
 use crate::table::Table;
+use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Serialize)]
 pub struct Level {
     level: String,
 }
@@ -25,6 +26,7 @@ impl fmt::Display for Level {
     }
 }
 
+#[derive(Deserialize, Serialize)]
 pub struct Levels {
     levels: Vec<Level>,
 }

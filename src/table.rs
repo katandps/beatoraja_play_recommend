@@ -7,10 +7,12 @@ use crate::song::level::{Level, Levels};
 use crate::song::title::Title;
 use crate::song::{Song, Songs};
 use scraper::{Html, Selector};
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fmt;
 use url::Url;
 
+#[derive(Serialize, Deserialize)]
 pub struct Table {
     name: String,
     symbol: String,
@@ -18,11 +20,12 @@ pub struct Table {
     levels: Levels,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct Charts {
     pub charts: Vec<Chart>,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct Chart {
     title: Title,
     artist: Artist,
@@ -193,6 +196,42 @@ pub async fn make_table(table_url: String) -> Result<Table, reqwest::Error> {
         header.level_order,
     );
     Ok(table)
+}
+
+pub mod repository {
+    use crate::table::Table;
+    use crate::{config, table};
+    use std::fs::File;
+    use std::io::{Read, Write};
+
+    pub fn get_tables() -> Vec<Table> {
+        let local = match config::config().local_cache {
+            true => table::repository::get_cached_tables(),
+            false => Err(anyhow!("No Local Access")),
+        };
+        match local {
+            Ok(t) => t,
+            _ => table::repository::get_from_internet(),
+        }
+    }
+
+    fn get_from_internet() -> Vec<Table> {
+        let tables = config::table_urls()
+            .iter()
+            .flat_map(|url| table::make_table(url.parse().unwrap()))
+            .collect();
+        let mut file = File::create(config::config().local_cache_url).unwrap();
+        let _ = file.write(serde_json::to_string(&tables).unwrap().as_ref());
+        tables
+    }
+
+    fn get_cached_tables() -> anyhow::Result<Vec<Table>> {
+        let mut file = File::open(config::config().local_cache_url)?;
+        let mut contents = String::new();
+        let _ = file.read_to_string(&mut contents);
+        let vec = serde_json::from_str(&contents)?;
+        Ok(vec)
+    }
 }
 
 #[cfg(test)]
