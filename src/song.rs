@@ -26,6 +26,10 @@ impl Songs {
         }
     }
 
+    pub fn song_by_sha256(&self, hash: &HashSha256) -> Option<&Song> {
+        self.songs.get(hash)
+    }
+
     pub fn get_md5(&self, sha256: &HashSha256) -> Option<HashMd5> {
         self.converter.get_md5(sha256)
     }
@@ -52,6 +56,13 @@ pub struct Song {
 impl Song {
     pub fn song_id(&self) -> SongId {
         SongId::new(self.hash.clone(), PlayMode::new(0))
+    }
+
+    pub fn title(&self) -> String {
+        self.title.to_string()
+    }
+    pub fn artist(&self) -> String {
+        self.artist.to_string()
     }
 }
 

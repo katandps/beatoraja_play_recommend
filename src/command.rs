@@ -1,8 +1,8 @@
 use crate::rank::ClearRank;
 use crate::score::clear_type::ClearType;
-use crate::score::scores::Scores;
 use crate::score::updated_at::UpdatedAt;
 use crate::score_log::ScoreLog;
+use crate::song::level::Level;
 use crate::song::{SongWithSnap, Songs};
 use crate::summary::Summary;
 use crate::table::Table;
@@ -15,7 +15,7 @@ pub enum Command {
     RankGraph,
 }
 
-pub type CommandFunc = fn(&Scores, &Songs, &Table, &ScoreLog, &UpdatedAt) -> String;
+pub type CommandFunc = fn(&Songs, &Table, &ScoreLog, &UpdatedAt, &Level) -> String;
 
 impl Command {
     pub fn all() -> Vec<Command> {
@@ -31,21 +31,29 @@ impl Command {
     }
 
     fn rec(
-        scores: &Scores,
-        songs: &Songs,
-        table: &Table,
-        _score_log: &ScoreLog,
-        _updated_at: &UpdatedAt,
-    ) -> String {
-        format!("{}\n", table.merge_score(scores, songs).recent_updated())
-    }
-
-    fn lamp(
-        _scores: &Scores,
         songs: &Songs,
         table: &Table,
         score_log: &ScoreLog,
         updated_at: &UpdatedAt,
+        level: &Level,
+    ) -> String {
+        let t = format!("{} {}\n", table.symbol(), level);
+        let f: String = score_log
+            .filter_by_table(table, songs, updated_at)
+            .for_recommend(updated_at)
+            .iter()
+            .flat_map(|snap| snap.str(songs))
+            .map(|s| format!("{}\n", s))
+            .collect();
+        t + &f
+    }
+
+    fn lamp(
+        songs: &Songs,
+        table: &Table,
+        score_log: &ScoreLog,
+        updated_at: &UpdatedAt,
+        _level: &Level,
     ) -> String {
         let mut summary = Summary::new(ClearType::vec());
         for song in table.get_song(songs) {
@@ -59,11 +67,11 @@ impl Command {
     }
 
     fn rank(
-        _scores: &Scores,
         songs: &Songs,
         table: &Table,
         score_log: &ScoreLog,
         updated_at: &UpdatedAt,
+        _level: &Level,
     ) -> String {
         let mut summary = Summary::new(ClearRank::vec());
         for song in table.get_song(songs) {

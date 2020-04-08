@@ -11,6 +11,10 @@ impl SongId {
     pub fn new(sha256: HashSha256, mode: PlayMode) -> SongId {
         SongId { sha256, mode }
     }
+
+    pub fn sha256(&self) -> HashSha256 {
+        self.sha256.clone()
+    }
 }
 
 impl fmt::Display for SongId {

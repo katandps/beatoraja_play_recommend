@@ -1,4 +1,3 @@
-use crate::file;
 use crate::score::scores::Scores;
 use crate::scored_table::ScoredTable;
 use crate::song::artist::Artist;
@@ -6,11 +5,9 @@ use crate::song::hash::HashMd5;
 use crate::song::level::{Level, Levels};
 use crate::song::title::Title;
 use crate::song::{Song, Songs};
-use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fmt;
-use url::Url;
 
 #[derive(Serialize, Deserialize)]
 pub struct Table {
@@ -79,8 +76,11 @@ impl Table {
     pub fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
         self.charts.get_song(song_data)
     }
-    pub fn name(&self) -> &str {
-        &self.name
+    pub fn name(&self) -> String {
+        self.name.clone()
+    }
+    pub fn symbol(&self) -> String {
+        self.symbol.clone()
     }
 }
 
@@ -167,42 +167,13 @@ impl fmt::Display for Chart {
     }
 }
 
-#[tokio::main]
-pub async fn make_table(table_url: String) -> Result<Table, reqwest::Error> {
-    let res = reqwest::get(&table_url).await?;
-    let body = res.text().await?;
-
-    let selector = Selector::parse(r#"meta[name="bmstable"]"#).unwrap();
-    let document = Html::parse_document(&body);
-    let mut header_url = Url::parse(&table_url).unwrap();
-    for element in document.select(&selector) {
-        let header_url_fragment = element.value().attr("content").unwrap();
-        header_url = header_url.join(header_url_fragment).unwrap();
-    }
-
-    let header_text: String = reqwest::get(&header_url.to_string()).await?.text().await?;
-    let header: file::Header =
-        serde_json::from_str(header_text.trim_start_matches('\u{feff}')).unwrap();
-
-    let data_url = header_url.join(header.data_url.as_ref()).unwrap();
-    let data_text = reqwest::get(&data_url.to_string()).await?.text().await?;
-    let data: Vec<file::Chart> =
-        serde_json::from_str(data_text.trim_start_matches('\u{feff}')).unwrap();
-
-    let table = Table::make(
-        header.name,
-        header.symbol,
-        Charts::new(data.iter().map(|c| c.to_chart()).collect()),
-        header.level_order,
-    );
-    Ok(table)
-}
-
 pub mod repository {
-    use crate::table::Table;
-    use crate::{config, table};
+    use crate::table::{Charts, Table};
+    use crate::{config, file, table};
+    use scraper::{Html, Selector};
     use std::fs::File;
     use std::io::{Read, Write};
+    use url::Url;
 
     pub fn get_tables(is_local: bool) -> Vec<Table> {
         match local(is_local) {
@@ -215,7 +186,7 @@ pub mod repository {
         let tables = config::config()
             .table_urls()
             .iter()
-            .flat_map(|url| table::make_table(url.parse().unwrap()))
+            .flat_map(|url| make_table(url.parse().unwrap()))
             .collect();
         let mut file = File::create(config::config().local_cache_url()).unwrap();
         let _ = file.write(serde_json::to_string(&tables).unwrap().as_ref());
@@ -236,20 +207,35 @@ pub mod repository {
             false => Err(anyhow!("No Local Access")),
         }
     }
-}
 
-#[cfg(test)]
-mod text {
-    use crate::table::make_table;
+    #[tokio::main]
+    pub async fn make_table(table_url: String) -> Result<Table, reqwest::Error> {
+        let res = reqwest::get(&table_url).await?;
+        let body = res.text().await?;
 
-    //    #[test]
-    fn test() {
-        let table = make_table(
-            "http://walkure.net/hakkyou/for_glassist/bms/?lamp=fc"
-                .parse()
-                .unwrap(),
-        )
-        .unwrap();
-        println!("{}", table.name())
+        let selector = Selector::parse(r#"meta[name="bmstable"]"#).unwrap();
+        let document = Html::parse_document(&body);
+        let mut header_url = Url::parse(&table_url).unwrap();
+        for element in document.select(&selector) {
+            let header_url_fragment = element.value().attr("content").unwrap();
+            header_url = header_url.join(header_url_fragment).unwrap();
+        }
+
+        let header_text: String = reqwest::get(&header_url.to_string()).await?.text().await?;
+        let header: file::Header =
+            serde_json::from_str(header_text.trim_start_matches('\u{feff}')).unwrap();
+
+        let data_url = header_url.join(header.data_url.as_ref()).unwrap();
+        let data_text = reqwest::get(&data_url.to_string()).await?.text().await?;
+        let data: Vec<file::Chart> =
+            serde_json::from_str(data_text.trim_start_matches('\u{feff}')).unwrap();
+
+        let table = Table::make(
+            header.name,
+            header.symbol,
+            Charts::new(data.iter().map(|c| c.to_chart()).collect()),
+            header.level_order,
+        );
+        Ok(table)
     }
 }

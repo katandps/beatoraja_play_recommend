@@ -4,7 +4,7 @@ pub use diesel::prelude::*;
 
 pub struct App<'a> {
     pub table: &'a crate::table::Table,
-    pub scores: &'a crate::score::scores::Scores,
+    pub scores: &'a crate::score::scores::Scores, //使ってない
     pub songs: &'a crate::song::Songs,
     pub score_log: &'a crate::score_log::ScoreLog,
 }
@@ -23,7 +23,6 @@ impl<'a> App<'a> {
                 "{}\n",
                 levels.format(
                     command,
-                    &self.scores,
                     &self.songs,
                     &self.table,
                     &self.score_log,

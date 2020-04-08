@@ -13,5 +13,5 @@ table_urls=[
 "http://walkure.net/hakkyou/for_glassist/bms/?lamp=easy"
 ]
 
-timestamp=1546268400
+#timestamp=1546268400
 local_cache_url="./files/cache.json"

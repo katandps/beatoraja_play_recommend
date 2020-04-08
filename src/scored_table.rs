@@ -1,10 +1,8 @@
-use std::cmp::Ordering;
-use std::fmt;
-
 use crate::config::config;
 use crate::score::song_id::SongId;
 use crate::score::Score;
 use crate::table::Chart;
+use std::fmt;
 
 pub struct ScoredTable {
     charts: Vec<ScoredChart>,
@@ -16,7 +14,7 @@ impl ScoredTable {
     }
     pub fn recent_updated(&self) -> ScoredTable {
         let mut vec: Vec<ScoredChart> = self.charts.iter().cloned().collect();
-        vec.sort();
+        vec.sort_by(|a, b| a.score.cmp(&b.score));
         ScoredTable::new(
             vec.iter()
                 .take(config().recommend_song_number())
@@ -36,7 +34,7 @@ impl fmt::Display for ScoredTable {
     }
 }
 
-#[derive(Eq, Clone)]
+#[derive(Clone)]
 pub struct ScoredChart {
     song_id: SongId,
     chart: Chart,
@@ -50,24 +48,6 @@ impl ScoredChart {
             chart,
             score,
         }
-    }
-}
-
-impl Ord for ScoredChart {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.score.cmp(&other.score)
-    }
-}
-
-impl PartialOrd for ScoredChart {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl PartialEq for ScoredChart {
-    fn eq(&self, other: &Self) -> bool {
-        self.score == other.score
     }
 }
 

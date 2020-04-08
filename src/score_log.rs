@@ -1,9 +1,12 @@
+use crate::config::config;
 use crate::score::clear_type::ClearType;
 use crate::score::ex_score::ExScore;
 use crate::score::max_combo::MaxCombo;
 use crate::score::min_bp::MinBP;
 use crate::score::song_id::SongId;
 use crate::score::updated_at::UpdatedAt;
+use crate::song::Songs;
+use crate::table::Table;
 use std::collections::HashMap;
 
 pub struct ScoreLog {
@@ -16,11 +19,45 @@ impl ScoreLog {
             log: HashMap::new(),
         }
     }
+    pub fn filter_by_table(&self, table: &Table, songs: &Songs, date: &UpdatedAt) -> ScoreLog {
+        let song_ids: Vec<SongId> = table
+            .get_song(songs)
+            .iter()
+            .map(|song| song.song_id())
+            .collect();
+        let log: HashMap<SongId, SnapShots> = song_ids
+            .iter()
+            .map(|song_id| {
+                (
+                    song_id.clone(),
+                    SnapShots {
+                        song_id: song_id.clone(),
+                        snapshots: vec![self.get_snap(&song_id, date)],
+                    },
+                )
+            })
+            .collect();
+        ScoreLog { log }
+    }
+
     pub fn get_snap(&self, song_id: &SongId, date: &UpdatedAt) -> SnapShot {
         match self.log.get(&song_id) {
             Some(s) => s.get_snap(date),
             _ => SnapShot::new(song_id.clone()),
         }
+    }
+
+    pub fn for_recommend(&self, date: &UpdatedAt) -> Vec<SnapShot> {
+        let mut vec: Vec<SnapShot> = self
+            .log
+            .iter()
+            .map(|(_id, snaps)| snaps.get_snap(date))
+            .collect();
+        vec.sort_by(|a, b| a.updated_at.cmp(&b.updated_at));
+        vec.iter()
+            .take(config().recommend_song_number())
+            .cloned()
+            .collect()
     }
 }
 
@@ -92,6 +129,20 @@ impl SnapShot {
     }
     pub fn clear_type(&self) -> &ClearType {
         &self.clear_type
+    }
+    pub fn str(&self, songs: &Songs) -> Option<String> {
+        match songs.song_by_sha256(&self.song_id.sha256()) {
+            Some(s) => Some(format!(
+                "{}\n{} {} score:{} bp:{} combo:{}",
+                s.title(),
+                self.updated_at,
+                self.clear_type,
+                self.score,
+                self.min_bp,
+                self.max_combo
+            )),
+            _ => None,
+        }
     }
 }
 
