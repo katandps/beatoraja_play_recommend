@@ -205,11 +205,7 @@ pub mod repository {
     use std::io::{Read, Write};
 
     pub fn get_tables() -> Vec<Table> {
-        let local = match config::config().local_cache {
-            true => table::repository::get_cached_tables(),
-            false => Err(anyhow!("No Local Access")),
-        };
-        match local {
+        match local() {
             Ok(t) => t,
             _ => table::repository::get_from_internet(),
         }
@@ -225,12 +221,19 @@ pub mod repository {
         tables
     }
 
-    fn get_cached_tables() -> anyhow::Result<Vec<Table>> {
-        let mut file = File::open(config::config().local_cache_url)?;
-        let mut contents = String::new();
-        let _ = file.read_to_string(&mut contents);
-        let vec = serde_json::from_str(&contents)?;
-        Ok(vec)
+    fn local() -> anyhow::Result<Vec<Table>> {
+        fn load() -> anyhow::Result<Vec<Table>> {
+            let mut file = File::open(config::config().local_cache_url)?;
+            let mut contents = String::new();
+            let _ = file.read_to_string(&mut contents);
+            let vec = serde_json::from_str(&contents)?;
+            Ok(vec)
+        }
+
+        match config::config().local_cache {
+            true => load(),
+            false => Err(anyhow!("No Local Access")),
+        }
     }
 }
 
