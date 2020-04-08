@@ -32,7 +32,7 @@ fn main() {
     loop {
         println!("Select table to display!\n");
         println!("q: Exit");
-        print!("r: table reload\n\n");
+        print!("r: Reload tables\n\n");
 
         for i in 0..tables.len() {
             println!("{}: {}", i, tables.iter().nth(i).unwrap().name());
