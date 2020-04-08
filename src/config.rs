@@ -9,6 +9,7 @@ pub struct Config {
     songdata_db_url: String,
     scorelog_db_url: String,
     table_urls: Option<Vec<String>>,
+    recommend_song_number: Option<usize>,
 }
 
 impl Config {
@@ -26,6 +27,9 @@ impl Config {
     }
     pub fn timestamp(&self) -> i32 {
         self.timestamp.unwrap_or(1800000000)
+    }
+    pub fn recommend_song_number(&self) -> usize {
+        self.recommend_song_number.unwrap_or(3)
     }
     pub fn table_urls(&self) -> Vec<String> {
         self.table_urls.clone().unwrap_or(Vec::new())

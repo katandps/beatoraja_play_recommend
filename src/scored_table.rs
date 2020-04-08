@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 use std::fmt;
 
+use crate::config::config;
 use crate::score::song_id::SongId;
 use crate::score::Score;
 use crate::table::Chart;
@@ -16,7 +17,12 @@ impl ScoredTable {
     pub fn recent_updated(&self) -> ScoredTable {
         let mut vec: Vec<ScoredChart> = self.charts.iter().cloned().collect();
         vec.sort();
-        ScoredTable::new(vec.iter().take(3).cloned().collect())
+        ScoredTable::new(
+            vec.iter()
+                .take(config().recommend_song_number())
+                .cloned()
+                .collect(),
+        )
     }
 }
 
