@@ -20,7 +20,7 @@ fn establish_connection(url: &str) -> SqliteConnection {
 
 pub fn player() {
     use super::schema::player::player::dsl::*;
-    let connection = establish_connection(&config().score_db_url);
+    let connection = establish_connection(&config().score_db_url());
     let results: Vec<Player> = player
         .load::<Player>(&connection)
         .expect("Error loading schema");
@@ -34,7 +34,7 @@ pub fn player() {
 
 pub fn score() -> Scores {
     use super::schema::score::score::dsl::*;
-    let connection = establish_connection(&config().score_db_url);
+    let connection = establish_connection(&config().score_db_url());
     let results = score
         .load::<crate::schema::score::Score>(&connection)
         .expect("Error loading schema");
@@ -73,7 +73,7 @@ fn make_whole_score(record: Vec<crate::schema::score::Score>) -> Scores {
 
 pub fn song_data() -> Songs {
     use super::schema::song::song::dsl::*;
-    let connection = establish_connection(&config().song_db_url);
+    let connection = establish_connection(&config().song_db_url());
     let results = song
         .load::<crate::schema::song::Song>(&connection)
         .expect("Error loading schema");
@@ -96,7 +96,7 @@ fn make_song_data(record: Vec<crate::schema::song::Song>) -> Songs {
 
 pub fn score_log() -> score_log::ScoreLog {
     use crate::schema::score_log::scorelog::dsl::*;
-    let connection = establish_connection(&config().scorelog_db_url);
+    let connection = establish_connection(&config().scorelog_db_url());
     let results = scorelog
         .load::<crate::schema::score_log::ScoreLog>(&connection)
         .expect("Error loading schema");

@@ -1,38 +1,38 @@
-use std::env;
-use std::str::FromStr;
+use serde::{Deserialize, Serialize};
+use std::fs;
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
-    pub timestamp: i32,
-    pub local_cache_url: String,
-    pub score_db_url: String,
-    pub song_db_url: String,
-    pub scorelog_db_url: String,
+    timestamp: Option<i32>,
+    local_cache_url: String,
+    score_db_url: String,
+    songdata_db_url: String,
+    scorelog_db_url: String,
+    table_urls: Option<Vec<String>>,
 }
 
-pub fn config() -> Config {
-    dotenv::dotenv().ok();
-    let local_cache_url = env::var("LOCAL_CACHE_URL").unwrap_or("./files/cache.json".into());
-    let timestamp = i32::from_str(
-        env::var("TIMESTAMP")
-            .unwrap_or("1800000000".into())
-            .as_ref(),
-    )
-    .unwrap();
-    let score_db_url = env::var("SCORE_DATABASE_URL").unwrap();
-    let song_db_url = env::var("SONG_DATABASE_URL").unwrap();
-    let scorelog_db_url = env::var("SCORELOG_DATABASE_URL").unwrap();
-    Config {
-        timestamp,
-        local_cache_url,
-        score_db_url,
-        song_db_url,
-        scorelog_db_url,
+impl Config {
+    pub fn score_db_url(&self) -> String {
+        self.score_db_url.clone()
+    }
+    pub fn song_db_url(&self) -> String {
+        self.songdata_db_url.clone()
+    }
+    pub fn scorelog_db_url(&self) -> String {
+        self.scorelog_db_url.clone()
+    }
+    pub fn local_cache_url(&self) -> String {
+        self.local_cache_url.clone()
+    }
+    pub fn timestamp(&self) -> i32 {
+        self.timestamp.unwrap_or(1800000000)
+    }
+    pub fn table_urls(&self) -> Vec<String> {
+        self.table_urls.clone().unwrap_or(Vec::new())
     }
 }
 
-pub fn table_urls() -> Vec<String> {
-    dotenv::dotenv().ok();
-    (1..100)
-        .flat_map(|i| env::var(format!("TABLE_URL{}", i)))
-        .collect()
+pub fn config() -> Config {
+    let file = fs::read_to_string("./config.toml").unwrap();
+    toml::from_str(&file).unwrap()
 }

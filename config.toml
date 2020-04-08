@@ -1,0 +1,17 @@
+score_db_url="./files/score.db"
+scorelog_db_url="./files/scorelog.db"
+songdata_db_url="./files/songdata.db"
+
+tables=[
+"https://stellabms.xyz/st/table.html",
+"https://stellabms.xyz/sl/table.html",
+"http://www.ribbit.xyz/bms/tables/insane.html",
+"http://www.ribbit.xyz/bms/tables/overjoy.html",
+"http://flowermaster.web.fc2.com/lrnanido/gla/LN.html",
+"http://rattoto10.jounin.jp/table_insane.html",
+"http://rattoto10.jounin.jp/table.html",
+"http://walkure.net/hakkyou/for_glassist/bms/?lamp=easy"
+]
+
+timestamp=1546268400
+local_cache_url="./files/cache.json"

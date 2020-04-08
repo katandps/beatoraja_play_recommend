@@ -15,7 +15,7 @@ impl<'a> App<'a> {
 
         let levels = self.table.ls();
 
-        let updated_at = UpdatedAt::from_timestamp(crate::config::config().timestamp);
+        let updated_at = UpdatedAt::from_timestamp(crate::config::config().timestamp());
 
         let all = Command::all();
         for command in &all {

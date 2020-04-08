@@ -212,18 +212,19 @@ pub mod repository {
     }
 
     fn get_from_internet() -> Vec<Table> {
-        let tables = config::table_urls()
+        let tables = config::config()
+            .table_urls()
             .iter()
             .flat_map(|url| table::make_table(url.parse().unwrap()))
             .collect();
-        let mut file = File::create(config::config().local_cache_url).unwrap();
+        let mut file = File::create(config::config().local_cache_url()).unwrap();
         let _ = file.write(serde_json::to_string(&tables).unwrap().as_ref());
         tables
     }
 
     fn local(is_local: bool) -> anyhow::Result<Vec<Table>> {
         fn load() -> anyhow::Result<Vec<Table>> {
-            let mut file = File::open(config::config().local_cache_url)?;
+            let mut file = File::open(config::config().local_cache_url())?;
             let mut contents = String::new();
             let _ = file.read_to_string(&mut contents);
             let vec = serde_json::from_str(&contents)?;

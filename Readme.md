@@ -5,9 +5,8 @@ beatorajaのプレイデータを読み込み、以下の内容を出力する
 クリアランク表
 
 ## 使い方
-1. .envファイルを作成する
-    - .env.sampleを.envとしてコピーする
-2. `SCORE_DATABASE_URL` と `SCORELOG_DATABASE_URL` と `SONG_DATABASE_URL` を書き換える
+1. コンフィグファイル(`config.toml`)を編集する
+    - 書き換える必要があるのは `score_db_url` と `scorelog_db_url` と `song_db_url` を書き換える
     - それぞれ、beatorajaの `score.db` `score_log.db` `songdata.db` に相当する
 3. 難易度表を追加する
     - `TABLE_URL{}`の`{}`の部分を変えて追加する(上限99)
