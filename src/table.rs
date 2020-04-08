@@ -209,7 +209,7 @@ pub mod repository {
     }
 
     #[tokio::main]
-    pub async fn make_table(table_url: String) -> Result<Table, reqwest::Error> {
+    pub async fn make_table(table_url: String) -> anyhow::Result<Table> {
         let res = reqwest::get(&table_url).await?;
         let body = res.text().await?;
 
@@ -223,7 +223,7 @@ pub mod repository {
 
         let header_text: String = reqwest::get(&header_url.to_string()).await?.text().await?;
         let header: file::Header =
-            serde_json::from_str(header_text.trim_start_matches('\u{feff}')).unwrap();
+            serde_json::from_str(header_text.trim_start_matches('\u{feff}'))?;
 
         let data_url = header_url.join(header.data_url.as_ref()).unwrap();
         let data_text = reqwest::get(&data_url.to_string()).await?.text().await?;
