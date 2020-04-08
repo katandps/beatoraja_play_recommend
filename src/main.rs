@@ -25,7 +25,6 @@ fn main() {
     db::player();
 
     let mut tables = table::repository::get_tables(true);
-    let whole_score = db::score();
     let song_data = db::song_data();
     let score_log = db::score_log();
 
@@ -54,7 +53,6 @@ fn main() {
         match tables.iter().nth(index) {
             Some(table) => App {
                 table,
-                scores: &whole_score,
                 songs: &song_data,
                 score_log: &score_log,
             }

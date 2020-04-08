@@ -6,6 +6,7 @@ use crate::scored_table::ScoredChart;
 use crate::table::Chart;
 use std::collections::HashMap;
 
+/// 最新スコアのみが入っている
 pub struct Scores {
     scores: HashMap<SongId, Score>,
 }

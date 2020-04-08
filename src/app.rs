@@ -4,7 +4,6 @@ pub use diesel::prelude::*;
 
 pub struct App<'a> {
     pub table: &'a crate::table::Table,
-    pub scores: &'a crate::score::scores::Scores, //使ってない
     pub songs: &'a crate::song::Songs,
     pub score_log: &'a crate::score_log::ScoreLog,
 }
