@@ -1,3 +1,4 @@
+use crate::config::config;
 use std::collections::HashMap;
 use std::fmt;
 use std::hash::Hash;
@@ -35,19 +36,25 @@ where
     T: Countable,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let should_coloring = config().coloring_table();
         write!(
             f,
             "{}\n",
             self.subjects
                 .iter()
                 .map(|countable| {
-                    countable.coloring(format!(
+                    let format = format!(
                         "[{:>3}]",
                         match self.sum.get(&countable) {
                             Some(i) => i.to_string(),
                             None => "".to_string(),
                         }
-                    ))
+                    );
+                    if should_coloring {
+                        countable.coloring(format)
+                    } else {
+                        format
+                    }
                 })
                 .collect::<String>()
         )

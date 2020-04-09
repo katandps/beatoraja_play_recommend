@@ -15,3 +15,4 @@ table_urls=[
 
 #timestamp=1546268400
 local_cache_url="./files/cache.json"
+coloring_table=false

@@ -10,6 +10,7 @@ pub struct Config {
     scorelog_db_url: String,
     table_urls: Option<Vec<String>>,
     recommend_song_number: Option<usize>,
+    coloring_table: Option<bool>,
 }
 
 impl Config {
@@ -33,6 +34,9 @@ impl Config {
     }
     pub fn table_urls(&self) -> Vec<String> {
         self.table_urls.clone().unwrap_or(Vec::new())
+    }
+    pub fn coloring_table(&self) -> bool {
+        self.coloring_table.unwrap_or(true)
     }
 }
 
