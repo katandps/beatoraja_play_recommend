@@ -1,18 +1,13 @@
 [package]
-name = "beatoraja_play_recommend"
+name = "ui"
 version = "0.1.0"
 authors = ["katand <katandps@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[workspace]
-
-members = [
-    "model",
-    "ui"
-]
-
 [dependencies]
-"model" = {path = "model"}
-"ui" = {path = "ui"}
+"orbtk" = { git = "https://github.com/redox-os/orbtk.git", branch="develop" }
+# JSONのパース
+serde = {version = "1.0", features= ["derive"]}
+serde_json = "1.0"
