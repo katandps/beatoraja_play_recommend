@@ -1,3 +1,4 @@
+use crate::command::RecommendSong;
 use crate::config::config;
 use crate::score::clear_type::ClearType;
 use crate::score::ex_score::ExScore;
@@ -130,9 +131,9 @@ impl SnapShot {
     pub fn clear_type(&self) -> &ClearType {
         &self.clear_type
     }
-    pub fn str(&self, songs: &Songs) -> Option<String> {
+    pub fn str(&self, songs: &Songs) -> Option<RecommendSong> {
         match songs.song_by_sha256(&self.song_id.sha256()) {
-            Some(s) => Some(format!(
+            Some(s) => Some(RecommendSong::new(format!(
                 "{}\n{} {} score:{} bp:{} combo:{}",
                 s.title(),
                 self.updated_at,
@@ -140,7 +141,7 @@ impl SnapShot {
                 self.score,
                 self.min_bp,
                 self.max_combo
-            )),
+            ))),
             _ => None,
         }
     }

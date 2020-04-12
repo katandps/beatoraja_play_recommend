@@ -10,7 +10,13 @@ pub struct App<'a> {
 
 impl<'a> App<'a> {
     pub fn run(&mut self) {
-        println!("{}", self.table.name());
+        println!("{}", self.out());
+    }
+
+    pub fn out(&mut self) -> String {
+        let mut ret = String::new();
+
+        ret = format!("{}{}", ret, self.table.name());
 
         let levels = self.table.ls();
 
@@ -18,8 +24,9 @@ impl<'a> App<'a> {
 
         let all = Command::all();
         for command in &all {
-            println!(
-                "{}\n",
+            ret = format!(
+                "{}{}\n",
+                ret,
                 levels.format(
                     command,
                     &self.songs,
@@ -29,5 +36,6 @@ impl<'a> App<'a> {
                 )
             )
         }
+        ret
     }
 }

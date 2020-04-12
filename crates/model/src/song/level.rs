@@ -57,6 +57,7 @@ impl Levels {
                     &updated_at,
                     level,
                 )
+                .to_string()
             })
             .collect()
     }
