@@ -25,8 +25,10 @@ pub(super) fn recommend(
         })
         .collect();
 
-    let ret = RecommendResult::new((&table.name()).parse().unwrap(), ret_levels);
-    CommandResult::recommend(ret)
+    CommandResult::Recommend(RecommendResult::new(
+        (&table.name()).parse().unwrap(),
+        ret_levels,
+    ))
 }
 
 #[derive(Deserialize, Serialize)]

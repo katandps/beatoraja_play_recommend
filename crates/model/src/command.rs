@@ -41,10 +41,6 @@ pub enum CommandResult {
 }
 
 impl CommandResult {
-    pub fn recommend(rec: RecommendResult) -> CommandResult {
-        Self::Recommend(rec)
-    }
-
     pub fn to_string(&self) -> String {
         match self {
             Self::Recommend(r) => r.to_string(),

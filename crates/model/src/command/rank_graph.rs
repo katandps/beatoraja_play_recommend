@@ -24,12 +24,27 @@ pub(super) fn rank(
         }
         str.push_str(format!("{}", summary).as_str());
     }
-    CommandResult::recommend(RecommendResult::new(str, Vec::new()))
+    CommandResult::RankGraph(RankGraphResult {
+        table: table.name(),
+        count: Vec::new(),
+    })
 }
 
 #[derive(Deserialize, Serialize)]
 pub struct RankGraphResult {
     table: String,
+    count: Vec<RankCountByLamp>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct RankCountByLamp {
+    lamp_type: ClearType,
+    count: Vec<RankCountByLevel>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct RankCountByLevel {
+    count: i32,
 }
 
 impl RankGraphResult {

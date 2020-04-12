@@ -22,12 +22,27 @@ pub(super) fn lamp(
         str.push_str(format!("{}", summary).as_str());
     }
 
-    CommandResult::recommend(RecommendResult::new(str, Vec::new()))
+    CommandResult::LampGraph(LampGraphResult {
+        table: table.name(),
+        count: Vec::new(),
+    })
 }
 
 #[derive(Deserialize, Serialize)]
 pub struct LampGraphResult {
     table: String,
+    count: Vec<LampCountByLamp>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct LampCountByLamp {
+    lamp_type: ClearType,
+    count: Vec<LampCountByLevel>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct LampCountByLevel {
+    count: i32,
 }
 
 impl LampGraphResult {
