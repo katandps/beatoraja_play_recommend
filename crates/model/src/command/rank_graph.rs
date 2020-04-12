@@ -1,6 +1,7 @@
 use super::*;
 use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
+use std::collections::HashMap;
 
 pub(super) fn rank(
     songs: &Songs,
@@ -9,7 +10,7 @@ pub(super) fn rank(
     updated_at: &UpdatedAt,
     levels: &Levels,
 ) -> CommandResult {
-    let mut str = String::new();
+    let mut vec = Vec::new();
     for level in &levels.levels {
         let specified = table.level_specified(level);
         let mut summary = Summary::new(ClearRank::vec());
@@ -22,33 +23,73 @@ pub(super) fn rank(
                 .clear_rank(),
             )
         }
-        str.push_str(format!("{}", summary).as_str());
+        vec.push(RankCountByLevel {
+            count: ClearRank::vec()
+                .iter()
+                .map(|c| {
+                    (
+                        c.clone(),
+                        RankCountByType {
+                            count: *summary.count(c).unwrap_or(&0i32),
+                        },
+                    )
+                })
+                .collect(),
+        });
     }
     CommandResult::RankGraph(RankGraphResult {
         table: table.name(),
-        count: Vec::new(),
+        vec: ClearRank::vec(),
+        count: vec,
     })
 }
 
 #[derive(Deserialize, Serialize)]
 pub struct RankGraphResult {
     table: String,
-    count: Vec<RankCountByLamp>,
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct RankCountByLamp {
-    lamp_type: ClearType,
+    vec: Vec<ClearRank>,
     count: Vec<RankCountByLevel>,
 }
 
 #[derive(Deserialize, Serialize)]
 pub struct RankCountByLevel {
+    count: HashMap<ClearRank, RankCountByType>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct RankCountByType {
     count: i32,
 }
 
 impl RankGraphResult {
     pub fn to_string(&self) -> String {
         self.table.clone()
+            + "\n"
+            + self
+                .count
+                .iter()
+                .map(|l| l.to_string(&self.vec) + "\n")
+                .collect::<String>()
+                .as_str()
+    }
+}
+
+impl RankCountByLevel {
+    pub fn to_string(&self, vec: &Vec<ClearRank>) -> String {
+        vec.iter()
+            .flat_map(|c| match self.count.get(c) {
+                Some(c) => Some(format!("[{:>3}]", c.to_string())),
+                _ => None,
+            })
+            .collect::<String>()
+    }
+}
+
+impl RankCountByType {
+    pub fn to_string(&self) -> String {
+        match self.count {
+            0 => "".into(),
+            _ => self.count.to_string(),
+        }
     }
 }

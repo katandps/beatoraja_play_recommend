@@ -29,6 +29,10 @@ where
         let count = self.sum.entry(c.clone()).or_insert(0);
         *count += 1;
     }
+
+    pub fn count(&self, key: &T) -> Option<&i32> {
+        self.sum.get(key)
+    }
 }
 
 impl<T> fmt::Display for Summary<T>

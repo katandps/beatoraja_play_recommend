@@ -1,8 +1,9 @@
 use crate::score::ex_score::ExScore;
 use crate::summary::Countable;
+use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Clone, Debug, Hash, Eq, PartialEq)]
 pub enum ClearRank {
     F,
     E,
