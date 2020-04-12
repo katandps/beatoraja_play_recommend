@@ -24,7 +24,7 @@ impl Controller {
     pub fn new() -> Self {
         Controller {
             output: Output::JSON,
-            input: Input::Parameters(Table { index: 1 }, Command::Recommend),
+            input: Input::Parameters(Table { index: 1 }, Command::RankGraph),
         }
     }
 }

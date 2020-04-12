@@ -1,4 +1,33 @@
+use super::*;
 use serde::{Deserialize, Serialize};
+
+pub(super) fn recommend(
+    songs: &Songs,
+    table: &Table,
+    score_log: &ScoreLog,
+    updated_at: &UpdatedAt,
+    levels: &Levels,
+) -> CommandResult {
+    let ret_levels = levels
+        .levels
+        .iter()
+        .map(|level| {
+            let specified_table = table.level_specified(level);
+            RecommendByLevel::new(
+                format!("{}{}", table.symbol(), level),
+                score_log
+                    .filter_by_table(&specified_table, songs, updated_at)
+                    .for_recommend(updated_at)
+                    .iter()
+                    .flat_map(|snap| snap.recommend_song(songs))
+                    .collect(),
+            )
+        })
+        .collect();
+
+    let ret = RecommendResult::new((&table.name()).parse().unwrap(), ret_levels);
+    CommandResult::recommend(ret)
+}
 
 #[derive(Deserialize, Serialize)]
 pub struct RecommendResult {
