@@ -84,8 +84,7 @@ impl fmt::Display for ClearRank {
 
 #[cfg(test)]
 mod test {
-    use crate::rank::ClearRank;
-    use crate::score::ex_score::ExScore;
+    use super::*;
 
     #[test]
     fn test() {

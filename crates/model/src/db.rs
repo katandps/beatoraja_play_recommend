@@ -2,15 +2,9 @@ use crate::config::config;
 use crate::schema::player::Player;
 use crate::score::prelude::*;
 use crate::score::scores::Scores;
-use crate::score_log;
-use crate::score_log::SnapShot;
-use crate::song::artist::Artist;
-use crate::song::hash::{HashMd5, HashSha256};
-use crate::song::title::Title;
-use crate::song::{Builder, Songs};
-use diesel;
+use crate::score_log::prelude::*;
+use crate::song::prelude::*;
 use diesel::prelude::*;
-use diesel::sqlite::SqliteConnection;
 use std::collections::HashMap;
 
 fn establish_connection(url: &str) -> SqliteConnection {
@@ -31,6 +25,8 @@ pub fn player() {
     println!()
 }
 
+// 現在のスコアを詳細に出力する機能はいまのところない
+#[allow(dead_code)]
 pub fn score() -> Scores {
     use super::schema::score::score::dsl::*;
     let connection = establish_connection(&config().score_db_url());
@@ -40,7 +36,7 @@ pub fn score() -> Scores {
 
     make_whole_score(results)
 }
-
+#[allow(dead_code)]
 fn make_whole_score(record: Vec<crate::schema::score::Score>) -> Scores {
     let mut scores = HashMap::new();
     for row in record {
@@ -80,7 +76,7 @@ pub fn song_data() -> Songs {
 }
 
 fn make_song_data(record: Vec<crate::schema::song::Song>) -> Songs {
-    let mut builder = Builder::new();
+    let mut builder = SongsBuilder::new();
     for row in record {
         builder.push(
             HashMd5::new(row.md5),
@@ -90,10 +86,10 @@ fn make_song_data(record: Vec<crate::schema::song::Song>) -> Songs {
             row.notes,
         );
     }
-    Builder::build(builder)
+    SongsBuilder::build(builder)
 }
 
-pub fn score_log() -> score_log::ScoreLog {
+pub fn score_log() -> ScoreLog {
     use crate::schema::score_log::scorelog::dsl::*;
     let connection = establish_connection(&config().scorelog_db_url());
     let results = scorelog
@@ -102,8 +98,8 @@ pub fn score_log() -> score_log::ScoreLog {
     make_score_log(results)
 }
 
-fn make_score_log(record: Vec<crate::schema::score_log::ScoreLog>) -> score_log::ScoreLog {
-    let mut builder = score_log::Builder::builder();
+fn make_score_log(record: Vec<crate::schema::score_log::ScoreLog>) -> ScoreLog {
+    let mut builder = ScoreLogBuilder::builder();
     for row in record {
         let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
         let snapshot = SnapShot::from_data(
@@ -116,5 +112,5 @@ fn make_score_log(record: Vec<crate::schema::score_log::ScoreLog>) -> score_log:
         );
         builder.push(song_id, snapshot)
     }
-    score_log::Builder::build(builder)
+    ScoreLogBuilder::build(builder)
 }

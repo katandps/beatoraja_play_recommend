@@ -1,6 +1,5 @@
 use crate::config::config;
-use crate::score::song_id::SongId;
-use crate::score::Score;
+use crate::score::prelude::*;
 use crate::table::Chart;
 use std::fmt;
 

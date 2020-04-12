@@ -1,11 +1,13 @@
 use crate::command::Command;
-use crate::score::updated_at::UpdatedAt;
-pub use diesel::prelude::*;
+use crate::score::prelude::*;
+use crate::score_log::prelude::*;
+use crate::song::prelude::*;
+use crate::table::prelude::*;
 
 pub struct App<'a> {
-    pub table: &'a crate::table::Table,
-    pub songs: &'a crate::song::Songs,
-    pub score_log: &'a crate::score_log::ScoreLog,
+    pub table: &'a Table,
+    pub songs: &'a Songs,
+    pub score_log: &'a ScoreLog,
 }
 
 impl<'a> App<'a> {
