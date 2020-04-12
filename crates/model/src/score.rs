@@ -4,18 +4,15 @@ pub mod judge;
 pub mod max_combo;
 pub mod min_bp;
 pub mod play_count;
+pub mod prelude;
 pub mod scores;
 pub mod song_id;
 pub mod updated_at;
 
+use crate::score::prelude::*;
+use clear_type::ClearType;
 use std::cmp::Ordering;
 use std::fmt;
-
-use crate::score::judge::Judge;
-use crate::score::max_combo::MaxCombo;
-use crate::score::min_bp::MinBP;
-use crate::score::play_count::PlayCount;
-use clear_type::ClearType;
 use updated_at::UpdatedAt;
 
 #[derive(Clone)]

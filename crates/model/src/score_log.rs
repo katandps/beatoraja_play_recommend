@@ -1,11 +1,6 @@
-use crate::command::RecommendSong;
+use crate::command::recommend::RecommendSong;
 use crate::config::config;
-use crate::score::clear_type::ClearType;
-use crate::score::ex_score::ExScore;
-use crate::score::max_combo::MaxCombo;
-use crate::score::min_bp::MinBP;
-use crate::score::song_id::SongId;
-use crate::score::updated_at::UpdatedAt;
+use crate::score::prelude::*;
 use crate::song::Songs;
 use crate::table::Table;
 use std::collections::HashMap;
