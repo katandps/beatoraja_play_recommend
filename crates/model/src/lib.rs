@@ -23,17 +23,9 @@ extern crate scraper;
 use crate::app::App;
 use crate::command::Command;
 pub use crate::controller::Controller;
-use crate::controller::{Input, Table};
+use crate::controller::{Out, Table};
 
-pub fn run(controller: Controller) -> String {
-    match controller.input {
-        Input::Interactive => interactive(),
-        Input::Parameters(t, c) => parameters(t, &c),
-        Input::ReloadTable => reload_table(),
-    }
-}
-
-fn interactive() -> String {
+pub fn interactive() -> Out {
     db::player();
 
     let mut tables = table::repository::get_tables(true);
@@ -73,28 +65,33 @@ fn interactive() -> String {
             _ => (),
         }
     }
-    "done".into()
+    Out::None
 }
 
-fn parameters(table: Table, command: &Command) -> String {
+pub fn parameters(table: &Table, command: &Command) -> Out {
     let tables = table::repository::get_tables(true);
     let song_data = db::song_data();
     let score_log = db::score_log();
 
     let table_index = table.index;
-    match tables.iter().nth(table_index) {
-        Some(table) => App {
-            table,
-            songs: &song_data,
-            score_log: &score_log,
-        }
-        .out(command),
-
-        _ => "".into(),
+    let res = match tables.iter().nth(table_index) {
+        Some(table) => Some(
+            App {
+                table,
+                songs: &song_data,
+                score_log: &score_log,
+            }
+            .out(command),
+        ),
+        _ => None,
+    };
+    match res {
+        Some(command_result) => Out::Result(command_result),
+        _ => Out::None,
     }
 }
 
-fn reload_table() -> String {
+fn reload_table() -> Out {
     let _ = table::repository::get_tables(false);
-    "done".into()
+    Out::None
 }

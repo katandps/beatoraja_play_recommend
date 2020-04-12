@@ -7,6 +7,8 @@ use crate::table::prelude::*;
 use lamp_graph::*;
 use rank_graph::*;
 use recommend::*;
+use serde::{Deserialize, Serialize};
+
 pub mod lamp_graph;
 pub mod rank_graph;
 pub mod recommend;
@@ -34,6 +36,7 @@ impl Command {
     }
 }
 
+#[derive(Deserialize, Serialize)]
 pub enum CommandResult {
     Recommend(RecommendResult),
     LampGraph(LampGraphResult),
