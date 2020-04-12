@@ -2,16 +2,16 @@ mod app;
 mod db;
 mod file;
 
-pub mod command;
-pub mod config;
-pub mod rank;
-pub mod schema;
-pub mod score;
-pub mod score_log;
-pub mod scored_table;
-pub mod song;
-pub mod summary;
-pub mod table;
+pub(crate) mod command;
+pub(crate) mod config;
+pub(crate) mod rank;
+pub(crate) mod schema;
+pub(crate) mod score;
+pub(crate) mod score_log;
+pub(crate) mod scored_table;
+pub(crate) mod song;
+pub(crate) mod summary;
+pub(crate) mod table;
 
 #[macro_use]
 extern crate diesel;

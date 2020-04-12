@@ -9,10 +9,10 @@ edition = "2018"
 [workspace]
 
 members = [
-    "model",
-    "ui"
+    "crates/model",
+    "crates/ui"
 ]
 
 [dependencies]
-"model" = {path = "model"}
-"ui" = {path = "ui"}
+"model" = {path = "crates/model"}
+"ui" = {path = "crates/ui"}
