@@ -21,13 +21,14 @@ extern crate anyhow;
 extern crate scraper;
 
 use crate::app::App;
+use crate::command::Command;
 pub use crate::controller::Controller;
 use crate::controller::{Input, Table};
 
 pub fn run(controller: Controller) -> String {
     match controller.input {
         Input::Interactive => interactive(),
-        Input::Parameters(t) => parameters(t),
+        Input::Parameters(t, c) => parameters(t, &c),
         Input::ReloadTable => reload_table(),
     }
 }
@@ -75,8 +76,8 @@ fn interactive() -> String {
     "done".into()
 }
 
-fn parameters(table: Table) -> String {
-    let mut tables = table::repository::get_tables(true);
+fn parameters(table: Table, command: &Command) -> String {
+    let tables = table::repository::get_tables(true);
     let song_data = db::song_data();
     let score_log = db::score_log();
 
@@ -87,7 +88,7 @@ fn parameters(table: Table) -> String {
             songs: &song_data,
             score_log: &score_log,
         }
-        .out(),
+        .out(command),
 
         _ => "".into(),
     }

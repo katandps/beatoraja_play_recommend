@@ -1,22 +1,22 @@
-use crate::command::Command::*;
 use crate::rank::ClearRank;
 use crate::score::clear_type::ClearType;
 use crate::score::updated_at::UpdatedAt;
 use crate::score_log::ScoreLog;
-use crate::song::level::Level;
+use crate::song::level::Levels;
 use crate::song::{SongWithSnap, Songs};
 use crate::summary::Summary;
 use crate::table::Table;
 pub use diesel::prelude::*;
 use std::borrow::Borrow;
 
+#[derive(Eq, PartialEq)]
 pub enum Command {
     Recommend,
     LampGraph,
     RankGraph,
 }
 
-pub type CommandFunc = fn(&Songs, &Table, &ScoreLog, &UpdatedAt, &Level) -> CommandResult;
+pub type CommandFunc = fn(&Songs, &Table, &ScoreLog, &UpdatedAt, &Levels) -> CommandResult;
 
 impl Command {
     pub fn all() -> Vec<Command> {
@@ -36,19 +36,26 @@ impl Command {
         table: &Table,
         score_log: &ScoreLog,
         updated_at: &UpdatedAt,
-        level: &Level,
+        levels: &Levels,
     ) -> CommandResult {
-        let mut ret = RecommendResult::new((&table.name()).parse().unwrap());
-        let t = format!("{} {}\n", table.symbol(), level);
-
-        let mut f = score_log
-            .filter_by_table(table, songs, updated_at)
-            .for_recommend(updated_at)
+        let ret_levels = levels
+            .levels
             .iter()
-            .flat_map(|snap| snap.str(songs))
+            .map(|level| {
+                let specified_table = table.level_specified(level);
+                RecommendByLevel::new(
+                    format!("{}{}", table.symbol(), level),
+                    score_log
+                        .filter_by_table(&specified_table, songs, updated_at)
+                        .for_recommend(updated_at)
+                        .iter()
+                        .flat_map(|snap| snap.recommend_song(songs))
+                        .collect(),
+                )
+            })
             .collect();
-        ret.push(t);
-        ret.insert(&mut f);
+
+        let ret = RecommendResult::new((&table.name()).parse().unwrap(), ret_levels);
         CommandResult::recommend(ret)
     }
 
@@ -57,17 +64,23 @@ impl Command {
         table: &Table,
         score_log: &ScoreLog,
         updated_at: &UpdatedAt,
-        _level: &Level,
+        levels: &Levels,
     ) -> CommandResult {
-        let mut summary = Summary::new(ClearType::vec());
-        for song in table.get_song(songs) {
-            summary.push(
-                score_log
-                    .get_snap(&song.song_id(), &updated_at)
-                    .clear_type(),
-            )
+        let mut str = String::new();
+        for level in &levels.levels {
+            let specified = table.level_specified(level);
+            let mut summary = Summary::new(ClearType::vec());
+            for song in specified.get_song(songs) {
+                summary.push(
+                    score_log
+                        .get_snap(&song.song_id(), &updated_at)
+                        .clear_type(),
+                )
+            }
+            str.push_str(format!("{}", summary).as_str());
         }
-        CommandResult::recommend(RecommendResult::new(format!("{}", summary)))
+
+        CommandResult::recommend(RecommendResult::new(str, Vec::new()))
     }
 
     fn rank(
@@ -75,19 +88,24 @@ impl Command {
         table: &Table,
         score_log: &ScoreLog,
         updated_at: &UpdatedAt,
-        _level: &Level,
+        levels: &Levels,
     ) -> CommandResult {
-        let mut summary = Summary::new(ClearRank::vec());
-        for song in table.get_song(songs) {
-            summary.push(
-                &SongWithSnap::make(
-                    &song,
-                    score_log.get_snap(&song.song_id(), &updated_at).borrow(),
+        let mut str = String::new();
+        for level in &levels.levels {
+            let specified = table.level_specified(level);
+            let mut summary = Summary::new(ClearRank::vec());
+            for song in specified.get_song(songs) {
+                summary.push(
+                    &SongWithSnap::make(
+                        &song,
+                        score_log.get_snap(&song.song_id(), &updated_at).borrow(),
+                    )
+                    .clear_rank(),
                 )
-                .clear_rank(),
-            )
+            }
+            str.push_str(format!("{}", summary).as_str());
         }
-        CommandResult::recommend(RecommendResult::new(format!("{}", summary)))
+        CommandResult::recommend(RecommendResult::new(str, Vec::new()))
     }
 }
 
@@ -112,7 +130,13 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize)]
 pub struct RecommendResult {
     table: String,
-    levels: Vec<RecommendSong>,
+    levels: Vec<RecommendByLevel>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct RecommendByLevel {
+    level: String,
+    songs: Vec<RecommendSong>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -121,27 +145,31 @@ pub struct RecommendSong {
 }
 
 impl RecommendResult {
-    pub fn new(table: String) -> RecommendResult {
-        RecommendResult {
-            table,
-            levels: Vec::new(),
-        }
-    }
-
-    pub fn insert(&mut self, v: &mut Vec<RecommendSong>) {
-        self.levels.append(v)
-    }
-
-    pub fn push(&mut self, song: String) {
-        self.levels.push(RecommendSong { song })
+    pub fn new(table: String, levels: Vec<RecommendByLevel>) -> RecommendResult {
+        RecommendResult { table, levels }
     }
 
     fn to_string(&self) -> String {
-        let mut ret = self.table.clone();
+        let mut ret = self.table.clone() + "\n";
         for level in &self.levels {
             ret = ret + level.to_string().as_ref();
         }
         ret
+    }
+}
+
+impl RecommendByLevel {
+    pub fn new(level: String, songs: Vec<RecommendSong>) -> RecommendByLevel {
+        RecommendByLevel { level, songs }
+    }
+    fn to_string(&self) -> String {
+        format!("{}\n", self.level)
+            + self
+                .songs
+                .iter()
+                .map(|s| s.to_string())
+                .collect::<String>()
+                .as_str()
     }
 }
 

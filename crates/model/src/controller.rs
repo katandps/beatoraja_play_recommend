@@ -1,3 +1,5 @@
+use crate::command::Command;
+
 pub struct Controller {
     pub output: Output,
     pub input: Input,
@@ -9,7 +11,7 @@ pub enum Output {
 #[derive(Eq, PartialEq)]
 pub enum Input {
     Interactive,
-    Parameters(Table),
+    Parameters(Table, Command),
     ReloadTable,
 }
 
@@ -18,19 +20,11 @@ pub struct Table {
     pub index: usize,
 }
 
-#[derive(Eq, PartialEq)]
-pub enum Mode {
-    PlayerStat,
-    Recommend,
-    RampGraph,
-    RankGraph,
-}
-
 impl Controller {
     pub fn new() -> Self {
         Controller {
             output: Output::JSON,
-            input: Input::Parameters(Table { index: 3 }),
+            input: Input::Parameters(Table { index: 1 }, Command::RankGraph),
         }
     }
 }

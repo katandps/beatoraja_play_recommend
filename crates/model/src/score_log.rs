@@ -131,19 +131,17 @@ impl SnapShot {
     pub fn clear_type(&self) -> &ClearType {
         &self.clear_type
     }
-    pub fn str(&self, songs: &Songs) -> Option<RecommendSong> {
+    pub fn recommend_song(&self, songs: &Songs) -> Option<RecommendSong> {
         match songs.song_by_sha256(&self.song_id.sha256()) {
-            Some(s) => Some(RecommendSong::new(format!(
-                "{}\n{} {} score:{} bp:{} combo:{}",
-                s.title(),
-                self.updated_at,
-                self.clear_type,
-                self.score,
-                self.min_bp,
-                self.max_combo
-            ))),
+            Some(s) => Some(RecommendSong::new(self.format(s.title()))),
             _ => None,
         }
+    }
+    fn format(&self, title: String) -> String {
+        format!(
+            "{}\n{} {} score:{} bp:{} combo:{}",
+            title, self.updated_at, self.clear_type, self.score, self.min_bp, self.max_combo
+        )
     }
 }
 

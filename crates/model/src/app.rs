@@ -10,16 +10,8 @@ pub struct App<'a> {
 
 impl<'a> App<'a> {
     pub fn run(&mut self) {
-        println!("{}", self.out());
-    }
-
-    pub fn out(&mut self) -> String {
         let mut ret = String::new();
-
-        ret = format!("{}{}", ret, self.table.name());
-
         let levels = self.table.ls();
-
         let updated_at = UpdatedAt::from_timestamp(crate::config::config().timestamp());
 
         let all = Command::all();
@@ -27,15 +19,31 @@ impl<'a> App<'a> {
             ret = format!(
                 "{}{}\n",
                 ret,
-                levels.format(
-                    command,
+                command.func()(
                     &self.songs,
                     &self.table,
                     &self.score_log,
                     &updated_at,
+                    &levels
                 )
+                .to_string()
             )
         }
-        ret
+        println!("{}", ret)
+    }
+
+    pub fn out(&mut self, command: &Command) -> String {
+        let updated_at = UpdatedAt::from_timestamp(crate::config::config().timestamp());
+        format!(
+            "{}\n",
+            command.func()(
+                &self.songs,
+                &self.table,
+                &self.score_log,
+                &updated_at,
+                &self.table.ls()
+            )
+            .to_string()
+        )
     }
 }
