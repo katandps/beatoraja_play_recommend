@@ -1,9 +1,9 @@
-use crate::config::config;
 use crate::schema::player::Player;
 use crate::score::prelude::*;
 use crate::score::scores::Scores;
 use crate::score_log::prelude::*;
 use crate::song::prelude::*;
+use config::config;
 use diesel::prelude::*;
 use std::collections::HashMap;
 

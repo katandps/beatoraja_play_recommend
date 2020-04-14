@@ -10,9 +10,13 @@ edition = "2018"
 
 members = [
     "crates/model",
-    "crates/ui"
+    "crates/ui",
+    "crates/send_slack",
+    "crates/config"
 ]
 
 [dependencies]
 "model" = {path = "crates/model"}
 "ui" = {path = "crates/ui"}
+"send_slack" = {path = "crates/send_slack"}
+"config" = {path = "crates/config"}

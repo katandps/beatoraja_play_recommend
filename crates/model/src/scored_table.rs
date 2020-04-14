@@ -1,4 +1,3 @@
-use crate::config::config;
 use crate::score::prelude::*;
 use crate::table::Chart;
 use std::fmt;
@@ -16,7 +15,7 @@ impl ScoredTable {
         vec.sort_by(|a, b| a.score.cmp(&b.score));
         ScoredTable::new(
             vec.iter()
-                .take(config().recommend_song_number())
+                .take(config::config().recommend_song_number())
                 .cloned()
                 .collect(),
         )

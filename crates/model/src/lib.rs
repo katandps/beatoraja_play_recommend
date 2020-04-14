@@ -3,7 +3,6 @@ mod db;
 mod file;
 
 pub(crate) mod command;
-pub(crate) mod config;
 pub(crate) mod controller;
 pub(crate) mod rank;
 pub(crate) mod schema;

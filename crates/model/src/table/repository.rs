@@ -1,6 +1,6 @@
 use super::*;
+use crate::file;
 use crate::table::prelude::*;
-use crate::{config, file};
 use scraper::{Html, Selector};
 use std::fs::File;
 use std::io::{Read, Write};

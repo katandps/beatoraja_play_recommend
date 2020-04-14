@@ -1,5 +1,7 @@
 use crate::command::{Command, CommandResult};
 use crate::controller::Out::Json;
+use config::config;
+use send_slack::send;
 
 pub struct Controller {
     output: Output,
@@ -9,8 +11,8 @@ pub struct Controller {
 impl Controller {
     pub fn new() -> Self {
         Controller {
-            output: Output::STDOUT,
-            input: Input::Parameters(Table { index: 1 }, Command::RankGraph),
+            output: Output::SLACK,
+            input: Input::Parameters(Table { index: 1 }, Command::Recommend),
         }
     }
 
@@ -45,25 +47,31 @@ pub struct Table {
 pub enum Output {
     JSON,
     STDOUT,
+    SLACK,
 }
 impl Output {
     fn convert(&self, initial: Out) -> Out {
-        match self {
-            Self::JSON => match initial {
-                Out::Result(r) => match serde_json::to_string(&r) {
+        match initial {
+            Out::Result(r) => match self {
+                Self::JSON => match serde_json::to_string(&r) {
                     Ok(j) => Json(j),
                     Err(_) => Out::None,
                 },
-                Out::Json(j) => Out::Json(j),
-                _ => Out::None,
-            },
-            Self::STDOUT => match initial {
-                Out::Result(r) => {
+                Self::STDOUT => {
                     println!("{}", r.to_string());
                     Out::None
                 }
-                _ => Out::None,
+                Self::SLACK => {
+                    let config = config();
+                    let _ = send(
+                        config.slack_channel(),
+                        config.slack_file_name(),
+                        format!("{}", r.to_string()),
+                    );
+                    Out::None
+                }
             },
+            _ => Out::None,
         }
     }
 }

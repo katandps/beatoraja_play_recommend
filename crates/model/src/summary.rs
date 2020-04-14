@@ -1,4 +1,3 @@
-use crate::config::config;
 use std::collections::HashMap;
 use std::fmt;
 use std::hash::Hash;
@@ -40,7 +39,7 @@ where
     T: Countable,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let should_coloring = config().coloring_table();
+        let should_coloring = config::config().coloring_table();
         write!(
             f,
             "{}\n",

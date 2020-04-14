@@ -11,6 +11,9 @@ pub struct Config {
     table_urls: Option<Vec<String>>,
     recommend_song_number: Option<usize>,
     coloring_table: Option<bool>,
+    slack_bot_token: Option<String>,
+    slack_channel: Option<String>,
+    slack_file_name: Option<String>,
 }
 
 impl Config {
@@ -38,9 +41,24 @@ impl Config {
     pub fn coloring_table(&self) -> bool {
         self.coloring_table.unwrap_or(true)
     }
+    pub fn slack_bot_token(&self) -> String {
+        self.slack_bot_token
+            .clone()
+            .expect("Slack bot token is not configure.")
+    }
+    pub fn slack_channel(&self) -> String {
+        self.slack_channel
+            .clone()
+            .expect("Slack channel is not configure.")
+    }
+    pub fn slack_file_name(&self) -> String {
+        self.slack_file_name
+            .clone()
+            .expect("Slack file name is not configure")
+    }
 }
 
 pub fn config() -> Config {
-    let file = fs::read_to_string("./config.toml").unwrap();
+    let file = fs::read_to_string("config.toml").unwrap();
     toml::from_str(&file).unwrap()
 }

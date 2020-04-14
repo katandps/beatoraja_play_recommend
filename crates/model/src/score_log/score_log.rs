@@ -47,7 +47,7 @@ impl ScoreLog {
             .collect();
         vec.sort_by(|a, b| a.updated_at.cmp(&b.updated_at));
         vec.iter()
-            .take(config().recommend_song_number())
+            .take(config::config().recommend_song_number())
             .cloned()
             .collect()
     }

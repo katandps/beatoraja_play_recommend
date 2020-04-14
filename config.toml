@@ -16,3 +16,6 @@ table_urls=[
 #timestamp=1546268400
 local_cache_url="./files/cache.json"
 coloring_table=false
+#slack_bot_token=""
+#slack_channel=""
+#slack_file_name=""
