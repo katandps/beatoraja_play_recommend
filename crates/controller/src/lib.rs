@@ -15,8 +15,13 @@ pub struct Controller {
 impl Controller {
     pub fn new() -> Self {
         Controller {
-            output: Output::STDOUT,
-            input: Input::Parameters(Table { index: 1 }, Command::Recommend),
+            output: Output::SLACK,
+            input: Input::Parameters(
+                Table {
+                    index: config::config().table_index(),
+                },
+                Command::Recommend,
+            ),
         }
     }
 

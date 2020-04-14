@@ -9,6 +9,7 @@ pub struct Config {
     songdata_db_url: String,
     scorelog_db_url: String,
     table_urls: Option<Vec<String>>,
+    table_index: Option<usize>,
     recommend_song_number: Option<usize>,
     coloring_table: Option<bool>,
     slack_bot_token: Option<String>,
@@ -37,6 +38,9 @@ impl Config {
     }
     pub fn table_urls(&self) -> Vec<String> {
         self.table_urls.clone().unwrap_or(Vec::new())
+    }
+    pub fn table_index(&self) -> usize {
+        self.table_index.unwrap_or(0)
     }
     pub fn coloring_table(&self) -> bool {
         self.coloring_table.unwrap_or(true)
