@@ -12,7 +12,10 @@ members = [
     "crates/model",
     "crates/ui",
     "crates/send_slack",
-    "crates/config"
+    "crates/config",
+    "crates/table",
+    "crates/controller",
+    "crates/play_data"
 ]
 
 [dependencies]
@@ -20,3 +23,6 @@ members = [
 "ui" = {path = "crates/ui"}
 "send_slack" = {path = "crates/send_slack"}
 "config" = {path = "crates/config"}
+"table" = {path = "crates/table"}
+"controller" = {path = "crates/controller"}
+"play_data" = {path = "crates/play_data"}

@@ -1,7 +1,6 @@
-use super::table;
-use serde::Deserialize;
-
+use model::table::prelude::Chart as ChartModel;
 use serde;
+use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 pub struct Header {
@@ -24,8 +23,8 @@ pub struct Chart {
 }
 
 impl Chart {
-    pub fn to_chart(&self) -> table::Chart {
-        table::Chart::new(
+    pub fn to_chart(&self) -> ChartModel {
+        ChartModel::new(
             self.title.clone(),
             match &self.artist {
                 Some(a) => a.clone(),

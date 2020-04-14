@@ -1,32 +1,36 @@
-use super::*;
-use crate::file;
-use crate::table::prelude::*;
+mod file;
+
+use config::config;
+use model::table::prelude::{Charts, Table};
 use scraper::{Html, Selector};
 use std::fs::File;
 use std::io::{Read, Write};
 use url::Url;
 
+#[macro_use]
+extern crate anyhow;
+
 pub fn get_tables(is_local: bool) -> Vec<Table> {
     match local(is_local) {
         Ok(t) => t,
-        _ => repository::get_from_internet(),
+        _ => get_from_internet(),
     }
 }
 
 fn get_from_internet() -> Vec<Table> {
-    let tables = config::config()
+    let tables = config()
         .table_urls()
         .iter()
         .flat_map(|url| make_table(url.parse().unwrap()))
         .collect();
-    let mut file = File::create(config::config().local_cache_url()).unwrap();
+    let mut file = File::create(config().local_cache_url()).unwrap();
     let _ = file.write(serde_json::to_string(&tables).unwrap().as_ref());
     tables
 }
 
 fn local(is_local: bool) -> anyhow::Result<Vec<Table>> {
     fn load() -> anyhow::Result<Vec<Table>> {
-        let mut file = File::open(config::config().local_cache_url())?;
+        let mut file = File::open(config().local_cache_url())?;
         let mut contents = String::new();
         let _ = file.read_to_string(&mut contents);
         let vec = serde_json::from_str(&contents)?;
@@ -53,11 +57,12 @@ async fn make_table(table_url: String) -> anyhow::Result<Table> {
     }
 
     let header_text: String = reqwest::get(&header_url.to_string()).await?.text().await?;
-    let header: file::Header = serde_json::from_str(header_text.trim_start_matches('\u{feff}'))?;
+    let header: crate::file::Header =
+        serde_json::from_str(header_text.trim_start_matches('\u{feff}'))?;
 
     let data_url = header_url.join(header.data_url.as_ref()).unwrap();
     let data_text = reqwest::get(&data_url.to_string()).await?.text().await?;
-    let data: Vec<file::Chart> =
+    let data: Vec<crate::file::Chart> =
         serde_json::from_str(data_text.trim_start_matches('\u{feff}')).unwrap();
 
     let table = Table::make(

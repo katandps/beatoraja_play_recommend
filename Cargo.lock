@@ -102,8 +102,11 @@ name = "beatoraja_play_recommend"
 version = "0.1.0"
 dependencies = [
  "config",
+ "controller",
  "model",
+ "play_data",
  "send_slack",
+ "table",
  "ui",
 ]
 
@@ -219,6 +222,19 @@ name = "constant_time_eq"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "245097e9a4535ee1e3e3931fcfcd55a796a44c643e8596ff6566d68f09b87bbc"
+
+[[package]]
+name = "controller"
+version = "0.1.0"
+dependencies = [
+ "config",
+ "model",
+ "play_data",
+ "send_slack",
+ "serde",
+ "serde_json",
+ "table",
+]
 
 [[package]]
 name = "core-foundation"
@@ -1059,16 +1075,9 @@ dependencies = [
  "anyhow",
  "chrono",
  "config",
- "diesel 1.4.4",
- "diesel_codegen",
  "dotenv",
- "reqwest",
- "scraper",
- "send_slack",
  "serde",
  "serde_json",
- "tokio",
- "url",
 ]
 
 [[package]]
@@ -1458,6 +1467,17 @@ name = "pkg-config"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05da548ad6865900e60eaba7f589cc0783590a92e940c26953ff81ddbab2d677"
+
+[[package]]
+name = "play_data"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "config",
+ "diesel 1.4.4",
+ "diesel_codegen",
+ "model",
+]
 
 [[package]]
 name = "png"
@@ -2258,6 +2278,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a393066ed9010ebaed60b9eafa373d4b1baac186dd7e008555b0f702b51945b6"
 dependencies = [
  "unicode-xid 0.0.4",
+]
+
+[[package]]
+name = "table"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "config",
+ "model",
+ "reqwest",
+ "scraper",
+ "serde",
+ "serde_json",
+ "tokio",
+ "url",
 ]
 
 [[package]]

@@ -7,7 +7,6 @@ use std::fmt;
 pub mod chart;
 pub mod charts;
 pub mod prelude;
-pub mod repository;
 pub mod table;
 pub use chart::*;
 pub use charts::*;

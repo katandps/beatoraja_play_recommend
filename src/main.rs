@@ -3,5 +3,5 @@ extern crate ui;
 
 fn main() {
     //ui::main();
-    println! {"{}", model::Controller::new().run().to_string()}
+    println! {"{}", controller::Controller::new().run().to_string()}
 }

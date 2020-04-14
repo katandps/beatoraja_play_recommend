@@ -1,21 +1,25 @@
-use crate::schema::player::Player;
-use crate::score::prelude::*;
-use crate::score::scores::Scores;
-use crate::score_log::prelude::*;
-use crate::song::prelude::*;
-use config::config;
+mod schema;
+
 use diesel::prelude::*;
+use model::score::prelude::*;
+use model::score::scores::Scores;
+use model::score_log::prelude::*;
+use model::song::prelude::*;
 use std::collections::HashMap;
+
+#[macro_use]
+extern crate diesel;
+extern crate anyhow;
 
 fn establish_connection(url: &str) -> SqliteConnection {
     SqliteConnection::establish(&url).unwrap_or_else(|_| panic!("Error connection to {}", &url))
 }
 
 pub fn player() {
-    use super::schema::player::player::dsl::*;
-    let connection = establish_connection(&config().score_db_url());
-    let results: Vec<Player> = player
-        .load::<Player>(&connection)
+    use schema::player::player::dsl::*;
+    let connection = establish_connection(&config::config().score_db_url());
+    let results: Vec<schema::player::Player> = player
+        .load::<schema::player::Player>(&connection)
         .expect("Error loading schema");
 
     let last = results.last().unwrap();
@@ -28,16 +32,16 @@ pub fn player() {
 // 現在のスコアを詳細に出力する機能はいまのところない
 #[allow(dead_code)]
 pub fn score() -> Scores {
-    use super::schema::score::score::dsl::*;
-    let connection = establish_connection(&config().score_db_url());
+    use schema::score::score::dsl::*;
+    let connection = establish_connection(&config::config().score_db_url());
     let results = score
-        .load::<crate::schema::score::Score>(&connection)
+        .load::<schema::score::Score>(&connection)
         .expect("Error loading schema");
 
     make_whole_score(results)
 }
 #[allow(dead_code)]
-fn make_whole_score(record: Vec<crate::schema::score::Score>) -> Scores {
+fn make_whole_score(record: Vec<schema::score::Score>) -> Scores {
     let mut scores = HashMap::new();
     for row in record {
         scores.insert(
@@ -67,15 +71,15 @@ fn make_whole_score(record: Vec<crate::schema::score::Score>) -> Scores {
 }
 
 pub fn song_data() -> Songs {
-    use super::schema::song::song::dsl::*;
-    let connection = establish_connection(&config().song_db_url());
+    use schema::song::song::dsl::*;
+    let connection = establish_connection(&config::config().song_db_url());
     let results = song
-        .load::<crate::schema::song::Song>(&connection)
+        .load::<schema::song::Song>(&connection)
         .expect("Error loading schema");
     make_song_data(results)
 }
 
-fn make_song_data(record: Vec<crate::schema::song::Song>) -> Songs {
+fn make_song_data(record: Vec<schema::song::Song>) -> Songs {
     let mut builder = SongsBuilder::new();
     for row in record {
         builder.push(
@@ -90,15 +94,15 @@ fn make_song_data(record: Vec<crate::schema::song::Song>) -> Songs {
 }
 
 pub fn score_log() -> ScoreLog {
-    use crate::schema::score_log::scorelog::dsl::*;
-    let connection = establish_connection(&config().scorelog_db_url());
+    use schema::score_log::scorelog::dsl::*;
+    let connection = establish_connection(&config::config().scorelog_db_url());
     let results = scorelog
-        .load::<crate::schema::score_log::ScoreLog>(&connection)
+        .load::<schema::score_log::ScoreLog>(&connection)
         .expect("Error loading schema");
     make_score_log(results)
 }
 
-fn make_score_log(record: Vec<crate::schema::score_log::ScoreLog>) -> ScoreLog {
+fn make_score_log(record: Vec<schema::score_log::ScoreLog>) -> ScoreLog {
     let mut builder = ScoreLogBuilder::builder();
     for row in record {
         let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
