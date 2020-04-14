@@ -1,7 +1,7 @@
 mod file;
 
 use config::config;
-use model::table::prelude::{Charts, Table};
+use model::{Charts, Table};
 use scraper::{Html, Selector};
 use std::fs::File;
 use std::io::{Read, Write};

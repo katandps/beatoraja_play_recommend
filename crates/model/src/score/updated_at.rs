@@ -1,7 +1,6 @@
+use chrono::{DateTime, Datelike, Local, TimeZone};
 use std::cmp::Ordering;
 use std::fmt;
-
-use chrono::{DateTime, Datelike, Local, TimeZone};
 
 #[derive(Clone, Eq, Debug)]
 pub struct UpdatedAt {

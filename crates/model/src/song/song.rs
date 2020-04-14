@@ -1,5 +1,4 @@
-use super::*;
-use crate::score::prelude::*;
+use crate::*;
 
 pub struct Song {
     pub(super) hash: HashSha256,

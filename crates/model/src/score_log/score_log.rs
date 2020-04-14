@@ -1,5 +1,5 @@
-use super::*;
-use crate::table::prelude::*;
+use crate::*;
+use std::collections::HashMap;
 
 pub struct ScoreLog {
     log: HashMap<SongId, SnapShots>,

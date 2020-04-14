@@ -1,6 +1,5 @@
 use crate::out::Out;
-use model::command::Command;
-use model::App;
+use model::*;
 use table::get_tables;
 
 #[derive(Eq, PartialEq)]

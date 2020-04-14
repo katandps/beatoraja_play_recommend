@@ -1,4 +1,6 @@
-use super::*;
+use crate::*;
+use std::cmp::Ordering;
+use std::fmt;
 
 #[derive(Clone)]
 pub struct Score {

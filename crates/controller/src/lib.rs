@@ -1,7 +1,7 @@
 use crate::input::{Input, Table};
 use crate::out::Out;
 use crate::output::Output;
-use model::command::Command;
+use model::*;
 
 mod input;
 mod out;
@@ -15,7 +15,7 @@ pub struct Controller {
 impl Controller {
     pub fn new() -> Self {
         Controller {
-            output: Output::SLACK,
+            output: Output::STDOUT,
             input: Input::Parameters(Table { index: 1 }, Command::Recommend),
         }
     }

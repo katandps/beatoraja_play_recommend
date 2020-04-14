@@ -1,8 +1,4 @@
-use crate::command::{Command, CommandResult};
-use crate::score::prelude::*;
-use crate::score_log::prelude::*;
-use crate::song::prelude::*;
-use crate::table::prelude::*;
+use crate::*;
 
 pub struct App<'a> {
     pub table: &'a Table,
@@ -26,7 +22,7 @@ impl<'a> App<'a> {
             &self.songs,
             &self.table,
             &self.score_log,
-            &UpdatedAt::from_timestamp(config::config().timestamp()),
+            &crate::UpdatedAt::from_timestamp(config::config().timestamp()),
             &self.table.ls(),
         )
     }

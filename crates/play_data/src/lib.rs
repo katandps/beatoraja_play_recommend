@@ -1,10 +1,7 @@
 mod schema;
 
 use diesel::prelude::*;
-use model::score::prelude::*;
-use model::score::scores::Scores;
-use model::score_log::prelude::*;
-use model::song::prelude::*;
+use model::*;
 use std::collections::HashMap;
 
 #[macro_use]

@@ -1,5 +1,4 @@
-use crate::score::prelude::*;
-use crate::table::Chart;
+use crate::*;
 use std::fmt;
 
 pub struct ScoredTable {

@@ -1,6 +1,4 @@
-use super::*;
-use crate::rank::ClearRank;
-use crate::score_log::SnapShot;
+use crate::*;
 
 pub struct SongWithSnap<'a> {
     song: &'a Song,

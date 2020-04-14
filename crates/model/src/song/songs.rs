@@ -1,9 +1,8 @@
-use super::*;
-use crate::score::prelude::*;
+use crate::*;
 use std::collections::HashMap;
 
 pub struct Songs {
-    songs: HashMap<hash::HashSha256, Song>,
+    songs: HashMap<HashSha256, Song>,
     converter: Converter,
 }
 
@@ -36,7 +35,7 @@ impl Songs {
 }
 
 pub struct SongsBuilder {
-    songs: HashMap<hash::HashSha256, Song>,
+    songs: HashMap<HashSha256, Song>,
     md5_to_sha256: HashMap<HashMd5, HashSha256>,
     sha256_to_md5: HashMap<HashSha256, HashMd5>,
 }

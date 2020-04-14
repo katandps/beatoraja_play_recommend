@@ -1,4 +1,4 @@
-use crate::song::hash::HashSha256;
+use crate::*;
 use std::fmt;
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]

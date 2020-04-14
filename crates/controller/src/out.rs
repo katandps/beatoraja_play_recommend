@@ -1,4 +1,4 @@
-use model::command::CommandResult;
+use model::CommandResult;
 
 pub enum Out {
     None,

@@ -1,4 +1,4 @@
-use model::table::prelude::Chart as ChartModel;
+use model::Chart as ChartModel;
 use serde;
 use serde::Deserialize;
 

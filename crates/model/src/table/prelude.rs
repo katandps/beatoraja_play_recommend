@@ -1,1 +1,1 @@
-pub use crate::table::{chart::*, charts::*, table::*};
+pub use crate::table::{chart::Chart, charts::Charts, table::Table};

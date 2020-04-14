@@ -1,10 +1,6 @@
-use std::fmt;
-
-use crate::score::song_id::SongId;
-use crate::score::Score;
-use crate::scored_table::ScoredChart;
-use crate::table::Chart;
+use crate::*;
 use std::collections::HashMap;
+use std::fmt;
 
 /// 最新スコアのみが入っている
 pub struct Scores {
