@@ -6,7 +6,6 @@ pub use crate::table::*;
 
 pub use crate::app::App;
 pub use crate::command::{Command, CommandResult};
-pub use crate::rank::ClearRank;
 pub use crate::scored_table::{ScoredChart, ScoredTable};
 pub use crate::summary::{Countable, Summary};
 

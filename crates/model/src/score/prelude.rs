@@ -6,6 +6,7 @@ pub use crate::score::{
     max_combo::MaxCombo,
     min_bp::MinBP,
     play_count::PlayCount,
+    rank::ClearRank,
     score::Score,
     scores::Scores,
     song_id::{PlayMode, SongId},
