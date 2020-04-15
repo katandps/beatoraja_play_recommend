@@ -1,5 +1,5 @@
+use crate::config;
 use crate::out::Out;
-use config::config;
 use send_slack::send;
 
 pub enum Output {

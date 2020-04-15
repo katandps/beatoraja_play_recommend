@@ -2,7 +2,7 @@ use crate::*;
 use std::cmp::Ordering;
 use std::fmt;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Score {
     clear: ClearType,
     updated_at: UpdatedAt,

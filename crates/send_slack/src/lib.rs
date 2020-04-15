@@ -2,7 +2,7 @@ pub fn send(channel: String, title: String, content: String) -> anyhow::Result<S
     let res = reqwest::blocking::Client::new()
         .get("https://slack.com/api/files.upload")
         .query(&[
-            ("token", config::config().slack_bot_token()),
+            ("token", config().slack_bot_token()),
             ("title", title),
             ("channels", channel),
             ("pretty", "1".into()),
@@ -10,6 +10,14 @@ pub fn send(channel: String, title: String, content: String) -> anyhow::Result<S
         ])
         .send()?;
     Ok(format!("{:#?}", res))
+}
+
+fn config() -> config::Config {
+    if cfg!(test) {
+        config::Config::Dummy
+    } else {
+        config::config()
+    }
 }
 
 #[cfg(test)]

@@ -1,6 +1,5 @@
 mod file;
 
-use config::config;
 use model::{Charts, Table};
 use scraper::{Html, Selector};
 use std::fs::File;
@@ -72,4 +71,12 @@ async fn make_table(table_url: String) -> anyhow::Result<Table> {
         header.level_order,
     );
     Ok(table)
+}
+
+fn config() -> config::Config {
+    if cfg!(test) {
+        config::Config::Dummy
+    } else {
+        config::config()
+    }
 }

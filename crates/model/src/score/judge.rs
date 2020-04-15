@@ -1,6 +1,6 @@
 use crate::score::ex_score::ExScore;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Judge {
     early_pgreat: i32,
     late_pgreat: i32,

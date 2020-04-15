@@ -22,7 +22,7 @@ impl<'a> App<'a> {
             &self.songs,
             &self.table,
             &self.score_log,
-            &crate::UpdatedAt::from_timestamp(config::config().timestamp()),
+            &crate::UpdatedAt::from_timestamp(config().timestamp()),
             &self.table.ls(),
         )
     }

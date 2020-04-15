@@ -14,7 +14,7 @@ fn establish_connection(url: &str) -> SqliteConnection {
 
 pub fn player() {
     use schema::player::player::dsl::*;
-    let connection = establish_connection(&config::config().score_db_url());
+    let connection = establish_connection(&config().score_db_url());
     let results: Vec<schema::player::Player> = player
         .load::<schema::player::Player>(&connection)
         .expect("Error loading schema");
@@ -30,7 +30,7 @@ pub fn player() {
 #[allow(dead_code)]
 pub fn score() -> Scores {
     use schema::score::score::dsl::*;
-    let connection = establish_connection(&config::config().score_db_url());
+    let connection = establish_connection(&config().score_db_url());
     let results = score
         .load::<schema::score::Score>(&connection)
         .expect("Error loading schema");
@@ -69,7 +69,7 @@ fn make_whole_score(record: Vec<schema::score::Score>) -> Scores {
 
 pub fn song_data() -> Songs {
     use schema::song::song::dsl::*;
-    let connection = establish_connection(&config::config().song_db_url());
+    let connection = establish_connection(&config().song_db_url());
     let results = song
         .load::<schema::song::Song>(&connection)
         .expect("Error loading schema");
@@ -92,7 +92,7 @@ fn make_song_data(record: Vec<schema::song::Song>) -> Songs {
 
 pub fn score_log() -> ScoreLog {
     use schema::score_log::scorelog::dsl::*;
-    let connection = establish_connection(&config::config().scorelog_db_url());
+    let connection = establish_connection(&config().scorelog_db_url());
     let results = scorelog
         .load::<schema::score_log::ScoreLog>(&connection)
         .expect("Error loading schema");
@@ -114,4 +114,12 @@ fn make_score_log(record: Vec<schema::score_log::ScoreLog>) -> ScoreLog {
         builder.push(song_id, snapshot)
     }
     ScoreLogBuilder::build(builder)
+}
+
+fn config() -> config::Config {
+    if cfg!(test) {
+        config::Config::Dummy
+    } else {
+        config::config()
+    }
 }

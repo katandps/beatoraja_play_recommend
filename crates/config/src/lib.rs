@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate lazy_static;
 use serde::{Deserialize, Serialize};
+use std::fs;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Config {
@@ -113,18 +114,8 @@ pub fn config() -> Config {
 }
 
 lazy_static! {
-    pub static ref CONFIG: Config = cfg();
-}
-
-#[cfg(not(test))]
-use std::fs;
-#[cfg(not(test))]
-fn cfg() -> Config {
-    let file = fs::read_to_string("config.toml").unwrap();
-    Config::Config(toml::from_str(&file).unwrap())
-}
-
-#[cfg(test)]
-fn cfg() -> Config {
-    Config::Dummy
+    pub static ref CONFIG: Config = {
+        let file = fs::read_to_string("config.toml").unwrap();
+        Config::Config(toml::from_str(&file).unwrap())
+    };
 }

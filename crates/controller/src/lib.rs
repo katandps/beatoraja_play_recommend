@@ -15,10 +15,10 @@ pub struct Controller {
 impl Controller {
     pub fn new() -> Self {
         Controller {
-            output: Output::SLACK,
+            output: Output::STDOUT,
             input: Input::Parameters(
                 Table {
-                    index: config::config().table_index(),
+                    index: config().table_index(),
                 },
                 Command::Recommend,
             ),
@@ -28,5 +28,13 @@ impl Controller {
     pub fn run(&self) -> Out {
         let initial = self.input.out();
         self.output.convert(initial)
+    }
+}
+
+fn config() -> config::Config {
+    if cfg!(test) {
+        config::Config::Dummy
+    } else {
+        config::config()
     }
 }
