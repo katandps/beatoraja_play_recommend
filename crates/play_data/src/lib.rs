@@ -43,24 +43,16 @@ fn make_whole_score(record: Vec<schema::score::Score>) -> Scores {
     for row in record {
         scores.insert(
             SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode)),
-            Score::from_data(
-                row.clear,
-                row.date,
-                row.epg,
-                row.lpg,
-                row.egr,
-                row.lgr,
-                row.egd,
-                row.lgd,
-                row.ebd,
-                row.lbd,
-                row.epr,
-                row.lpr,
-                row.ems,
-                row.lms,
-                row.combo,
-                row.playcount,
-                row.minbp,
+            Score::new(
+                ClearType::from_integer(row.clear),
+                UpdatedAt::from_timestamp(row.date),
+                Judge::new(
+                    row.epg, row.lpg, row.egr, row.lgr, row.egd, row.lgd, row.ebd, row.lbd,
+                    row.epr, row.lpr, row.ems, row.lms,
+                ),
+                MaxCombo::from_combo(row.combo),
+                PlayCount::new(row.playcount),
+                MinBP::from_bp(row.minbp),
             ),
         );
     }
