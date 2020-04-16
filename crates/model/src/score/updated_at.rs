@@ -1,8 +1,7 @@
-use chrono::{DateTime, Datelike, Local, TimeZone};
-use std::cmp::Ordering;
+use chrono::{DateTime, Local, TimeZone};
 use std::fmt;
 
-#[derive(Clone, Eq, Debug)]
+#[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Debug)]
 pub struct UpdatedAt {
     updated_at: DateTime<Local>,
 }
@@ -17,26 +16,6 @@ impl UpdatedAt {
         UpdatedAt {
             updated_at: DateTime::from(Local.timestamp(timestamp as i64, 0)),
         }
-    }
-}
-
-impl Ord for UpdatedAt {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.updated_at
-            .num_days_from_ce()
-            .cmp(&other.updated_at.num_days_from_ce())
-    }
-}
-
-impl PartialOrd for UpdatedAt {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl PartialEq for UpdatedAt {
-    fn eq(&self, other: &Self) -> bool {
-        self.updated_at == other.updated_at
     }
 }
 
