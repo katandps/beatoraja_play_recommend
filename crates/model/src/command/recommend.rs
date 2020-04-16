@@ -1,9 +1,9 @@
 use crate::*;
 use serde::{Deserialize, Serialize};
 
-pub(super) fn recommend(
+pub(super) fn recommend<T: TableTrait>(
     songs: &Songs,
-    table: &Table,
+    table: &T,
     score_log: &ScoreLog,
     updated_at: &UpdatedAt,
     levels: &Levels,

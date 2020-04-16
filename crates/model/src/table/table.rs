@@ -35,17 +35,12 @@ impl Table {
             levels: Levels::make(levels),
         }
     }
-    pub fn level_specified(&self, level: &Level) -> Table {
-        Table::make(
-            &self.name,
-            &self.symbol,
-            self.charts.level_specified(level),
-            None,
-        )
-    }
 }
-pub trait TableTrait: TableName + TableSymbol + TableLevels + TableCharts {}
+pub trait TableTrait: TableName + TableSymbol + TableLevels + TableCharts + TableFilter {}
 
+pub trait TableFilter: Sized {
+    fn level_specified(&self, level: &Level) -> Self;
+}
 pub trait TableName {
     fn name(&self) -> String;
 }
@@ -61,6 +56,16 @@ pub trait TableCharts {
 }
 
 impl TableTrait for Table {}
+impl TableFilter for Table {
+    fn level_specified(&self, level: &Level) -> Self {
+        Table::make(
+            &self.name,
+            &self.symbol,
+            self.charts.level_specified(level),
+            None,
+        )
+    }
+}
 impl TableName for Table {
     fn name(&self) -> String {
         self.name.clone()

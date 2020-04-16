@@ -1,13 +1,16 @@
 use crate::*;
 
-pub struct App<'a> {
-    pub table: &'a Table,
+pub struct App<'a, T: TableTrait> {
+    pub table: &'a T,
     pub songs: &'a Songs,
     pub score_log: &'a ScoreLog,
 }
 
-impl<'a> App<'a> {
-    pub fn new(table: &'a Table, songs: &'a Songs, score_log: &'a ScoreLog) -> App<'a> {
+impl<'a, T> App<'a, T>
+where
+    T: TableTrait,
+{
+    pub fn new(table: &'a T, songs: &'a Songs, score_log: &'a ScoreLog) -> App<'a, T> {
         App {
             table,
             songs,
@@ -26,7 +29,10 @@ pub trait AppOutTrait {
     fn out(&mut self, command: &Command) -> CommandResult;
 }
 
-impl AppRunTrait for App<'_> {
+impl<T> AppRunTrait for App<'_, T>
+where
+    T: TableTrait,
+{
     fn run(&mut self) {
         println!(
             "{}",
@@ -38,14 +44,17 @@ impl AppRunTrait for App<'_> {
     }
 }
 
-impl AppOutTrait for App<'_> {
+impl<T> AppOutTrait for App<'_, T>
+where
+    T: TableTrait,
+{
     fn out(&mut self, command: &Command) -> CommandResult {
         command.func()(
-            &self.songs,
-            &self.table,
-            &self.score_log,
+            self.songs,
+            self.table,
+            self.score_log,
             &crate::UpdatedAt::from_timestamp(config().timestamp()),
-            &self.table.levels(),
+            self.table.levels(),
         )
     }
 }

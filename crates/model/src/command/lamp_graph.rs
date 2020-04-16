@@ -2,13 +2,16 @@ use crate::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-pub(super) fn lamp(
+pub(super) fn lamp<T>(
     songs: &Songs,
-    table: &Table,
+    table: &T,
     score_log: &ScoreLog,
     updated_at: &UpdatedAt,
     levels: &Levels,
-) -> CommandResult {
+) -> CommandResult
+where
+    T: TableTrait,
+{
     let mut vec = Vec::new();
     for level in &levels.levels {
         let specified = table.level_specified(level);

@@ -11,7 +11,12 @@ impl ScoreLog {
             log: HashMap::new(),
         }
     }
-    pub fn filter_by_table(&self, table: &Table, songs: &Songs, date: &UpdatedAt) -> ScoreLog {
+    pub fn filter_by_table<T: TableTrait>(
+        &self,
+        table: &T,
+        songs: &Songs,
+        date: &UpdatedAt,
+    ) -> ScoreLog {
         let song_ids: Vec<SongId> = table
             .get_song(songs)
             .iter()

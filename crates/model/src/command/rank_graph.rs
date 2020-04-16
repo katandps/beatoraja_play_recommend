@@ -2,9 +2,9 @@ use crate::*;
 use std::borrow::Borrow;
 use std::collections::HashMap;
 
-pub(super) fn rank(
+pub(super) fn rank<T: TableTrait>(
     songs: &Songs,
-    table: &Table,
+    table: &T,
     score_log: &ScoreLog,
     updated_at: &UpdatedAt,
     levels: &Levels,
