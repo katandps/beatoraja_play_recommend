@@ -1,29 +1,30 @@
 use crate::*;
+use serde::de::DeserializeOwned;
 use std::fmt;
 
 #[derive(Serialize, Deserialize)]
-pub struct Table {
+pub struct Table<T> {
     name: String,
     symbol: String,
-    charts: Charts,
+    charts: T,
     levels: Levels,
 }
 
-impl Table {
-    pub fn new() -> Table {
+impl<T: ChartsTrait> Table<T> {
+    pub fn new() -> Self {
         Table {
             name: "Not Loaded".to_string(),
             symbol: "No".to_string(),
-            charts: Charts { charts: Vec::new() },
+            charts: T::new(),
             levels: Levels::new(),
         }
     }
     pub fn make(
         name: impl Into<String>,
         symbol: impl Into<String>,
-        charts: Charts,
+        charts: T,
         levels: Option<Vec<String>>,
-    ) -> Table {
+    ) -> Self {
         let levels: Vec<Level> = match levels {
             Some(l) => l.iter().map(|s| Level::make(s.clone())).collect(),
             _ => charts.get_levels(),
@@ -36,7 +37,10 @@ impl Table {
         }
     }
 }
-pub trait TableTrait: TableName + TableSymbol + TableLevels + TableCharts + TableFilter {}
+pub trait TableTrait:
+    TableName + TableSymbol + TableLevels + TableCharts + TableFilter + Serialize + DeserializeOwned
+{
+}
 
 pub trait TableFilter: Sized {
     fn level_specified(&self, level: &Level) -> Self;
@@ -55,8 +59,8 @@ pub trait TableCharts {
     fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song>;
 }
 
-impl TableTrait for Table {}
-impl TableFilter for Table {
+impl<T: ChartsTrait> TableTrait for Table<T> {}
+impl<T: ChartsTrait> TableFilter for Table<T> {
     fn level_specified(&self, level: &Level) -> Self {
         Table::make(
             &self.name,
@@ -66,22 +70,22 @@ impl TableFilter for Table {
         )
     }
 }
-impl TableName for Table {
+impl<T: ChartsTrait> TableName for Table<T> {
     fn name(&self) -> String {
         self.name.clone()
     }
 }
-impl TableSymbol for Table {
+impl<T: ChartsTrait> TableSymbol for Table<T> {
     fn symbol(&self) -> String {
         self.symbol.clone()
     }
 }
-impl TableLevels for Table {
+impl<T: ChartsTrait> TableLevels for Table<T> {
     fn levels(&self) -> &Levels {
         &self.levels
     }
 }
-impl TableCharts for Table {
+impl<T: ChartsTrait> TableCharts for Table<T> {
     fn merge_score(&self, scores: &Scores, song_data: &Songs) -> ScoredTable {
         self.charts.merge_score(scores, song_data)
     }
@@ -91,7 +95,7 @@ impl TableCharts for Table {
     }
 }
 
-impl fmt::Display for Table {
+impl<T: ChartsTrait> fmt::Display for Table<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} [{}] {}", self.name, self.symbol, self.charts)
     }

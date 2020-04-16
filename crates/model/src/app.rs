@@ -29,7 +29,7 @@ pub trait AppOutTrait {
     fn out(&mut self, command: &Command) -> CommandResult;
 }
 
-impl<T> AppRunTrait for App<'_, T>
+impl<'a, T> AppRunTrait for App<'a, T>
 where
     T: TableTrait,
 {
@@ -44,7 +44,7 @@ where
     }
 }
 
-impl<T> AppOutTrait for App<'_, T>
+impl<'a, T> AppOutTrait for App<'a, T>
 where
     T: TableTrait,
 {

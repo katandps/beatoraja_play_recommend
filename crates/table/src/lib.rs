@@ -1,6 +1,6 @@
 mod file;
 
-use model::{Charts, Table};
+use model::*;
 use scraper::{Html, Selector};
 use std::fs::File;
 use std::io::{Read, Write};
@@ -9,14 +9,14 @@ use url::Url;
 #[macro_use]
 extern crate anyhow;
 
-pub fn get_tables(is_local: bool) -> Vec<Table> {
+pub fn get_tables(is_local: bool) -> Vec<Table<Charts>> {
     match local(is_local) {
         Ok(t) => t,
         _ => get_from_internet(),
     }
 }
 
-fn get_from_internet() -> Vec<Table> {
+fn get_from_internet() -> Vec<Table<Charts>> {
     let tables = config()
         .table_urls()
         .iter()
@@ -27,8 +27,8 @@ fn get_from_internet() -> Vec<Table> {
     tables
 }
 
-fn local(is_local: bool) -> anyhow::Result<Vec<Table>> {
-    fn load() -> anyhow::Result<Vec<Table>> {
+fn local(is_local: bool) -> anyhow::Result<Vec<Table<Charts>>> {
+    fn load() -> anyhow::Result<Vec<Table<Charts>>> {
         let mut file = File::open(config().local_cache_url())?;
         let mut contents = String::new();
         let _ = file.read_to_string(&mut contents);
@@ -43,7 +43,7 @@ fn local(is_local: bool) -> anyhow::Result<Vec<Table>> {
 }
 
 #[tokio::main]
-async fn make_table(table_url: String) -> anyhow::Result<Table> {
+async fn make_table(table_url: String) -> anyhow::Result<Table<Charts>> {
     let res = reqwest::get(&table_url).await?;
     let body = res.text().await?;
 
@@ -67,7 +67,7 @@ async fn make_table(table_url: String) -> anyhow::Result<Table> {
     let table = Table::make(
         header.name,
         header.symbol,
-        Charts::new(data.iter().map(|c| c.to_chart()).collect()),
+        Charts::make(data.iter().map(|c| c.to_chart()).collect()),
         header.level_order,
     );
     Ok(table)

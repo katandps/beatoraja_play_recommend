@@ -1,4 +1,5 @@
 use crate::*;
+use serde::de::DeserializeOwned;
 use std::collections::HashSet;
 use std::fmt;
 
@@ -7,21 +8,60 @@ pub struct Charts {
     pub(super) charts: Vec<Chart>,
 }
 
-impl Charts {
-    pub fn new(charts: Vec<Chart>) -> Charts {
+pub trait ChartsTrait:
+    LevelSpecify + ChartsLevels + MergeScore + Serialize + DeserializeOwned + GetSong + fmt::Display
+{
+    fn make(charts: Vec<Chart>) -> Self;
+    fn new() -> Self;
+}
+impl ChartsTrait for Charts {
+    fn make(charts: Vec<Chart>) -> Self {
         Charts { charts }
     }
-    pub fn level_specified(&self, level: &Level) -> Charts {
+
+    fn new() -> Self {
+        Charts { charts: Vec::new() }
+    }
+}
+
+pub trait GetSong {
+    fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song>;
+}
+
+impl GetSong for Charts {
+    fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
+        self.charts
+            .iter()
+            .flat_map(|c| match song_data.song(&c.md5) {
+                Some(s) => Some(s),
+                _ => None,
+            })
+            .collect()
+    }
+}
+
+pub trait LevelSpecify: Sized {
+    fn level_specified(&self, level: &Level) -> Self;
+}
+
+impl LevelSpecify for Charts {
+    fn level_specified(&self, level: &Level) -> Self {
         let charts = self
             .charts
             .iter()
             .filter_map(|c| if &c.level == level { Some(c) } else { None })
             .cloned()
             .collect();
-        Charts::new(charts)
+        Charts::make(charts)
     }
+}
 
-    pub fn get_levels(&self) -> Vec<Level> {
+pub trait ChartsLevels {
+    fn get_levels(&self) -> Vec<Level>;
+}
+
+impl ChartsLevels for Charts {
+    fn get_levels(&self) -> Vec<Level> {
         let mut set = HashSet::new();
         for level in self.charts.iter().map(|c| c.level.clone()) {
             set.insert(level);
@@ -30,8 +70,14 @@ impl Charts {
         vec.sort_unstable();
         vec
     }
+}
 
-    pub fn merge_score(&self, scores: &Scores, song_data: &Songs) -> ScoredTable {
+pub trait MergeScore {
+    fn merge_score(&self, scores: &Scores, song_data: &Songs) -> ScoredTable;
+}
+
+impl MergeScore for Charts {
+    fn merge_score(&self, scores: &Scores, song_data: &Songs) -> ScoredTable {
         ScoredTable::new(
             self.charts
                 .iter()
@@ -41,16 +87,6 @@ impl Charts {
                 })
                 .collect(),
         )
-    }
-
-    pub fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
-        self.charts
-            .iter()
-            .flat_map(|c| match song_data.song(&c.md5) {
-                Some(s) => Some(s),
-                _ => None,
-            })
-            .collect()
     }
 }
 
