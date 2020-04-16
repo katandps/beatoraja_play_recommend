@@ -43,23 +43,46 @@ impl Table {
             None,
         )
     }
+}
+pub trait TableTrait: TableName + TableSymbol + TableLevels + TableCharts {}
 
-    pub fn ls(&self) -> &Levels {
+pub trait TableName {
+    fn name(&self) -> String;
+}
+pub trait TableSymbol {
+    fn symbol(&self) -> String;
+}
+pub trait TableLevels {
+    fn levels(&self) -> &Levels;
+}
+pub trait TableCharts {
+    fn merge_score(&self, scores: &Scores, song_data: &Songs) -> ScoredTable;
+    fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song>;
+}
+
+impl TableTrait for Table {}
+impl TableName for Table {
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+}
+impl TableSymbol for Table {
+    fn symbol(&self) -> String {
+        self.symbol.clone()
+    }
+}
+impl TableLevels for Table {
+    fn levels(&self) -> &Levels {
         &self.levels
     }
-
-    pub fn merge_score(&self, scores: &Scores, song_data: &Songs) -> ScoredTable {
+}
+impl TableCharts for Table {
+    fn merge_score(&self, scores: &Scores, song_data: &Songs) -> ScoredTable {
         self.charts.merge_score(scores, song_data)
     }
 
-    pub fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
+    fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
         self.charts.get_song(song_data)
-    }
-    pub fn name(&self) -> String {
-        self.name.clone()
-    }
-    pub fn symbol(&self) -> String {
-        self.symbol.clone()
     }
 }
 

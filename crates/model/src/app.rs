@@ -7,7 +7,27 @@ pub struct App<'a> {
 }
 
 impl<'a> App<'a> {
-    pub fn run(&mut self) {
+    pub fn new(table: &'a Table, songs: &'a Songs, score_log: &'a ScoreLog) -> App<'a> {
+        App {
+            table,
+            songs,
+            score_log,
+        }
+    }
+}
+
+pub trait AppTrait: AppRunTrait + AppOutTrait {}
+
+pub trait AppRunTrait {
+    fn run(&mut self);
+}
+
+pub trait AppOutTrait {
+    fn out(&mut self, command: &Command) -> CommandResult;
+}
+
+impl AppRunTrait for App<'_> {
+    fn run(&mut self) {
         println!(
             "{}",
             Command::all()
@@ -16,14 +36,16 @@ impl<'a> App<'a> {
                 .collect::<String>()
         )
     }
+}
 
-    pub fn out(&mut self, command: &Command) -> CommandResult {
+impl AppOutTrait for App<'_> {
+    fn out(&mut self, command: &Command) -> CommandResult {
         command.func()(
             &self.songs,
             &self.table,
             &self.score_log,
             &crate::UpdatedAt::from_timestamp(config().timestamp()),
-            &self.table.ls(),
+            &self.table.levels(),
         )
     }
 }

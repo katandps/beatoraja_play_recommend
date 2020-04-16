@@ -54,12 +54,7 @@ fn interactive() -> Out {
 
         let index: usize = selected.parse().ok().unwrap_or(tables.len() + 1);
         match tables.iter().nth(index) {
-            Some(table) => App {
-                table,
-                songs: &song_data,
-                score_log: &score_log,
-            }
-            .run(),
+            Some(table) => App::new(table, &song_data, &score_log).run(),
 
             _ => (),
         }
@@ -74,14 +69,7 @@ fn parameters(table: &Table, command: &Command) -> Out {
 
     let table_index = table.index;
     let res = match tables.iter().nth(table_index) {
-        Some(table) => Some(
-            App {
-                table,
-                songs: &song_data,
-                score_log: &score_log,
-            }
-            .out(command),
-        ),
+        Some(table) => Some(App::new(table, &song_data, &score_log).out(command)),
         _ => None,
     };
     match res {
