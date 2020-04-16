@@ -10,7 +10,7 @@ pub(super) fn rank<T: TableTrait>(
     levels: &Levels,
 ) -> CommandResult {
     let mut vec = Vec::new();
-    for level in &levels.levels {
+    for level in levels.iter() {
         let specified = table.level_specified(level);
         let mut summary = Summary::new(ClearRank::vec());
         for song in specified.get_song(songs) {

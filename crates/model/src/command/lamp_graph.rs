@@ -13,7 +13,7 @@ where
     T: TableTrait,
 {
     let mut vec = Vec::new();
-    for level in &levels.levels {
+    for level in levels.iter() {
         let specified = table.level_specified(level);
         let mut summary = Summary::new(ClearType::vec());
         for song in specified.get_song(songs) {

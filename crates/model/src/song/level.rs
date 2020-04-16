@@ -2,35 +2,18 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Serialize)]
-pub struct Level {
-    level: String,
-}
+pub struct Level(String);
 
 impl Level {
     pub fn make(str: String) -> Level {
-        Level {
-            level: format!("{:>3}", str),
-        }
+        Level(format!("{:>3}", str))
     }
 }
 
 impl fmt::Display for Level {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.level.trim())
+        write!(f, "{}", self.0.trim())
     }
 }
 
-#[derive(Deserialize, Serialize)]
-pub struct Levels {
-    pub levels: Vec<Level>,
-}
-
-impl Levels {
-    pub fn new() -> Levels {
-        Levels { levels: Vec::new() }
-    }
-
-    pub fn make(levels: Vec<Level>) -> Levels {
-        Levels { levels }
-    }
-}
+pub type Levels = Vec<Level>;

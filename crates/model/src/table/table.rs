@@ -11,21 +11,13 @@ pub struct Table<T> {
 }
 
 impl<T: ChartsTrait> Table<T> {
-    pub fn new() -> Self {
-        Table {
-            name: "Not Loaded".to_string(),
-            symbol: "No".to_string(),
-            charts: T::new(),
-            levels: Levels::new(),
-        }
-    }
     pub fn make(
         name: impl Into<String>,
         symbol: impl Into<String>,
         charts: T,
         levels: Option<Vec<String>>,
     ) -> Self {
-        let levels: Vec<Level> = match levels {
+        let levels: Levels = match levels {
             Some(l) => l.iter().map(|s| Level::make(s.clone())).collect(),
             _ => charts.get_levels(),
         };
@@ -33,18 +25,23 @@ impl<T: ChartsTrait> Table<T> {
             name: name.into(),
             symbol: symbol.into(),
             charts,
-            levels: Levels::make(levels),
+            levels,
         }
     }
 }
 pub trait TableTrait:
-    TableName + TableSymbol + TableLevels + TableCharts + TableFilter + Serialize + DeserializeOwned
+    TableName
+    + TableSymbol
+    + TableLevels
+    + MergeScore
+    + GetSong
+    + LevelSpecify
+    + Serialize
+    + DeserializeOwned
+    + fmt::Display
 {
 }
 
-pub trait TableFilter: Sized {
-    fn level_specified(&self, level: &Level) -> Self;
-}
 pub trait TableName {
     fn name(&self) -> String;
 }
@@ -54,13 +51,9 @@ pub trait TableSymbol {
 pub trait TableLevels {
     fn levels(&self) -> &Levels;
 }
-pub trait TableCharts {
-    fn merge_score(&self, scores: &Scores, song_data: &Songs) -> ScoredTable;
-    fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song>;
-}
 
 impl<T: ChartsTrait> TableTrait for Table<T> {}
-impl<T: ChartsTrait> TableFilter for Table<T> {
+impl<T: ChartsTrait> LevelSpecify for Table<T> {
     fn level_specified(&self, level: &Level) -> Self {
         Table::make(
             &self.name,
@@ -85,11 +78,12 @@ impl<T: ChartsTrait> TableLevels for Table<T> {
         &self.levels
     }
 }
-impl<T: ChartsTrait> TableCharts for Table<T> {
+impl<T: ChartsTrait> MergeScore for Table<T> {
     fn merge_score(&self, scores: &Scores, song_data: &Songs) -> ScoredTable {
         self.charts.merge_score(scores, song_data)
     }
-
+}
+impl<T: ChartsTrait> GetSong for Table<T> {
     fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
         self.charts.get_song(song_data)
     }

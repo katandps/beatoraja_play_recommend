@@ -9,7 +9,6 @@ pub(super) fn recommend<T: TableTrait>(
     levels: &Levels,
 ) -> CommandResult {
     let ret_levels = levels
-        .levels
         .iter()
         .map(|level| {
             let specified_table = table.level_specified(level);
