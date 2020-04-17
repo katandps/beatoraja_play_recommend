@@ -1,7 +1,8 @@
 mod command;
-mod lamp_graph;
+mod graph;
+mod lamp;
 mod prelude;
-mod rank_graph;
+mod rank;
 mod recommend;
 
 pub use prelude::*;

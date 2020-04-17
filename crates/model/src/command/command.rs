@@ -1,5 +1,5 @@
-use super::lamp_graph;
-use super::rank_graph;
+use super::lamp;
+use super::rank;
 use super::recommend;
 use crate::*;
 
@@ -20,8 +20,8 @@ impl Command {
     pub fn func<T: TableTrait>(&self) -> CommandFunc<T> {
         match self {
             Self::Recommend => recommend::recommend,
-            Self::LampGraph => lamp_graph::lamp,
-            Self::RankGraph => rank_graph::rank,
+            Self::LampGraph => lamp::lamp,
+            Self::RankGraph => rank::rank,
         }
     }
 }
@@ -29,8 +29,8 @@ impl Command {
 #[derive(Deserialize, Serialize)]
 pub enum CommandResult {
     Recommend(RecommendResult),
-    LampGraph(LampGraphResult),
-    RankGraph(RankGraphResult),
+    LampGraph(Graph<ClearType>),
+    RankGraph(Graph<ClearRank>),
 }
 
 impl CommandResult {
