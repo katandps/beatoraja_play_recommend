@@ -3,34 +3,37 @@ use std::collections::HashMap;
 use std::fmt;
 use std::hash::Hash;
 
-pub struct Summary<T>
-where
-    T: Countable,
-{
+pub struct Summary<T> {
     sum: HashMap<T, i32>,
     subjects: Vec<T>,
 }
 
-impl<T> Summary<T>
-where
-    T: Countable,
-{
-    pub fn new(subjects: Vec<T>) -> Summary<T> {
+pub trait SummaryTrait<T>: MakeSummary + SummaryCount<T> + fmt::Display {}
+
+pub trait MakeSummary {
+    fn new() -> Self;
+}
+
+impl<T: Countable + Sized> MakeSummary for Summary<T> {
+    fn new() -> Self {
         Summary {
             sum: HashMap::new(),
-            subjects,
+            subjects: T::vec(),
         }
     }
+}
 
-    pub fn push(&mut self, c: &T)
-    where
-        T: Countable,
-    {
+pub trait SummaryCount<T> {
+    fn push(&mut self, c: &T);
+    fn count(&self, key: &T) -> Option<&i32>;
+}
+
+impl<T: Countable> SummaryCount<T> for Summary<T> {
+    fn push(&mut self, c: &T) {
         let count = self.sum.entry(c.clone()).or_insert(0);
         *count += 1;
     }
-
-    pub fn count(&self, key: &T) -> Option<&i32> {
+    fn count(&self, key: &T) -> Option<&i32> {
         self.sum.get(key)
     }
 }
@@ -67,4 +70,5 @@ where
 
 pub trait Countable: Hash + Eq + PartialEq + Clone {
     fn coloring(&self, s: String) -> String;
+    fn vec() -> Vec<Self>;
 }

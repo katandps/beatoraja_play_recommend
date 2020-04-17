@@ -35,10 +35,6 @@ impl ClearType {
             _ => ClearType::Unknown,
         }
     }
-
-    pub fn vec() -> Vec<ClearType> {
-        (0..11).map(|x| ClearType::from_integer(x)).collect()
-    }
 }
 
 impl Countable for ClearType {
@@ -58,6 +54,9 @@ impl Countable for ClearType {
             ClearType::Max => format!("{ESC}[00;1m{}{ESC}[00m", s, ESC = ESC),
             ClearType::Unknown => format!("{}", s),
         }
+    }
+    fn vec() -> Vec<ClearType> {
+        (0..11).map(|x| ClearType::from_integer(x)).collect()
     }
 }
 

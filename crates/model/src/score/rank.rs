@@ -42,10 +42,6 @@ impl ClearRank {
             _ => ClearRank::Unknown,
         }
     }
-
-    pub fn vec() -> Vec<ClearRank> {
-        (0..8).map(|x| ClearRank::from_integer(x)).collect()
-    }
 }
 
 impl Countable for ClearRank {
@@ -62,6 +58,9 @@ impl Countable for ClearRank {
             ClearRank::AAA => format!("{ESC}[00;33m{}{ESC}[00m", s, ESC = ESC),
             ClearRank::Unknown => format!("{}", s),
         }
+    }
+    fn vec() -> Vec<ClearRank> {
+        (0..8).map(|x| ClearRank::from_integer(x)).collect()
     }
 }
 
