@@ -2,6 +2,9 @@ score_db_url="./files/score.db"
 scorelog_db_url="./files/scorelog.db"
 songdata_db_url="./files/songdata.db"
 
+#output_type="SLACK"|"STDOUT"|"JSON"
+output_type="STDOUT"
+
 table_urls=[
 "https://stellabms.xyz/st/table.html",
 "https://stellabms.xyz/sl/table.html",

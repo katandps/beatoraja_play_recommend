@@ -23,6 +23,7 @@ pub struct Cfg {
     pub slack_bot_token: Option<String>,
     pub slack_channel: Option<String>,
     pub slack_file_name: Option<String>,
+    pub output_type: Option<String>,
 }
 
 impl Config {
@@ -105,6 +106,16 @@ impl Config {
                 .clone()
                 .expect("Slack file name is not configure"),
             _ => "slack_file_name".into(),
+        }
+    }
+
+    pub fn output_type(&self) -> String {
+        match self {
+            Config::Config(cfg) => match cfg.output_type.clone() {
+                Some(t) => t,
+                None => "STDOUT".into(),
+            },
+            _ => "STDOUT".into(),
         }
     }
 }
