@@ -8,20 +8,32 @@ pub(super) fn rank<T: TableTrait>(
     updated_at: &UpdatedAt,
     levels: &Levels,
 ) -> CommandResult {
-    let mut vec = Vec::new();
-    for level in levels.iter() {
-        let song_vec = table.level_specified(level).get_song(songs);
-        let mut summary = Summary::new();
-        for song in song_vec {
-            summary.push(
-                &SongWithSnap::make(
-                    &song,
-                    score_log.get_snap(&song.song_id(), &updated_at).borrow(),
-                )
-                .clear_rank(),
+    CommandResult::RankGraph(Graph::make(
+        table.name(),
+        levels
+            .iter()
+            .map(|level| {
+                let song_vec = table.level_specified(level).get_song(songs);
+                CountByLevel::make(make_summary(song_vec, score_log, updated_at))
+            })
+            .collect(),
+    ))
+}
+
+pub fn make_summary(
+    songs: Vec<&Song>,
+    score_log: &ScoreLog,
+    updated_at: &UpdatedAt,
+) -> Summary<ClearRank> {
+    let mut summary = Summary::new();
+    for song in songs {
+        summary.push(
+            &SongWithSnap::make(
+                &song,
+                score_log.get_snap(&song.song_id(), &updated_at).borrow(),
             )
-        }
-        vec.push(CountByLevel::make(summary));
+            .clear_rank(),
+        )
     }
-    CommandResult::RankGraph(Graph::make(table.name(), vec))
+    summary
 }
