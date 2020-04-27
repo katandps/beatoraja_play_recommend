@@ -6,9 +6,9 @@ pub(super) fn recommend<T: TableTrait>(
     table: &T,
     score_log: &ScoreLog,
     updated_at: &UpdatedAt,
-    levels: &Levels,
 ) -> CommandResult {
-    let ret_levels = levels
+    let ret_levels = table
+        .levels()
         .iter()
         .map(|level| {
             let specified_table = table.level_specified(level);

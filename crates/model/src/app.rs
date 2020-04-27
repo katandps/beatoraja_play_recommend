@@ -54,7 +54,6 @@ where
             self.table,
             self.score_log,
             &crate::UpdatedAt::from_timestamp(config().timestamp()),
-            self.table.levels(),
         )
     }
 }

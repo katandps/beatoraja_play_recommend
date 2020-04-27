@@ -1,4 +1,5 @@
 use crate::config;
+use crate::*;
 use std::collections::HashMap;
 use std::fmt;
 use std::hash::Hash;
@@ -24,15 +25,18 @@ impl<T: Countable + Sized> MakeSummary for Summary<T> {
 }
 
 pub trait SummaryCount<T> {
-    fn push(&mut self, c: &T);
+    fn tally(self, c: T) -> Self;
     fn count(&self, key: &T) -> Option<&i32>;
 }
 
 impl<T: Countable> SummaryCount<T> for Summary<T> {
-    fn push(&mut self, c: &T) {
-        let count = self.sum.entry(c.clone()).or_insert(0);
+    fn tally(self, c: T) -> Self {
+        let mut s = self;
+        let count = s.sum.entry(c.clone()).or_insert(0);
         *count += 1;
+        s
     }
+
     fn count(&self, key: &T) -> Option<&i32> {
         self.sum.get(key)
     }
@@ -71,4 +75,5 @@ where
 pub trait Countable: Hash + Eq + PartialEq + Clone {
     fn coloring(&self, s: String) -> String;
     fn vec() -> Vec<Self>;
+    fn get_from(song: &Song, score_log: &ScoreLog, updated_at: &UpdatedAt) -> Self;
 }

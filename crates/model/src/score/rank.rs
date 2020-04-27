@@ -62,6 +62,10 @@ impl Countable for ClearRank {
     fn vec() -> Vec<ClearRank> {
         (0..8).map(|x| ClearRank::from_integer(x)).collect()
     }
+
+    fn get_from(song: &Song, score_log: &ScoreLog, updated_at: &UpdatedAt) -> Self {
+        SongWithSnap::make(&song, score_log.get_snap(&song.song_id(), &updated_at)).clear_rank()
+    }
 }
 
 impl fmt::Display for ClearRank {

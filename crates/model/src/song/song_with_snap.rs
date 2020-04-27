@@ -2,11 +2,11 @@ use crate::*;
 
 pub struct SongWithSnap<'a> {
     song: &'a Song,
-    snap: &'a SnapShot,
+    snap: SnapShot,
 }
 
 impl<'a> SongWithSnap<'a> {
-    pub fn make(song: &'a Song, snap: &'a SnapShot) -> SongWithSnap<'a> {
+    pub fn make(song: &'a Song, snap: SnapShot) -> SongWithSnap<'a> {
         SongWithSnap { song, snap }
     }
 

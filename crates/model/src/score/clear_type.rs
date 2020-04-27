@@ -1,4 +1,5 @@
 use crate::summary::Countable;
+use crate::*;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -57,6 +58,12 @@ impl Countable for ClearType {
     }
     fn vec() -> Vec<ClearType> {
         (0..11).map(|x| ClearType::from_integer(x)).collect()
+    }
+    fn get_from(song: &Song, score_log: &ScoreLog, updated_at: &UpdatedAt) -> Self {
+        score_log
+            .get_snap(&song.song_id(), &updated_at)
+            .clear_type()
+            .clone()
     }
 }
 
