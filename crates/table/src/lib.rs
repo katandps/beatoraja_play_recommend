@@ -1,4 +1,4 @@
-mod file;
+mod schema;
 
 use model::*;
 use scraper::{Html, Selector};
@@ -56,12 +56,12 @@ async fn make_table(table_url: String) -> anyhow::Result<Table<Charts>> {
     }
 
     let header_text: String = reqwest::get(&header_url.to_string()).await?.text().await?;
-    let header: crate::file::Header =
+    let header: crate::schema::Header =
         serde_json::from_str(header_text.trim_start_matches('\u{feff}'))?;
 
     let data_url = header_url.join(header.data_url.as_ref()).unwrap();
     let data_text = reqwest::get(&data_url.to_string()).await?.text().await?;
-    let data: Vec<crate::file::Chart> =
+    let data: Vec<crate::schema::Chart> =
         serde_json::from_str(data_text.trim_start_matches('\u{feff}')).unwrap();
 
     let table = Table::make(

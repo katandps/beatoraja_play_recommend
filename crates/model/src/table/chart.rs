@@ -2,7 +2,7 @@ use crate::*;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Chart {
     pub(super) title: Title,
     pub(super) artist: Artist,
@@ -13,22 +13,20 @@ pub struct Chart {
 impl Chart {
     pub fn new(title: String, artist: String, md5: HashMd5, level: String) -> Chart {
         Chart {
-            title: Title::make(title),
-            artist: Artist::make(artist),
+            title: Title::new(title),
+            artist: Artist::new(artist),
             md5,
             level: Level::make(level),
         }
     }
 
-    pub fn string(&self) -> String {
-        format!("{}: {}, {}", self.title, self.artist, self.md5)
+    pub fn level(&self) -> Level {
+        self.level.clone()
     }
 }
 
 impl fmt::Display for Chart {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", self.level, self.title)
+        write!(f, "{} {} {}", self.level, self.title, self.artist)
     }
 }
-
-impl Eq for Chart {}

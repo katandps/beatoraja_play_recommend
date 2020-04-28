@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Title {
     title: String,
 }
 
 impl Title {
-    pub fn make(title: String) -> Title {
+    pub fn new(title: String) -> Title {
         Title { title }
     }
 }

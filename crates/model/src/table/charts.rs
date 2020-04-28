@@ -1,6 +1,6 @@
 use crate::*;
+use itertools::Itertools;
 use serde::de::DeserializeOwned;
-use std::collections::HashSet;
 use std::fmt;
 
 #[derive(Serialize, Deserialize)]
@@ -46,13 +46,13 @@ pub trait LevelSpecify: Sized {
 
 impl LevelSpecify for Charts {
     fn level_specified(&self, level: &Level) -> Self {
-        let charts = self
-            .charts
-            .iter()
-            .filter_map(|c| if &c.level == level { Some(c) } else { None })
-            .cloned()
-            .collect();
-        Charts::make(charts)
+        Charts::make(
+            self.charts
+                .iter()
+                .filter(|&c| &c.level == level)
+                .cloned()
+                .collect(),
+        )
     }
 }
 
@@ -62,12 +62,13 @@ pub trait ChartsLevels {
 
 impl ChartsLevels for Charts {
     fn get_levels(&self) -> Vec<Level> {
-        let mut set = HashSet::new();
-        for level in self.charts.iter().map(|c| c.level.clone()) {
-            set.insert(level);
-        }
-        let mut vec: Vec<Level> = set.iter().cloned().collect();
-        vec.sort_unstable();
+        let mut vec = self
+            .charts
+            .iter()
+            .map(Chart::level)
+            .unique()
+            .collect::<Vec<Level>>();
+        vec.sort();
         vec
     }
 }
@@ -92,7 +93,14 @@ impl MergeScore for Charts {
 
 impl fmt::Display for Charts {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let vec: Vec<String> = self.charts.iter().map(|c| c.string()).collect();
-        write!(f, "{}", vec.join("\n"))
+        write!(
+            f,
+            "{}",
+            self.charts
+                .iter()
+                .map(ToString::to_string)
+                .collect::<Vec<String>>()
+                .join("\n")
+        )
     }
 }

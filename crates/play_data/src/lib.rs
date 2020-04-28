@@ -74,8 +74,8 @@ fn make_song_data(record: Vec<schema::song::Song>) -> Songs {
         builder.push(
             HashMd5::new(row.md5),
             HashSha256::new(row.sha256),
-            Title::make(row.title),
-            Artist::make(row.artist),
+            Title::new(row.title),
+            Artist::new(row.artist),
             row.notes,
         );
     }

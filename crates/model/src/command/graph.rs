@@ -1,10 +1,10 @@
 use crate::*;
 use std::collections::HashMap;
+use std::fmt::{Display, Formatter, Result};
 
 #[derive(Deserialize, Serialize)]
 pub struct Graph<T: Countable> {
     table: String,
-    vec: Vec<T>,
     count: Vec<CountByLevel<T>>,
 }
 
@@ -19,35 +19,26 @@ pub struct CountByType {
 }
 
 impl<T: Countable> Graph<T> {
-    pub fn to_string(&self) -> String {
-        self.table.clone()
-            + "\n"
-            + self
-                .count
-                .iter()
-                .map(|l| l.to_string(&self.vec) + "\n")
-                .collect::<String>()
-                .as_str()
-    }
-
     pub fn make(table: String, count: Vec<CountByLevel<T>>) -> Self {
-        Graph {
-            table,
-            vec: T::vec(),
-            count,
-        }
+        Graph { table, count }
+    }
+}
+
+impl<T: Countable + Display> Display for Graph<T> {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        write!(
+            f,
+            "{}\n{}",
+            self.table,
+            self.count
+                .iter()
+                .map(ToString::to_string)
+                .collect::<String>()
+        )
     }
 }
 
 impl<T: Countable> CountByLevel<T> {
-    pub fn to_string(&self, vec: &Vec<T>) -> String {
-        vec.iter()
-            .flat_map(|c| match self.count.get(c) {
-                Some(c) => Some(format!("[{:>3}]", c.to_string())),
-                _ => None,
-            })
-            .collect::<String>()
-    }
     pub fn make(summary: Summary<T>) -> CountByLevel<T> {
         CountByLevel {
             count: T::vec()
@@ -63,14 +54,27 @@ impl<T: Countable> CountByLevel<T> {
     }
 }
 
-impl CountByType {
-    pub fn to_string(&self) -> String {
-        match self.count {
-            0 => "".into(),
-            _ => self.count.to_string(),
-        }
+impl<T: Countable + Display> Display for CountByLevel<T> {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        write!(
+            f,
+            "{}\n",
+            T::vec().iter().map(ToString::to_string).collect::<String>()
+        )
     }
+}
+
+impl CountByType {
     pub fn new(count: i32) -> CountByType {
         CountByType { count }
+    }
+}
+
+impl Display for CountByType {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        match self.count {
+            0 => write!(f, "[   ]"),
+            _ => write!(f, "[{:>3}]", self.count),
+        }
     }
 }

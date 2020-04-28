@@ -1,5 +1,6 @@
 use crate::*;
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
 pub(super) fn recommend<T: TableTrait>(
     songs: &Songs,
@@ -31,13 +32,19 @@ impl RecommendResult {
     pub fn new(table: String, levels: Vec<RecommendByLevel>) -> RecommendResult {
         RecommendResult { table, levels }
     }
+}
 
-    pub fn to_string(&self) -> String {
-        let mut ret = self.table.clone() + "\n";
-        for level in &self.levels {
-            ret = ret + level.to_string().as_ref();
-        }
-        ret
+impl fmt::Display for RecommendResult {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}\n{}",
+            self.table,
+            self.levels
+                .iter()
+                .map(ToString::to_string)
+                .collect::<String>()
+        )
     }
 }
 
@@ -45,14 +52,19 @@ impl RecommendByLevel {
     pub fn new(level: String, songs: Vec<RecommendSong>) -> RecommendByLevel {
         RecommendByLevel { level, songs }
     }
-    fn to_string(&self) -> String {
-        format!("{}\n", self.level)
-            + self
-                .songs
+}
+
+impl fmt::Display for RecommendByLevel {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}\n{}",
+            self.level,
+            self.songs
                 .iter()
-                .map(|s| s.to_string())
+                .map(ToString::to_string)
                 .collect::<String>()
-                .as_str()
+        )
     }
 }
 
@@ -60,8 +72,10 @@ impl RecommendSong {
     pub fn new(song: String) -> RecommendSong {
         RecommendSong { song }
     }
+}
 
-    fn to_string(&self) -> String {
-        format!("{}\n", self.song)
+impl fmt::Display for RecommendSong {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}\n", self.song)
     }
 }
