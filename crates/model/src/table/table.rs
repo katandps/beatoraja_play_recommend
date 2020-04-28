@@ -28,6 +28,13 @@ impl<T: ChartsTrait> Table<T> {
             levels,
         }
     }
+
+    fn level_specified_vec(&self) -> Vec<Table<T>> {
+        self.levels()
+            .iter()
+            .map(|level| self.level_specified(level))
+            .collect()
+    }
 }
 pub trait TableTrait:
     TableName
@@ -40,6 +47,7 @@ pub trait TableTrait:
     + DeserializeOwned
     + fmt::Display
     + MakeGraph
+    + MakeRecommend
 {
 }
 
@@ -62,15 +70,24 @@ pub trait MakeGraph {
     ) -> Graph<U>;
 }
 
+pub trait MakeRecommend {
+    fn make_recommend(
+        &self,
+        songs: &Songs,
+        score_log: &ScoreLog,
+        updated_at: &UpdatedAt,
+    ) -> RecommendResult;
+}
+
 impl<T: ChartsTrait> TableTrait for Table<T> {}
 impl<T: ChartsTrait> LevelSpecify for Table<T> {
     fn level_specified(&self, level: &Level) -> Self {
-        Table::make(
-            &self.name,
-            &self.symbol,
-            self.charts.level_specified(level),
-            None,
-        )
+        Table {
+            name: self.name.clone(),
+            symbol: self.symbol.clone(),
+            charts: self.charts.level_specified(level),
+            levels: vec![level.clone()],
+        }
     }
 }
 impl<T: ChartsTrait> TableName for Table<T> {
@@ -114,11 +131,10 @@ impl<T: ChartsTrait> MakeGraph for Table<T> {
     ) -> Graph<U> {
         Graph::make(
             self.name(),
-            self.levels()
+            self.level_specified_vec()
                 .iter()
-                .map(|level| {
-                    let song_vec = self.level_specified(level).get_song(songs);
-                    CountByLevel::make(make_summary(song_vec, score_log, updated_at))
+                .map(|table| {
+                    CountByLevel::make(make_summary(table.get_song(songs), score_log, updated_at))
                 })
                 .collect(),
         )
@@ -134,4 +150,26 @@ fn make_summary<U: Countable>(
         .iter()
         .map(|song| U::get_from(song, score_log, updated_at))
         .fold(Summary::new(), Summary::tally)
+}
+
+impl<T: ChartsTrait> MakeRecommend for Table<T> {
+    fn make_recommend(
+        &self,
+        songs: &Songs,
+        score_log: &ScoreLog,
+        updated_at: &UpdatedAt,
+    ) -> RecommendResult {
+        RecommendResult::new(
+            self.name(),
+            self.level_specified_vec()
+                .iter()
+                .map(|table| {
+                    RecommendByLevel::new(
+                        format!("{}{}", self.symbol(), table.levels.first().unwrap()),
+                        score_log.get_recommend(table, songs, updated_at),
+                    )
+                })
+                .collect(),
+        )
+    }
 }

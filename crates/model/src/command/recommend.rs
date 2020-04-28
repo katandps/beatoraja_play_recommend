@@ -7,27 +7,7 @@ pub(super) fn recommend<T: TableTrait>(
     score_log: &ScoreLog,
     updated_at: &UpdatedAt,
 ) -> CommandResult {
-    let ret_levels = table
-        .levels()
-        .iter()
-        .map(|level| {
-            let specified_table = table.level_specified(level);
-            RecommendByLevel::new(
-                format!("{}{}", table.symbol(), level),
-                score_log
-                    .filter_by_table(&specified_table, songs, updated_at)
-                    .for_recommend(updated_at)
-                    .iter()
-                    .flat_map(|snap| snap.recommend_song(songs))
-                    .collect(),
-            )
-        })
-        .collect();
-
-    CommandResult::Recommend(RecommendResult::new(
-        (&table.name()).parse().unwrap(),
-        ret_levels,
-    ))
+    CommandResult::Recommend(table.make_recommend(songs, score_log, updated_at))
 }
 
 #[derive(Deserialize, Serialize)]

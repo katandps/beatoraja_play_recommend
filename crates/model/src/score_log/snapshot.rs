@@ -45,6 +45,7 @@ impl SnapShot {
     pub fn clear_type(&self) -> &ClearType {
         &self.clear_type
     }
+    /// Snapshotをリコメンドとして返す
     pub fn recommend_song(&self, songs: &Songs) -> Option<RecommendSong> {
         match songs.song_by_sha256(&self.song_id.sha256()) {
             Some(s) => Some(RecommendSong::new(self.format(s.title()))),

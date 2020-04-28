@@ -11,7 +11,9 @@ impl ScoreLog {
             log: HashMap::new(),
         }
     }
-    pub fn filter_by_table<T: TableTrait>(
+
+    /// Tableに存在する曲ログに絞り込む ログが存在しない曲はダミーで補完される
+    fn filter_by_table<T: TableTrait>(
         &self,
         table: &T,
         songs: &Songs,
@@ -44,7 +46,8 @@ impl ScoreLog {
         }
     }
 
-    pub fn for_recommend(&self, date: &UpdatedAt) -> Vec<SnapShot> {
+    /// 更新が古い順に設定された件数だけ取得する
+    fn for_recommend(&self, date: &UpdatedAt) -> Vec<SnapShot> {
         let mut vec: Vec<SnapShot> = self
             .log
             .iter()
@@ -54,6 +57,20 @@ impl ScoreLog {
         vec.iter()
             .take(config().recommend_song_number())
             .cloned()
+            .collect()
+    }
+
+    /// リコメンドのVectorを返す
+    pub fn get_recommend<T: TableTrait>(
+        &self,
+        table: &T,
+        songs: &Songs,
+        date: &UpdatedAt,
+    ) -> Vec<RecommendSong> {
+        self.filter_by_table(table, songs, date)
+            .for_recommend(date)
+            .iter()
+            .flat_map(|snap| snap.recommend_song(songs))
             .collect()
     }
 }
