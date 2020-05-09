@@ -1,7 +1,7 @@
-use serde::Serialize;
+use crate::*;
 use std::fmt;
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MaxCombo(i32);
 
 impl MaxCombo {

@@ -1,7 +1,7 @@
-use serde::Serialize;
+use crate::*;
 use std::fmt;
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ExScore(i32);
 
 impl ExScore {

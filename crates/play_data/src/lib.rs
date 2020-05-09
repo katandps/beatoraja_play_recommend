@@ -94,16 +94,10 @@ pub fn score_log() -> ScoreLog {
 fn make_score_log(record: Vec<schema::score_log::ScoreLog>) -> ScoreLog {
     let mut builder = ScoreLogBuilder::builder();
     for row in record {
-        let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
-        let snapshot = SnapShot::from_data(
-            song_id.clone(),
-            row.clear,
-            row.score,
-            row.combo,
-            row.minbp,
-            row.date,
-        );
-        builder.push(song_id, snapshot)
+        builder.push(
+            SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode)),
+            SnapShot::from_data(row.clear, row.score, row.combo, row.minbp, row.date),
+        )
     }
     ScoreLogBuilder::build(builder)
 }

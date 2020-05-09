@@ -1,17 +1,13 @@
 use crate::*;
-use serde::ser::SerializeMap;
 use serde::Serializer;
 use std::collections::HashMap;
 
-pub struct ScoreLog {
-    log: HashMap<SongId, SnapShots>,
-}
+#[derive(Debug)]
+pub struct ScoreLog(HashMap<SongId, SnapShots>);
 
 impl ScoreLog {
     pub fn new() -> ScoreLog {
-        ScoreLog {
-            log: HashMap::new(),
-        }
+        ScoreLog(HashMap::new())
     }
 
     /// Tableに存在する曲ログに絞り込む ログが存在しない曲はダミーで補完される
@@ -38,24 +34,24 @@ impl ScoreLog {
                 )
             })
             .collect();
-        ScoreLog { log }
+        ScoreLog(log)
     }
 
     pub fn get_snap(&self, song_id: &SongId, date: &UpdatedAt) -> SnapShot {
-        match self.log.get(&song_id) {
+        match self.0.get(&song_id) {
             Some(s) => s.get_snap(date),
-            _ => SnapShot::new(song_id.clone()),
+            _ => SnapShot::new(),
         }
     }
 
     /// 更新が古い順に設定された件数だけ取得する
-    fn for_recommend(&self, date: &UpdatedAt) -> Vec<SnapShot> {
-        let mut vec: Vec<SnapShot> = self
-            .log
+    fn for_recommend(&self, date: &UpdatedAt) -> Vec<(SongId, SnapShot)> {
+        let mut vec: Vec<(SongId, SnapShot)> = self
+            .0
             .iter()
-            .map(|(_id, snaps)| snaps.get_snap(date))
+            .map(|(id, snaps)| (id.clone(), snaps.get_snap(date)))
             .collect();
-        vec.sort_by(|a, b| a.updated_at.cmp(&b.updated_at));
+        vec.sort_by(|a, b| a.1.updated_at.cmp(&b.1.updated_at));
         vec.iter()
             .take(config().recommend_song_number())
             .cloned()
@@ -72,7 +68,7 @@ impl ScoreLog {
         self.filter_by_table(table, songs, date)
             .for_recommend(date)
             .iter()
-            .flat_map(|snap| snap.recommend_song(songs))
+            .flat_map(|(song_id, snap)| snap.recommend_song(songs, &song_id))
             .collect()
     }
 }
@@ -82,40 +78,35 @@ impl Serialize for ScoreLog {
     where
         S: Serializer,
     {
-        let mut map = serializer.serialize_map(Some(self.log.len()))?;
-        for (k, v) in &self.log {
-            map.serialize_entry(&k.to_string(), &v)?;
-        }
-        map.end()
+        let l: Vec<SnapShots> = self.0.iter().map(|(_, snap)| snap.clone()).collect();
+        l.serialize(serializer)
     }
 }
+#[derive(Serialize)]
+struct Id(SongId);
 
-pub struct ScoreLogBuilder {
-    log: HashMap<SongId, SnapShots>,
-}
+pub struct ScoreLogBuilder(HashMap<SongId, SnapShots>);
 
 impl ScoreLogBuilder {
     pub fn push(&mut self, song_id: SongId, snapshot: SnapShot) {
-        if !self.log.contains_key(&song_id) {
-            self.log.insert(
-                song_id.clone(),
-                SnapShots {
-                    song_id: song_id.clone(),
-                    snapshots: Vec::new(),
-                },
-            );
-        }
-        let snapshots = self.log.get_mut(&song_id).unwrap();
-        snapshots.add(snapshot);
+        self.0
+            .entry(song_id.clone())
+            .or_insert(SnapShots {
+                song_id,
+                snapshots: Vec::new(),
+            })
+            .add(snapshot);
+    }
+
+    pub fn push_snapshots(&mut self, snapshots: SnapShots) {
+        self.0.entry(snapshots.song_id.clone()).or_insert(snapshots);
     }
 
     pub fn builder() -> ScoreLogBuilder {
-        ScoreLogBuilder {
-            log: HashMap::new(),
-        }
+        ScoreLogBuilder(HashMap::new())
     }
 
-    pub fn build(builder: ScoreLogBuilder) -> ScoreLog {
-        ScoreLog { log: builder.log }
+    pub fn build(self) -> ScoreLog {
+        ScoreLog(self.0)
     }
 }

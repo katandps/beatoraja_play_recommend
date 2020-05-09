@@ -1,6 +1,6 @@
 use crate::*;
 
-#[derive(Serialize)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct SnapShots {
     pub(super) song_id: SongId,
     pub(super) snapshots: Vec<SnapShot>,
@@ -20,7 +20,7 @@ impl SnapShots {
             .last();
         match snap {
             Some(s) => s,
-            _ => SnapShot::new(self.song_id.clone()),
+            _ => SnapShot::new(),
         }
     }
 }

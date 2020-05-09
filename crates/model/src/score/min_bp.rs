@@ -1,7 +1,7 @@
-use serde::Serialize;
+use crate::*;
 use std::fmt;
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MinBP(i32);
 
 impl MinBP {

@@ -1,8 +1,8 @@
+use crate::*;
 use chrono::{DateTime, Local, TimeZone};
-use serde::Serialize;
 use std::fmt;
 
-#[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Debug, Serialize)]
+#[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct UpdatedAt(DateTime<Local>);
 
 impl UpdatedAt {

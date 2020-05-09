@@ -1,8 +1,7 @@
 use crate::*;
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct SnapShot {
-    pub(super) song_id: SongId,
     pub(super) clear_type: ClearType,
     pub(super) score: ExScore,
     pub(super) max_combo: MaxCombo,
@@ -11,9 +10,8 @@ pub struct SnapShot {
 }
 
 impl SnapShot {
-    pub fn new(song_id: SongId) -> SnapShot {
+    pub fn new() -> SnapShot {
         SnapShot {
-            song_id,
             clear_type: ClearType::NoPlay,
             score: ExScore::new(),
             max_combo: MaxCombo::new(),
@@ -22,7 +20,6 @@ impl SnapShot {
         }
     }
     pub fn from_data(
-        song_id: SongId,
         clear_type: i32,
         score: i32,
         combo: i32,
@@ -30,7 +27,6 @@ impl SnapShot {
         timestamp: i32,
     ) -> SnapShot {
         SnapShot {
-            song_id,
             clear_type: ClearType::from_integer(clear_type),
             score: ExScore::from_score(score),
             max_combo: MaxCombo::from_combo(combo),
@@ -46,8 +42,8 @@ impl SnapShot {
         &self.clear_type
     }
     /// Snapshotをリコメンドとして返す
-    pub fn recommend_song(&self, songs: &Songs) -> Option<RecommendSong> {
-        match songs.song_by_sha256(&self.song_id.sha256()) {
+    pub fn recommend_song(&self, songs: &Songs, song_id: &SongId) -> Option<RecommendSong> {
+        match songs.song_by_sha256(&song_id.sha256()) {
             Some(s) => Some(RecommendSong::new(self.format(s.title()))),
             _ => None,
         }

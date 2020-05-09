@@ -1,29 +1,26 @@
 use crate::*;
 use std::fmt;
 
-#[derive(PartialEq, Eq, Hash, Clone, Debug, Serialize)]
-pub struct SongId {
-    sha256: HashSha256,
-    mode: PlayMode,
-}
+#[derive(PartialEq, Eq, Hash, Clone, Debug, Serialize, Deserialize)]
+pub struct SongId(HashSha256, PlayMode);
 
 impl SongId {
     pub fn new(sha256: HashSha256, mode: PlayMode) -> SongId {
-        SongId { sha256, mode }
+        SongId(sha256, mode)
     }
 
     pub fn sha256(&self) -> HashSha256 {
-        self.sha256.clone()
+        self.0.clone()
     }
 }
 
 impl fmt::Display for SongId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "[{} {}]", self.sha256, self.mode)
+        write!(f, "[{} {}]", self.0, self.1)
     }
 }
 
-#[derive(Eq, PartialEq, Hash, Clone, Debug, Serialize)]
+#[derive(Eq, PartialEq, Hash, Clone, Debug, Serialize, Deserialize)]
 pub struct PlayMode(i32);
 
 impl PlayMode {
