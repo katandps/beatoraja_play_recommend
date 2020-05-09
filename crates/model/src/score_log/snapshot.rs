@@ -1,6 +1,6 @@
 use crate::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct SnapShot {
     pub(super) song_id: SongId,
     pub(super) clear_type: ClearType,

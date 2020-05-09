@@ -59,7 +59,10 @@ impl<T: Countable + Display> Display for CountByLevel<T> {
         write!(
             f,
             "{}\n",
-            T::vec().iter().map(ToString::to_string).collect::<String>()
+            T::vec()
+                .iter()
+                .map(|l| self.count[l].to_string())
+                .collect::<String>()
         )
     }
 }

@@ -1,7 +1,7 @@
 use crate::*;
 use std::fmt;
 
-#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug, Serialize)]
 pub struct SongId {
     sha256: HashSha256,
     mode: PlayMode,
@@ -23,19 +23,17 @@ impl fmt::Display for SongId {
     }
 }
 
-#[derive(Eq, PartialEq, Hash, Clone, Debug)]
-pub struct PlayMode {
-    mode: i32,
-}
+#[derive(Eq, PartialEq, Hash, Clone, Debug, Serialize)]
+pub struct PlayMode(i32);
 
 impl PlayMode {
     pub fn new(mode: i32) -> Self {
-        PlayMode { mode }
+        PlayMode(mode)
     }
 }
 
 impl fmt::Display for PlayMode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.mode)
+        write!(f, "{}", self.0)
     }
 }

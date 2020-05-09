@@ -1,21 +1,20 @@
+use serde::Serialize;
 use std::fmt;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct ExScore {
-    score: i32,
-}
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub struct ExScore(i32);
 
 impl ExScore {
     pub fn new() -> ExScore {
-        ExScore { score: 0 }
+        ExScore(0)
     }
 
     pub fn from_score(score: i32) -> ExScore {
-        ExScore { score }
+        ExScore(score)
     }
 
     pub fn ex_score(&self) -> i32 {
-        self.score
+        self.0
     }
 }
 

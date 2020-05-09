@@ -1,5 +1,6 @@
 use crate::*;
 
+#[derive(Serialize)]
 pub struct SnapShots {
     pub(super) song_id: SongId,
     pub(super) snapshots: Vec<SnapShot>,

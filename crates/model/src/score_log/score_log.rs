@@ -1,4 +1,6 @@
 use crate::*;
+use serde::ser::SerializeMap;
+use serde::Serializer;
 use std::collections::HashMap;
 
 pub struct ScoreLog {
@@ -72,6 +74,19 @@ impl ScoreLog {
             .iter()
             .flat_map(|snap| snap.recommend_song(songs))
             .collect()
+    }
+}
+
+impl Serialize for ScoreLog {
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        let mut map = serializer.serialize_map(Some(self.log.len()))?;
+        for (k, v) in &self.log {
+            map.serialize_entry(&k.to_string(), &v)?;
+        }
+        map.end()
     }
 }
 

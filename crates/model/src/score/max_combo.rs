@@ -1,21 +1,20 @@
+use serde::Serialize;
 use std::fmt;
 
-#[derive(Clone, Debug)]
-pub struct MaxCombo {
-    combo: i32,
-}
+#[derive(Clone, Debug, Serialize)]
+pub struct MaxCombo(i32);
 
 impl MaxCombo {
     pub fn new() -> MaxCombo {
-        MaxCombo { combo: 0 }
+        MaxCombo(0)
     }
     pub fn from_combo(combo: i32) -> MaxCombo {
-        MaxCombo { combo }
+        MaxCombo(combo)
     }
 }
 
 impl fmt::Display for MaxCombo {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.combo)
+        write!(f, "{}", self.0)
     }
 }
