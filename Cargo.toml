@@ -10,7 +10,6 @@ edition = "2018"
 
 members = [
     "crates/model",
-    "crates/ui",
     "crates/send_slack",
     "crates/config",
     "crates/table",
