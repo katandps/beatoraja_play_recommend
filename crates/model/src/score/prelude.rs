@@ -8,7 +8,7 @@ pub use crate::score::{
     play_count::PlayCount,
     rank::ClearRank,
     score::Score,
-    scores::Scores,
+    scores::{ScoreRepository, Scores},
     song_id::{PlayMode, SongId},
     updated_at::UpdatedAt,
 };

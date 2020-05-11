@@ -110,3 +110,7 @@ impl ScoreLogBuilder {
         ScoreLog(self.0)
     }
 }
+
+pub trait ScoreLogRepository {
+    fn score_log(&self) -> ScoreLog;
+}

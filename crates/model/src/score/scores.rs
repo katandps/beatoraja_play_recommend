@@ -31,3 +31,7 @@ impl fmt::Display for Scores {
         write!(f, "{}", result)
     }
 }
+
+pub trait ScoreRepository {
+    fn score(&self) -> Scores;
+}

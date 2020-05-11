@@ -1,5 +1,6 @@
 use crate::out::Out;
 use model::*;
+use play_data::SqliteClient;
 use table::get_tables;
 
 #[derive(Eq, PartialEq)]
@@ -25,11 +26,12 @@ pub struct Table {
 }
 
 fn interactive() -> Out {
+    let repository = SqliteClient::new();
     play_data::player();
 
     let mut tables = get_tables(true);
-    let song_data = play_data::song_data();
-    let score_log = play_data::score_log();
+    let song_data = repository.song_data();
+    let score_log = repository.score_log();
 
     loop {
         println!("Select table to display!\n");
@@ -63,9 +65,10 @@ fn interactive() -> Out {
 }
 
 fn parameters(table: &Table, command: &Command) -> Out {
+    let repository = SqliteClient::new();
     let tables = get_tables(true);
-    let song_data = play_data::song_data();
-    let score_log = play_data::score_log();
+    let song_data = repository.song_data();
+    let score_log = repository.score_log();
 
     let table_index = table.index;
     let res = match tables.iter().nth(table_index) {

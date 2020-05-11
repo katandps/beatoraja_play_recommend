@@ -76,3 +76,7 @@ impl SongsBuilder {
         }
     }
 }
+
+pub trait SongRepository {
+    fn song_data(&self) -> Songs;
+}

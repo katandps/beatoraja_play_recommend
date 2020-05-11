@@ -5,6 +5,6 @@ pub use crate::song::{
     level::{Level, Levels},
     song::Song,
     song_with_snap::SongWithSnap,
-    songs::{Songs, SongsBuilder},
+    songs::{SongRepository, Songs, SongsBuilder},
     title::Title,
 };
