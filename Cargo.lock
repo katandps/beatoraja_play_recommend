@@ -135,10 +135,10 @@ version = "0.1.0"
 dependencies = [
  "config",
  "model",
- "play_data",
  "send_slack",
  "serde",
  "serde_json",
+ "sqlite",
  "table",
 ]
 
@@ -917,17 +917,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05da548ad6865900e60eaba7f589cc0783590a92e940c26953ff81ddbab2d677"
 
 [[package]]
-name = "play_data"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "config",
- "diesel 1.4.4",
- "diesel_codegen",
- "model",
-]
-
-[[package]]
 name = "ppv-lite86"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1369,6 +1358,17 @@ name = "smallvec"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5c2fb2ec9bcd216a5b0d0ccf31ab17b5ed1d627960edff65bbe95d3ce221cefc"
+
+[[package]]
+name = "sqlite"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "config",
+ "diesel 1.4.4",
+ "diesel_codegen",
+ "model",
+]
 
 [[package]]
 name = "stable_deref_trait"

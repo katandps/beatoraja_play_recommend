@@ -1,6 +1,6 @@
 use crate::out::Out;
 use model::*;
-use play_data::SqliteClient;
+use sqlite::SqliteClient;
 use table::get_tables;
 
 #[derive(Eq, PartialEq)]
@@ -27,7 +27,7 @@ pub struct Table {
 
 fn interactive() -> Out {
     let repository = SqliteClient::new();
-    play_data::player();
+    sqlite::player();
 
     let mut tables = get_tables(true);
     let song_data = repository.song_data();

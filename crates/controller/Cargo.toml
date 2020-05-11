@@ -11,7 +11,7 @@ model = {path = "../model"}
 config = {path = "../config"}
 send_slack = {path = "../send_slack"}
 table = {path = "../table"}
-play_data = {path = "../play_data"}
+sqlite = {path = "../sqlite"}
 
 # JSONのパース
 serde = {version = "1.0", features= ["derive"]}

@@ -6,10 +6,6 @@ use std::collections::HashMap;
 pub struct ScoreLog(HashMap<SongId, SnapShots>);
 
 impl ScoreLog {
-    pub fn new() -> ScoreLog {
-        ScoreLog(HashMap::new())
-    }
-
     /// Tableに存在する曲ログに絞り込む ログが存在しない曲はダミーで補完される
     fn filter_by_table<T: TableTrait>(
         &self,
@@ -98,6 +94,7 @@ impl ScoreLogBuilder {
             .add(snapshot);
     }
 
+    /// Deserialize用 CustomizedKeyを使用した場合HashMapがシリアライズできないので、Vec<SnapShots>から復元する
     pub fn push_snapshots(&mut self, snapshots: SnapShots) {
         self.0.entry(snapshots.song_id.clone()).or_insert(snapshots);
     }

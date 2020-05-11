@@ -14,7 +14,7 @@ members = [
     "crates/config",
     "crates/table",
     "crates/controller",
-    "crates/play_data"
+    "crates/sqlite"
 ]
 
 [dependencies]
