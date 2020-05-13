@@ -6,6 +6,7 @@ use std::string::ParseError;
 
 pub enum Output {
     JSON,
+    TEXT,
     STDOUT,
     SLACK,
 }
@@ -17,6 +18,7 @@ impl Output {
                     Ok(j) => Out::Json(j),
                     Err(_) => Out::None,
                 },
+                Self::TEXT => Out::Text(r.to_string()),
                 Self::STDOUT => {
                     println!("{}", r.to_string());
                     Out::None
@@ -45,6 +47,7 @@ impl FromStr for Output {
         match s {
             "STDOUT" => Ok(Output::STDOUT),
             "JSON" => Ok(Output::JSON),
+            "TEXT" => Ok(Output::TEXT),
             "SLACK" => Ok(Output::SLACK),
             _ => Ok(Output::STDOUT),
         }
