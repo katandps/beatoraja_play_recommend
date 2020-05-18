@@ -1,5 +1,6 @@
 use crate::*;
 
+#[derive(Clone)]
 pub struct Song {
     pub(super) hash: HashSha256,
     pub(super) title: Title,

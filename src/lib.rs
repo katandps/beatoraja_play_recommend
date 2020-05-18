@@ -1,3 +1,3 @@
 pub fn take() -> String {
-    controller::Controller::new().run().to_string()
+    controller::Controller::local().run().to_string()
 }

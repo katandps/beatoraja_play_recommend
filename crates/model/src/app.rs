@@ -1,16 +1,17 @@
 use crate::*;
 
-pub struct App<'a, T: TableTrait> {
-    pub table: &'a T,
-    pub songs: &'a Songs,
-    pub score_log: &'a ScoreLog,
+#[derive(Clone)]
+pub struct App<T> {
+    pub table: T,
+    pub songs: Songs,
+    pub score_log: ScoreLog,
 }
 
-impl<'a, T> App<'a, T>
+impl<T> App<T>
 where
     T: TableTrait,
 {
-    pub fn new(table: &'a T, songs: &'a Songs, score_log: &'a ScoreLog) -> App<'a, T> {
+    pub fn new(table: T, songs: Songs, score_log: ScoreLog) -> App<T> {
         App {
             table,
             songs,
@@ -19,7 +20,7 @@ where
     }
 }
 
-pub trait AppTrait: AppRunTrait + AppOutTrait {}
+pub trait AppTrait: AppRunTrait + AppOutTrait + Clone {}
 
 pub trait AppRunTrait {
     fn run(&mut self);
@@ -29,10 +30,9 @@ pub trait AppOutTrait {
     fn out(&mut self, command: &Command) -> CommandResult;
 }
 
-impl<'a, T> AppRunTrait for App<'a, T>
-where
-    T: TableTrait,
-{
+impl<T: TableTrait + Clone> AppTrait for App<T> {}
+
+impl<T: TableTrait> AppRunTrait for App<T> {
     fn run(&mut self) {
         println!(
             "{}",
@@ -44,15 +44,12 @@ where
     }
 }
 
-impl<'a, T> AppOutTrait for App<'a, T>
-where
-    T: TableTrait,
-{
+impl<T: TableTrait> AppOutTrait for App<T> {
     fn out(&mut self, command: &Command) -> CommandResult {
         command.func()(
-            self.songs,
-            self.table,
-            self.score_log,
+            &self.songs,
+            &self.table,
+            &self.score_log,
             &crate::UpdatedAt::from_timestamp(config().timestamp()),
         )
     }

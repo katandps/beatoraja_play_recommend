@@ -1,20 +1,22 @@
 use crate::out::Out;
 use model::*;
 use sqlite::SqliteClient;
-use table::get_tables;
 
 #[derive(Eq, PartialEq)]
-pub enum Input {
+pub enum Input<T> {
     Interactive,
-    Parameters(Table, Command),
+    Parameters(T, Command),
     ReloadTable,
 }
 
-impl Input {
+impl<T> Input<T>
+where
+    T: AppTrait,
+{
     pub fn out(&self) -> Out {
         match self {
             Self::Interactive => interactive(),
-            Self::Parameters(table, command) => parameters(table, command),
+            Self::Parameters(app, command) => Out::Result(app.clone().out(command)),
             Self::ReloadTable => reload_table(),
         }
     }
@@ -29,7 +31,7 @@ fn interactive() -> Out {
     let repository = SqliteClient::new();
     sqlite::player();
 
-    let mut tables = get_tables(true);
+    let mut tables = table::get_tables(true);
     let song_data = repository.song_data();
     let score_log = repository.score_log();
 
@@ -56,7 +58,7 @@ fn interactive() -> Out {
 
         let index: usize = selected.parse().ok().unwrap_or(tables.len() + 1);
         match tables.iter().nth(index) {
-            Some(table) => App::new(table, &song_data, &score_log).run(),
+            Some(table) => App::new(table.clone(), song_data.clone(), score_log.clone()).run(),
 
             _ => (),
         }
@@ -64,24 +66,7 @@ fn interactive() -> Out {
     Out::None
 }
 
-fn parameters(table: &Table, command: &Command) -> Out {
-    let repository = SqliteClient::new();
-    let tables = get_tables(true);
-    let song_data = repository.song_data();
-    let score_log = repository.score_log();
-
-    let table_index = table.index;
-    let res = match tables.iter().nth(table_index) {
-        Some(table) => Some(App::new(table, &song_data, &score_log).out(command)),
-        _ => None,
-    };
-    match res {
-        Some(command_result) => Out::Result(command_result),
-        _ => Out::None,
-    }
-}
-
 pub fn reload_table() -> Out {
-    let _ = get_tables(false);
+    let _ = table::get_tables(false);
     Out::None
 }

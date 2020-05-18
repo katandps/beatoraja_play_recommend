@@ -1,6 +1,7 @@
 use crate::*;
 use std::collections::HashMap;
 
+#[derive(Clone)]
 pub struct Songs {
     songs: HashMap<HashSha256, Song>,
     converter: Converter,

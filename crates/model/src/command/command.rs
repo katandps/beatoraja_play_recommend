@@ -3,7 +3,7 @@ use super::rank;
 use super::recommend;
 use crate::*;
 
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Clone)]
 pub enum Command {
     Recommend,
     LampGraph,

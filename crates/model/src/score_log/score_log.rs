@@ -2,7 +2,7 @@ use crate::*;
 use serde::Serializer;
 use std::collections::HashMap;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ScoreLog(HashMap<SongId, SnapShots>);
 
 impl ScoreLog {

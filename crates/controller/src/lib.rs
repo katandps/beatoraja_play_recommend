@@ -1,4 +1,4 @@
-use crate::input::{Input, Table};
+use crate::input::Input;
 use crate::out::Out;
 use crate::output::Output;
 use model::*;
@@ -8,27 +8,32 @@ mod input;
 mod out;
 mod output;
 
-pub struct Controller {
+pub struct Controller<T> {
     output: Output,
-    input: Input,
+    input: Input<T>,
 }
 
-impl Controller {
-    pub fn new() -> Self {
+impl Controller<App<Table<Charts>>> {
+    pub fn local() -> Self {
+        let repository = sqlite::SqliteClient::new();
+        let tables = table::get_tables(true);
+        let table_index = config().table_index();
+
         Controller {
             output: Output::from_str(config().output_type().as_ref()).unwrap(),
             input: Input::Parameters(
-                Table {
-                    index: config().table_index(),
-                },
+                App::new(
+                    tables[table_index].clone(),
+                    repository.song_data(),
+                    repository.score_log(),
+                ),
                 Command::Recommend,
             ),
         }
     }
 
     pub fn run(&self) -> Out {
-        let initial = self.input.out();
-        self.output.convert(initial)
+        self.output.convert(self.input.out())
     }
 }
 

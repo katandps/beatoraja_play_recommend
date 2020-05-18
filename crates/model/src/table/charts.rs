@@ -3,7 +3,7 @@ use itertools::Itertools;
 use serde::de::DeserializeOwned;
 use std::fmt;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Charts {
     pub(super) charts: Vec<Chart>,
 }

@@ -2,7 +2,7 @@ use crate::*;
 use serde::de::DeserializeOwned;
 use std::fmt;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Table<T> {
     name: String,
     symbol: String,
