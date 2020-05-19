@@ -135,6 +135,7 @@ version = "0.1.0"
 dependencies = [
  "config",
  "model",
+ "mysql",
  "send_slack",
  "serde",
  "serde_json",
@@ -729,6 +730,14 @@ dependencies = [
  "itertools",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "mysql"
+version = "0.1.0"
+dependencies = [
+ "config",
+ "model",
 ]
 
 [[package]]

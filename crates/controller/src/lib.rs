@@ -32,6 +32,14 @@ impl Controller<App<Table<Charts>>> {
         }
     }
 
+    pub fn for_server(table: Table<Charts>, songs: Songs, command: Command) -> Self {
+        let repository = mysql::MySQLClient::new();
+        Controller {
+            output: Output::TEXT,
+            input: Input::Parameters(App::new(table, songs, repository.score_log()), command),
+        }
+    }
+
     pub fn run(&self) -> Out {
         self.output.convert(self.input.out())
     }
