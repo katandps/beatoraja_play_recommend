@@ -15,8 +15,8 @@ members = [
     "crates/table",
     "crates/controller",
     "crates/sqlite",
-    "crates/mysql"
 ]
 
 [dependencies]
 "controller" = {path = "crates/controller"}
+"model" = {path = "crates/model"}

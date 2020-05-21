@@ -2,9 +2,9 @@ use crate::*;
 
 #[derive(Clone)]
 pub struct App<T> {
-    pub table: T,
-    pub songs: Songs,
-    pub score_log: ScoreLog,
+    table: T,
+    songs: Songs,
+    score_log: ScoreLog,
 }
 
 impl<T> App<T>

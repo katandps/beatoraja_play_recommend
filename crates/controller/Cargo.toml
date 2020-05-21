@@ -12,7 +12,6 @@ config = {path = "../config"}
 send_slack = {path = "../send_slack"}
 table = {path = "../table"}
 sqlite = {path = "../sqlite"}
-mysql = {path = "../mysql"}
 
 # JSONのパース
 serde = {version = "1.0", features= ["derive"]}
