@@ -19,17 +19,13 @@ impl Controller<App<Table<Charts>>> {
         let tables = table::get_tables(true);
         let table_index = config().table_index();
 
-        Controller {
-            output: Output::from_str(config().output_type().as_ref()).unwrap(),
-            input: Input::Parameters(
-                App::new(
-                    tables[table_index].clone(),
-                    repository.song_data(),
-                    repository.score_log(),
-                ),
-                Command::Recommend,
-            ),
-        }
+        Self::new(
+            Output::from_str(config().output_type().as_ref()).unwrap(),
+            tables[table_index].clone(),
+            repository.song_data(),
+            repository.score_log(),
+            Command::Recommend,
+        )
     }
 
     pub fn for_server(
@@ -38,14 +34,26 @@ impl Controller<App<Table<Charts>>> {
         score_log: ScoreLog,
         command: Command,
     ) -> Self {
-        Controller {
-            output: Output::TEXT,
-            input: Input::Parameters(App::new(table, songs, score_log), command),
-        }
+        Self::new(Output::TEXT, table, songs, score_log, command)
     }
 
-    pub fn run(&self) -> Out {
+    fn new(
+        output: Output,
+        table: Table<Charts>,
+        songs: Songs,
+        score_log: ScoreLog,
+        command: Command,
+    ) -> Self {
+        let input = Input::Parameters(App::new(table, songs, score_log), command);
+        Controller { output, input }
+    }
+
+    pub fn run(self) -> Out {
         self.output.convert(self.input.out())
+    }
+
+    pub async fn run_async(self) -> Out {
+        self.output.convert_async(self.input.out()).await
     }
 }
 

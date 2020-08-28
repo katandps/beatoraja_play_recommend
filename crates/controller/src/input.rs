@@ -13,18 +13,13 @@ impl<T> Input<T>
 where
     T: AppTrait,
 {
-    pub fn out(&self) -> Out {
+    pub fn out(self) -> Out {
         match self {
             Self::Interactive => interactive(),
-            Self::Parameters(app, command) => Out::Result(app.clone().out(command)),
+            Self::Parameters(mut app, command) => Out::Result(app.out(&command)),
             Self::ReloadTable => reload_table(),
         }
     }
-}
-
-#[derive(Eq, PartialEq)]
-pub struct Table {
-    pub index: usize,
 }
 
 fn interactive() -> Out {
