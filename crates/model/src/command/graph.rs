@@ -5,7 +5,7 @@ use std::fmt::{Display, Formatter, Result};
 #[derive(Deserialize, Serialize)]
 pub struct Graph<T: Countable> {
     table: String,
-    count: Vec<CountByLevel<T>>,
+    levels: Vec<CountByLevel<T>>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -20,7 +20,10 @@ pub struct CountByType {
 
 impl<T: Countable> Graph<T> {
     pub fn make(table: String, count: Vec<CountByLevel<T>>) -> Self {
-        Graph { table, count }
+        Graph {
+            table,
+            levels: count,
+        }
     }
 }
 
@@ -30,7 +33,7 @@ impl<T: Countable + Display> Display for Graph<T> {
             f,
             "{}\n{}",
             self.table,
-            self.count
+            self.levels
                 .iter()
                 .map(ToString::to_string)
                 .collect::<String>()
