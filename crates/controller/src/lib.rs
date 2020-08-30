@@ -34,7 +34,7 @@ impl Controller<App<Table<Charts>>> {
         score_log: ScoreLog,
         command: Command,
     ) -> Self {
-        Self::new(Output::TEXT, table, songs, score_log, command)
+        Self::new(Output::JSON, table, songs, score_log, command)
     }
 
     fn new(
