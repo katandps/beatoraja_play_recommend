@@ -3,3 +3,5 @@ pub use crate::table::{
     charts::{Charts, ChartsLevels, ChartsTrait, GetSong, LevelSpecify, MergeScore},
     table::{Table, TableLevels, TableName, TableSymbol, TableTrait},
 };
+
+pub type Tables = Vec<Table<Charts>>;

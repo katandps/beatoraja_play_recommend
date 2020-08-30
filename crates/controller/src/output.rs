@@ -1,6 +1,6 @@
 use crate::config;
 use crate::out::Out;
-use send_slack::{send, send_async};
+use send_slack::send_async;
 use std::str::FromStr;
 use std::string::ParseError;
 
@@ -24,16 +24,8 @@ impl Output {
                     Out::None
                 }
                 Self::SLACK => {
-                    let config = config();
-                    let result = send(
-                        config.slack_channel(),
-                        config.slack_file_name(),
-                        format!("{}", r.to_string()),
-                    );
-                    match result {
-                        Ok(_) => Out::None,
-                        Err(e) => panic!(e),
-                    }
+                    println!("Can not send to slack");
+                    Out::None
                 }
             },
             _ => Out::None,

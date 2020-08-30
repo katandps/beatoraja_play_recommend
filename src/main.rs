@@ -1,3 +1,4 @@
-pub fn main() {
-    println! {"{}", controller::Controller::local().run().to_string()}
+#[tokio::main]
+pub async fn main() {
+    println! {"{}", controller::Controller::local().await.run_async().await.to_string()};
 }

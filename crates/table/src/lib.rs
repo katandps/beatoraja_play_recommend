@@ -9,19 +9,21 @@ use url::Url;
 #[macro_use]
 extern crate anyhow;
 
-pub fn get_tables(is_local: bool) -> Vec<Table<Charts>> {
+pub async fn get_tables(is_local: bool) -> Vec<Table<Charts>> {
     match local(is_local) {
         Ok(t) => t,
-        _ => get_from_internet(),
+        _ => from_web().await,
     }
 }
 
-fn get_from_internet() -> Vec<Table<Charts>> {
-    let tables = config()
-        .table_urls()
-        .iter()
-        .flat_map(|url| make_table(url.parse().unwrap()))
-        .collect();
+async fn from_web() -> Vec<Table<Charts>> {
+    let mut tables = Vec::new();
+    for url in config().table_urls() {
+        match make_table(url.parse().unwrap()).await {
+            Ok(r) => tables.push(r),
+            _ => {}
+        }
+    }
     let mut file = File::create(config().local_cache_url()).unwrap();
     let _ = file.write(serde_json::to_string(&tables).unwrap().as_ref());
     tables
@@ -42,7 +44,6 @@ fn local(is_local: bool) -> anyhow::Result<Vec<Table<Charts>>> {
     }
 }
 
-#[tokio::main]
 async fn make_table(table_url: String) -> anyhow::Result<Table<Charts>> {
     let res = reqwest::get(&table_url).await?;
     let body = res.text().await?;
@@ -64,13 +65,12 @@ async fn make_table(table_url: String) -> anyhow::Result<Table<Charts>> {
     let data: Vec<crate::schema::Chart> =
         serde_json::from_str(data_text.trim_start_matches('\u{feff}')).unwrap();
 
-    let table = Table::make(
+    Ok(Table::make(
         header.name,
         header.symbol,
         Charts::make(data.iter().map(|c| c.to_chart()).collect()),
         header.level_order,
-    );
-    Ok(table)
+    ))
 }
 
 fn config() -> config::Config {

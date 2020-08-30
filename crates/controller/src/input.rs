@@ -15,18 +15,27 @@ where
 {
     pub fn out(self) -> Out {
         match self {
-            Self::Interactive => interactive(),
             Self::Parameters(mut app, command) => Out::Result(app.out(&command)),
-            Self::ReloadTable => reload_table(),
+            _ => unreachable!(
+                "Interactiveモード及びテーブルの再読み込みは非同期実行の場合のみ可能です"
+            ),
+        }
+    }
+
+    pub async fn out_async(self) -> Out {
+        match self {
+            Self::Interactive => interactive().await,
+            Self::Parameters(mut app, command) => Out::Result(app.out(&command)),
+            Self::ReloadTable => reload_table().await,
         }
     }
 }
 
-fn interactive() -> Out {
+async fn interactive() -> Out {
     let repository = SqliteClient::new();
     sqlite::player();
 
-    let mut tables = table::get_tables(true);
+    let mut tables = table::get_tables(true).await;
     let song_data = repository.song_data();
     let score_log = repository.score_log();
 
@@ -47,7 +56,7 @@ fn interactive() -> Out {
             break;
         }
         if selected == "r" {
-            tables = table::get_tables(false);
+            tables = table::get_tables(false).await;
             continue;
         }
 
@@ -61,7 +70,7 @@ fn interactive() -> Out {
     Out::None
 }
 
-pub fn reload_table() -> Out {
-    let _ = table::get_tables(false);
+pub async fn reload_table() -> Out {
+    let _ = table::get_tables(false).await;
     Out::None
 }

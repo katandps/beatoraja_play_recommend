@@ -14,9 +14,9 @@ pub struct Controller<T> {
 }
 
 impl Controller<App<Table<Charts>>> {
-    pub fn local() -> Self {
+    pub async fn local() -> Self {
         let repository = sqlite::SqliteClient::new();
-        let tables = table::get_tables(true);
+        let tables = table::get_tables(true).await;
         let table_index = config().table_index();
 
         Self::new(
@@ -53,7 +53,9 @@ impl Controller<App<Table<Charts>>> {
     }
 
     pub async fn run_async(self) -> Out {
-        self.output.convert_async(self.input.out()).await
+        self.output
+            .convert_async(self.input.out_async().await)
+            .await
     }
 }
 
