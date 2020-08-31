@@ -69,11 +69,10 @@ impl SongsBuilder {
         self.md5_to_sha256.insert(md5, sha256);
     }
 
-    pub fn build(builder: Self) -> Songs {
-        let hash_converter = Converter::new(builder.md5_to_sha256, builder.sha256_to_md5);
+    pub fn build(self) -> Songs {
         Songs {
-            songs: builder.songs,
-            converter: hash_converter,
+            songs: self.songs,
+            converter: Converter::new(self.md5_to_sha256, self.sha256_to_md5),
         }
     }
 }

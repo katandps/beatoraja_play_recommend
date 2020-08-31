@@ -54,24 +54,27 @@ impl ScoreRepository for SqliteClient {
             .load::<schema::score::Score>(&connection)
             .expect("Error loading schema");
 
-        let mut scores = HashMap::new();
-        for row in record {
-            scores.insert(
-                SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode)),
-                Score::new(
-                    ClearType::from_integer(row.clear),
-                    UpdatedAt::from_timestamp(row.date),
-                    Judge::new(
-                        row.epg, row.lpg, row.egr, row.lgr, row.egd, row.lgd, row.ebd, row.lbd,
-                        row.epr, row.lpr, row.ems, row.lms,
-                    ),
-                    MaxCombo::from_combo(row.combo),
-                    PlayCount::new(row.playcount),
-                    MinBP::from_bp(row.minbp),
-                ),
-            );
-        }
-        Scores::new(scores)
+        Scores::new(
+            record
+                .iter()
+                .map(|row| {
+                    (
+                        SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode)),
+                        Score::new(
+                            ClearType::from_integer(row.clear),
+                            UpdatedAt::from_timestamp(row.date),
+                            Judge::new(
+                                row.epg, row.lpg, row.egr, row.lgr, row.egd, row.lgd, row.ebd,
+                                row.lbd, row.epr, row.lpr, row.ems, row.lms,
+                            ),
+                            MaxCombo::from_combo(row.combo),
+                            PlayCount::new(row.playcount),
+                            MinBP::from_bp(row.minbp),
+                        ),
+                    )
+                })
+                .collect::<HashMap<SongId, Score>>(),
+        )
     }
 }
 
@@ -79,20 +82,21 @@ impl SongRepository for SqliteClient {
     fn song_data(&self) -> Songs {
         use schema::song::song::dsl::*;
         let connection = Self::establish_connection(&self.song_db_url);
-        let record = song
-            .load::<schema::song::Song>(&connection)
-            .expect("Error loading schema");
+        let record: Vec<schema::song::Song> = song.load(&connection).expect("Error loading schema");
 
-        SongsBuilder::build(record.iter().fold(SongsBuilder::new(), |mut builder, row| {
-            builder.push(
-                HashMd5::new(row.md5.clone()),
-                HashSha256::new(row.sha256.clone()),
-                Title::new(row.title.clone()),
-                Artist::new(row.artist.clone()),
-                row.notes,
-            );
-            builder
-        }))
+        record
+            .iter()
+            .fold(SongsBuilder::new(), |mut builder, row| {
+                builder.push(
+                    HashMd5::new(row.md5.clone()),
+                    HashSha256::new(row.sha256.clone()),
+                    Title::new(row.title.clone()),
+                    Artist::new(row.artist.clone()),
+                    row.notes,
+                );
+                builder
+            })
+            .build()
     }
 }
 
@@ -100,20 +104,19 @@ impl ScoreLogRepository for SqliteClient {
     fn score_log(&self) -> ScoreLog {
         use schema::score_log::scorelog::dsl::*;
         let connection = Self::establish_connection(&self.scorelog_db_url);
-        let record = scorelog
-            .load::<schema::score_log::ScoreLog>(&connection)
-            .expect("Error loading schema");
+        let record: Vec<schema::score_log::ScoreLog> =
+            scorelog.load(&connection).expect("Error loading schema");
 
-        ScoreLogBuilder::build(record.iter().fold(
-            ScoreLogBuilder::builder(),
-            |mut builder, row| {
+        record
+            .iter()
+            .fold(ScoreLogBuilder::builder(), |mut builder, row| {
                 builder.push(
                     SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode)),
                     SnapShot::from_data(row.clear, row.score, row.combo, row.minbp, row.date),
                 );
                 builder
-            },
-        ))
+            })
+            .build()
     }
 }
 
