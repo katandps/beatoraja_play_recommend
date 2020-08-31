@@ -21,7 +21,7 @@ async fn from_web() -> Vec<Table<Charts>> {
     for url in config().table_urls() {
         match make_table(url.parse().unwrap()).await {
             Ok(r) => tables.push(r),
-            _ => {}
+            Err(e) => eprintln!("{}", e),
         }
     }
     let mut file = File::create(config().local_cache_url()).unwrap();
