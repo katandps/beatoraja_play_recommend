@@ -1,4 +1,5 @@
 use crate::*;
+use itertools::Itertools;
 use serde::Serializer;
 use std::collections::HashMap;
 
@@ -42,15 +43,11 @@ impl ScoreLog {
 
     /// 更新が古い順に設定された件数だけ取得する
     fn for_recommend(&self, date: &UpdatedAt) -> Vec<(SongId, SnapShot)> {
-        let mut vec: Vec<(SongId, SnapShot)> = self
-            .0
+        self.0
             .iter()
             .map(|(id, snaps)| (id.clone(), snaps.get_snap(date)))
-            .collect();
-        vec.sort_by(|a, b| a.1.updated_at.cmp(&b.1.updated_at));
-        vec.iter()
+            .sorted_by(|a, b| a.1.updated_at.cmp(&b.1.updated_at))
             .take(config().recommend_song_number())
-            .cloned()
             .collect()
     }
 
@@ -74,26 +71,16 @@ impl ScoreLog {
         songs: &Songs,
         date: &UpdatedAt,
     ) -> Vec<SongDetail> {
-        let mut v: Vec<(SongId, SnapShot)> = self
-            .filter_by_table(table, songs, date)
+        self.filter_by_table(table, songs, date)
             .0
             .iter()
-            .map(|(id, snaps)| (id.clone(), snaps.get_snap(date)))
-            .collect();
-        v.sort_by(|(a_id, _a_snap), (b_id, _b_snap)| {
-            songs
-                .song_by_sha256(&a_id.sha256())
-                .unwrap()
-                .title()
-                .cmp(&songs.song_by_sha256(&b_id.sha256()).unwrap().title())
-        });
-        v.iter()
-            .map(|(id, snap)| {
+            .map(|(id, snaps)| {
                 SongDetail::new(
                     songs.song_by_sha256(&id.sha256()).unwrap().title(),
-                    snap.clone(),
+                    snaps.get_snap(date),
                 )
             })
+            .sorted_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()))
             .collect()
     }
 }

@@ -25,7 +25,7 @@ pub struct DetailByLevel {
 
 #[derive(Deserialize, Serialize)]
 pub struct SongDetail {
-    title: String,
+    pub title: String,
     snap: SnapShot,
 }
 
