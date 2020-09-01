@@ -24,7 +24,7 @@ impl Controller<App<Table<Charts>>> {
             tables[table_index].clone(),
             repository.song_data(),
             repository.score_log(),
-            Command::Recommend,
+            Command::Detail,
         )
     }
 

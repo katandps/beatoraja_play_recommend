@@ -79,6 +79,10 @@ pub trait MakeRecommend {
     ) -> RecommendResult;
 }
 
+pub trait MakeDetail {
+    fn make_detail();
+}
+
 impl<T: ChartsTrait> TableTrait for Table<T> {}
 impl<T: ChartsTrait> LevelSpecify for Table<T> {
     fn level_specified(&self, level: &Level) -> Self {

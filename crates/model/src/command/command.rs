@@ -1,3 +1,4 @@
+use super::detail;
 use super::lamp;
 use super::rank;
 use super::recommend;
@@ -8,6 +9,7 @@ pub enum Command {
     Recommend,
     LampGraph,
     RankGraph,
+    Detail,
 }
 
 pub type CommandFunc<T> = fn(&Songs, &T, &ScoreLog, &UpdatedAt) -> CommandResult;
@@ -22,6 +24,7 @@ impl Command {
             Self::Recommend => recommend::recommend,
             Self::LampGraph => lamp::lamp,
             Self::RankGraph => rank::rank,
+            Self::Detail => detail::detail,
         }
     }
 }
@@ -31,6 +34,7 @@ pub enum CommandResult {
     Recommend(RecommendResult),
     LampGraph(Graph<ClearType>),
     RankGraph(Graph<ClearRank>),
+    Detail(DetailResult),
 }
 
 impl CommandResult {
@@ -39,6 +43,7 @@ impl CommandResult {
             Self::Recommend(r) => r.to_string(),
             Self::LampGraph(r) => r.to_string(),
             Self::RankGraph(r) => r.to_string(),
+            Self::Detail(r) => r.to_string(),
         }
     }
 }
