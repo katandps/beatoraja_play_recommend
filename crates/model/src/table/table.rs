@@ -48,6 +48,7 @@ pub trait TableTrait:
     + fmt::Display
     + MakeGraph
     + MakeRecommend
+    + MakeDetail
 {
 }
 
@@ -80,7 +81,12 @@ pub trait MakeRecommend {
 }
 
 pub trait MakeDetail {
-    fn make_detail();
+    fn make_detail(
+        &self,
+        songs: &Songs,
+        score_log: &ScoreLog,
+        updated_at: &UpdatedAt,
+    ) -> DetailResult;
 }
 
 impl<T: ChartsTrait> TableTrait for Table<T> {}
@@ -171,6 +177,28 @@ impl<T: ChartsTrait> MakeRecommend for Table<T> {
                     RecommendByLevel::new(
                         format!("{}{}", self.symbol(), table.levels.first().unwrap()),
                         score_log.get_recommend(table, songs, updated_at),
+                    )
+                })
+                .collect(),
+        )
+    }
+}
+
+impl<T: ChartsTrait> MakeDetail for Table<T> {
+    fn make_detail(
+        &self,
+        songs: &Songs,
+        score_log: &ScoreLog,
+        updated_at: &UpdatedAt,
+    ) -> DetailResult {
+        DetailResult::new(
+            self.name(),
+            self.level_specified_vec()
+                .iter()
+                .map(|table| {
+                    DetailByLevel::new(
+                        format!("{}{}", self.symbol(), table.levels.first().unwrap()),
+                        score_log.get_detail(table, songs, updated_at),
                     )
                 })
                 .collect(),

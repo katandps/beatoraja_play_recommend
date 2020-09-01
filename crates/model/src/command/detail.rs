@@ -8,10 +8,7 @@ pub(super) fn detail<T: TableTrait>(
     score_log: &ScoreLog,
     updated_at: &UpdatedAt,
 ) -> CommandResult {
-    CommandResult::Detail(DetailResult {
-        table: "test".into(),
-        levels: Vec::new(),
-    })
+    CommandResult::Detail(table.make_detail(songs, score_log, updated_at))
 }
 
 #[derive(Deserialize, Serialize)]
@@ -29,17 +26,57 @@ pub struct DetailByLevel {
 #[derive(Deserialize, Serialize)]
 pub struct SongDetail {
     title: String,
-    level: String,
-    ex_score: i32,
-    max_score: i32,
-    combo: i32,
-    total_notes: i32,
-    bp: i32,
-    updated_at: UpdatedAt,
+    snap: SnapShot,
+}
+
+impl DetailResult {
+    pub fn new(table: String, levels: Vec<DetailByLevel>) -> DetailResult {
+        DetailResult { table, levels }
+    }
+}
+
+impl DetailByLevel {
+    pub fn new(level: String, songs: Vec<SongDetail>) -> DetailByLevel {
+        DetailByLevel { level, songs }
+    }
+}
+
+impl SongDetail {
+    pub fn new(title: String, snap: SnapShot) -> SongDetail {
+        SongDetail { title, snap }
+    }
 }
 
 impl fmt::Display for DetailResult {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "hogehoge")
+        write!(
+            f,
+            "{}\n{}",
+            self.table,
+            self.levels
+                .iter()
+                .map(ToString::to_string)
+                .collect::<String>()
+        )
+    }
+}
+
+impl fmt::Display for DetailByLevel {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}\n{}",
+            self.level,
+            self.songs
+                .iter()
+                .map(ToString::to_string)
+                .collect::<String>()
+        )
+    }
+}
+
+impl fmt::Display for SongDetail {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}\n", self.snap.format(self.title.clone()))
     }
 }

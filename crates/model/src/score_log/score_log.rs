@@ -67,6 +67,35 @@ impl ScoreLog {
             .flat_map(|(song_id, snap)| snap.recommend_song(songs, &song_id))
             .collect()
     }
+
+    pub fn get_detail<T: TableTrait>(
+        &self,
+        table: &T,
+        songs: &Songs,
+        date: &UpdatedAt,
+    ) -> Vec<SongDetail> {
+        let mut v: Vec<(SongId, SnapShot)> = self
+            .filter_by_table(table, songs, date)
+            .0
+            .iter()
+            .map(|(id, snaps)| (id.clone(), snaps.get_snap(date)))
+            .collect();
+        v.sort_by(|(a_id, _a_snap), (b_id, _b_snap)| {
+            songs
+                .song_by_sha256(&a_id.sha256())
+                .unwrap()
+                .title()
+                .cmp(&songs.song_by_sha256(&b_id.sha256()).unwrap().title())
+        });
+        v.iter()
+            .map(|(id, snap)| {
+                SongDetail::new(
+                    songs.song_by_sha256(&id.sha256()).unwrap().title(),
+                    snap.clone(),
+                )
+            })
+            .collect()
+    }
 }
 
 impl Serialize for ScoreLog {
