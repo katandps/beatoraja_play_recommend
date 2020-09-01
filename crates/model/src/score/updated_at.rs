@@ -16,6 +16,6 @@ impl UpdatedAt {
 
 impl fmt::Display for UpdatedAt {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
+        write!(f, "{}", self.0.format("%Y-%m-%d %H:%M:%S"))
     }
 }
