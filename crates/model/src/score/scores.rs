@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::fmt;
 
 /// 最新スコアのみが入っている
+#[derive(Clone)]
 pub struct Scores {
     scores: HashMap<SongId, Score>,
 }

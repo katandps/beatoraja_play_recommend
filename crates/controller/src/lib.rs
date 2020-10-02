@@ -23,6 +23,7 @@ impl Controller<App<Table<Charts>>> {
             Output::from_str(config().output_type().as_ref()).unwrap(),
             tables[table_index].clone(),
             repository.song_data(),
+            repository.score(),
             repository.score_log(),
             Command::Detail,
         )
@@ -31,20 +32,22 @@ impl Controller<App<Table<Charts>>> {
     pub fn for_server(
         table: Table<Charts>,
         songs: Songs,
+        scores: Scores,
         score_log: ScoreLog,
         command: Command,
     ) -> Self {
-        Self::new(Output::JSON, table, songs, score_log, command)
+        Self::new(Output::JSON, table, songs, scores, score_log, command)
     }
 
     fn new(
         output: Output,
         table: Table<Charts>,
         songs: Songs,
+        scores: Scores,
         score_log: ScoreLog,
         command: Command,
     ) -> Self {
-        let input = Input::Parameters(App::new(table, songs, score_log), command);
+        let input = Input::Parameters(App::new(table, songs, scores, score_log), command);
         Controller { output, input }
     }
 

@@ -4,17 +4,16 @@ use crate::*;
 pub struct App<T> {
     table: T,
     songs: Songs,
+    scores: Scores,
     score_log: ScoreLog,
 }
 
-impl<T> App<T>
-where
-    T: TableTrait,
-{
-    pub fn new(table: T, songs: Songs, score_log: ScoreLog) -> App<T> {
+impl<T: TableTrait> App<T> {
+    pub fn new(table: T, songs: Songs, scores: Scores, score_log: ScoreLog) -> App<T> {
         App {
             table,
             songs,
+            scores,
             score_log,
         }
     }

@@ -38,6 +38,7 @@ async fn interactive() -> Out {
     let mut tables = table::get_tables(true).await;
     let song_data = repository.song_data();
     let score_log = repository.score_log();
+    let scores = repository.score();
 
     loop {
         println!("Select table to display!\n");
@@ -62,7 +63,13 @@ async fn interactive() -> Out {
 
         let index: usize = selected.parse().ok().unwrap_or(tables.len() + 1);
         match tables.iter().nth(index) {
-            Some(table) => App::new(table.clone(), song_data.clone(), score_log.clone()).run(),
+            Some(table) => App::new(
+                table.clone(),
+                song_data.clone(),
+                scores.clone(),
+                score_log.clone(),
+            )
+            .run(),
 
             _ => (),
         }
