@@ -21,6 +21,9 @@ impl Scores {
             _ => None,
         }
     }
+    pub fn get(&self, song_id: &SongId) -> Option<Score> {
+        self.scores.get(song_id).map(|s| s.clone())
+    }
 }
 
 impl fmt::Display for Scores {

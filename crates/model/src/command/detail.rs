@@ -6,11 +6,11 @@ use std::fmt;
 pub(super) fn detail<T: TableTrait>(
     songs: &Songs,
     table: &T,
-    _scores: &Scores,
+    scores: &Scores,
     score_log: &ScoreLog,
     updated_at: &UpdatedAt,
 ) -> CommandResult {
-    CommandResult::Detail(table.make_detail(songs, score_log, updated_at))
+    CommandResult::Detail(table.make_detail(songs, scores, score_log, updated_at))
 }
 
 #[derive(Deserialize, Serialize)]
@@ -33,6 +33,7 @@ pub struct SongDetail {
     min_bp: MinBP,
     score: ExScore,
     updated_at: UpdatedAt,
+    play_count: PlayCount,
 }
 
 impl DetailResult {
@@ -48,14 +49,26 @@ impl DetailByLevel {
 }
 
 impl SongDetail {
-    pub fn new(title: String, snap: SnapShot) -> SongDetail {
-        SongDetail {
-            title,
-            clear_type: snap.clear_type,
-            max_combo: snap.max_combo,
-            min_bp: snap.min_bp,
-            score: snap.score,
-            updated_at: snap.updated_at,
+    pub fn new(title: String, snap: SnapShot, score: Option<Score>) -> SongDetail {
+        match score {
+            Some(s) => SongDetail {
+                title,
+                clear_type: s.clear,
+                max_combo: s.max_combo,
+                min_bp: s.min_bp,
+                score: s.judge.ex_score(),
+                updated_at: s.updated_at,
+                play_count: s.play_count,
+            },
+            None => SongDetail {
+                title,
+                clear_type: snap.clear_type,
+                max_combo: snap.max_combo,
+                min_bp: snap.min_bp,
+                score: snap.score,
+                updated_at: snap.updated_at,
+                play_count: PlayCount::new(0),
+            },
         }
     }
 }

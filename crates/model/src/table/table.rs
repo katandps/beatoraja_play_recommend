@@ -84,6 +84,7 @@ pub trait MakeDetail {
     fn make_detail(
         &self,
         songs: &Songs,
+        scores: &Scores,
         score_log: &ScoreLog,
         updated_at: &UpdatedAt,
     ) -> DetailResult;
@@ -188,6 +189,7 @@ impl<T: ChartsTrait> MakeDetail for Table<T> {
     fn make_detail(
         &self,
         songs: &Songs,
+        scores: &Scores,
         score_log: &ScoreLog,
         updated_at: &UpdatedAt,
     ) -> DetailResult {
@@ -198,7 +200,7 @@ impl<T: ChartsTrait> MakeDetail for Table<T> {
                 .map(|table| {
                     DetailByLevel::new(
                         format!("{}{}", self.symbol(), table.levels.first().unwrap()),
-                        score_log.get_detail(table, songs, updated_at),
+                        score_log.get_detail(table, scores, songs, updated_at),
                     )
                 })
                 .collect(),

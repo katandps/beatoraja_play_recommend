@@ -3,19 +3,13 @@ use std::cmp::Ordering;
 use std::fmt;
 
 #[derive(Clone, Debug)]
-pub enum Score {
-    ScoreImpl(ScoreImpl),
-    Dummy,
-}
-
-#[derive(Clone, Debug)]
-pub struct ScoreImpl {
-    clear: ClearType,
-    updated_at: UpdatedAt,
-    judge: Judge,
-    max_combo: MaxCombo,
-    play_count: PlayCount,
-    min_bp: MinBP,
+pub struct Score {
+    pub clear: ClearType,
+    pub updated_at: UpdatedAt,
+    pub judge: Judge,
+    pub max_combo: MaxCombo,
+    pub play_count: PlayCount,
+    pub min_bp: MinBP,
 }
 
 impl Score {
@@ -27,32 +21,20 @@ impl Score {
         play_count: PlayCount,
         min_bp: MinBP,
     ) -> Score {
-        Score::ScoreImpl(ScoreImpl {
+        Score {
             clear,
             updated_at,
             judge,
             max_combo,
             play_count,
             min_bp,
-        })
-    }
-
-    pub fn clear_type(&self) -> &ClearType {
-        match self {
-            Score::ScoreImpl(score) => &score.clear,
-            _ => &ClearType::Failed,
         }
     }
 }
 
 impl Ord for Score {
     fn cmp(&self, other: &Self) -> Ordering {
-        match (self, other) {
-            (Score::ScoreImpl(self_score), Score::ScoreImpl(other_score)) => {
-                self_score.updated_at.cmp(&other_score.updated_at)
-            }
-            _ => Ordering::Equal,
-        }
+        self.updated_at.cmp(&other.updated_at)
     }
 }
 
@@ -64,12 +46,7 @@ impl PartialOrd for Score {
 
 impl PartialEq for Score {
     fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Score::ScoreImpl(self_score), Score::ScoreImpl(other_score)) => {
-                self_score.updated_at == other_score.updated_at
-            }
-            _ => true,
-        }
+        self.updated_at == other.updated_at
     }
 }
 
@@ -77,17 +54,14 @@ impl Eq for Score {}
 
 impl fmt::Display for Score {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Score::ScoreImpl(score) => write!(
-                f,
-                "{} {} score:{} bp:{} combo:{}",
-                score.updated_at,
-                score.clear,
-                score.judge.ex_score(),
-                score.min_bp,
-                score.max_combo
-            ),
-            _ => write!(f, "dummy score"),
-        }
+        write!(
+            f,
+            "{} {} score:{} bp:{} combo:{}",
+            self.updated_at,
+            self.clear,
+            self.judge.ex_score(),
+            self.min_bp,
+            self.max_combo
+        )
     }
 }

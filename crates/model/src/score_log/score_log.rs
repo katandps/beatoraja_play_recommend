@@ -68,6 +68,7 @@ impl ScoreLog {
     pub fn get_detail<T: TableTrait>(
         &self,
         table: &T,
+        scores: &Scores,
         songs: &Songs,
         date: &UpdatedAt,
     ) -> Vec<SongDetail> {
@@ -78,6 +79,7 @@ impl ScoreLog {
                 SongDetail::new(
                     songs.song_by_sha256(&id.sha256()).unwrap().title(),
                     snaps.get_snap(date),
+                    scores.get(id),
                 )
             })
             .sorted_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()))
