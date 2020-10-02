@@ -12,7 +12,7 @@ pub enum Command {
     Detail,
 }
 
-pub type CommandFunc<T> = fn(&Songs, &T, &ScoreLog, &UpdatedAt) -> CommandResult;
+pub type CommandFunc<T> = fn(&Songs, &T, &Scores, &ScoreLog, &UpdatedAt) -> CommandResult;
 
 impl Command {
     pub fn all() -> Vec<Command> {

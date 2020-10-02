@@ -6,6 +6,7 @@ use std::fmt;
 pub(super) fn detail<T: TableTrait>(
     songs: &Songs,
     table: &T,
+    _scores: &Scores,
     score_log: &ScoreLog,
     updated_at: &UpdatedAt,
 ) -> CommandResult {

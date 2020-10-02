@@ -3,6 +3,7 @@ use crate::*;
 pub(super) fn rank<T: TableTrait>(
     songs: &Songs,
     table: &T,
+    _score: &Scores,
     score_log: &ScoreLog,
     updated_at: &UpdatedAt,
 ) -> CommandResult {

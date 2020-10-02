@@ -48,6 +48,7 @@ impl<T: TableTrait> AppOutTrait for App<T> {
         command.func()(
             &self.songs,
             &self.table,
+            &self.scores,
             &self.score_log,
             &crate::UpdatedAt::from_timestamp(config().timestamp()),
         )
