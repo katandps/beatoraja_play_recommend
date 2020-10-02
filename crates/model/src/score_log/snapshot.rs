@@ -2,11 +2,11 @@ use crate::*;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct SnapShot {
-    pub(super) clear_type: ClearType,
-    pub(super) score: ExScore,
-    pub(super) max_combo: MaxCombo,
-    pub(super) min_bp: MinBP,
-    pub(super) updated_at: UpdatedAt,
+    pub clear_type: ClearType,
+    pub score: ExScore,
+    pub max_combo: MaxCombo,
+    pub min_bp: MinBP,
+    pub updated_at: UpdatedAt,
 }
 
 impl SnapShot {

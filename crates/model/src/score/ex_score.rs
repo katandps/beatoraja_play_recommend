@@ -1,7 +1,7 @@
 use crate::*;
 use std::fmt;
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ExScore(i32);
 
 impl ExScore {

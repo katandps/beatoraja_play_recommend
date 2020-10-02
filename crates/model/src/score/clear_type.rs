@@ -3,7 +3,7 @@ use crate::*;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Deserialize, Serialize, Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Clone, Copy, Debug, Hash, Eq, PartialEq)]
 pub enum ClearType {
     NoPlay,
     Failed,

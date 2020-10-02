@@ -1,4 +1,5 @@
 use crate::*;
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -26,7 +27,11 @@ pub struct DetailByLevel {
 #[derive(Deserialize, Serialize)]
 pub struct SongDetail {
     pub title: String,
-    snap: SnapShot,
+    clear_type: ClearType,
+    max_combo: MaxCombo,
+    min_bp: MinBP,
+    score: ExScore,
+    updated_at: UpdatedAt,
 }
 
 impl DetailResult {
@@ -43,40 +48,35 @@ impl DetailByLevel {
 
 impl SongDetail {
     pub fn new(title: String, snap: SnapShot) -> SongDetail {
-        SongDetail { title, snap }
+        SongDetail {
+            title,
+            clear_type: snap.clear_type,
+            max_combo: snap.max_combo,
+            min_bp: snap.min_bp,
+            score: snap.score,
+            updated_at: snap.updated_at,
+        }
     }
 }
 
 impl fmt::Display for DetailResult {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{}\n{}",
-            self.table,
-            self.levels
-                .iter()
-                .map(ToString::to_string)
-                .collect::<String>()
-        )
+        write!(f, "{}\n{}", self.table, self.levels.iter().join("\n"))
     }
 }
 
 impl fmt::Display for DetailByLevel {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{}\n{}",
-            self.level,
-            self.songs
-                .iter()
-                .map(ToString::to_string)
-                .collect::<String>()
-        )
+        write!(f, "{}\n{}", self.level, self.songs.iter().join("\n"))
     }
 }
 
 impl fmt::Display for SongDetail {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}\n", self.snap.format(self.title.clone()))
+        write!(
+            f,
+            "{}\n{} {} score:{} bp:{} combo:{}",
+            self.title, self.updated_at, self.clear_type, self.score, self.min_bp, self.max_combo
+        )
     }
 }
