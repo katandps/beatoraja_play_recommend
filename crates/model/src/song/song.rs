@@ -19,4 +19,8 @@ impl Song {
     pub fn artist(&self) -> String {
         self.artist.to_string()
     }
+
+    pub fn notes(&self) -> i32 {
+        self.notes
+    }
 }

@@ -28,6 +28,7 @@ pub struct DetailByLevel {
 #[derive(Deserialize, Serialize)]
 pub struct SongDetail {
     pub title: String,
+    total_notes: i32,
     clear_type: ClearType,
     max_combo: MaxCombo,
     min_bp: MinBP,
@@ -49,10 +50,11 @@ impl DetailByLevel {
 }
 
 impl SongDetail {
-    pub fn new(title: String, snap: SnapShot, score: Option<Score>) -> SongDetail {
+    pub fn new(song: &Song, snap: SnapShot, score: Option<Score>) -> SongDetail {
         match score {
             Some(s) => SongDetail {
-                title,
+                title: song.title(),
+                total_notes: song.notes(),
                 clear_type: s.clear,
                 max_combo: s.max_combo,
                 min_bp: s.min_bp,
@@ -61,7 +63,8 @@ impl SongDetail {
                 play_count: s.play_count,
             },
             None => SongDetail {
-                title,
+                title: song.title(),
+                total_notes: song.notes(),
                 clear_type: snap.clear_type,
                 max_combo: snap.max_combo,
                 min_bp: snap.min_bp,

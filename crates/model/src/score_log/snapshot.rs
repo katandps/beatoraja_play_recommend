@@ -42,11 +42,8 @@ impl SnapShot {
         &self.clear_type
     }
     /// Snapshotをリコメンドとして返す
-    pub fn recommend_song(&self, songs: &Songs, song_id: &SongId) -> Option<RecommendSong> {
-        match songs.song_by_sha256(&song_id.sha256()) {
-            Some(s) => Some(RecommendSong::new(self.format(s.title()))),
-            _ => None,
-        }
+    pub fn recommend_song(&self, songs: &Songs, song_id: &SongId) -> RecommendSong {
+        RecommendSong::new(self.format(songs.song_by_id(song_id).title()))
     }
     pub(crate) fn format(&self, title: String) -> String {
         format!(

@@ -61,7 +61,7 @@ impl ScoreLog {
         self.filter_by_table(table, songs, date)
             .for_recommend(date)
             .iter()
-            .flat_map(|(song_id, snap)| snap.recommend_song(songs, &song_id))
+            .map(|(song_id, snap)| snap.recommend_song(songs, &song_id))
             .collect()
     }
 
@@ -76,11 +76,7 @@ impl ScoreLog {
             .0
             .iter()
             .map(|(id, snaps)| {
-                SongDetail::new(
-                    songs.song_by_sha256(&id.sha256()).unwrap().title(),
-                    snaps.get_snap(date),
-                    scores.get(id),
-                )
+                SongDetail::new(songs.song_by_id(id), snaps.get_snap(date), scores.get(id))
             })
             .sorted_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()))
             .collect()

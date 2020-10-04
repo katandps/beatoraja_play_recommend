@@ -15,6 +15,10 @@ impl Songs {
         }
     }
 
+    pub fn song_by_id(&self, id: &SongId) -> &Song {
+        self.songs.get(&id.sha256()).unwrap()
+    }
+
     pub fn song_by_sha256(&self, hash: &HashSha256) -> Option<&Song> {
         self.songs.get(hash)
     }
