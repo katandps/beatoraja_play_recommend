@@ -53,13 +53,14 @@ impl ScoreRepository for SqliteClient {
         let record = score
             .load::<schema::score::Score>(&connection)
             .expect("Error loading schema");
-
+        let score_log = self.score_log();
         Scores::new(
             record
                 .iter()
                 .map(|row| {
+                    let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
                     (
-                        SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode)),
+                        song_id.clone(),
                         Score::new(
                             ClearType::from_integer(row.clear),
                             UpdatedAt::from_timestamp(row.date),
@@ -70,6 +71,7 @@ impl ScoreRepository for SqliteClient {
                             MaxCombo::from_combo(row.combo),
                             PlayCount::new(row.playcount),
                             MinBP::from_bp(row.minbp),
+                            score_log.get_snaps(&song_id),
                         ),
                     )
                 })

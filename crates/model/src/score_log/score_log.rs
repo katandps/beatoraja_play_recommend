@@ -34,6 +34,10 @@ impl ScoreLog {
         ScoreLog(log)
     }
 
+    pub fn get_snaps(&self, song_id: &SongId) -> SnapShots {
+        self.0.get(song_id).unwrap().clone()
+    }
+
     pub fn get_snap(&self, song_id: &SongId, date: &UpdatedAt) -> SnapShot {
         match self.0.get(&song_id) {
             Some(s) => s.get_snap(date),
