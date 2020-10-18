@@ -53,6 +53,9 @@ impl Judge {
             },
         }
     }
+    pub fn default() -> Judge {
+        Self::new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    }
     pub fn ex_score(&self) -> ExScore {
         let score = match self {
             Judge::JudgeImpl { judge } => {

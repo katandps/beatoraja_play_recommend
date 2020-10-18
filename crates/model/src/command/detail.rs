@@ -7,10 +7,10 @@ pub(super) fn detail<T: TableTrait>(
     songs: &Songs,
     table: &T,
     scores: &Scores,
-    score_log: &ScoreLog,
+    _score_log: &ScoreLog,
     updated_at: &UpdatedAt,
 ) -> CommandResult {
-    CommandResult::Detail(table.make_detail(songs, scores, score_log, updated_at))
+    CommandResult::Detail(table.make_detail(songs, scores, updated_at))
 }
 
 #[derive(Deserialize, Serialize)]
@@ -50,28 +50,16 @@ impl DetailByLevel {
 }
 
 impl SongDetail {
-    pub fn new(song: &Song, snap: SnapShot, score: Option<Score>) -> SongDetail {
-        match score {
-            Some(s) => SongDetail {
-                title: song.title(),
-                total_notes: song.notes(),
-                clear_type: s.clear,
-                max_combo: s.max_combo,
-                min_bp: s.min_bp,
-                score: s.judge.ex_score(),
-                updated_at: s.updated_at,
-                play_count: s.play_count,
-            },
-            None => SongDetail {
-                title: song.title(),
-                total_notes: song.notes(),
-                clear_type: snap.clear_type,
-                max_combo: snap.max_combo,
-                min_bp: snap.min_bp,
-                score: snap.score,
-                updated_at: snap.updated_at,
-                play_count: PlayCount::new(0),
-            },
+    pub fn new(song: &Song, score: Score) -> SongDetail {
+        SongDetail {
+            title: song.title(),
+            total_notes: song.notes(),
+            clear_type: score.clear,
+            max_combo: score.max_combo,
+            min_bp: score.min_bp,
+            score: score.judge.ex_score(),
+            updated_at: score.updated_at,
+            play_count: score.play_count,
         }
     }
 }

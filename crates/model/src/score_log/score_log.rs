@@ -24,10 +24,7 @@ impl ScoreLog {
             .map(|song_id| {
                 (
                     song_id.clone(),
-                    SnapShots {
-                        song_id: song_id.clone(),
-                        snapshots: vec![self.get_snap(&song_id, date)],
-                    },
+                    SnapShots::new(vec![self.get_snap(&song_id, date)]),
                 )
             })
             .collect();
@@ -68,23 +65,6 @@ impl ScoreLog {
             .map(|(song_id, snap)| snap.recommend_song(songs, &song_id))
             .collect()
     }
-
-    pub fn get_detail<T: TableTrait>(
-        &self,
-        table: &T,
-        scores: &Scores,
-        songs: &Songs,
-        date: &UpdatedAt,
-    ) -> Vec<SongDetail> {
-        self.filter_by_table(table, songs, date)
-            .0
-            .iter()
-            .map(|(id, snaps)| {
-                SongDetail::new(songs.song_by_id(id), snaps.get_snap(date), scores.get(id))
-            })
-            .sorted_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()))
-            .collect()
-    }
 }
 
 impl Serialize for ScoreLog {
@@ -105,16 +85,8 @@ impl ScoreLogBuilder {
     pub fn push(&mut self, song_id: SongId, snapshot: SnapShot) {
         self.0
             .entry(song_id.clone())
-            .or_insert(SnapShots {
-                song_id,
-                snapshots: Vec::new(),
-            })
+            .or_insert(SnapShots::default())
             .add(snapshot);
-    }
-
-    /// Deserialize用 CustomizedKeyを使用した場合HashMapがシリアライズできないので、Vec<SnapShots>から復元する
-    pub fn push_snapshots(&mut self, snapshots: SnapShots) {
-        self.0.entry(snapshots.song_id.clone()).or_insert(snapshots);
     }
 
     pub fn builder() -> ScoreLogBuilder {

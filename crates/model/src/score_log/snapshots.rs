@@ -1,19 +1,24 @@
 use crate::*;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct SnapShots {
-    pub(super) song_id: SongId,
-    pub(super) snapshots: Vec<SnapShot>,
-}
+pub struct SnapShots(Vec<SnapShot>);
 
 impl SnapShots {
-    pub(super) fn add(&mut self, snapshot: SnapShot) {
-        self.snapshots.push(snapshot)
+    pub fn new(snapshots: Vec<SnapShot>) -> SnapShots {
+        SnapShots(snapshots)
     }
 
-    pub(super) fn get_snap(&self, date: &UpdatedAt) -> SnapShot {
+    pub fn default() -> SnapShots {
+        SnapShots::new(Vec::new())
+    }
+
+    pub(super) fn add(&mut self, snapshot: SnapShot) {
+        self.0.push(snapshot)
+    }
+
+    pub fn get_snap(&self, date: &UpdatedAt) -> SnapShot {
         let snap = self
-            .snapshots
+            .0
             .iter()
             .filter(|s| s.updated_at.le(date))
             .map(|s| s.clone())
