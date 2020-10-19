@@ -7,7 +7,6 @@ pub(super) fn detail<T: TableTrait>(
     songs: &Songs,
     table: &T,
     scores: &Scores,
-    _score_log: &ScoreLog,
     updated_at: &UpdatedAt,
 ) -> CommandResult {
     CommandResult::Detail(table.make_detail(songs, scores, updated_at))

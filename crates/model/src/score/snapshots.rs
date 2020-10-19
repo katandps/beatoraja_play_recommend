@@ -12,7 +12,7 @@ impl SnapShots {
         SnapShots::new(Vec::new())
     }
 
-    pub(super) fn add(&mut self, snapshot: SnapShot) {
+    pub fn add(&mut self, snapshot: SnapShot) {
         self.0.push(snapshot)
     }
 

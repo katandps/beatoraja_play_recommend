@@ -8,6 +8,8 @@ mod prelude;
 mod rank;
 mod score;
 mod scores;
+mod snapshot;
+mod snapshots;
 mod song_id;
 mod updated_at;
 

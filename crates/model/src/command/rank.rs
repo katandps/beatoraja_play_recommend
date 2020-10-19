@@ -4,7 +4,6 @@ pub(super) fn rank<T: TableTrait>(
     songs: &Songs,
     table: &T,
     score: &Scores,
-    _score_log: &ScoreLog,
     updated_at: &UpdatedAt,
 ) -> CommandResult {
     CommandResult::RankGraph(
