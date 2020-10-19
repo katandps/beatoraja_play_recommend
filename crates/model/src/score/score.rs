@@ -10,6 +10,7 @@ pub struct Score {
     pub max_combo: MaxCombo,
     pub play_count: PlayCount,
     pub min_bp: MinBP,
+    log: SnapShots,
 }
 
 impl Score {
@@ -20,6 +21,7 @@ impl Score {
         max_combo: MaxCombo,
         play_count: PlayCount,
         min_bp: MinBP,
+        log: SnapShots,
     ) -> Score {
         Score {
             clear,
@@ -28,7 +30,24 @@ impl Score {
             max_combo,
             play_count,
             min_bp,
+            log,
         }
+    }
+
+    pub fn default() -> Score {
+        Score::new(
+            ClearType::NoPlay,
+            UpdatedAt::new(),
+            Judge::default(),
+            MaxCombo::new(),
+            PlayCount::new(0),
+            MinBP::new(),
+            SnapShots::default(),
+        )
+    }
+
+    pub fn get_detail<T: TableTrait>(self, song: Song, _date: &UpdatedAt) -> SongDetail {
+        SongDetail::new(&song, self)
     }
 }
 

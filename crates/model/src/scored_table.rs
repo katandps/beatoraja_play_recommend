@@ -11,16 +11,6 @@ impl ScoredTable {
     pub fn new(charts: Vec<ScoredChart>) -> ScoredTable {
         ScoredTable { charts }
     }
-    pub fn old_updated(&self) -> ScoredTable {
-        let mut vec: Vec<ScoredChart> = self.charts.iter().cloned().collect();
-        vec.sort_by(ScoredChart::cmp);
-        ScoredTable::new(
-            vec.iter()
-                .take(config().recommend_song_number())
-                .cloned()
-                .collect(),
-        )
-    }
 }
 
 impl fmt::Display for ScoredTable {
@@ -88,29 +78,5 @@ impl fmt::Display for ScoredChart {
             } => write!(f, "{}\n{}", chart, score),
             _ => write!(f, "Dummy Object"),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let charts = vec![
-            ScoredChart::Dummy(3),
-            ScoredChart::Dummy(2),
-            ScoredChart::Dummy(4),
-            ScoredChart::Dummy(1),
-        ];
-        let table = ScoredTable { charts };
-
-        let expect_vec = vec![
-            ScoredChart::Dummy(1),
-            ScoredChart::Dummy(2),
-            ScoredChart::Dummy(3),
-        ];
-        let expect = ScoredTable { charts: expect_vec };
-        assert_eq!(table.old_updated(), expect)
     }
 }

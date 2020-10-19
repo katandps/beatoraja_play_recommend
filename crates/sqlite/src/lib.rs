@@ -44,6 +44,21 @@ impl SqliteClient {
     fn establish_connection(url: &str) -> SqliteConnection {
         SqliteConnection::establish(&url).unwrap_or_else(|_| panic!("Error connection to {}", &url))
     }
+
+    fn score_log(&self) -> HashMap<SongId, SnapShots> {
+        use schema::score_log::scorelog::dsl::*;
+        let connection = Self::establish_connection(&self.scorelog_db_url);
+        let record: Vec<schema::score_log::ScoreLog> =
+            scorelog.load(&connection).expect("Error loading schema");
+
+        let mut map = HashMap::new();
+        for row in record {
+            let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
+            let snap = SnapShot::from_data(row.clear, row.score, row.combo, row.minbp, row.date);
+            map.entry(song_id).or_insert(SnapShots::default()).add(snap);
+        }
+        map
+    }
 }
 
 impl ScoreRepository for SqliteClient {
@@ -53,13 +68,14 @@ impl ScoreRepository for SqliteClient {
         let record = score
             .load::<schema::score::Score>(&connection)
             .expect("Error loading schema");
-
+        let score_log = self.score_log();
         Scores::new(
             record
                 .iter()
                 .map(|row| {
+                    let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
                     (
-                        SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode)),
+                        song_id.clone(),
                         Score::new(
                             ClearType::from_integer(row.clear),
                             UpdatedAt::from_timestamp(row.date),
@@ -70,6 +86,7 @@ impl ScoreRepository for SqliteClient {
                             MaxCombo::from_combo(row.combo),
                             PlayCount::new(row.playcount),
                             MinBP::from_bp(row.minbp),
+                            score_log.get(&song_id).unwrap().clone(),
                         ),
                     )
                 })
@@ -93,26 +110,6 @@ impl SongRepository for SqliteClient {
                     Title::new(row.title.clone()),
                     Artist::new(row.artist.clone()),
                     row.notes,
-                );
-                builder
-            })
-            .build()
-    }
-}
-
-impl ScoreLogRepository for SqliteClient {
-    fn score_log(&self) -> ScoreLog {
-        use schema::score_log::scorelog::dsl::*;
-        let connection = Self::establish_connection(&self.scorelog_db_url);
-        let record: Vec<schema::score_log::ScoreLog> =
-            scorelog.load(&connection).expect("Error loading schema");
-
-        record
-            .iter()
-            .fold(ScoreLogBuilder::builder(), |mut builder, row| {
-                builder.push(
-                    SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode)),
-                    SnapShot::from_data(row.clear, row.score, row.combo, row.minbp, row.date),
                 );
                 builder
             })

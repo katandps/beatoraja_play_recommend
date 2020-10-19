@@ -5,16 +5,14 @@ pub struct App<T> {
     table: T,
     songs: Songs,
     scores: Scores,
-    score_log: ScoreLog,
 }
 
 impl<T: TableTrait> App<T> {
-    pub fn new(table: T, songs: Songs, scores: Scores, score_log: ScoreLog) -> App<T> {
+    pub fn new(table: T, songs: Songs, scores: Scores) -> App<T> {
         App {
             table,
             songs,
             scores,
-            score_log,
         }
     }
 }
@@ -37,7 +35,7 @@ impl<T: TableTrait> AppRunTrait for App<T> {
             "{}",
             Command::all()
                 .iter()
-                .map(|c| format!("{}\n", self.out(c).to_string()))
+                .map(|c| format!("{}\n", self.out(c).to_text()))
                 .collect::<String>()
         )
     }
@@ -49,7 +47,6 @@ impl<T: TableTrait> AppOutTrait for App<T> {
             &self.songs,
             &self.table,
             &self.scores,
-            &self.score_log,
             &crate::UpdatedAt::from_timestamp(config().timestamp()),
         )
     }

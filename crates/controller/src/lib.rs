@@ -24,7 +24,6 @@ impl Controller<App<Table<Charts>>> {
             tables[table_index].clone(),
             repository.song_data(),
             repository.score(),
-            repository.score_log(),
             Command::Detail,
         )
     }
@@ -33,10 +32,9 @@ impl Controller<App<Table<Charts>>> {
         table: Table<Charts>,
         songs: Songs,
         scores: Scores,
-        score_log: ScoreLog,
         command: Command,
     ) -> Self {
-        Self::new(Output::JSON, table, songs, scores, score_log, command)
+        Self::new(Output::JSON, table, songs, scores, command)
     }
 
     fn new(
@@ -44,20 +42,21 @@ impl Controller<App<Table<Charts>>> {
         table: Table<Charts>,
         songs: Songs,
         scores: Scores,
-        score_log: ScoreLog,
         command: Command,
     ) -> Self {
-        let input = Input::Parameters(App::new(table, songs, scores, score_log), command);
+        let input = Input::Parameters(App::new(table, songs, scores), command);
         Controller { output, input }
     }
 
     pub fn run(self) -> Out {
-        self.output.convert(self.input.out())
+        self.input.out().convert(self.output)
     }
 
     pub async fn run_async(self) -> Out {
-        self.output
-            .convert_async(self.input.out_async().await)
+        self.input
+            .out_async()
+            .await
+            .convert_async(self.output)
             .await
     }
 }

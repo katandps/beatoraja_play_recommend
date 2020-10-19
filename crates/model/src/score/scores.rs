@@ -1,35 +1,65 @@
 use crate::*;
+use itertools::Itertools;
 use std::collections::HashMap;
 use std::fmt;
 
 /// 最新スコアのみが入っている
 #[derive(Clone)]
-pub struct Scores {
-    scores: HashMap<SongId, Score>,
-}
+pub struct Scores(HashMap<SongId, Score>);
 
 impl Scores {
     pub fn new(scores: HashMap<SongId, Score>) -> Scores {
-        Scores { scores }
+        Scores(scores)
     }
     pub fn count(&self) -> usize {
-        self.scores.len()
+        self.0.len()
     }
     pub fn merge(&self, song_id: SongId, chart: &Chart) -> Option<ScoredChart> {
-        match self.scores.get(&song_id) {
+        match self.0.get(&song_id) {
             Some(score) => Some(ScoredChart::new(song_id, chart.clone(), score.clone())),
             _ => None,
         }
     }
-    pub fn get(&self, song_id: &SongId) -> Option<Score> {
-        self.scores.get(song_id).map(|s| s.clone())
+    pub fn get(&self, song_id: &SongId) -> Option<&Score> {
+        self.0.get(song_id)
+    }
+
+    /// Tableに存在する曲ログに絞り込む ログが存在しない曲はダミーで補完される
+    fn filter_by_table<T: TableTrait>(&self, table: &T, songs: &Songs, _date: &UpdatedAt) -> Self {
+        let song_ids: Vec<SongId> = table
+            .get_song(songs)
+            .iter()
+            .map(|song| song.song_id())
+            .collect();
+        let mut map = HashMap::new();
+        for song_id in &song_ids {
+            map.insert(
+                song_id.clone(),
+                self.get(&song_id).cloned().unwrap_or(Score::default()),
+            );
+        }
+        Scores(map)
+    }
+
+    pub fn detail<T: TableTrait>(
+        &self,
+        table: &T,
+        songs: &Songs,
+        date: &UpdatedAt,
+    ) -> Vec<SongDetail> {
+        self.filter_by_table(table, songs, date)
+            .0
+            .iter()
+            .map(|(id, score)| SongDetail::new(songs.song_by_id(id), score.clone()))
+            .sorted_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()))
+            .collect()
     }
 }
 
 impl fmt::Display for Scores {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut result = String::new();
-        for score in &self.scores {
+        for score in &self.0 {
             result.push_str(&format!("{}: {}\n", score.0, score.1));
         }
         write!(f, "{}", result)

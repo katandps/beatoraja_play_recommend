@@ -1,5 +1,4 @@
 use crate::config;
-use crate::*;
 use std::collections::HashMap;
 use std::fmt;
 use std::hash::Hash;
@@ -75,5 +74,4 @@ where
 pub trait Countable: Hash + Eq + PartialEq + Clone {
     fn coloring(&self, s: String) -> String;
     fn vec() -> Vec<Self>;
-    fn get_from(song: &Song, score_log: &ScoreLog, updated_at: &UpdatedAt) -> Self;
 }

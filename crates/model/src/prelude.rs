@@ -1,6 +1,5 @@
 pub use crate::command::*;
 pub use crate::score::*;
-pub use crate::score_log::*;
 pub use crate::song::*;
 pub use crate::table::*;
 

@@ -9,7 +9,7 @@ pub struct Charts {
 }
 
 pub trait ChartsTrait:
-    LevelSpecify + ChartsLevels + MergeScore + Serialize + DeserializeOwned + GetSong + fmt::Display
+    LevelSpecify + ChartsLevels + Serialize + DeserializeOwned + GetSong + fmt::Display
 {
     fn make(charts: Vec<Chart>) -> Self;
     fn new() -> Self;
@@ -70,24 +70,6 @@ impl ChartsLevels for Charts {
             .collect::<Vec<Level>>();
         vec.sort();
         vec
-    }
-}
-
-pub trait MergeScore {
-    fn merge_score(&self, scores: &Scores, song_data: &Songs) -> ScoredTable;
-}
-
-impl MergeScore for Charts {
-    fn merge_score(&self, scores: &Scores, song_data: &Songs) -> ScoredTable {
-        ScoredTable::new(
-            self.charts
-                .iter()
-                .flat_map(|chart| match song_data.song_id(&chart.md5) {
-                    Some(song_id) => scores.merge(song_id, chart),
-                    _ => None,
-                })
-                .collect(),
-        )
     }
 }
 
