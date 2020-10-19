@@ -38,12 +38,16 @@ pub enum CommandResult {
 }
 
 impl CommandResult {
-    pub fn to_string(&self) -> String {
+    pub fn to_text(&self) -> String {
         match self {
             Self::Recommend(r) => r.to_string(),
             Self::LampGraph(r) => r.to_string(),
             Self::RankGraph(r) => r.to_string(),
             Self::Detail(r) => r.to_string(),
         }
+    }
+
+    pub fn to_json(&self) -> String {
+        serde_json::to_string(&self).unwrap()
     }
 }

@@ -52,12 +52,14 @@ impl Controller<App<Table<Charts>>> {
     }
 
     pub fn run(self) -> Out {
-        self.output.convert(self.input.out())
+        self.input.out().convert(self.output)
     }
 
     pub async fn run_async(self) -> Out {
-        self.output
-            .convert_async(self.input.out_async().await)
+        self.input
+            .out_async()
+            .await
+            .convert_async(self.output)
             .await
     }
 }

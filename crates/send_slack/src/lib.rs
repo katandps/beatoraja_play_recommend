@@ -34,10 +34,11 @@ pub fn send(channel: String, title: String, content: String) -> anyhow::Result<S
     }
 }
 
-pub async fn send_async(channel: String, title: String, content: String) -> anyhow::Result<String> {
+pub async fn send_async(content: String) -> anyhow::Result<String> {
     use reqwest::multipart::{Form, Part};
     use reqwest::Client;
 
+    let (channel, title) = (config().slack_channel(), config().slack_file_name());
     let fp = Part::text(content).file_name("buf.txt");
 
     let form = Form::new().part("file", fp);

@@ -37,7 +37,7 @@ impl<T: TableTrait> AppRunTrait for App<T> {
             "{}",
             Command::all()
                 .iter()
-                .map(|c| format!("{}\n", self.out(c).to_string()))
+                .map(|c| format!("{}\n", self.out(c).to_text()))
                 .collect::<String>()
         )
     }
