@@ -18,7 +18,6 @@ pub struct Cfg {
     pub scorelog_db_url: String,
     pub table_urls: Option<Vec<String>>,
     pub table_index: Option<usize>,
-    pub recommend_song_number: Option<usize>,
     pub coloring_table: Option<bool>,
     pub slack_bot_token: Option<String>,
     pub slack_channel: Option<String>,
@@ -55,12 +54,6 @@ impl Config {
         match self {
             Config::Config(cfg) => cfg.timestamp.unwrap_or(1800000000),
             _ => 1800000000,
-        }
-    }
-    pub fn recommend_song_number(&self) -> usize {
-        match self {
-            Config::Config(cfg) => cfg.recommend_song_number.unwrap_or(3),
-            _ => 3,
         }
     }
     pub fn table_urls(&self) -> Vec<String> {

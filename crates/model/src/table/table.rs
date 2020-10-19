@@ -40,13 +40,11 @@ pub trait TableTrait:
     TableName
     + TableSymbol
     + TableLevels
-    + MergeScore
     + GetSong
     + LevelSpecify
     + Serialize
     + DeserializeOwned
     + fmt::Display
-    + MakeRecommend
     + MakeDetail
 {
 }
@@ -59,15 +57,6 @@ pub trait TableSymbol {
 }
 pub trait TableLevels {
     fn levels(&self) -> &Levels;
-}
-
-pub trait MakeRecommend {
-    fn make_recommend(
-        &self,
-        songs: &Songs,
-        score_log: &ScoreLog,
-        updated_at: &UpdatedAt,
-    ) -> RecommendResult;
 }
 
 pub trait MakeDetail {
@@ -100,11 +89,6 @@ impl<T: ChartsTrait> TableLevels for Table<T> {
         &self.levels
     }
 }
-impl<T: ChartsTrait> MergeScore for Table<T> {
-    fn merge_score(&self, scores: &Scores, song_data: &Songs) -> ScoredTable {
-        self.charts.merge_score(scores, song_data)
-    }
-}
 impl<T: ChartsTrait> GetSong for Table<T> {
     fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
         self.charts.get_song(song_data)
@@ -114,28 +98,6 @@ impl<T: ChartsTrait> GetSong for Table<T> {
 impl<T: ChartsTrait> fmt::Display for Table<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} [{}] {}", self.name, self.symbol, self.charts)
-    }
-}
-
-impl<T: ChartsTrait> MakeRecommend for Table<T> {
-    fn make_recommend(
-        &self,
-        songs: &Songs,
-        score_log: &ScoreLog,
-        updated_at: &UpdatedAt,
-    ) -> RecommendResult {
-        RecommendResult::new(
-            self.name(),
-            self.level_specified_vec()
-                .iter()
-                .map(|table| {
-                    RecommendByLevel::new(
-                        format!("{}{}", self.symbol(), table.levels.first().unwrap()),
-                        score_log.get_recommend(table, songs, updated_at),
-                    )
-                })
-                .collect(),
-        )
     }
 }
 

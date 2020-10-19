@@ -41,14 +41,4 @@ impl SnapShot {
     pub fn clear_type(&self) -> &ClearType {
         &self.clear_type
     }
-    /// Snapshotをリコメンドとして返す
-    pub fn recommend_song(&self, songs: &Songs, song_id: &SongId) -> RecommendSong {
-        RecommendSong::new(self.format(songs.song_by_id(song_id).title()))
-    }
-    pub(crate) fn format(&self, title: String) -> String {
-        format!(
-            "{}\n{} {} score:{} bp:{} combo:{}",
-            title, self.updated_at, self.clear_type, self.score, self.min_bp, self.max_combo
-        )
-    }
 }
