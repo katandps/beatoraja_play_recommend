@@ -48,6 +48,11 @@ impl CommandResult {
     }
 
     pub fn to_json(&self) -> String {
-        serde_json::to_string(&self).unwrap()
+        match self {
+            Self::Recommend(r) => serde_json::to_string(r).unwrap(),
+            Self::LampGraph(r) => serde_json::to_string(r).unwrap(),
+            Self::RankGraph(r) => serde_json::to_string(r).unwrap(),
+            Self::Detail(r) => serde_json::to_string(r).unwrap(),
+        }
     }
 }
