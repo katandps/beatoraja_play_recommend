@@ -42,6 +42,40 @@ impl DetailResult {
     pub fn new(table: String, levels: Vec<DetailByLevel>) -> DetailResult {
         DetailResult { table, levels }
     }
+
+    pub fn make_rank_graph(self) -> Graph<ClearRank> {
+        Graph::make(
+            self.table,
+            self.levels
+                .iter()
+                .map(|dbl| {
+                    CountByLevel::make(
+                        dbl.songs
+                            .iter()
+                            .map(|sd| sd.clear_rank)
+                            .fold(Summary::new(), Summary::tally),
+                    )
+                })
+                .collect(),
+        )
+    }
+
+    pub fn make_lamp_graph(self) -> Graph<ClearType> {
+        Graph::make(
+            self.table,
+            self.levels
+                .iter()
+                .map(|dbl| {
+                    CountByLevel::make(
+                        dbl.songs
+                            .iter()
+                            .map(|sd| sd.clear_type)
+                            .fold(Summary::new(), Summary::tally),
+                    )
+                })
+                .collect(),
+        )
+    }
 }
 
 impl DetailByLevel {

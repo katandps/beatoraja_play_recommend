@@ -3,9 +3,13 @@ use crate::*;
 pub(super) fn rank<T: TableTrait>(
     songs: &Songs,
     table: &T,
-    _score: &Scores,
-    score_log: &ScoreLog,
+    score: &Scores,
+    _score_log: &ScoreLog,
     updated_at: &UpdatedAt,
 ) -> CommandResult {
-    CommandResult::RankGraph(table.make_graph(songs, score_log, updated_at))
+    CommandResult::RankGraph(
+        table
+            .make_detail(songs, score, updated_at)
+            .make_rank_graph(),
+    )
 }

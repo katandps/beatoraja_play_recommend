@@ -46,7 +46,6 @@ pub trait TableTrait:
     + Serialize
     + DeserializeOwned
     + fmt::Display
-    + MakeGraph
     + MakeRecommend
     + MakeDetail
 {
@@ -60,15 +59,6 @@ pub trait TableSymbol {
 }
 pub trait TableLevels {
     fn levels(&self) -> &Levels;
-}
-
-pub trait MakeGraph {
-    fn make_graph<U: Countable>(
-        &self,
-        songs: &Songs,
-        score_log: &ScoreLog,
-        updated_at: &UpdatedAt,
-    ) -> Graph<U>;
 }
 
 pub trait MakeRecommend {
@@ -125,36 +115,6 @@ impl<T: ChartsTrait> fmt::Display for Table<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} [{}] {}", self.name, self.symbol, self.charts)
     }
-}
-
-impl<T: ChartsTrait> MakeGraph for Table<T> {
-    fn make_graph<U: Countable>(
-        &self,
-        songs: &Songs,
-        score_log: &ScoreLog,
-        updated_at: &UpdatedAt,
-    ) -> Graph<U> {
-        Graph::make(
-            self.name(),
-            self.level_specified_vec()
-                .iter()
-                .map(|table| {
-                    CountByLevel::make(make_summary(table.get_song(songs), score_log, updated_at))
-                })
-                .collect(),
-        )
-    }
-}
-
-fn make_summary<U: Countable>(
-    songs: Vec<&Song>,
-    score_log: &ScoreLog,
-    updated_at: &UpdatedAt,
-) -> Summary<U> {
-    songs
-        .iter()
-        .map(|song| U::get_from(song, score_log, updated_at))
-        .fold(Summary::new(), Summary::tally)
 }
 
 impl<T: ChartsTrait> MakeRecommend for Table<T> {
