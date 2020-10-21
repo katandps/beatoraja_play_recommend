@@ -1,6 +1,5 @@
 use crate::*;
 use serde::de::DeserializeOwned;
-use std::fmt;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Table<T> {
@@ -44,7 +43,6 @@ pub trait TableTrait:
     + LevelSpecify
     + Serialize
     + DeserializeOwned
-    + fmt::Display
     + MakeDetail
 {
 }
@@ -92,12 +90,6 @@ impl<T: ChartsTrait> TableLevels for Table<T> {
 impl<T: ChartsTrait> GetSong for Table<T> {
     fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
         self.charts.get_song(song_data)
-    }
-}
-
-impl<T: ChartsTrait> fmt::Display for Table<T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} [{}] {}", self.name, self.symbol, self.charts)
     }
 }
 

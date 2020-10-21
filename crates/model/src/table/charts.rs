@@ -1,7 +1,6 @@
 use crate::*;
 use itertools::Itertools;
 use serde::de::DeserializeOwned;
-use std::fmt;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Charts {
@@ -9,7 +8,7 @@ pub struct Charts {
 }
 
 pub trait ChartsTrait:
-    LevelSpecify + ChartsLevels + Serialize + DeserializeOwned + GetSong + fmt::Display
+    LevelSpecify + ChartsLevels + Serialize + DeserializeOwned + GetSong
 {
     fn make(charts: Vec<Chart>) -> Self;
     fn new() -> Self;
@@ -70,19 +69,5 @@ impl ChartsLevels for Charts {
             .collect::<Vec<Level>>();
         vec.sort();
         vec
-    }
-}
-
-impl fmt::Display for Charts {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}",
-            self.charts
-                .iter()
-                .map(ToString::to_string)
-                .collect::<Vec<String>>()
-                .join("\n")
-        )
     }
 }

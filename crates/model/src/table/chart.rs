@@ -1,6 +1,5 @@
 use crate::*;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Chart {
@@ -22,11 +21,5 @@ impl Chart {
 
     pub fn level(&self) -> Level {
         self.level.clone()
-    }
-}
-
-impl fmt::Display for Chart {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {} {}", self.level, self.title, self.artist)
     }
 }

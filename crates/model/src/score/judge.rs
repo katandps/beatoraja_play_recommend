@@ -1,12 +1,7 @@
 use crate::score::ex_score::ExScore;
 
 #[derive(Clone, Debug)]
-pub enum Judge {
-    JudgeImpl { judge: JudgeImpl },
-    Dummy { score: i32 },
-}
-#[derive(Clone, Debug)]
-pub struct JudgeImpl {
+pub struct Judge {
     early_pgreat: i32,
     late_pgreat: i32,
     early_great: i32,
@@ -36,37 +31,28 @@ impl Judge {
         early_miss: i32,
         late_miss: i32,
     ) -> Judge {
-        Judge::JudgeImpl {
-            judge: JudgeImpl {
-                early_pgreat,
-                late_pgreat,
-                early_great,
-                late_great,
-                early_good,
-                late_good,
-                early_bad,
-                late_bad,
-                early_poor,
-                late_poor,
-                early_miss,
-                late_miss,
-            },
+        Judge {
+            early_pgreat,
+            late_pgreat,
+            early_great,
+            late_great,
+            early_good,
+            late_good,
+            early_bad,
+            late_bad,
+            early_poor,
+            late_poor,
+            early_miss,
+            late_miss,
         }
     }
     pub fn default() -> Judge {
         Self::new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     }
     pub fn ex_score(&self) -> ExScore {
-        let score = match self {
-            Judge::JudgeImpl { judge } => {
-                judge.early_pgreat * 2
-                    + judge.late_pgreat * 2
-                    + judge.early_great
-                    + judge.late_great
-            }
-            Judge::Dummy { score } => *score,
-        };
-        ExScore::from_score(score)
+        ExScore::from_score(
+            self.early_pgreat * 2 + self.late_pgreat * 2 + self.early_great + self.late_great,
+        )
     }
 }
 

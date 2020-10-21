@@ -2,17 +2,13 @@ use crate::out::Out;
 use model::*;
 use sqlite::SqliteClient;
 
-#[derive(Eq, PartialEq)]
-pub enum Input<T> {
+pub enum Input {
     Interactive,
-    Parameters(T, Command),
+    Parameters(App<Table<Charts>>, Command),
     ReloadTable,
 }
 
-impl<T> Input<T>
-where
-    T: AppTrait,
-{
+impl Input {
     pub fn out(self) -> Out {
         match self {
             Self::Parameters(mut app, command) => Out::Result(app.out(&command)),

@@ -8,12 +8,12 @@ mod input;
 mod out;
 mod output;
 
-pub struct Controller<T> {
+pub struct Controller {
     output: Output,
-    input: Input<T>,
+    input: Input,
 }
 
-impl Controller<App<Table<Charts>>> {
+impl Controller {
     pub async fn local() -> Self {
         let repository = sqlite::SqliteClient::new();
         let tables = table::get_tables(true).await;

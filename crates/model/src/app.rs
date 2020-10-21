@@ -15,22 +15,8 @@ impl<T: TableTrait> App<T> {
             scores,
         }
     }
-}
 
-pub trait AppTrait: AppRunTrait + AppOutTrait + Clone {}
-
-pub trait AppRunTrait {
-    fn run(&mut self);
-}
-
-pub trait AppOutTrait {
-    fn out(&mut self, command: &Command) -> CommandResult;
-}
-
-impl<T: TableTrait + Clone> AppTrait for App<T> {}
-
-impl<T: TableTrait> AppRunTrait for App<T> {
-    fn run(&mut self) {
+    pub fn run(&mut self) {
         println!(
             "{}",
             Command::all()
@@ -39,10 +25,8 @@ impl<T: TableTrait> AppRunTrait for App<T> {
                 .collect::<String>()
         )
     }
-}
 
-impl<T: TableTrait> AppOutTrait for App<T> {
-    fn out(&mut self, command: &Command) -> CommandResult {
+    pub fn out(&mut self, command: &Command) -> CommandResult {
         command.func()(
             &self.songs,
             &self.table,
