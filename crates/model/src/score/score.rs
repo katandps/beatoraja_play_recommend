@@ -1,6 +1,4 @@
 use crate::*;
-use std::cmp::Ordering;
-use std::fmt;
 
 #[derive(Clone, Debug)]
 pub struct Score {
@@ -46,35 +44,8 @@ impl Score {
         )
     }
 
-    pub fn get_detail<T: TableTrait>(self, song: Song, _date: &UpdatedAt) -> SongDetail {
-        SongDetail::new(&song, self)
-    }
-}
-
-impl Ord for Score {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.updated_at.cmp(&other.updated_at)
-    }
-}
-
-impl PartialOrd for Score {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl PartialEq for Score {
-    fn eq(&self, other: &Self) -> bool {
-        self.updated_at == other.updated_at
-    }
-}
-
-impl Eq for Score {}
-
-impl fmt::Display for Score {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
+    pub fn view(&self) -> String {
+        format!(
             "{} {} score:{} bp:{} combo:{}",
             self.updated_at,
             self.clear,

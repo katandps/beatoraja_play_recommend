@@ -14,12 +14,6 @@ impl Scores {
     pub fn count(&self) -> usize {
         self.0.len()
     }
-    pub fn merge(&self, song_id: SongId, chart: &Chart) -> Option<ScoredChart> {
-        match self.0.get(&song_id) {
-            Some(score) => Some(ScoredChart::new(song_id, chart.clone(), score.clone())),
-            _ => None,
-        }
-    }
     pub fn get(&self, song_id: &SongId) -> Option<&Score> {
         self.0.get(song_id)
     }
@@ -59,8 +53,8 @@ impl Scores {
 impl fmt::Display for Scores {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut result = String::new();
-        for score in &self.0 {
-            result.push_str(&format!("{}: {}\n", score.0, score.1));
+        for (song_id, score) in &self.0 {
+            result.push_str(&format!("{}: {}\n", song_id, score.view()));
         }
         write!(f, "{}", result)
     }
