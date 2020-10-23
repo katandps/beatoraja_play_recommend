@@ -8,24 +8,6 @@ use std::collections::HashMap;
 extern crate diesel;
 extern crate anyhow;
 
-pub fn player() {
-    use schema::player::player::dsl::*;
-    fn establish_connection(url: &str) -> SqliteConnection {
-        SqliteConnection::establish(&url).unwrap_or_else(|_| panic!("Error connection to {}", &url))
-    }
-
-    let connection = establish_connection(&config().score_db_url());
-    let results: Vec<schema::player::Player> = player
-        .load::<schema::player::Player>(&connection)
-        .expect("Error loading schema");
-
-    let last = results.last().unwrap();
-    println!("\nPlayCount: {}", last.playcount);
-    println!("ClearCount: {}", last.clear);
-    println!("PlayTime: {}", last.playtime);
-    println!()
-}
-
 pub struct SqliteClient {
     scorelog_db_url: String,
     song_db_url: String,
@@ -58,6 +40,30 @@ impl SqliteClient {
             map.entry(song_id).or_insert(SnapShots::default()).add(snap);
         }
         map
+    }
+
+    pub fn player(&self) -> PlayerStates {
+        use schema::player::player::dsl::*;
+        let connection = Self::establish_connection(&self.score_db_url);
+        let records: Vec<schema::player::Player> = player
+            .load::<schema::player::Player>(&connection)
+            .expect("Error loading schema");
+
+        let mut log = Vec::new();
+        for row in records {
+            let pl = PlayerState::new(
+                row.playcount,
+                row.clear,
+                row.playtime,
+                UpdatedAt::from_timestamp(row.date),
+                TotalJudge::new(Judge::new(
+                    row.epg, row.lpg, row.egr, row.lgr, row.egd, row.lgd, row.ebd, row.lbd,
+                    row.epr, row.lpr, row.ems, row.lms,
+                )),
+            );
+            log.push(pl);
+        }
+        PlayerStates::new(log)
     }
 }
 

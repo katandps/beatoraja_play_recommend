@@ -1,4 +1,5 @@
 pub use crate::command::*;
+pub use crate::player::*;
 pub use crate::score::*;
 pub use crate::song::*;
 pub use crate::table::*;
