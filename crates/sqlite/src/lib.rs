@@ -52,9 +52,9 @@ impl SqliteClient {
         let mut log = Vec::new();
         for row in records {
             let pl = PlayerState::new(
-                row.playcount,
-                row.clear,
-                row.playtime,
+                PlayCount::new(row.playcount),
+                PlayCount::new(row.clear),
+                PlayTime::new(row.playtime),
                 UpdatedAt::from_timestamp(row.date),
                 TotalJudge::new(Judge::new(
                     row.epg, row.lpg, row.egr, row.lgr, row.egd, row.lgd, row.ebd, row.lbd,

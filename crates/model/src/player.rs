@@ -1,4 +1,4 @@
-use crate::{Judge, UpdatedAt};
+use crate::{Judge, PlayCount, UpdatedAt};
 
 #[derive(Debug)]
 pub struct PlayerStates {
@@ -17,18 +17,18 @@ impl PlayerStates {
 
 #[derive(Debug)]
 pub struct PlayerState {
-    play_count: i32,
-    clear_count: i32,
-    play_time: i32,
+    play_count: PlayCount,
+    clear_count: PlayCount,
+    play_time: PlayTime,
     date: UpdatedAt,
     total_judge: TotalJudge,
 }
 
 impl PlayerState {
     pub fn new(
-        play_count: i32,
-        clear_count: i32,
-        play_time: i32,
+        play_count: PlayCount,
+        clear_count: PlayCount,
+        play_time: PlayTime,
         date: UpdatedAt,
         total_judge: TotalJudge,
     ) -> PlayerState {
@@ -39,6 +39,16 @@ impl PlayerState {
             date,
             total_judge,
         }
+    }
+}
+
+/// PlayTime(seconds)
+#[derive(Debug)]
+pub struct PlayTime(i32);
+
+impl PlayTime {
+    pub fn new(seconds: i32) -> PlayTime {
+        PlayTime(seconds)
     }
 }
 
