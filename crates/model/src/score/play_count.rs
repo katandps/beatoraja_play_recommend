@@ -15,3 +15,10 @@ impl fmt::Display for PlayCount {
         write!(f, "{}", self.0)
     }
 }
+
+impl std::ops::Sub<PlayCount> for PlayCount {
+    type Output = PlayCount;
+    fn sub(self, rhs: PlayCount) -> PlayCount {
+        PlayCount::new(self.0 - rhs.0)
+    }
+}

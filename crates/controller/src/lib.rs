@@ -18,7 +18,6 @@ impl Controller {
         let repository = sqlite::SqliteClient::new();
         let tables = table::get_tables(true).await;
         let table_index = config().table_index();
-        dbg!(repository.player());
 
         Self::new(
             Output::from_str(config().output_type().as_ref()).unwrap(),
