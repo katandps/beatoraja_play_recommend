@@ -1,6 +1,7 @@
 use crate::score::ex_score::ExScore;
+use serde::Serialize;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Judge {
     early_pgreat: i32,
     late_pgreat: i32,
@@ -52,6 +53,26 @@ impl Judge {
     pub fn ex_score(&self) -> ExScore {
         ExScore::from_score(
             self.early_pgreat * 2 + self.late_pgreat * 2 + self.early_great + self.late_great,
+        )
+    }
+}
+
+impl std::ops::Sub<Judge> for Judge {
+    type Output = Judge;
+    fn sub(self, rhs: Judge) -> Judge {
+        Judge::new(
+            self.early_pgreat - rhs.early_pgreat,
+            self.late_pgreat - rhs.late_pgreat,
+            self.early_great - rhs.early_great,
+            self.late_great - rhs.late_great,
+            self.early_good - rhs.early_good,
+            self.late_good - rhs.late_good,
+            self.early_bad - rhs.early_bad,
+            self.late_bad - rhs.late_bad,
+            self.early_poor - rhs.early_poor,
+            self.late_poor - rhs.late_poor,
+            self.early_miss - rhs.early_miss,
+            self.late_miss - rhs.late_miss,
         )
     }
 }

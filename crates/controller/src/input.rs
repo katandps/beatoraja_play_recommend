@@ -29,7 +29,6 @@ impl Input {
 
 async fn interactive() -> Out {
     let repository = SqliteClient::new();
-    sqlite::player();
 
     let mut tables = table::get_tables(true).await;
     let song_data = repository.song_data();

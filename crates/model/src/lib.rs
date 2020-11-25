@@ -1,5 +1,6 @@
 mod app;
 mod command;
+mod player;
 mod prelude;
 mod score;
 mod song;
