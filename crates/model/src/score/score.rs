@@ -59,7 +59,7 @@ impl Score {
     }
 
     pub fn at(self, date: &UpdatedAt) -> Score {
-        if date.is_today() {
+        if date.is_future() {
             self
         } else {
             let snap = self.log.get_snap(date);

@@ -25,8 +25,8 @@ impl UpdatedAt {
         Self::from_str(format!("{}", self.0.format("%Y-%m-%d")).as_str())
     }
 
-    pub fn is_today(&self) -> bool {
-        self == &UpdatedAt::day_start(UpdatedAt::now())
+    pub fn is_future(&self) -> bool {
+        self >= &UpdatedAt::day_start(UpdatedAt::now())
     }
 }
 
