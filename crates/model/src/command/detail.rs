@@ -84,15 +84,16 @@ impl DetailByLevel {
 }
 
 impl SongDetail {
-    pub fn new(song: &Song, score: Score) -> SongDetail {
+    pub fn new(song: &Song, score: Score, date: &UpdatedAt) -> SongDetail {
+        let score = score.at(date);
         SongDetail {
             title: song.title(),
             total_notes: song.notes(),
             clear_type: score.clear,
-            clear_rank: ClearRank::from_notes_score(song.notes(), score.judge.ex_score()),
+            clear_rank: ClearRank::from_notes_score(song.notes(), score.score),
             max_combo: score.max_combo,
             min_bp: score.min_bp,
-            score: score.judge.ex_score(),
+            score: score.score,
             updated_at: score.updated_at,
             play_count: score.play_count,
         }

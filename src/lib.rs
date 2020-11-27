@@ -1,6 +1,12 @@
-pub fn take(table: Table<Charts>, songs: Songs, scores: Scores, command: Command) -> String {
+pub fn take(
+    table: Table<Charts>,
+    songs: Songs,
+    scores: Scores,
+    command: Command,
+    date: UpdatedAt,
+) -> String {
     controller::Controller::for_server(table, songs, scores, command)
-        .run()
+        .run(date)
         .to_string()
 }
 

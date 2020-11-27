@@ -4,7 +4,8 @@ use crate::*;
 pub struct Score {
     pub clear: ClearType,
     pub updated_at: UpdatedAt,
-    pub judge: Judge,
+    judge: Judge,
+    pub score: ExScore,
     pub max_combo: MaxCombo,
     pub play_count: PlayCount,
     pub min_bp: MinBP,
@@ -21,10 +22,12 @@ impl Score {
         min_bp: MinBP,
         log: SnapShots,
     ) -> Score {
+        let score = judge.ex_score();
         Score {
             clear,
             updated_at,
             judge,
+            score,
             max_combo,
             play_count,
             min_bp,
@@ -53,5 +56,23 @@ impl Score {
             self.min_bp,
             self.max_combo
         )
+    }
+
+    pub fn at(self, date: &UpdatedAt) -> Score {
+        if date.is_today() {
+            self
+        } else {
+            let snap = self.log.get_snap(date);
+            Score {
+                clear: snap.clear_type,
+                updated_at: snap.updated_at,
+                judge: Judge::default(),
+                score: snap.score,
+                max_combo: snap.max_combo,
+                play_count: PlayCount::new(-1),
+                min_bp: snap.min_bp,
+                log: SnapShots::default(),
+            }
+        }
     }
 }

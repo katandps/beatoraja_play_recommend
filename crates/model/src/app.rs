@@ -21,17 +21,12 @@ impl<T: TableTrait> App<T> {
             "{}",
             Command::all()
                 .iter()
-                .map(|c| format!("{}\n", self.out(c).to_text()))
+                .map(|c| format!("{}\n", self.out(c, UpdatedAt::now()).to_text()))
                 .collect::<String>()
         )
     }
 
-    pub fn out(&mut self, command: &Command) -> CommandResult {
-        command.func()(
-            &self.songs,
-            &self.table,
-            &self.scores,
-            &crate::UpdatedAt::from_timestamp(config().timestamp()),
-        )
+    pub fn out(&mut self, command: &Command, date: UpdatedAt) -> CommandResult {
+        command.func()(&self.songs, &self.table, &self.scores, &date)
     }
 }

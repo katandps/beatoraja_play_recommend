@@ -15,8 +15,15 @@ impl UpdatedAt {
     pub fn from_str(str: &str) -> UpdatedAt {
         match DateTime::parse_from_rfc3339(format!("{}T00:00:00+09:00", str).as_str()) {
             Ok(d) => UpdatedAt(DateTime::from(d)),
-            _ => UpdatedAt(Local::now()),
+            _ => Self::now(),
         }
+    }
+    pub fn now() -> UpdatedAt {
+        UpdatedAt(Local::now())
+    }
+
+    pub fn is_today(&self) -> bool {
+        self.0 == Local::now()
     }
 }
 

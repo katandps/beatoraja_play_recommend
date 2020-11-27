@@ -48,8 +48,8 @@ impl Controller {
         Controller { output, input }
     }
 
-    pub fn run(self) -> Out {
-        self.input.out().convert(self.output)
+    pub fn run(self, date: UpdatedAt) -> Out {
+        self.input.out(date).convert(self.output)
     }
 
     pub async fn run_async(self) -> Out {

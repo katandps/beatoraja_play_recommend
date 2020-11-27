@@ -19,7 +19,7 @@ impl Scores {
     }
 
     /// Tableに存在する曲ログに絞り込む ログが存在しない曲はダミーで補完される
-    fn filter_by_table<T: TableTrait>(&self, table: &T, songs: &Songs, _date: &UpdatedAt) -> Self {
+    fn filter_by_table<T: TableTrait>(&self, table: &T, songs: &Songs) -> Self {
         let song_ids: Vec<SongId> = table
             .get_song(songs)
             .iter()
@@ -41,10 +41,10 @@ impl Scores {
         songs: &Songs,
         date: &UpdatedAt,
     ) -> Vec<SongDetail> {
-        self.filter_by_table(table, songs, date)
+        self.filter_by_table(table, songs)
             .0
             .iter()
-            .map(|(id, score)| SongDetail::new(songs.song_by_id(id), score.clone()))
+            .map(|(id, score)| SongDetail::new(songs.song_by_id(id), score.clone(), date))
             .sorted_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()))
             .collect()
     }

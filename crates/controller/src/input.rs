@@ -9,9 +9,9 @@ pub enum Input {
 }
 
 impl Input {
-    pub fn out(self) -> Out {
+    pub fn out(self, date: UpdatedAt) -> Out {
         match self {
-            Self::Parameters(mut app, command) => Out::Result(app.out(&command)),
+            Self::Parameters(mut app, command) => Out::Result(app.out(&command, date)),
             _ => unreachable!(
                 "Interactiveモード及びテーブルの再読み込みは非同期実行の場合のみ可能です"
             ),
@@ -21,7 +21,7 @@ impl Input {
     pub async fn out_async(self) -> Out {
         match self {
             Self::Interactive => interactive().await,
-            Self::Parameters(mut app, command) => Out::Result(app.out(&command)),
+            Self::Parameters(mut app, command) => Out::Result(app.out(&command, UpdatedAt::now())),
             Self::ReloadTable => reload_table().await,
         }
     }

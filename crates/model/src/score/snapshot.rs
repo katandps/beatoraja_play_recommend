@@ -1,4 +1,5 @@
 use crate::*;
+use std::cmp::Ordering;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct SnapShot {
@@ -40,5 +41,25 @@ impl SnapShot {
     }
     pub fn clear_type(&self) -> &ClearType {
         &self.clear_type
+    }
+}
+
+impl PartialEq for SnapShot {
+    fn eq(&self, other: &Self) -> bool {
+        self.updated_at == other.updated_at
+    }
+}
+
+impl Eq for SnapShot {}
+
+impl PartialOrd for SnapShot {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.updated_at.partial_cmp(&other.updated_at)
+    }
+}
+
+impl Ord for SnapShot {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.updated_at.cmp(&other.updated_at)
     }
 }
