@@ -21,9 +21,12 @@ impl UpdatedAt {
     pub fn now() -> UpdatedAt {
         UpdatedAt(Local::now())
     }
+    fn day_start(self) -> UpdatedAt {
+        Self::from_str(format!("{}", self.0.format("%Y-%m-%d")).as_str())
+    }
 
     pub fn is_today(&self) -> bool {
-        self.0 == Local::now()
+        self == &UpdatedAt::day_start(UpdatedAt::now())
     }
 }
 
