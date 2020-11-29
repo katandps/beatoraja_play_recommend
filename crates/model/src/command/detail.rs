@@ -28,6 +28,7 @@ pub struct DetailByLevel {
 pub struct SongDetail {
     pub title: String,
     total_notes: i32,
+    level: Level,
     clear_type: ClearType,
     clear_rank: ClearRank,
     max_combo: MaxCombo,
@@ -84,11 +85,12 @@ impl DetailByLevel {
 }
 
 impl SongDetail {
-    pub fn new(song: &Song, score: Score, date: &UpdatedAt) -> SongDetail {
+    pub fn new(song: &Song, score: Score, date: &UpdatedAt, level: Level) -> SongDetail {
         let score = score.at(date);
         SongDetail {
             title: song.title(),
             total_notes: song.notes(),
+            level,
             clear_type: score.clear,
             clear_rank: ClearRank::from_notes_score(song.notes(), score.score),
             max_combo: score.max_combo,

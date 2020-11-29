@@ -100,9 +100,15 @@ impl<T: ChartsTrait> MakeDetail for Table<T> {
             self.level_specified_vec()
                 .iter()
                 .map(|table| {
+                    let level = table
+                        .levels
+                        .first()
+                        .unwrap()
+                        .clone()
+                        .add_symbol(self.symbol());
                     DetailByLevel::new(
-                        format!("{}{}", self.symbol(), table.levels.first().unwrap()),
-                        scores.detail(table, songs, updated_at),
+                        level.to_string(),
+                        scores.detail(table, songs, updated_at, level),
                     )
                 })
                 .collect(),

@@ -8,6 +8,10 @@ impl Level {
     pub fn make(str: String) -> Level {
         Level(format!("{:>3}", str))
     }
+
+    pub fn add_symbol(self, symbol: String) -> Self {
+        Level(format!("{}{}", symbol, self.0.trim()))
+    }
 }
 
 impl fmt::Display for Level {

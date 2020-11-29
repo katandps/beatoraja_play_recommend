@@ -40,11 +40,14 @@ impl Scores {
         table: &T,
         songs: &Songs,
         date: &UpdatedAt,
+        level: Level,
     ) -> Vec<SongDetail> {
         self.filter_by_table(table, songs)
             .0
             .iter()
-            .map(|(id, score)| SongDetail::new(songs.song_by_id(id), score.clone(), date))
+            .map(|(id, score)| {
+                SongDetail::new(songs.song_by_id(id), score.clone(), date, level.clone())
+            })
             .sorted_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()))
             .collect()
     }
