@@ -76,14 +76,14 @@ impl Score {
         }
     }
 
-    pub fn score_snap(&self) -> ScoreSnap {
-        self.log.score_snap(&self.updated_at)
+    pub fn score_snap(&self, date: &UpdatedAt) -> ScoreSnap {
+        self.log.score_snap(date)
     }
-    pub fn min_bp_snap(&self) -> MinBPSnap {
-        self.log.min_bp_snap(&self.updated_at)
+    pub fn min_bp_snap(&self, date: &UpdatedAt) -> MinBPSnap {
+        self.log.min_bp_snap(date)
     }
-    pub fn clear_type_snap(&self) -> ClearTypeSnap {
-        self.log.clear_type_snap(&self.updated_at)
+    pub fn clear_type_snap(&self, date: &UpdatedAt) -> ClearTypeSnap {
+        self.log.clear_type_snap(date)
     }
 }
 

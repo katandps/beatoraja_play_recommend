@@ -86,16 +86,19 @@ impl DetailByLevel {
 
 impl SongDetail {
     pub fn new(song: &Song, score: Score, date: &UpdatedAt, level: Level) -> SongDetail {
-        let score = score.at(date);
+        let score_snap = score.score_snap(date);
+        let clear_snap = score.clear_type_snap(date);
+        let min_bp_snap = score.min_bp_snap(date);
+        let score = score.at(date).clone();
         SongDetail {
             title: song.title(),
             total_notes: song.notes(),
             level,
-            clear_type: score.clear_type_snap(),
+            clear_type: clear_snap,
             clear_rank: ClearRank::from_notes_score(song.notes(), score.score),
             max_combo: score.max_combo.clone(),
-            min_bp: score.min_bp_snap(),
-            score: score.score_snap(),
+            min_bp: min_bp_snap,
+            score: score_snap,
             updated_at: score.updated_at,
             play_count: score.play_count,
         }

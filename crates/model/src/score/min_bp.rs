@@ -6,7 +6,7 @@ pub struct MinBP(i32);
 
 impl MinBP {
     pub fn new() -> MinBP {
-        MinBP(0)
+        MinBP(-1)
     }
     pub fn from_bp(bp: i32) -> MinBP {
         MinBP(bp)

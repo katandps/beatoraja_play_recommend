@@ -26,72 +26,49 @@ impl SnapShots {
     }
 
     pub fn score_snap(&self, date: &UpdatedAt) -> ScoreSnap {
-        let mut last = None;
-        let mut last_date = None;
+        let last = self.get_snap(date);
+        let mut last_date = &last.updated_at;
         for snap in self.0.iter().rev() {
-            match last {
-                Some(last_score) => {
-                    if snap.score == last_score {
-                        last_date = Some(snap.updated_at.clone());
-                    } else {
-                        return ScoreSnap::new(last.unwrap(), last_date.unwrap(), last_score);
-                    }
-                }
-                None => {
-                    if snap.updated_at.le(date) {
-                        last = Some(snap.score.clone());
-                        last_date = Some(snap.updated_at.clone());
-                    }
-                }
+            if snap.score == last.score {
+                last_date = &snap.updated_at;
+                continue;
             }
+            let one_day_before = self.get_snap(&snap.updated_at.sub(1));
+            return ScoreSnap::new(last.score, last_date.clone(), one_day_before.score);
         }
-        ScoreSnap::new(ExScore::new(), UpdatedAt::new(), ExScore::new())
+        ScoreSnap::new(last.score, last_date.clone(), ExScore::new())
     }
 
     pub fn min_bp_snap(&self, date: &UpdatedAt) -> MinBPSnap {
-        let mut last = None;
-        let mut last_date = None;
+        let last = self.get_snap(date);
+        let mut last_date = &last.updated_at;
         for snap in self.0.iter().rev() {
-            match last {
-                Some(last_bp) => {
-                    if snap.min_bp == last_bp {
-                        last_date = Some(snap.updated_at.clone());
-                    } else {
-                        return MinBPSnap::new(last.unwrap(), last_date.unwrap(), last_bp);
-                    }
-                }
-                None => {
-                    if snap.updated_at.le(date) {
-                        last = Some(snap.min_bp.clone());
-                        last_date = Some(snap.updated_at.clone());
-                    }
-                }
+            if snap.min_bp == last.min_bp {
+                last_date = &snap.updated_at;
+                continue;
             }
+            let one_day_before = self.get_snap(&snap.updated_at.sub(1));
+            return MinBPSnap::new(last.min_bp, last_date.clone(), one_day_before.min_bp);
         }
-        MinBPSnap::new(MinBP::new(), UpdatedAt::new(), MinBP::new())
+        MinBPSnap::new(last.min_bp, last_date.clone(), MinBP::new())
     }
 
     pub fn clear_type_snap(&self, date: &UpdatedAt) -> ClearTypeSnap {
-        let mut last = None;
-        let mut last_date = None;
+        let last = self.get_snap(date);
+        let mut last_date = &last.updated_at;
         for snap in self.0.iter().rev() {
-            match last {
-                Some(last_clear) => {
-                    if snap.clear_type == last_clear {
-                        last_date = Some(snap.updated_at.clone());
-                    } else {
-                        return ClearTypeSnap::new(last.unwrap(), last_date.unwrap(), last_clear);
-                    }
-                }
-                None => {
-                    if snap.updated_at.le(date) {
-                        last = Some(snap.clear_type);
-                        last_date = Some(snap.updated_at.clone());
-                    }
-                }
+            if snap.clear_type == last.clear_type {
+                last_date = &snap.updated_at;
+                continue;
             }
+            let one_day_before = self.get_snap(&snap.updated_at.sub(1));
+            return ClearTypeSnap::new(
+                last.clear_type,
+                last_date.clone(),
+                one_day_before.clear_type,
+            );
         }
-        ClearTypeSnap::new(ClearType::NoPlay, UpdatedAt::new(), ClearType::NoPlay)
+        ClearTypeSnap::new(last.clear_type, last_date.clone(), ClearType::NoPlay)
     }
 }
 

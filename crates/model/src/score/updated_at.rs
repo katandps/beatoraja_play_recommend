@@ -1,5 +1,5 @@
 use crate::*;
-use chrono::{DateTime, Local, TimeZone};
+use chrono::{DateTime, Duration, Local, TimeZone};
 use std::fmt;
 
 #[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Debug, Serialize, Deserialize)]
@@ -28,6 +28,10 @@ impl UpdatedAt {
     pub fn is_future(&self) -> bool {
         self >= &UpdatedAt::day_start(UpdatedAt::now())
     }
+
+    pub fn sub(&self, days: i64) -> UpdatedAt {
+        UpdatedAt(self.0 - Duration::days(days))
+    }
 }
 
 impl fmt::Display for UpdatedAt {
@@ -50,5 +54,13 @@ mod test {
             Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
             UpdatedAt::from_str("hogehoge").to_string()
         );
+    }
+
+    #[test]
+    pub fn test_sub() {
+        assert_eq!(
+            "1992-11-20 00:00:00",
+            UpdatedAt::from_str("1992-11-21").sub(1).to_string()
+        )
     }
 }
