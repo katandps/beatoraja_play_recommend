@@ -1,7 +1,7 @@
 use crate::*;
 use std::fmt;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct MinBP(i32);
 
 impl MinBP {

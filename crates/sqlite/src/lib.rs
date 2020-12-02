@@ -113,7 +113,7 @@ impl SongRepository for SqliteClient {
                 builder.push(
                     HashMd5::new(row.md5.clone()),
                     HashSha256::new(row.sha256.clone()),
-                    Title::new(row.title.clone()),
+                    Title::new(format!("{}{}", row.title, row.subtitle)),
                     Artist::new(row.artist.clone()),
                     row.notes,
                 );

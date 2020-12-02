@@ -75,4 +75,65 @@ impl Score {
             }
         }
     }
+
+    pub fn score_snap(&self) -> ScoreSnap {
+        self.log.score_snap(&self.updated_at)
+    }
+    pub fn min_bp_snap(&self) -> MinBPSnap {
+        self.log.min_bp_snap(&self.updated_at)
+    }
+    pub fn clear_type_snap(&self) -> ClearTypeSnap {
+        self.log.clear_type_snap(&self.updated_at)
+    }
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct ScoreSnap {
+    pub current: ExScore,
+    pub updated_at: UpdatedAt,
+    pub before: ExScore,
+}
+
+impl ScoreSnap {
+    pub fn new(current: ExScore, updated_at: UpdatedAt, before: ExScore) -> Self {
+        ScoreSnap {
+            current,
+            updated_at,
+            before,
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct MinBPSnap {
+    pub current: MinBP,
+    pub updated_at: UpdatedAt,
+    pub before: MinBP,
+}
+
+impl MinBPSnap {
+    pub fn new(current: MinBP, updated_at: UpdatedAt, before: MinBP) -> Self {
+        MinBPSnap {
+            current,
+            updated_at,
+            before,
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct ClearTypeSnap {
+    pub current: ClearType,
+    pub updated_at: UpdatedAt,
+    pub before: ClearType,
+}
+
+impl ClearTypeSnap {
+    pub fn new(current: ClearType, updated_at: UpdatedAt, before: ClearType) -> Self {
+        ClearTypeSnap {
+            current,
+            updated_at,
+            before,
+        }
+    }
 }

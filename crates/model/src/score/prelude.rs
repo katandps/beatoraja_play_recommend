@@ -7,7 +7,7 @@ pub use crate::score::{
     min_bp::MinBP,
     play_count::PlayCount,
     rank::ClearRank,
-    score::Score,
+    score::{ClearTypeSnap, MinBPSnap, Score, ScoreSnap},
     scores::{ScoreRepository, Scores},
     snapshot::SnapShot,
     snapshots::SnapShots,

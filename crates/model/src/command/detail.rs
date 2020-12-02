@@ -29,11 +29,11 @@ pub struct SongDetail {
     pub title: String,
     total_notes: i32,
     level: Level,
-    clear_type: ClearType,
     clear_rank: ClearRank,
     max_combo: MaxCombo,
-    min_bp: MinBP,
-    score: ExScore,
+    score: ScoreSnap,
+    min_bp: MinBPSnap,
+    clear_type: ClearTypeSnap,
     updated_at: UpdatedAt,
     play_count: PlayCount,
 }
@@ -69,7 +69,7 @@ impl DetailResult {
                     CountByLevel::make(
                         dbl.songs
                             .iter()
-                            .map(|sd| sd.clear_type)
+                            .map(|sd| sd.clear_type.current)
                             .fold(Summary::new(), Summary::tally),
                     )
                 })
@@ -91,11 +91,11 @@ impl SongDetail {
             title: song.title(),
             total_notes: song.notes(),
             level,
-            clear_type: score.clear,
+            clear_type: score.clear_type_snap(),
             clear_rank: ClearRank::from_notes_score(song.notes(), score.score),
-            max_combo: score.max_combo,
-            min_bp: score.min_bp,
-            score: score.score,
+            max_combo: score.max_combo.clone(),
+            min_bp: score.min_bp_snap(),
+            score: score.score_snap(),
             updated_at: score.updated_at,
             play_count: score.play_count,
         }
@@ -119,7 +119,12 @@ impl fmt::Display for SongDetail {
         write!(
             f,
             "{}\n{} {} score:{} bp:{} combo:{}",
-            self.title, self.updated_at, self.clear_type, self.score, self.min_bp, self.max_combo
+            self.title,
+            self.updated_at,
+            self.clear_type.current,
+            self.score.current,
+            self.min_bp.current,
+            self.max_combo
         )
     }
 }
