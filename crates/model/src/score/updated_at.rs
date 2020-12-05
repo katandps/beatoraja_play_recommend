@@ -26,7 +26,7 @@ impl UpdatedAt {
     }
 
     pub fn is_future(&self) -> bool {
-        self >= &UpdatedAt::day_start(UpdatedAt::now())
+        self > &UpdatedAt::day_start(UpdatedAt::now())
     }
 
     pub fn sub(&self, days: i64) -> UpdatedAt {
@@ -62,5 +62,11 @@ mod test {
             "1992-11-20 00:00:00",
             UpdatedAt::from_str("1992-11-21").sub(1).to_string()
         )
+    }
+
+    #[test]
+    pub fn test_future() {
+        let date = UpdatedAt::day_start(UpdatedAt::now());
+        assert_eq!(false, date.is_future());
     }
 }
