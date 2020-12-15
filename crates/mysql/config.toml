@@ -1,0 +1,4 @@
+local_cache_url="../../files/cache.json"
+score_db_url="../../files/score.db"
+scorelog_db_url="../../files/scorelog.db"
+songdata_db_url="../../files/songdata.db"

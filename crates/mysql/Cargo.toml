@@ -1,0 +1,17 @@
+[package]
+name = "mysql"
+version = "0.1.0"
+authors = ["katand <katandps@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+diesel = { version = "1.4.4", features = ["mysql"] }
+diesel_codegen = "0.16.1"
+
+model = { path = "../model" }
+config = { path = "../config" }
+
+#エラー処理
+anyhow = "1.0"
