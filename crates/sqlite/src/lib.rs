@@ -121,6 +121,10 @@ impl SongRepository for SqliteClient {
             })
             .build()
     }
+
+    fn save_song(&self, _songs: &Songs) {
+        unimplemented!()
+    }
 }
 
 fn config() -> config::Config {

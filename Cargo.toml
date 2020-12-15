@@ -22,5 +22,6 @@ members = [
 "model" = { path = "crates/model" }
 "table" = { path = "crates/table" }
 "sqlite" = { path = "crates/sqlite" }
+"config" = { path = "crates/config" }
 
 tokio = { version = "0.2", features = ["macros"] }

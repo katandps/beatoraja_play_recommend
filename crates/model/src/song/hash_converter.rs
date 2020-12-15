@@ -1,10 +1,10 @@
 use crate::song::hash::{HashMd5, HashSha256};
 use std::collections::HashMap;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Converter {
-    md5_to_sha256: HashMap<HashMd5, HashSha256>,
-    sha256_to_md5: HashMap<HashSha256, HashMd5>,
+    pub md5_to_sha256: HashMap<HashMd5, HashSha256>,
+    pub sha256_to_md5: HashMap<HashSha256, HashMd5>,
 }
 
 impl Converter {

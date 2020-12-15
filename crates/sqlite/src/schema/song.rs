@@ -10,7 +10,7 @@ table! {
         notes -> Integer,
         maxbpm -> Integer,
         minbpm -> Integer,
-        length - Integer,
+        length -> Integer,
     }
 }
 

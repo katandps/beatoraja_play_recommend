@@ -13,7 +13,7 @@ pub enum Config {
 pub struct Cfg {
     pub timestamp: Option<i32>,
     pub local_cache_url: String,
-    pub mysql_url: String,
+    pub mysql_url: Option<String>,
     pub score_db_url: String,
     pub songdata_db_url: String,
     pub scorelog_db_url: String,
@@ -29,8 +29,11 @@ pub struct Cfg {
 impl Config {
     pub fn mysql_url(&self) -> String {
         match self {
-            Config::Config(cfg) => cfg.mysql_url.clone(),
-            _ => "mysql_url".into(),
+            Config::Config(cfg) => cfg
+                .mysql_url
+                .clone()
+                .unwrap_or("mysql://root:root@127.0.0.1/user_data".into()),
+            _ => "mysql://root:root@127.0.0.1/user_data".into(),
         }
     }
 

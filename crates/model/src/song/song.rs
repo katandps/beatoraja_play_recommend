@@ -1,11 +1,11 @@
 use crate::*;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Song {
-    pub(super) hash: HashSha256,
-    pub(super) title: Title,
-    pub(super) artist: Artist,
-    pub(super) notes: i32,
+    pub hash: HashSha256,
+    pub title: Title,
+    pub artist: Artist,
+    pub notes: i32,
 }
 
 impl Song {

@@ -14,5 +14,6 @@ pub async fn get_tables() -> Vec<Table<Charts>> {
     table::get_tables(false).await
 }
 
+pub use config::*;
 pub use model::*;
 pub use sqlite::*;

@@ -1,10 +1,10 @@
 use crate::*;
 use std::collections::HashMap;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Songs {
-    songs: HashMap<HashSha256, Song>,
-    converter: Converter,
+    pub songs: HashMap<HashSha256, Song>,
+    pub converter: Converter,
 }
 
 impl Songs {
@@ -83,4 +83,5 @@ impl SongsBuilder {
 
 pub trait SongRepository {
     fn song_data(&self) -> Songs;
+    fn save_song(&self, songs: &Songs);
 }

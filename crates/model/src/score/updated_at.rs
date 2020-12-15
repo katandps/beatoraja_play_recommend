@@ -50,10 +50,6 @@ mod test {
             "1992-11-20 00:00:00",
             UpdatedAt::from_str("1992-11-20").to_string()
         );
-        assert_eq!(
-            Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
-            UpdatedAt::from_str("hogehoge").to_string()
-        );
     }
 
     #[test]
@@ -67,6 +63,7 @@ mod test {
     #[test]
     pub fn test_future() {
         let date = UpdatedAt::day_start(UpdatedAt::now());
-        assert_eq!(false, date.is_future());
+        assert_eq!(true, date.is_future());
+        assert_eq!(false, date.sub(1).is_future());
     }
 }
