@@ -28,7 +28,7 @@ table! {
         min_bp -> Integer,
         play_count -> Integer,
         clear_count -> Integer,
-        date -> Datetime,
+        date -> Timestamp,
     }
 }
 
@@ -67,7 +67,7 @@ table! {
         id -> Integer,
         gmail_address -> Varchar,
         name -> Varchar,
-        registered_date -> Nullable<Datetime>,
+        registered_date -> Timestamp,
     }
 }
 
@@ -77,10 +77,4 @@ joinable!(scores -> hashes (sha256));
 joinable!(scores -> users (user_id));
 joinable!(songs -> hashes (sha256));
 
-allow_tables_to_appear_in_same_query!(
-    hashes,
-    scores,
-    score_snaps,
-    songs,
-    users,
-);
+allow_tables_to_appear_in_same_query!(hashes, scores, score_snaps, songs, users,);

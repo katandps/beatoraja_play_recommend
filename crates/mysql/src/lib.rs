@@ -1,6 +1,8 @@
 mod models;
 mod schema;
 
+use anyhow::Result;
+use chrono::Utc;
 use diesel::prelude::*;
 use model::*;
 use std::collections::HashMap;
@@ -34,6 +36,52 @@ impl MySQLClient {
         schema::hashes::table
             .load(&self.connection)
             .expect("Error loading schema")
+    }
+
+    pub fn register(&self, email: String) -> Result<Account> {
+        let user: Vec<models::User> = schema::users::table
+            .filter(schema::users::gmail_address.eq(email.clone()))
+            .load(&self.connection)
+            .expect("Error loading schema");
+
+        if user.is_empty() {
+            let user = models::RegisteringUser {
+                gmail_address: email.clone(),
+                name: "".to_string(),
+                registered_date: Utc::now().naive_utc(),
+            };
+            println!("Insert new user");
+            diesel::insert_into(schema::users::table)
+                .values(user.clone())
+                .execute(&self.connection)?;
+            self.get_account(email)
+        } else {
+            let user = user[0].clone();
+            Ok(Account::new(
+                user.gmail_address,
+                user.name,
+                user.registered_date,
+            ))
+        }
+    }
+
+    pub fn account(&self, email: String) -> Result<Account> {
+        match self.get_account(email.clone()) {
+            Ok(a) => Ok(a),
+            _ => self.register(email),
+        }
+    }
+
+    fn get_account(&self, email: String) -> Result<Account> {
+        let user: models::User = schema::users::table
+            .filter(schema::users::gmail_address.eq(email))
+            .first(&self.connection)?;
+
+        Ok(Account::new(
+            user.gmail_address,
+            user.name,
+            user.registered_date,
+        ))
     }
 }
 
@@ -113,7 +161,7 @@ impl SongRepository for MySQLClient {
         let mut index = 0;
         loop {
             let mut records = Vec::new();
-            while index < new_songs.len() && records.len() < 3 {
+            while index < new_songs.len() && records.len() < 100 {
                 records.push(new_songs[index].clone());
                 index += 1;
             }

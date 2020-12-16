@@ -11,7 +11,7 @@ model = {path = "../model"}
 config = {path = "../config"}
 
 # SqLiteへのアクセス
-diesel = { version = "1.4.4", features = ["sqlite"]}
+diesel = { version = "1.4.5", features = ["sqlite"]}
 diesel_codegen = "0.16.1"
 #エラー処理
 anyhow = "1.0"
