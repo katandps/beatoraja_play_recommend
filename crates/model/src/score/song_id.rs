@@ -12,6 +12,10 @@ impl SongId {
     pub fn sha256(&self) -> HashSha256 {
         self.0.clone()
     }
+
+    pub fn mode(&self) -> PlayMode {
+        self.1.clone()
+    }
 }
 
 impl fmt::Display for SongId {
@@ -21,7 +25,7 @@ impl fmt::Display for SongId {
 }
 
 #[derive(Eq, PartialEq, Hash, Clone, Debug, Serialize, Deserialize)]
-pub struct PlayMode(i32);
+pub struct PlayMode(pub i32);
 
 impl PlayMode {
     pub fn new(mode: i32) -> Self {

@@ -1,6 +1,6 @@
 create table songs
 (
-    sha256 varchar(64) not null primary key,
+    sha256 char(64) not null primary key,
     title varchar(255) not null,
     subtitle varchar(255) not null,
     artist varchar(255) not null,

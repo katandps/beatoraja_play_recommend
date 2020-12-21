@@ -2,7 +2,7 @@ create table scores
 (
     id int primary key auto_increment,
     user_id int not null,
-    sha256 varchar(64) not null,
+    sha256 char(64) not null,
     mode int not null,
     clear int not null,
     epg int not null,

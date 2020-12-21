@@ -4,12 +4,13 @@ use crate::*;
 pub struct Score {
     pub clear: ClearType,
     pub updated_at: UpdatedAt,
-    judge: Judge,
+    pub judge: Judge,
     pub score: ExScore,
     pub max_combo: MaxCombo,
     pub play_count: PlayCount,
+    pub clear_count: ClearCount,
     pub min_bp: MinBP,
-    log: SnapShots,
+    pub log: SnapShots,
 }
 
 impl Score {
@@ -19,6 +20,7 @@ impl Score {
         judge: Judge,
         max_combo: MaxCombo,
         play_count: PlayCount,
+        clear_count: ClearCount,
         min_bp: MinBP,
         log: SnapShots,
     ) -> Score {
@@ -32,6 +34,7 @@ impl Score {
             play_count,
             min_bp,
             log,
+            clear_count,
         }
     }
 
@@ -42,6 +45,7 @@ impl Score {
             Judge::default(),
             MaxCombo::new(),
             PlayCount::new(0),
+            ClearCount::new(0),
             MinBP::new(),
             SnapShots::default(),
         )
@@ -72,6 +76,7 @@ impl Score {
                 play_count: PlayCount::new(-1),
                 min_bp: snap.min_bp,
                 log: SnapShots::default(),
+                clear_count: ClearCount::new(-1),
             }
         }
     }

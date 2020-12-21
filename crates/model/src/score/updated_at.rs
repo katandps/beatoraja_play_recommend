@@ -1,5 +1,5 @@
 use crate::*;
-use chrono::{DateTime, Duration, Local, TimeZone};
+use chrono::{DateTime, Duration, Local, NaiveDateTime, TimeZone};
 use std::fmt;
 
 #[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Debug, Serialize, Deserialize)]
@@ -31,6 +31,10 @@ impl UpdatedAt {
 
     pub fn sub(&self, days: i64) -> UpdatedAt {
         UpdatedAt(self.0 - Duration::days(days))
+    }
+
+    pub fn naive_datetime(&self) -> NaiveDateTime {
+        self.0.naive_local()
     }
 }
 

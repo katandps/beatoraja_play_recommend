@@ -1,5 +1,6 @@
 pub use crate::score::*;
 pub use crate::score::{
+    clear_count::ClearCount,
     clear_type::ClearType,
     ex_score::ExScore,
     judge::Judge,

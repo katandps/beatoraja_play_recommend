@@ -2,7 +2,7 @@ use crate::*;
 use std::collections::BTreeSet;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct SnapShots(BTreeSet<SnapShot>);
+pub struct SnapShots(pub BTreeSet<SnapShot>);
 
 impl SnapShots {
     pub fn new(snapshots: Vec<SnapShot>) -> SnapShots {

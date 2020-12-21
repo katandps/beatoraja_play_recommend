@@ -1,3 +1,4 @@
+mod clear_count;
 mod clear_type;
 mod ex_score;
 mod judge;

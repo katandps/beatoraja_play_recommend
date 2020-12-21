@@ -26,4 +26,6 @@ members = [
 "config" = { path = "crates/config" }
 "mysql" = { path = "crates/mysql" }
 
+anyhow = "*"
+
 tokio = { version = "0.2", features = ["macros"] }

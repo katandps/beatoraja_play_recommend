@@ -1,5 +1,6 @@
 mod schema;
 
+use anyhow::Result;
 use diesel::prelude::*;
 use model::*;
 use std::collections::HashMap;
@@ -69,9 +70,8 @@ impl SqliteClient {
 
 impl ScoreRepository for SqliteClient {
     fn score(&self) -> Scores {
-        use schema::score::score::dsl::*;
         let connection = Self::establish_connection(&self.score_db_url);
-        let record = score
+        let record = schema::score::score::table
             .load::<schema::score::Score>(&connection)
             .expect("Error loading schema");
         let score_log = self.score_log();
@@ -91,6 +91,7 @@ impl ScoreRepository for SqliteClient {
                             ),
                             MaxCombo::from_combo(row.combo),
                             PlayCount::new(row.playcount),
+                            ClearCount::new(row.clearcount),
                             MinBP::from_bp(row.minbp),
                             score_log.get(&song_id).unwrap().clone(),
                         ),
@@ -98,6 +99,10 @@ impl ScoreRepository for SqliteClient {
                 })
                 .collect::<HashMap<SongId, Score>>(),
         )
+    }
+
+    fn save_score(&self, _account: Account, _score: Scores) -> Result<()> {
+        unimplemented!()
     }
 }
 

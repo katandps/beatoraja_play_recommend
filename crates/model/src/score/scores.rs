@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::fmt;
 
 #[derive(Clone)]
-pub struct Scores(HashMap<SongId, Score>);
+pub struct Scores(pub HashMap<SongId, Score>);
 
 impl Scores {
     pub fn new(scores: HashMap<SongId, Score>) -> Scores {
@@ -62,6 +62,8 @@ impl fmt::Display for Scores {
     }
 }
 
+use anyhow::Result;
 pub trait ScoreRepository {
     fn score(&self) -> Scores;
+    fn save_score(&self, _account: Account, _score: Scores) -> Result<()>;
 }

@@ -3,18 +3,18 @@ use serde::Serialize;
 
 #[derive(Clone, Debug, Serialize)]
 pub struct Judge {
-    early_pgreat: i32,
-    late_pgreat: i32,
-    early_great: i32,
-    late_great: i32,
-    early_good: i32,
-    late_good: i32,
-    early_bad: i32,
-    late_bad: i32,
-    early_poor: i32,
-    late_poor: i32,
-    early_miss: i32,
-    late_miss: i32,
+    pub early_pgreat: i32,
+    pub late_pgreat: i32,
+    pub early_great: i32,
+    pub late_great: i32,
+    pub early_good: i32,
+    pub late_good: i32,
+    pub early_bad: i32,
+    pub late_bad: i32,
+    pub early_poor: i32,
+    pub late_poor: i32,
+    pub early_miss: i32,
+    pub late_miss: i32,
 }
 
 impl Judge {

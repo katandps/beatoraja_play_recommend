@@ -2,15 +2,47 @@ use model::*;
 use mysql::*;
 use sqlite::*;
 
+use anyhow::Result;
+
 #[tokio::main]
 pub async fn main() {
-    // let sqlite_client = SqliteClient::new();
-    // let songs = sqlite_client.song_data();
-    //
+    update_songs();
+    change_name();
+    match save_score() {
+        Err(e) => panic!("{:?}", e),
+        _ => (),
+    }
+    dbg!(get_score().unwrap().to_string());
+}
+
+fn update_songs() {
+    let sqlite_client = SqliteClient::new();
+    let songs = sqlite_client.song_data();
     let repository = MySQLClient::new();
-    repository.register("hogehoge2@gmail.com".into());
-    dbg!(repository.account("hogehoge@gmail.com".into()));
-    // repository.save_song(&songs);
-    // let songs = repository.song_data();
-    // println!("Finished. {} records", songs.songs.len());
+    repository.save_song(&songs);
+    let songs = repository.song_data();
+    println!("Finished. {} records", songs.songs.len());
+}
+
+fn save_score() -> Result<()> {
+    let repository = MySQLClient::new();
+    let account = repository.account("katandps@gmail.com".into())?;
+    let sqlite = SqliteClient::new();
+    let score = sqlite.score();
+
+    repository.save_score(account, score)
+}
+
+fn change_name() -> Result<()> {
+    let repository = MySQLClient::new();
+    let mut account = repository.account("katandps@gmail.com".into())?;
+    account.set_name("katand".into());
+    repository.save_account(account)?;
+    Ok(())
+}
+
+fn get_score() -> Result<Scores> {
+    let repository = MySQLClient::new();
+    let account = repository.account("katandps@gmail.com".into())?;
+    repository.score(account)
 }

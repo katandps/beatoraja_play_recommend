@@ -2,7 +2,7 @@ use crate::*;
 use std::fmt;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct MaxCombo(i32);
+pub struct MaxCombo(pub i32);
 
 impl MaxCombo {
     pub fn new() -> MaxCombo {
