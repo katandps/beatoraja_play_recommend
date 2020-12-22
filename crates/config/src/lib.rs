@@ -12,55 +12,48 @@ pub enum Config {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Cfg {
     pub timestamp: Option<i32>,
-    pub local_cache_url: String,
+    pub local_cache_url: Option<String>,
     pub mysql_url: Option<String>,
-    pub score_db_url: String,
-    pub songdata_db_url: String,
-    pub scorelog_db_url: String,
+    pub song_db_url: Option<String>,
+    pub score_db_url: Option<String>,
+    pub songdata_db_url: Option<String>,
+    pub scorelog_db_url: Option<String>,
     pub table_urls: Option<Vec<String>>,
     pub table_index: Option<usize>,
     pub coloring_table: Option<bool>,
+    pub google_oauth_client_id: Option<String>,
     pub slack_bot_token: Option<String>,
     pub slack_channel: Option<String>,
     pub slack_file_name: Option<String>,
     pub output_type: Option<String>,
 }
 
-impl Config {
-    pub fn mysql_url(&self) -> String {
-        match self {
-            Config::Config(cfg) => cfg
-                .mysql_url
-                .clone()
-                .unwrap_or("mysql://root:root@127.0.0.1/user_data".into()),
-            _ => "mysql://root:root@127.0.0.1/user_data".into(),
+macro_rules! string_config {
+    ($name:ident, $default:expr) => {
+        pub fn $name(&self) -> String {
+            match self {
+                Self::Config(cfg) => cfg.$name.clone().unwrap_or(($default).into()),
+                _ => ($default).into(),
+            }
         }
-    }
+    };
+}
 
-    pub fn score_db_url(&self) -> String {
-        match self {
-            Config::Config(cfg) => cfg.score_db_url.clone(),
-            _ => "score_db_url".into(),
-        }
-    }
-    pub fn song_db_url(&self) -> String {
-        match self {
-            Config::Config(cfg) => cfg.songdata_db_url.clone(),
-            _ => "song_db_url".into(),
-        }
-    }
-    pub fn scorelog_db_url(&self) -> String {
-        match self {
-            Config::Config(cfg) => cfg.scorelog_db_url.clone(),
-            _ => "scorelog_db_url".into(),
-        }
-    }
-    pub fn local_cache_url(&self) -> String {
-        match self {
-            Config::Config(cfg) => cfg.local_cache_url.clone(),
-            _ => "local_cache_url".into(),
-        }
-    }
+impl Config {
+    string_config!(mysql_url, "mysql://root:root@127.0.0.1/user_data");
+    string_config!(score_db_url, "score_db_url");
+    string_config!(song_db_url, "song_db_url");
+    string_config!(scorelog_db_url, "scorelog_db_url");
+    string_config!(local_cache_url, "local_cache_url");
+    string_config!(slack_bot_token, "Slack bot token is not configure.");
+    string_config!(slack_channel, "Slack channel is not configure.");
+    string_config!(slack_file_name, "Slack file name is not configure");
+    string_config!(output_type, "STDOUT");
+    string_config!(
+        google_oauth_client_id,
+        "hogehoge.apps.googleusercontent.com"
+    );
+
     pub fn timestamp(&self) -> i32 {
         match self {
             Config::Config(cfg) => cfg.timestamp.unwrap_or(1800000000),
@@ -85,43 +78,6 @@ impl Config {
             _ => true,
         }
     }
-    pub fn slack_bot_token(&self) -> String {
-        match self {
-            Config::Config(cfg) => cfg
-                .slack_bot_token
-                .clone()
-                .expect("Slack bot token is not configure."),
-            _ => "slack_bot_token bot token".into(),
-        }
-    }
-    pub fn slack_channel(&self) -> String {
-        match self {
-            Config::Config(cfg) => cfg
-                .slack_channel
-                .clone()
-                .expect("Slack channel is not configure."),
-            _ => "slack_channel".into(),
-        }
-    }
-    pub fn slack_file_name(&self) -> String {
-        match self {
-            Config::Config(cfg) => cfg
-                .slack_file_name
-                .clone()
-                .expect("Slack file name is not configure"),
-            _ => "slack_file_name".into(),
-        }
-    }
-
-    pub fn output_type(&self) -> String {
-        match self {
-            Config::Config(cfg) => match cfg.output_type.clone() {
-                Some(t) => t,
-                None => "STDOUT".into(),
-            },
-            _ => "STDOUT".into(),
-        }
-    }
 }
 
 pub fn config() -> Config {
@@ -130,7 +86,7 @@ pub fn config() -> Config {
 
 lazy_static! {
     pub static ref CONFIG: Config = {
-        let file = fs::read_to_string("config.toml").unwrap();
+        let file = fs::read_to_string("config.toml").unwrap_or("".to_string());
         Config::Config(toml::from_str(&file).unwrap())
     };
 }
