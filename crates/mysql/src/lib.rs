@@ -69,6 +69,18 @@ impl MySQLClient {
         }
     }
 
+    pub fn account_by_id(&self, user_id: i32) -> Result<Account> {
+        let user: models::User = schema::users::table
+            .filter(schema::users::id.eq(user_id))
+            .first(&self.connection)?;
+
+        Ok(Account::new(
+            GmailAddress::new(user.gmail_address),
+            UserName::new(user.name),
+            RegisteredDate::new(user.registered_date),
+        ))
+    }
+
     pub fn account(&self, email: String) -> Result<Account> {
         match self.get_account(email.clone()) {
             Ok(a) => Ok(a),
