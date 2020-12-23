@@ -2,6 +2,52 @@ use crate::*;
 use serde::de::DeserializeOwned;
 
 #[derive(Serialize, Deserialize, Clone)]
+pub struct Tables(Vec<Table<Charts>>);
+
+impl Tables {
+    pub fn new(v: Vec<Table<Charts>>) -> Self {
+        Tables(v)
+    }
+
+    pub fn format(&self) -> Vec<TableFormat> {
+        self.0
+            .iter()
+            .map(|t| TableFormat {
+                name: t.name(),
+                levels: t
+                    .levels()
+                    .iter()
+                    .cloned()
+                    .map(|l| format!("{}{}", t.symbol(), l.to_string()))
+                    .collect::<Vec<_>>(),
+            })
+            .collect()
+    }
+
+    pub fn get_table(&self, mut index: usize) -> Table<Charts> {
+        if index >= self.len() {
+            index = 0;
+        }
+        self.0[index].clone()
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn make_detail(&self, songs: &Songs, scores: &Scores, updated_at: &UpdatedAt) -> String {
+        serde_json::to_string(
+            &self
+                .0
+                .iter()
+                .map(|table| table.make_detail(songs, scores, updated_at))
+                .collect::<Vec<_>>(),
+        )
+        .unwrap()
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Table<T> {
     name: String,
     symbol: String,
@@ -114,4 +160,10 @@ impl<T: ChartsTrait> MakeDetail for Table<T> {
                 .collect(),
         )
     }
+}
+
+#[derive(Serialize)]
+pub struct TableFormat {
+    name: String,
+    levels: Vec<String>,
 }

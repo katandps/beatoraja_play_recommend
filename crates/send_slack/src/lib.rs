@@ -82,11 +82,6 @@ mod tests {
 
     #[tokio::test]
     async fn async_fn_works() {
-        println!(
-            "{}",
-            send_async("ほげほげ".into(), "タイトル".into(), "内容".into())
-                .await
-                .unwrap()
-        );
+        println!("{}", send_async("ほげほげ".into()).await.unwrap());
     }
 }

@@ -1,7 +1,5 @@
 pub use crate::table::{
     chart::Chart,
     charts::{Charts, ChartsLevels, ChartsTrait, GetSong, LevelSpecify},
-    table::{Table, TableLevels, TableName, TableSymbol, TableTrait},
+    table::{Table, TableFormat, TableLevels, TableName, TableSymbol, TableTrait, Tables},
 };
-
-pub type Tables = Vec<Table<Charts>>;

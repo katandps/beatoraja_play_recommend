@@ -9,14 +9,14 @@ use url::Url;
 #[macro_use]
 extern crate anyhow;
 
-pub async fn get_tables(is_local: bool) -> Vec<Table<Charts>> {
+pub async fn get_tables(is_local: bool) -> Tables {
     match local(is_local) {
         Ok(t) => t,
         _ => from_web().await,
     }
 }
 
-async fn from_web() -> Vec<Table<Charts>> {
+async fn from_web() -> Tables {
     let mut tables = Vec::new();
     for url in config().table_urls() {
         match make_table(url.parse().unwrap()).await {
@@ -26,16 +26,16 @@ async fn from_web() -> Vec<Table<Charts>> {
     }
     let mut file = File::create(config().local_cache_url()).unwrap();
     let _ = file.write(serde_json::to_string(&tables).unwrap().as_ref());
-    tables
+    Tables::new(tables)
 }
 
-fn local(is_local: bool) -> anyhow::Result<Vec<Table<Charts>>> {
-    fn load() -> anyhow::Result<Vec<Table<Charts>>> {
+fn local(is_local: bool) -> anyhow::Result<Tables> {
+    fn load() -> anyhow::Result<Tables> {
         let mut file = File::open(config().local_cache_url())?;
         let mut contents = String::new();
         let _ = file.read_to_string(&mut contents);
         let vec = serde_json::from_str(&contents)?;
-        Ok(vec)
+        Ok(Tables::new(vec))
     }
 
     match is_local {

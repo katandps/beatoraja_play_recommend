@@ -61,7 +61,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "config",
- "controller",
  "model",
  "mysql",
  "sqlite",
@@ -136,19 +135,6 @@ dependencies = [
  "serde",
  "serde_json",
  "toml",
-]
-
-[[package]]
-name = "controller"
-version = "0.1.0"
-dependencies = [
- "config",
- "model",
- "send_slack",
- "serde",
- "serde_json",
- "sqlite",
- "table",
 ]
 
 [[package]]

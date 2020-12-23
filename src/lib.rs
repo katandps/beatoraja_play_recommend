@@ -1,5 +1,4 @@
 pub use config::*;
-pub use controller::Controller;
 pub use model::*;
 pub use mysql::*;
 pub use sqlite::*;

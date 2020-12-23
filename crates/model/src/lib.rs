@@ -1,5 +1,4 @@
 mod account;
-mod app;
 mod command;
 mod player;
 mod prelude;

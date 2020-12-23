@@ -13,13 +13,11 @@ members = [
     "crates/send_slack",
     "crates/config",
     "crates/table",
-    "crates/controller",
     "crates/sqlite",
     "crates/mysql",
 ]
 
 [dependencies]
-"controller" = { path = "crates/controller" }
 "model" = { path = "crates/model" }
 "table" = { path = "crates/table" }
 "sqlite" = { path = "crates/sqlite" }

@@ -3,15 +3,6 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-pub(super) fn detail<T: TableTrait>(
-    songs: &Songs,
-    table: &T,
-    scores: &Scores,
-    updated_at: &UpdatedAt,
-) -> CommandResult {
-    CommandResult::Detail(table.make_detail(songs, scores, updated_at))
-}
-
 #[derive(Deserialize, Serialize)]
 pub struct DetailResult {
     table: String,
