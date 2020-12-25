@@ -80,8 +80,3 @@ impl SongsBuilder {
         }
     }
 }
-
-pub trait SongRepository {
-    fn song_data(&self) -> Songs;
-    fn save_song(&self, songs: &Songs);
-}

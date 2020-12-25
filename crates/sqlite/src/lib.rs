@@ -32,13 +32,13 @@ impl SqliteClient {
         )
     }
 
-    fn establish_connection(url: &str) -> SqliteConnection {
-        SqliteConnection::establish(&url).unwrap_or_else(|_| panic!("Error connection to {}", &url))
+    fn establish_connection(url: &str) -> Result<SqliteConnection, diesel::ConnectionError> {
+        SqliteConnection::establish(&url)
     }
 
     fn score_log(&self) -> HashMap<SongId, SnapShots> {
         use schema::score_log::scorelog::dsl::*;
-        let connection = Self::establish_connection(&self.scorelog_db_url);
+        let connection = Self::establish_connection(&self.scorelog_db_url).unwrap();
         let record: Vec<schema::score_log::ScoreLog> =
             scorelog.load(&connection).expect("Error loading schema");
 
@@ -53,7 +53,7 @@ impl SqliteClient {
 
     pub fn player(&self) -> PlayerStates {
         use schema::player::player::dsl::*;
-        let connection = Self::establish_connection(&self.score_db_url);
+        let connection = Self::establish_connection(&self.score_db_url).unwrap();
         let records: Vec<schema::player::Player> = player
             .load::<schema::player::Player>(&connection)
             .expect("Error loading schema");
@@ -74,11 +74,30 @@ impl SqliteClient {
         }
         PlayerStates::new(log)
     }
+
+    pub fn song_data(&self) -> Result<Songs> {
+        let connection = Self::establish_connection(&self.song_db_url)?;
+        let record: Vec<schema::song::Song> = schema::song::song::table.load(&connection)?;
+
+        Ok(record
+            .iter()
+            .fold(SongsBuilder::new(), |mut builder, row| {
+                builder.push(
+                    HashMd5::new(row.md5.clone()),
+                    HashSha256::new(row.sha256.clone()),
+                    Title::new(format!("{}{}", row.title, row.subtitle)),
+                    Artist::new(row.artist.clone()),
+                    row.notes,
+                );
+                builder
+            })
+            .build())
+    }
 }
 
 impl ScoreRepository for SqliteClient {
     fn score(&self) -> Scores {
-        let connection = Self::establish_connection(&self.score_db_url);
+        let connection = Self::establish_connection(&self.score_db_url).unwrap();
         let record = schema::score::score::table
             .load::<schema::score::Score>(&connection)
             .expect("Error loading schema");
@@ -111,39 +130,5 @@ impl ScoreRepository for SqliteClient {
 
     fn save_score(&self, _account: Account, _score: Scores) -> Result<()> {
         unimplemented!()
-    }
-}
-
-impl SongRepository for SqliteClient {
-    fn song_data(&self) -> Songs {
-        use schema::song::song::dsl::*;
-        let connection = Self::establish_connection(&self.song_db_url);
-        let record: Vec<schema::song::Song> = song.load(&connection).expect("Error loading schema");
-
-        record
-            .iter()
-            .fold(SongsBuilder::new(), |mut builder, row| {
-                builder.push(
-                    HashMd5::new(row.md5.clone()),
-                    HashSha256::new(row.sha256.clone()),
-                    Title::new(format!("{}{}", row.title, row.subtitle)),
-                    Artist::new(row.artist.clone()),
-                    row.notes,
-                );
-                builder
-            })
-            .build()
-    }
-
-    fn save_song(&self, _songs: &Songs) {
-        unimplemented!()
-    }
-}
-
-fn config() -> config::Config {
-    if cfg!(test) {
-        config::Config::Dummy
-    } else {
-        config::config()
     }
 }

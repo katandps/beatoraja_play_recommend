@@ -339,34 +339,8 @@ impl MySQLClient {
 
         Ok(())
     }
-}
 
-impl SongRepository for MySQLClient {
-    fn song_data(&self) -> Songs {
-        let record = self.songs();
-        let hash: HashMap<String, String> = self
-            .hash()
-            .iter()
-            .map(|hash| (hash.sha256.clone(), hash.md5.clone()))
-            .collect();
-
-        record
-            .iter()
-            .fold(SongsBuilder::new(), |mut builder, row| {
-                let md5 = HashMd5::new(hash.get(&row.sha256).unwrap().clone());
-                builder.push(
-                    md5,
-                    HashSha256::new(row.sha256.clone()),
-                    Title::new(format!("{}{}", row.title, row.subtitle)),
-                    Artist::new(row.artist.clone()),
-                    row.notes,
-                );
-                builder
-            })
-            .build()
-    }
-
-    fn save_song(&self, songs: &Songs) {
+    pub fn save_song(&self, songs: &Songs) -> Result<()> {
         let exist_hashes = self.hash();
         let mut hashmap = songs.converter.sha256_to_md5.clone();
         for row in exist_hashes {
@@ -393,8 +367,7 @@ impl SongRepository for MySQLClient {
             println!("Insert {} hashes.", records.len());
             diesel::insert_into(schema::hashes::table)
                 .values(records)
-                .execute(&self.connection)
-                .expect("Error saving new hashes");
+                .execute(&self.connection)?;
         }
 
         let exist_songs = self.songs();
@@ -427,9 +400,33 @@ impl SongRepository for MySQLClient {
             println!("Insert {} songs.", records.len());
             diesel::insert_into(schema::songs::table)
                 .values(records)
-                .execute(&self.connection)
-                .expect("Error saving new songs");
+                .execute(&self.connection)?;
         }
+        Ok(())
+    }
+
+    pub fn song_data(&self) -> Songs {
+        let record = self.songs();
+        let hash: HashMap<String, String> = self
+            .hash()
+            .iter()
+            .map(|hash| (hash.sha256.clone(), hash.md5.clone()))
+            .collect();
+
+        record
+            .iter()
+            .fold(SongsBuilder::new(), |mut builder, row| {
+                let md5 = HashMd5::new(hash.get(&row.sha256).unwrap().clone());
+                builder.push(
+                    md5,
+                    HashSha256::new(row.sha256.clone()),
+                    Title::new(format!("{}{}", row.title, row.subtitle)),
+                    Artist::new(row.artist.clone()),
+                    row.notes,
+                );
+                builder
+            })
+            .build()
     }
 }
 
