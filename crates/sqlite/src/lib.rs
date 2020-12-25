@@ -16,12 +16,20 @@ pub struct SqliteClient {
 }
 
 impl SqliteClient {
-    pub fn new() -> SqliteClient {
+    pub fn new(scorelog_db_url: String, song_db_url: String, score_db_url: String) -> SqliteClient {
         SqliteClient {
-            scorelog_db_url: config().scorelog_db_url(),
-            song_db_url: config().song_db_url(),
-            score_db_url: config().score_db_url(),
+            scorelog_db_url,
+            score_db_url,
+            song_db_url,
         }
+    }
+
+    pub fn by_config() -> SqliteClient {
+        SqliteClient::new(
+            config::config().scorelog_db_url(),
+            config::config().song_db_url(),
+            config::config().score_db_url(),
+        )
     }
 
     fn establish_connection(url: &str) -> SqliteConnection {

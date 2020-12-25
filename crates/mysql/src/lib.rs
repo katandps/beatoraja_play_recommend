@@ -6,6 +6,7 @@ use anyhow::Result;
 use chrono::Utc;
 use diesel::prelude::*;
 use model::gmail_address::GmailAddress;
+use model::google_id::GoogleId;
 use model::registered_date::RegisteredDate;
 use model::user_name::UserName;
 use model::*;
@@ -42,26 +43,28 @@ impl MySQLClient {
             .expect("Error loading schema")
     }
 
-    pub fn register(&self, email: String) -> Result<Account> {
+    pub fn register(&self, profile: &GoogleProfile) -> Result<Account> {
         let user: Vec<models::User> = schema::users::table
-            .filter(schema::users::gmail_address.eq(email.clone()))
+            .filter(schema::users::gmail_address.eq(&profile.email))
             .load(&self.connection)
             .expect("Error loading schema");
 
         if user.is_empty() {
             let user = models::RegisteringUser {
-                gmail_address: email.clone(),
-                name: "".to_string(),
+                google_id: profile.user_id.clone(),
+                gmail_address: profile.email.clone(),
+                name: profile.name.to_string(),
                 registered_date: Utc::now().naive_utc(),
             };
             println!("Insert new user");
             diesel::insert_into(schema::users::table)
                 .values(user.clone())
                 .execute(&self.connection)?;
-            self.get_account(email)
+            self.get_account(profile)
         } else {
             let user = user[0].clone();
             Ok(Account::new(
+                GoogleId::new(user.google_id),
                 GmailAddress::new(user.gmail_address),
                 UserName::new(user.name),
                 RegisteredDate::new(user.registered_date),
@@ -75,16 +78,17 @@ impl MySQLClient {
             .first(&self.connection)?;
 
         Ok(Account::new(
+            GoogleId::new(user.google_id),
             GmailAddress::new(user.gmail_address),
             UserName::new(user.name),
             RegisteredDate::new(user.registered_date),
         ))
     }
 
-    pub fn account(&self, email: String) -> Result<Account> {
-        match self.get_account(email.clone()) {
+    pub fn account(&self, profile: &GoogleProfile) -> Result<Account> {
+        match self.get_account(profile) {
             Ok(a) => Ok(a),
-            _ => self.register(email),
+            _ => self.register(profile),
         }
     }
 
@@ -101,12 +105,13 @@ impl MySQLClient {
         Ok(())
     }
 
-    fn get_account(&self, email: String) -> Result<Account> {
+    fn get_account(&self, profile: &GoogleProfile) -> Result<Account> {
         let user: models::User = schema::users::table
-            .filter(schema::users::gmail_address.eq(email))
+            .filter(schema::users::gmail_address.eq(&profile.email))
             .first(&self.connection)?;
 
         Ok(Account::new(
+            GoogleId::new(user.google_id),
             GmailAddress::new(user.gmail_address),
             UserName::new(user.name),
             RegisteredDate::new(user.registered_date),

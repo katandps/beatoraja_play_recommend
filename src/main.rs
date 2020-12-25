@@ -16,7 +16,7 @@ pub async fn main() {
 }
 
 fn update_songs() {
-    let sqlite_client = SqliteClient::new();
+    let sqlite_client = SqliteClient::by_config();
     let songs = sqlite_client.song_data();
     let repository = MySQLClient::new();
     repository.save_song(&songs);
@@ -27,7 +27,7 @@ fn update_songs() {
 fn save_score() -> Result<()> {
     let repository = MySQLClient::new();
     let account = repository.account("katandps@gmail.com".into())?;
-    let sqlite = SqliteClient::new();
+    let sqlite = SqliteClient::by_config();
     let score = sqlite.score();
 
     repository.save_score(account, score)

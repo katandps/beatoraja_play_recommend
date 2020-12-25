@@ -61,6 +61,7 @@ table! {
 table! {
     users (id) {
         id -> Integer,
+        google_id -> Varchar,
         gmail_address -> Varchar,
         name -> Varchar,
         registered_date -> Datetime,

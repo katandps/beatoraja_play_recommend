@@ -23,6 +23,7 @@ pub struct Hash {
 #[derive(Debug, Clone, Queryable, Insertable)]
 pub struct User {
     pub id: i32,
+    pub google_id: String,
     pub gmail_address: String,
     pub name: String,
     pub registered_date: NaiveDateTime,
@@ -31,6 +32,7 @@ pub struct User {
 #[derive(Debug, Clone, Insertable)]
 #[table_name = "users"]
 pub struct RegisteringUser {
+    pub google_id: String,
     pub gmail_address: String,
     pub name: String,
     pub registered_date: NaiveDateTime,
