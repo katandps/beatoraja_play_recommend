@@ -33,7 +33,7 @@ impl SnapShots {
                 last_date = &snap.updated_at;
                 continue;
             }
-            let one_day_before = self.get_snap(&snap.updated_at.sub(1));
+            let one_day_before = self.get_snap(&last_date.sub(1));
             return ScoreSnap::new(last.score, last_date.clone(), one_day_before.score);
         }
         ScoreSnap::new(last.score, last_date.clone(), ExScore::new())
@@ -47,7 +47,7 @@ impl SnapShots {
                 last_date = &snap.updated_at;
                 continue;
             }
-            let one_day_before = self.get_snap(&snap.updated_at.sub(1));
+            let one_day_before = self.get_snap(&last_date.sub(1));
             return MinBPSnap::new(last.min_bp, last_date.clone(), one_day_before.min_bp);
         }
         MinBPSnap::new(last.min_bp, last_date.clone(), MinBP::new())
@@ -61,7 +61,7 @@ impl SnapShots {
                 last_date = &snap.updated_at;
                 continue;
             }
-            let one_day_before = self.get_snap(&snap.updated_at.sub(1));
+            let one_day_before = self.get_snap(&last_date.sub(1));
             return ClearTypeSnap::new(
                 last.clear_type,
                 last_date.clone(),
