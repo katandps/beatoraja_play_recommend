@@ -1,5 +1,6 @@
 use crate::summary::Countable;
 use serde::{Deserialize, Serialize};
+use std::cmp::Ordering;
 use std::fmt;
 
 #[derive(Deserialize, Serialize, Clone, Copy, Debug, Hash, Eq, PartialEq)]
@@ -93,5 +94,17 @@ impl fmt::Display for ClearType {
             ClearType::Max => write!(f, "Max"),
             ClearType::Unknown => write!(f, "Unknown"),
         }
+    }
+}
+
+impl PartialOrd for ClearType {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.to_integer().partial_cmp(&other.to_integer())
+    }
+}
+
+impl Ord for ClearType {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.to_integer().cmp(&other.to_integer())
     }
 }
