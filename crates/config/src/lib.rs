@@ -26,6 +26,7 @@ pub struct Cfg {
     pub google_oauth_client_secret: Option<String>,
     pub google_oauth_redirect_uri: Option<String>,
     pub client_url: Option<String>,
+    pub client_domain: Option<String>,
     pub slack_bot_token: Option<String>,
     pub slack_channel: Option<String>,
     pub slack_file_name: Option<String>,
@@ -64,6 +65,7 @@ impl Config {
         client_url,
         "http://localhost:8080/beatoraja_play_recommend_web"
     );
+    string_config!(client_domain, "localhost:8080");
 
     pub fn timestamp(&self) -> i32 {
         match self {
