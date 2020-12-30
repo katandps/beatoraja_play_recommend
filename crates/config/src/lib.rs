@@ -14,6 +14,7 @@ pub struct Cfg {
     pub timestamp: Option<i32>,
     pub local_cache_url: Option<String>,
     pub mysql_url: Option<String>,
+    pub redis_url: Option<String>,
     pub song_db_url: Option<String>,
     pub score_db_url: Option<String>,
     pub songdata_db_url: Option<String>,
@@ -22,6 +23,9 @@ pub struct Cfg {
     pub table_index: Option<usize>,
     pub coloring_table: Option<bool>,
     pub google_oauth_client_id: Option<String>,
+    pub google_oauth_client_secret: Option<String>,
+    pub google_oauth_redirect_uri: Option<String>,
+    pub client_url: Option<String>,
     pub slack_bot_token: Option<String>,
     pub slack_channel: Option<String>,
     pub slack_file_name: Option<String>,
@@ -41,6 +45,7 @@ macro_rules! string_config {
 
 impl Config {
     string_config!(mysql_url, "mysql://root:root@127.0.0.1/user_data");
+    string_config!(redis_url, "redis://localhost:6379/");
     string_config!(score_db_url, "score_db_url");
     string_config!(song_db_url, "song_db_url");
     string_config!(scorelog_db_url, "scorelog_db_url");
@@ -52,6 +57,12 @@ impl Config {
     string_config!(
         google_oauth_client_id,
         "hogehoge.apps.googleusercontent.com"
+    );
+    string_config!(google_oauth_client_secret, "secret");
+    string_config!(google_oauth_redirect_uri, "hogehoge.com/auth");
+    string_config!(
+        client_url,
+        "http://localhost:8080/beatoraja_play_recommend_web"
     );
 
     pub fn timestamp(&self) -> i32 {

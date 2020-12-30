@@ -72,9 +72,9 @@ impl MySQLClient {
         }
     }
 
-    pub fn account_by_id(&self, user_id: i32) -> Result<Account> {
+    pub fn account_by_increments(&self, id: i32) -> Result<Account> {
         let user: models::User = schema::users::table
-            .filter(schema::users::id.eq(user_id))
+            .filter(schema::users::id.eq(id))
             .first(&self.connection)?;
 
         Ok(Account::new(
@@ -85,11 +85,17 @@ impl MySQLClient {
         ))
     }
 
-    pub fn account(&self, profile: &GoogleProfile) -> Result<Account> {
-        match self.get_account(profile) {
-            Ok(a) => Ok(a),
-            _ => self.register(profile),
-        }
+    pub fn account_by_id(&self, google_id: GoogleId) -> Result<Account> {
+        let user: models::User = schema::users::table
+            .filter(schema::users::google_id.eq(google_id.to_string()))
+            .first(&self.connection)?;
+
+        Ok(Account::new(
+            GoogleId::new(user.google_id),
+            GmailAddress::new(user.gmail_address),
+            UserName::new(user.name),
+            RegisteredDate::new(user.registered_date),
+        ))
     }
 
     pub fn save_account(&self, account: Account) -> Result<()> {
