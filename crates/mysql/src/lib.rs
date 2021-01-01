@@ -98,16 +98,27 @@ impl MySQLClient {
         ))
     }
 
-    pub fn save_account(&self, account: Account) -> Result<()> {
-        let mut user: models::User = schema::users::table
+    pub fn rename_account(&self, account: &Account) -> Result<()> {
+        println!("Update user name to {}.", account.user_name());
+        let user: models::User = schema::users::table
             .filter(schema::users::gmail_address.eq(account.email()))
             .first(&self.connection)?;
 
-        user.name = account.name.to_string();
-        println!("Update user name.");
-        diesel::replace_into(schema::users::table)
-            .values(user.clone())
+        diesel::insert_into(schema::rename_logs::table)
+            .values(models::RenameUser {
+                user_id: user.id.clone(),
+                old_name: user.name.clone(),
+                new_name: account.user_name(),
+                date: Utc::now().naive_utc(),
+            })
             .execute(&self.connection)?;
+
+        diesel::update(
+            schema::users::table.filter(schema::users::gmail_address.eq(account.email())),
+        )
+        .set(schema::users::name.eq(account.user_name()))
+        .execute(&self.connection)?;
+
         Ok(())
     }
 

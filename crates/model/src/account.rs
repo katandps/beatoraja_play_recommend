@@ -8,6 +8,7 @@ use crate::account::google_id::GoogleId;
 use crate::account::registered_date::RegisteredDate;
 use crate::account::user_name::UserName;
 use chrono::NaiveDateTime;
+use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct Account {
@@ -50,6 +51,16 @@ impl Account {
 
     pub fn set_name(&mut self, new_name: String) {
         self.name = UserName::new(new_name);
+    }
+
+    pub fn to_json(&self) -> String {
+        serde_json::to_string(
+            &vec![("user_name", self.user_name())]
+                .iter()
+                .cloned()
+                .collect::<HashMap<_, _>>(),
+        )
+        .unwrap()
     }
 }
 

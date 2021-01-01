@@ -68,16 +68,20 @@ table! {
     }
 }
 
+table! {
+    rename_logs(id) {
+        id -> Integer,
+        user_id -> Integer,
+        old_name -> Varchar,
+        new_name -> Varchar,
+        date -> Datetime,
+    }
+}
+
 joinable!(score_snaps -> hashes (sha256));
 joinable!(score_snaps -> users (user_id));
 joinable!(scores -> hashes (sha256));
 joinable!(scores -> users (user_id));
 joinable!(songs -> hashes (sha256));
 
-allow_tables_to_appear_in_same_query!(
-    hashes,
-    scores,
-    score_snaps,
-    songs,
-    users,
-);
+allow_tables_to_appear_in_same_query!(hashes, scores, score_snaps, songs, users,);

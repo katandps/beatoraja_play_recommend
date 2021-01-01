@@ -1,5 +1,6 @@
 use crate::schema::*;
 use chrono::NaiveDateTime;
+use diesel::Identifiable;
 
 #[derive(Debug, Clone, Queryable, Insertable)]
 #[table_name = "songs"]
@@ -20,7 +21,7 @@ pub struct Hash {
     pub md5: String,
 }
 
-#[derive(Debug, Clone, Queryable, Insertable)]
+#[derive(Debug, Clone, Queryable, Insertable, Identifiable)]
 pub struct User {
     pub id: i32,
     pub google_id: String,
@@ -36,6 +37,15 @@ pub struct RegisteringUser {
     pub gmail_address: String,
     pub name: String,
     pub registered_date: NaiveDateTime,
+}
+
+#[derive(Debug, Clone, Insertable)]
+#[table_name = "rename_logs"]
+pub struct RenameUser {
+    pub user_id: i32,
+    pub old_name: String,
+    pub new_name: String,
+    pub date: NaiveDateTime,
 }
 
 #[derive(Debug, Clone, Queryable, Insertable)]
