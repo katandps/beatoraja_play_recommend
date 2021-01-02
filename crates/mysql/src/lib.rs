@@ -123,8 +123,9 @@ impl MySQLClient {
         Ok(Self::create_account(user))
     }
 
-    fn score_log(&self) -> HashMap<SongId, SnapShots> {
+    fn score_log(&self, account: &Account) -> HashMap<SongId, SnapShots> {
         let records: Vec<models::ScoreSnap> = schema::score_snaps::table
+            .filter(schema::score_snaps::user_id.eq(&account.user_id()))
             .load(&self.connection)
             .expect("Error loading schema");
         let mut map = HashMap::new();
@@ -149,7 +150,7 @@ impl MySQLClient {
         let record: Vec<models::Score> = schema::scores::table
             .filter(schema::scores::user_id.eq(user.id))
             .load(&self.connection)?;
-        let score_log = self.score_log();
+        let score_log = self.score_log(account);
         Ok(Scores::new(
             record
                 .iter()
