@@ -120,7 +120,10 @@ impl ScoreRepository for SqliteClient {
                             PlayCount::new(row.playcount),
                             ClearCount::new(row.clearcount),
                             MinBP::from_bp(row.minbp),
-                            score_log.get(&song_id).unwrap().clone(),
+                            score_log
+                                .get(&song_id)
+                                .unwrap_or(&SnapShots::default())
+                                .clone(),
                         ),
                     )
                 })
