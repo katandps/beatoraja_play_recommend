@@ -9,8 +9,8 @@ impl UpdatedAt {
     pub fn new() -> UpdatedAt {
         UpdatedAt(DateTime::from(Local.timestamp(0, 0)))
     }
-    pub fn from_timestamp(timestamp: i32) -> UpdatedAt {
-        UpdatedAt(DateTime::from(Local.timestamp(timestamp as i64, 0)))
+    pub fn from_timestamp(timestamp: i64) -> UpdatedAt {
+        UpdatedAt(DateTime::from(Local.timestamp(timestamp, 0)))
     }
     pub fn from_str(str: &str) -> UpdatedAt {
         match DateTime::parse_from_rfc3339(format!("{}T00:00:00+09:00", str).as_str()) {
@@ -35,6 +35,10 @@ impl UpdatedAt {
 
     pub fn naive_datetime(&self) -> NaiveDateTime {
         self.0.naive_local()
+    }
+
+    pub fn from_naive_datetime(time: NaiveDateTime) -> Self {
+        Self::from_timestamp((time - Duration::hours(9)).timestamp())
     }
 }
 
@@ -69,5 +73,20 @@ mod test {
         let date = UpdatedAt::day_start(UpdatedAt::now());
         assert_eq!(true, date.is_future());
         assert_eq!(false, date.sub(1).is_future());
+    }
+
+    #[test]
+    pub fn test_cmp() {
+        let date1 = UpdatedAt::now();
+        let date2 = date1.sub(1);
+
+        assert!(date1 > date2);
+    }
+
+    #[test]
+    pub fn test_naive_datetime() {
+        let date1 = UpdatedAt::from_timestamp(1000000000);
+        let date2 = UpdatedAt::from_naive_datetime(date1.naive_datetime());
+        assert_eq!(date1, date2);
     }
 }

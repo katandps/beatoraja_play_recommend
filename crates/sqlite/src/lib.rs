@@ -45,7 +45,8 @@ impl SqliteClient {
         let mut map = HashMap::new();
         for row in record {
             let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
-            let snap = SnapShot::from_data(row.clear, row.score, row.combo, row.minbp, row.date);
+            let snap =
+                SnapShot::from_data(row.clear, row.score, row.combo, row.minbp, row.date as i64);
             map.entry(song_id).or_insert(SnapShots::default()).add(snap);
         }
         map
@@ -64,7 +65,7 @@ impl SqliteClient {
                 PlayCount::new(row.playcount),
                 PlayCount::new(row.clear),
                 PlayTime::new(row.playtime),
-                UpdatedAt::from_timestamp(row.date),
+                UpdatedAt::from_timestamp(row.date as i64),
                 TotalJudge::new(Judge::new(
                     row.epg, row.lpg, row.egr, row.lgr, row.egd, row.lgd, row.ebd, row.lbd,
                     row.epr, row.lpr, row.ems, row.lms,
@@ -111,7 +112,7 @@ impl ScoreRepository for SqliteClient {
                         song_id.clone(),
                         Score::new(
                             ClearType::from_integer(row.clear),
-                            UpdatedAt::from_timestamp(row.date),
+                            UpdatedAt::from_timestamp(row.date as i64),
                             Judge::new(
                                 row.epg, row.lpg, row.egr, row.lgr, row.egd, row.lgd, row.ebd,
                                 row.lbd, row.epr, row.lpr, row.ems, row.lms,

@@ -136,7 +136,7 @@ impl MySQLClient {
                 row.score,
                 row.combo,
                 row.min_bp,
-                row.date.timestamp() as i32,
+                row.date.timestamp(),
             );
             map.entry(song_id).or_insert(SnapShots::default()).add(snap);
         }
@@ -160,7 +160,7 @@ impl MySQLClient {
                         song_id.clone(),
                         Score::new(
                             ClearType::from_integer(row.clear),
-                            UpdatedAt::from_timestamp(row.date.timestamp() as i32),
+                            UpdatedAt::from_timestamp(row.date.timestamp()),
                             Judge::new(
                                 row.epg, row.lpg, row.egr, row.lgr, row.egd, row.lgd, row.ebd,
                                 row.lbd, row.epr, row.lpr, row.ems, row.lms,
@@ -233,7 +233,7 @@ impl MySQLClient {
         for (song_id, score) in score.0 {
             match saved_song.get(&song_id) {
                 Some(saved) => {
-                    if UpdatedAt::from_str(&saved.date.to_string()) < score.updated_at {
+                    if UpdatedAt::from_naive_datetime(saved.date) < score.updated_at {
                         songs_for_update.push(models::Score {
                             id: saved.id,
                             user_id,

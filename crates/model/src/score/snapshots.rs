@@ -99,9 +99,9 @@ mod test {
 
     #[test]
     pub fn clear() {
-        const DAY: i32 = 86400;
+        const DAY: i64 = 86400;
 
-        fn asrt(snapshots: &SnapShots, current: ClearType, before: ClearType, timestamp: i32) {
+        fn asrt(snapshots: &SnapShots, current: ClearType, before: ClearType, timestamp: i64) {
             let snap = snapshots.clear_type_snap(&UpdatedAt::from_timestamp(timestamp));
             assert_eq!(current, snap.current);
             assert_eq!(before, snap.before);

@@ -25,7 +25,7 @@ impl SnapShot {
         score: i32,
         combo: i32,
         minbp: i32,
-        timestamp: i32,
+        timestamp: i64,
     ) -> SnapShot {
         SnapShot {
             clear_type: ClearType::from_integer(clear_type),
