@@ -35,15 +35,16 @@ impl Tables {
         self.0.len()
     }
 
-    pub fn make_detail(&self, songs: &Songs, scores: &Scores, updated_at: &UpdatedAt) -> String {
-        serde_json::to_string(
-            &self
-                .0
-                .iter()
-                .map(|table| table.make_detail(songs, scores, updated_at))
-                .collect::<Vec<_>>(),
-        )
-        .unwrap()
+    pub fn make_detail(
+        &self,
+        songs: &Songs,
+        scores: &Scores,
+        updated_at: &UpdatedAt,
+    ) -> Vec<DetailResult> {
+        self.0
+            .iter()
+            .map(|table| table.make_detail(songs, scores, updated_at))
+            .collect::<Vec<_>>()
     }
 }
 
@@ -81,6 +82,7 @@ impl<T: ChartsTrait> Table<T> {
             .collect()
     }
 }
+
 pub trait TableTrait:
     TableName
     + TableSymbol
@@ -96,9 +98,11 @@ pub trait TableTrait:
 pub trait TableName {
     fn name(&self) -> String;
 }
+
 pub trait TableSymbol {
     fn symbol(&self) -> String;
 }
+
 pub trait TableLevels {
     fn levels(&self) -> &Levels;
 }
@@ -108,6 +112,7 @@ pub trait MakeDetail {
 }
 
 impl<T: ChartsTrait> TableTrait for Table<T> {}
+
 impl<T: ChartsTrait> LevelSpecify for Table<T> {
     fn level_specified(&self, level: &Level) -> Self {
         Table {
@@ -118,21 +123,25 @@ impl<T: ChartsTrait> LevelSpecify for Table<T> {
         }
     }
 }
+
 impl<T: ChartsTrait> TableName for Table<T> {
     fn name(&self) -> String {
         self.name.clone()
     }
 }
+
 impl<T: ChartsTrait> TableSymbol for Table<T> {
     fn symbol(&self) -> String {
         self.symbol.clone()
     }
 }
+
 impl<T: ChartsTrait> TableLevels for Table<T> {
     fn levels(&self) -> &Levels {
         &self.levels
     }
 }
+
 impl<T: ChartsTrait> GetSong for Table<T> {
     fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
         self.charts.get_song(song_data)

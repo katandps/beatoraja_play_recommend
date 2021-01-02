@@ -8,6 +8,7 @@ use diesel::prelude::*;
 use model::gmail_address::GmailAddress;
 use model::google_id::GoogleId;
 use model::registered_date::RegisteredDate;
+use model::user_id::UserId;
 use model::user_name::UserName;
 use model::*;
 use std::collections::{HashMap, HashSet};
@@ -62,13 +63,7 @@ impl MySQLClient {
                 .execute(&self.connection)?;
             self.get_account(profile)
         } else {
-            let user = user[0].clone();
-            Ok(Account::new(
-                GoogleId::new(user.google_id),
-                GmailAddress::new(user.gmail_address),
-                UserName::new(user.name),
-                RegisteredDate::new(user.registered_date),
-            ))
+            Ok(Self::create_account(user[0].clone()))
         }
     }
 
@@ -77,25 +72,24 @@ impl MySQLClient {
             .filter(schema::users::id.eq(id))
             .first(&self.connection)?;
 
-        Ok(Account::new(
-            GoogleId::new(user.google_id),
-            GmailAddress::new(user.gmail_address),
-            UserName::new(user.name),
-            RegisteredDate::new(user.registered_date),
-        ))
+        Ok(Self::create_account(user))
+    }
+
+    fn create_account(model: models::User) -> Account {
+        Account::new(
+            UserId::new(model.id),
+            GoogleId::new(model.google_id),
+            GmailAddress::new(model.gmail_address),
+            UserName::new(model.name),
+            RegisteredDate::new(model.registered_date),
+        )
     }
 
     pub fn account_by_id(&self, google_id: GoogleId) -> Result<Account> {
         let user: models::User = schema::users::table
             .filter(schema::users::google_id.eq(google_id.to_string()))
             .first(&self.connection)?;
-
-        Ok(Account::new(
-            GoogleId::new(user.google_id),
-            GmailAddress::new(user.gmail_address),
-            UserName::new(user.name),
-            RegisteredDate::new(user.registered_date),
-        ))
+        Ok(Self::create_account(user))
     }
 
     pub fn rename_account(&self, account: &Account) -> Result<()> {
@@ -126,13 +120,7 @@ impl MySQLClient {
         let user: models::User = schema::users::table
             .filter(schema::users::gmail_address.eq(&profile.email))
             .first(&self.connection)?;
-
-        Ok(Account::new(
-            GoogleId::new(user.google_id),
-            GmailAddress::new(user.gmail_address),
-            UserName::new(user.name),
-            RegisteredDate::new(user.registered_date),
-        ))
+        Ok(Self::create_account(user))
     }
 
     fn score_log(&self) -> HashMap<SongId, SnapShots> {
@@ -154,7 +142,7 @@ impl MySQLClient {
         map
     }
 
-    pub fn score(&self, account: Account) -> Result<Scores> {
+    pub fn score(&self, account: &Account) -> Result<Scores> {
         let user: models::User = schema::users::table
             .filter(schema::users::gmail_address.eq(account.email()))
             .first(&self.connection)?;

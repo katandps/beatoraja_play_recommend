@@ -3,19 +3,19 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct DetailResult {
     table: String,
     levels: Vec<DetailByLevel>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct DetailByLevel {
     level: String,
     songs: Vec<SongDetail>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct SongDetail {
     pub title: String,
     total_notes: i32,

@@ -92,7 +92,7 @@ impl Score {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct ScoreSnap {
     pub current: ExScore,
     pub updated_at: UpdatedAt,
@@ -109,7 +109,7 @@ impl ScoreSnap {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct MinBPSnap {
     pub current: MinBP,
     pub updated_at: UpdatedAt,
@@ -126,7 +126,7 @@ impl MinBPSnap {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct ClearTypeSnap {
     pub current: ClearType,
     pub updated_at: UpdatedAt,
