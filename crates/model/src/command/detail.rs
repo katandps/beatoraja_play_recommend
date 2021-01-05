@@ -27,6 +27,7 @@ pub struct SongDetail {
     clear_type: ClearTypeSnap,
     updated_at: UpdatedAt,
     play_count: PlayCount,
+    hash: HashSha256,
 }
 
 impl DetailResult {
@@ -92,6 +93,7 @@ impl SongDetail {
             score: score_snap,
             updated_at: score.updated_at,
             play_count: score.play_count,
+            hash: song.hash.clone(),
         }
     }
 }

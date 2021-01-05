@@ -10,9 +10,9 @@ use crate::account::registered_date::RegisteredDate;
 use crate::account::user_id::UserId;
 use crate::account::user_name::UserName;
 use chrono::NaiveDateTime;
-use std::collections::HashMap;
+use serde::Serialize;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Account {
     pub user_id: UserId,
     pub google_id: GoogleId,
@@ -60,16 +60,6 @@ impl Account {
 
     pub fn set_name(&mut self, new_name: String) {
         self.name = UserName::new(new_name);
-    }
-
-    pub fn to_json(&self) -> String {
-        serde_json::to_string(
-            &vec![("user_name", self.user_name())]
-                .iter()
-                .cloned()
-                .collect::<HashMap<_, _>>(),
-        )
-        .unwrap()
     }
 }
 

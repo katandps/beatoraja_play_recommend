@@ -1,4 +1,6 @@
-#[derive(Debug, Clone)]
+use serde::Serialize;
+
+#[derive(Clone, Debug, Serialize)]
 pub struct GmailAddress(String);
 
 impl GmailAddress {

@@ -1,6 +1,7 @@
 use chrono::NaiveDateTime;
+use serde::Serialize;
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Serialize)]
 pub struct RegisteredDate(NaiveDateTime);
 
 impl RegisteredDate {
