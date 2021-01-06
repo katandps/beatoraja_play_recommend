@@ -1,25 +1,26 @@
-score_db_url="./files/score.db"
-scorelog_db_url="./files/scorelog.db"
-songdata_db_url="./files/songdata.db"
+score_db_url = "./files/score.db"
+scorelog_db_url = "./files/scorelog.db"
+songdata_db_url = "./files/songdata.db"
 
 #output_type="SLACK"|"STDOUT"|"JSON"|"TEXT
-output_type="STDOUT"
+output_type = "STDOUT"
 
-table_urls=[
-"https://stellabms.xyz/st/table.html",
-"https://stellabms.xyz/sl/table.html",
-"http://www.ribbit.xyz/bms/tables/insane.html",
-"http://www.ribbit.xyz/bms/tables/overjoy.html",
-"http://flowermaster.web.fc2.com/lrnanido/gla/LN.html",
-"http://rattoto10.jounin.jp/table_insane.html",
-"http://rattoto10.jounin.jp/table.html",
-"http://walkure.net/hakkyou/for_glassist/bms/?lamp=easy"
+table_urls = [
+    "https://stellabms.xyz/st/table.html",
+    "https://stellabms.xyz/sl/table.html",
+    "http://www.ribbit.xyz/bms/tables/insane.html",
+    "http://www.ribbit.xyz/bms/tables/overjoy.html",
+    "http://lr2.sakura.ne.jp/overjoy.php",
+    "http://flowermaster.web.fc2.com/lrnanido/gla/LN.html",
+    "http://rattoto10.jounin.jp/table_insane.html",
+    "http://rattoto10.jounin.jp/table.html",
+    "http://walkure.net/hakkyou/for_glassist/bms/?lamp=easy"
 ]
-table_index=1
+table_index = 1
 
+local_cache_url = "./files/cache.json"
+coloring_table = false
 #timestamp=1546268400
-local_cache_url="./files/cache.json"
-coloring_table=false
 #slack_bot_token=""
 #slack_channel=""
 #slack_file_name=""
