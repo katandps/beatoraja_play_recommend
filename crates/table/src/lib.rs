@@ -44,7 +44,7 @@ fn local(is_local: bool) -> anyhow::Result<Tables> {
     }
 }
 
-async fn make_table(table_url: String) -> anyhow::Result<Table<Charts>> {
+async fn make_table(table_url: String) -> anyhow::Result<Table> {
     let res = reqwest::get(&table_url).await?;
     let body = res.text().await?;
 

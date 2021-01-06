@@ -1,11 +1,10 @@
 use crate::*;
-use serde::de::DeserializeOwned;
 
 #[derive(Serialize, Deserialize, Clone)]
-pub struct Tables(Vec<Table<Charts>>);
+pub struct Tables(Vec<Table>);
 
 impl Tables {
-    pub fn new(v: Vec<Table<Charts>>) -> Self {
+    pub fn new(v: Vec<Table>) -> Self {
         Tables(v)
     }
 
@@ -24,7 +23,7 @@ impl Tables {
             .collect()
     }
 
-    pub fn get_table(&self, mut index: usize) -> Table<Charts> {
+    pub fn get_table(&self, mut index: usize) -> Table {
         if index >= self.len() {
             index = 0;
         }
@@ -49,18 +48,18 @@ impl Tables {
 }
 
 #[derive(Serialize, Deserialize, Clone)]
-pub struct Table<T> {
+pub struct Table {
     name: String,
     symbol: String,
-    charts: T,
+    charts: Charts,
     levels: Levels,
 }
 
-impl<T: ChartsTrait> Table<T> {
+impl Table {
     pub fn make(
         name: impl Into<String>,
         symbol: impl Into<String>,
-        charts: T,
+        charts: Charts,
         levels: Option<Vec<String>>,
     ) -> Self {
         let levels: Levels = match levels {
@@ -75,46 +74,14 @@ impl<T: ChartsTrait> Table<T> {
         }
     }
 
-    fn level_specified_vec(&self) -> Vec<Table<T>> {
+    fn level_specified_vec(&self) -> Vec<Table> {
         self.levels()
             .iter()
             .map(|level| self.level_specified(level))
             .collect()
     }
-}
 
-pub trait TableTrait:
-    TableName
-    + TableSymbol
-    + TableLevels
-    + GetSong
-    + LevelSpecify
-    + Serialize
-    + DeserializeOwned
-    + MakeDetail
-{
-}
-
-pub trait TableName {
-    fn name(&self) -> String;
-}
-
-pub trait TableSymbol {
-    fn symbol(&self) -> String;
-}
-
-pub trait TableLevels {
-    fn levels(&self) -> &Levels;
-}
-
-pub trait MakeDetail {
-    fn make_detail(&self, songs: &Songs, scores: &Scores, updated_at: &UpdatedAt) -> DetailResult;
-}
-
-impl<T: ChartsTrait> TableTrait for Table<T> {}
-
-impl<T: ChartsTrait> LevelSpecify for Table<T> {
-    fn level_specified(&self, level: &Level) -> Self {
+    pub fn level_specified(&self, level: &Level) -> Self {
         Table {
             name: self.name.clone(),
             symbol: self.symbol.clone(),
@@ -122,34 +89,25 @@ impl<T: ChartsTrait> LevelSpecify for Table<T> {
             levels: vec![level.clone()],
         }
     }
-}
 
-impl<T: ChartsTrait> TableName for Table<T> {
-    fn name(&self) -> String {
+    pub fn name(&self) -> String {
         self.name.clone()
     }
-}
-
-impl<T: ChartsTrait> TableSymbol for Table<T> {
-    fn symbol(&self) -> String {
+    pub fn symbol(&self) -> String {
         self.symbol.clone()
     }
-}
-
-impl<T: ChartsTrait> TableLevels for Table<T> {
-    fn levels(&self) -> &Levels {
+    pub fn levels(&self) -> &Levels {
         &self.levels
     }
-}
-
-impl<T: ChartsTrait> GetSong for Table<T> {
-    fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
+    pub fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
         self.charts.get_song(song_data)
     }
-}
-
-impl<T: ChartsTrait> MakeDetail for Table<T> {
-    fn make_detail(&self, songs: &Songs, scores: &Scores, updated_at: &UpdatedAt) -> DetailResult {
+    pub fn make_detail(
+        &self,
+        songs: &Songs,
+        scores: &Scores,
+        updated_at: &UpdatedAt,
+    ) -> DetailResult {
         DetailResult::new(
             self.name(),
             self.level_specified_vec()

@@ -18,7 +18,7 @@ impl Scores {
     }
 
     /// Tableに存在する曲ログに絞り込む ログが存在しない曲は未プレイとして作成される
-    fn filter_by_table<T: TableTrait>(&self, table: &T, songs: &Songs) -> Self {
+    fn filter_by_table(&self, table: &Table, songs: &Songs) -> Self {
         let song_ids: Vec<SongId> = table
             .get_song(songs)
             .iter()
@@ -34,9 +34,9 @@ impl Scores {
         Scores(map)
     }
 
-    pub fn detail<T: TableTrait>(
+    pub fn detail(
         &self,
-        table: &T,
+        table: &Table,
         songs: &Songs,
         date: &UpdatedAt,
         level: Level,
