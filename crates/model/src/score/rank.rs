@@ -44,26 +44,6 @@ impl ClearRank {
     }
 }
 
-impl Countable for ClearRank {
-    fn coloring(&self, s: String) -> String {
-        const ESC: &str = "\u{001b}";
-        match self {
-            ClearRank::F => format!("{}", s),
-            ClearRank::E => format!("{ESC}[00;31m{}{ESC}[00m", s, ESC = ESC),
-            ClearRank::D => format!("{ESC}[00;34m{}{ESC}[00m", s, ESC = ESC),
-            ClearRank::C => format!("{ESC}[00;35m{}{ESC}[00m", s, ESC = ESC),
-            ClearRank::B => format!("{ESC}[00;32m{}{ESC}[00m", s, ESC = ESC),
-            ClearRank::A => format!("{ESC}[00;36m{}{ESC}[00m", s, ESC = ESC),
-            ClearRank::AA => format!("{ESC}[00;40m{}{ESC}[00m", s, ESC = ESC),
-            ClearRank::AAA => format!("{ESC}[00;33m{}{ESC}[00m", s, ESC = ESC),
-            ClearRank::Unknown => format!("{}", s),
-        }
-    }
-    fn vec() -> Vec<ClearRank> {
-        (0..8).map(|x| ClearRank::from_integer(x)).collect()
-    }
-}
-
 impl fmt::Display for ClearRank {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {

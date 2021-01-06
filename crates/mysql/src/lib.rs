@@ -5,11 +5,6 @@ use crate::models::{CanGetHash, RegisteredScore, ScoreSnapForUpdate};
 use anyhow::Result;
 use chrono::Utc;
 use diesel::prelude::*;
-use model::gmail_address::GmailAddress;
-use model::google_id::GoogleId;
-use model::registered_date::RegisteredDate;
-use model::user_id::UserId;
-use model::user_name::UserName;
 use model::*;
 use std::collections::{HashMap, HashSet};
 

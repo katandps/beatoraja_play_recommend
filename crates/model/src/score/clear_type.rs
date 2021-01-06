@@ -1,4 +1,3 @@
-use crate::summary::Countable;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::fmt;
@@ -52,29 +51,6 @@ impl ClearType {
             Max => 10,
             _ => 0,
         }
-    }
-}
-
-impl Countable for ClearType {
-    fn coloring(&self, s: String) -> String {
-        const ESC: &str = "\u{001b}";
-        match self {
-            ClearType::NoPlay => format!("{}", s),
-            ClearType::Failed => format!("{ESC}[00;31m{}{ESC}[00m", s, ESC = ESC),
-            ClearType::AssistEasy => format!("{ESC}[00;34m{}{ESC}[00m", s, ESC = ESC),
-            ClearType::LightAssistEasy => format!("{ESC}[00;35m{}{ESC}[00m", s, ESC = ESC),
-            ClearType::Easy => format!("{ESC}[00;32m{}{ESC}[00m", s, ESC = ESC),
-            ClearType::Normal => format!("{ESC}[00;36m{}{ESC}[00m", s, ESC = ESC),
-            ClearType::Hard => format!("{ESC}[00;40m{}{ESC}[00m", s, ESC = ESC),
-            ClearType::ExHard => format!("{ESC}[00;33m{}{ESC}[00m", s, ESC = ESC),
-            ClearType::FullCombo => format!("{ESC}[00;1;46m{}{ESC}[00m", s, ESC = ESC),
-            ClearType::Perfect => format!("{ESC}[00;1;43m{}{ESC}[00m", s, ESC = ESC),
-            ClearType::Max => format!("{ESC}[00;1m{}{ESC}[00m", s, ESC = ESC),
-            ClearType::Unknown => format!("{}", s),
-        }
-    }
-    fn vec() -> Vec<ClearType> {
-        (0..11).map(|x| ClearType::from_integer(x)).collect()
     }
 }
 

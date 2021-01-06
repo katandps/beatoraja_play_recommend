@@ -14,5 +14,4 @@ mod snapshots;
 mod song_id;
 mod updated_at;
 
-//use clear_type::ClearType;
 pub use prelude::*;
