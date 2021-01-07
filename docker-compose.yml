@@ -10,6 +10,8 @@ services:
     volumes:
       - ./files:/app/files
       - ~/.aws/:/root/.aws/ro
+    env_file:
+      - .env
     depends_on:
       - mysql
       - session-redis
