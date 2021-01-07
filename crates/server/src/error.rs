@@ -1,6 +1,5 @@
 use serde_derive::Serialize;
 use std::convert::Infallible;
-use std::string::FromUtf8Error;
 use thiserror::Error;
 use warp::{http::StatusCode, Rejection, Reply};
 
@@ -25,7 +24,6 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
                 FileIsNotFound => StatusCode::OK,
                 SaveIsNotComplete => StatusCode::OK,
                 FileIsNotDeleted => StatusCode::OK,
-                FileIsInvalid => StatusCode::OK,
                 _ => StatusCode::INTERNAL_SERVER_ERROR,
             },
             e.to_string(),
@@ -53,10 +51,6 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
 pub enum HandleError {
     #[error("Code Is Not Found")]
     AuthorizationCodeIsNotFound,
-    #[error("ReqwestError: {0:?}")]
-    ReqwestError(reqwest::Error),
-    #[error("Google End Point Is Down")]
-    GoogleResponseIsInvalid,
 
     #[error("Token Is Invalid")]
     TokenIsInvalid,
@@ -69,8 +63,6 @@ pub enum HandleError {
 
     #[error("IOError: {0:?}")]
     IOError(std::io::Error),
-    #[error("SerdeJsonError: {0:?}")]
-    SerdeJsonError(serde_json::Error),
 
     #[error("Reading File Error")]
     ReadingFileError,
@@ -79,18 +71,16 @@ pub enum HandleError {
     DirectoryCouldNotCreated,
     #[error("File Is Not Found")]
     FileIsNotFound,
-    #[error("File Is Invalid")]
-    FileIsInvalid,
     #[error("File Is Not Deleted")]
     FileIsNotDeleted,
     #[error("Save Is Not Complete")]
     SaveIsNotComplete,
-    #[error("FromUtf8 Error: {0:?}")]
-    FromUtf8Error(FromUtf8Error),
 
     #[error("Changed Name Is Not Found")]
     ChangedNameNotFound,
 
+    #[error("OAuthGoogleError: {0:?}")]
+    OAuthGoogleError(oauth_google::Error),
     #[error("Other Error: {0}")]
     OtherError(anyhow::Error),
 }

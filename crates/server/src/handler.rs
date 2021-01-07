@@ -2,12 +2,10 @@ pub mod detail;
 pub mod health;
 pub mod upload;
 
-use crate::error::HandleError::{
-    ChangedNameNotFound, FromUtf8Error, GoogleResponseIsInvalid, OtherError,
-};
+use crate::config::config;
+use crate::error::HandleError::{ChangedNameNotFound, OtherError};
 use crate::error::*;
 use crate::session::save_user_id;
-use config::config;
 use http::StatusCode;
 use model::*;
 use mysql::MySQLClient;
@@ -58,67 +56,10 @@ pub async fn oauth(query: HashMap<String, String>) -> Result<impl Reply, Rejecti
         .get(&"code".to_string())
         .cloned()
         .ok_or(HandleError::AuthorizationCodeIsNotFound.rejection())?;
-    let mut body = HashMap::new();
-    body.insert("client_id", config().google_oauth_client_id);
-    body.insert("client_secret", config().google_oauth_client_secret);
-    body.insert("redirect_uri", config().google_oauth_redirect_uri);
-    body.insert("code", code.clone());
-    body.insert("grant_type", "authorization_code".to_string());
-    let res = reqwest::Client::new()
-        .post("https://accounts.google.com/o/oauth2/token")
-        .json(&body)
-        .send()
+    let profile = oauth_google::verify(code)
         .await
-        .map_err(|e| HandleError::ReqwestError(e).rejection())?;
-    let body = res
-        .text()
-        .await
-        .map_err(|e| HandleError::ReqwestError(e).rejection())?;
-    let json: serde_json::Value =
-        serde_json::from_str(&body).map_err(|e| HandleError::SerdeJsonError(e).rejection())?;
-    let obj = json.as_object().unwrap();
-
-    let token = &obj
-        .get(&"id_token".to_string())
-        .ok_or(GoogleResponseIsInvalid.rejection())?
-        .to_string()
-        .replace("\"", "")
-        .replace(",", "");
-    let mut segments = token.split('.');
-    let _encoded_header = segments.next().ok_or(GoogleResponseIsInvalid.rejection())?;
-    let encoded_payload = segments.next().ok_or(GoogleResponseIsInvalid.rejection())?;
-
-    let payload_string = String::from_utf8(
-        base64::decode_config(&encoded_payload, base64::URL_SAFE_NO_PAD).unwrap(),
-    )
-    .map_err(|e| FromUtf8Error(e).rejection())?;
-    let payload_json: serde_json::Value =
-        serde_json::from_str::<serde_json::Value>(&payload_string)
-            .map_err(|e| HandleError::SerdeJsonError(e).rejection())?;
-    let payload = payload_json
-        .as_object()
-        .ok_or(HandleError::GoogleResponseIsInvalid.rejection())?;
-
-    let user_id = payload
-        .get(&"sub".to_string())
-        .ok_or(GoogleResponseIsInvalid.rejection())?
-        .to_string()
-        .replace("\"", "");
-    let email = payload
-        .get(&"email".to_string())
-        .ok_or(GoogleResponseIsInvalid.rejection())?
-        .to_string()
-        .replace("\"", "");
-    let name = "default_name".to_string();
-    let profile = GoogleProfile {
-        user_id,
-        email,
-        name,
-    };
-    println!(
-        "Login: {} {} {}",
-        profile.user_id, profile.name, profile.email
-    );
+        .map_err(|e| HandleError::OAuthGoogleError(e).rejection())?;
+    dbg!(&profile);
     let repos = MySQLClient::new();
     let account = repos
         .register(&profile)

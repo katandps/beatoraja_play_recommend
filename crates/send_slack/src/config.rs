@@ -28,7 +28,7 @@ pub fn config() -> Cfg {
 
 lazy_static! {
     pub static ref CONFIG: Cfg = {
-        match envy::prefixed("APP_").from_env::<Cfg>() {
+        match envy::prefixed("").from_env::<Cfg>() {
             Ok(val) => val,
             Err(e) => {
                 panic!(format!("{}", e))

@@ -8,7 +8,6 @@ edition = "2018"
 
 [dependencies]
 model = {path = "../model"}
-config = {path = "../config"}
 
 # SqLiteへのアクセス
 diesel = { version = "1.4.5", features = ["sqlite"]}

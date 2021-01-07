@@ -52,10 +52,3 @@ impl Account {
         self.name = UserName::new(new_name);
     }
 }
-
-#[derive(Clone, Debug)]
-pub struct GoogleProfile {
-    pub user_id: String,
-    pub email: String,
-    pub name: String,
-}

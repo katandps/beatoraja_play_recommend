@@ -1,21 +1,17 @@
+mod config;
 mod error;
 mod filter;
 mod handler;
 mod session;
 
 use config::config;
-use diesel::r2d2::ConnectionManager;
-use diesel::MysqlConnection;
-use r2d2::Pool;
 use std::collections::HashMap;
 use std::env;
 use table::get_tables;
 use warp::Filter;
 
-const TLS_CERT_PATH: &str = "TLS_CERT_PATH";
-const TLS_CERT_PATH_DEFAULT: &str = "./files/cert.pem";
-const TLS_KEY_PATH: &str = "TLS_KEY_PATH";
-const TLS_KEY_PATH_DEFAULT: &str = "./files/key.rsa";
+#[macro_use]
+extern crate lazy_static;
 
 #[tokio::main]
 async fn main() {
@@ -23,7 +19,7 @@ async fn main() {
     env_logger::init();
     let log = warp::log("example");
 
-    let db_pool = get_db_pool();
+    let db_pool = mysql::get_db_pool();
 
     let tables = get_tables(false).await;
     let tables_route = warp::get()
@@ -132,20 +128,9 @@ async fn main() {
 
     let (_https_addr, https_warp) = warp::serve(route.clone())
         .tls()
-        .cert_path(get_env(TLS_CERT_PATH, TLS_CERT_PATH_DEFAULT))
-        .key_path(get_env(TLS_KEY_PATH, TLS_KEY_PATH_DEFAULT))
+        .cert_path(config().tls_cert_path)
+        .key_path(config().tls_key_path)
         .bind_ephemeral(([0, 0, 0, 0], 4431));
 
     futures::future::join(http_warp, https_warp).await;
-}
-
-fn get_env(key: &str, default: &str) -> String {
-    match env::var(key) {
-        Ok(val) => val,
-        Err(_) => default.into(),
-    }
-}
-
-fn get_db_pool() -> Pool<ConnectionManager<MysqlConnection>> {
-    Pool::builder().build_unchecked(ConnectionManager::new(config().mysql_url))
 }

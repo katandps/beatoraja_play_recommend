@@ -1,5 +1,5 @@
+use crate::config::config;
 use anyhow::Result;
-use config::config;
 use model::*;
 use mysql::MySQLClient;
 use redis::{Commands, Connection, RedisResult};

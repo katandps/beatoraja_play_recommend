@@ -237,17 +237,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "config"
-version = "0.1.0"
-dependencies = [
- "envy",
- "lazy_static",
- "serde",
- "serde_json",
- "toml",
-]
-
-[[package]]
 name = "core-foundation"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1120,7 +1109,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "chrono",
- "config",
  "dotenv",
  "itertools",
  "serde",
@@ -1156,6 +1144,8 @@ dependencies = [
  "envy",
  "lazy_static",
  "model",
+ "oauth_google",
+ "r2d2",
  "serde",
 ]
 
@@ -1237,6 +1227,20 @@ checksum = "05499f3756671c15885fee9034446956fff3f243d6077b91e5767df161f766b3"
 dependencies = [
  "hermit-abi",
  "libc",
+]
+
+[[package]]
+name = "oauth_google"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "base64 0.13.0",
+ "envy",
+ "lazy_static",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror",
 ]
 
 [[package]]
@@ -2030,13 +2034,15 @@ dependencies = [
  "bigint",
  "bytes 0.5.6",
  "chrono",
- "config",
  "diesel 1.4.5",
  "env_logger",
+ "envy",
  "futures",
  "http",
+ "lazy_static",
  "model",
  "mysql",
+ "oauth_google",
  "r2d2",
  "rand 0.8.1",
  "rand_chacha 0.3.0",
@@ -2151,7 +2157,6 @@ name = "sqlite"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "config",
  "diesel 1.4.5",
  "diesel_codegen",
  "model",
@@ -2430,15 +2435,6 @@ dependencies = [
  "log",
  "pin-project-lite 0.1.11",
  "tokio",
-]
-
-[[package]]
-name = "toml"
-version = "0.5.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a31142970826733df8241ef35dc040ef98c679ab14d7c3e54d827099b3acecaa"
-dependencies = [
- "serde",
 ]
 
 [[package]]

@@ -33,9 +33,11 @@ redis = "0.19.0"
 
 anyhow = "1.0.36"
 thiserror = "1.0.23"
+lazy_static = "1.4.0"
+envy = "0.4.2"
 
 model = { path = "../model" }
 table = { path = "../table" }
 sqlite = { path = "../sqlite" }
 mysql = { path = "../mysql" }
-config = { path= "../config" }
+oauth_google = { path = "../oauth_google" }

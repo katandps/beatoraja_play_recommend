@@ -6,7 +6,11 @@ use crate::models::{CanGetHash, RegisteredScore, ScoreSnapForUpdate};
 use anyhow::Result;
 use chrono::Utc;
 use diesel::prelude::*;
+use diesel::r2d2::ConnectionManager;
+use diesel::MysqlConnection;
 use model::*;
+use oauth_google::GoogleProfile;
+use r2d2::Pool;
 use std::collections::{HashMap, HashSet};
 
 #[macro_use]
@@ -433,4 +437,8 @@ impl MySQLClient {
             })
             .build()
     }
+}
+
+pub fn get_db_pool() -> Pool<ConnectionManager<MysqlConnection>> {
+    Pool::builder().build_unchecked(ConnectionManager::new(config::config().mysql_url))
 }

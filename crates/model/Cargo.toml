@@ -22,5 +22,3 @@ anyhow = "1.0"
 
 #イテレータ拡張
 itertools = "0.9.0"
-
-config = {path = "../config"}

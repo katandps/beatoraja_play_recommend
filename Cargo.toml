@@ -2,9 +2,9 @@
 members = [
     "crates/model",
     "crates/send_slack",
-    "crates/config",
     "crates/table",
     "crates/sqlite",
     "crates/mysql",
     "crates/server",
+    "crates/oauth_google"
 ]
