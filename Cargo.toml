@@ -1,13 +1,4 @@
-[package]
-name = "beatoraja_play_recommend"
-version = "0.1.0"
-authors = ["katand <katandps@gmail.com>"]
-edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [workspace]
-
 members = [
     "crates/model",
     "crates/send_slack",
@@ -17,14 +8,3 @@ members = [
     "crates/mysql",
     "crates/server",
 ]
-
-[dependencies]
-"model" = { path = "crates/model" }
-"table" = { path = "crates/table" }
-"sqlite" = { path = "crates/sqlite" }
-"config" = { path = "crates/config" }
-"mysql" = { path = "crates/mysql" }
-
-anyhow = "*"
-
-tokio = { version = "0.2", features = ["macros"] }

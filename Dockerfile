@@ -9,7 +9,7 @@ RUN apt-get update -y \
   && apt-get install -y libmysqlclient-dev \
   && apt-get install -y ca-certificates
 
-COPY ./target/release/beatoraja_play_recommend_server /app
+COPY ./target/release/server /app
 EXPOSE 80
 
-ENTRYPOINT /app/beatoraja_play_recommend_server
+ENTRYPOINT /app/server
