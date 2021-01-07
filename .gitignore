@@ -1,3 +1,4 @@
 /target
 /.idea
-files
+/files
+/db/data

@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  app:
+    image: 847110695266.dkr.ecr.ap-northeast-1.amazonaws.com/beatoraja_recommend_server:latest
+    container_name: app
+    ports:
+      - "80:8000"
+      - "443:4431"
+    volumes:
+      - ./files:/app/files
+      - ./config.toml:/app/config.toml
+      - ~/.aws/:/root/.aws/ro
+    depends_on:
+      - mysql
+      - session-redis
+    #開発時はコメントアウト
+    #logging:
+    #  driver: awslogs
+    #  options:
+    #    awslogs-region: ap-northeast-1
+    #    awslogs-group: dev-beatoraja-play-recommend-log
+    #    awslogs-stream: app
+
+  mysql:
+    image: mysql:5.7.16
+    container_name: mysql
+    restart: always
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+    volumes:
+      - ./db/data:/var/lib/mysql
+      - ./db/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+      #- ./db/sql:/docker-entrypoint-initdb.d:ro
+      - /etc/group:/etc/group:ro
+      - /etc/passwd:/etc/passwd:ro
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: user_data
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: docker
+
+  session-redis:
+    image: redis
+    container_name: session-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  builder:
+    build: ./docker/builder/
+    container_name: builder
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/app
+    working_dir: /app
+    depends_on:
+      - mysql

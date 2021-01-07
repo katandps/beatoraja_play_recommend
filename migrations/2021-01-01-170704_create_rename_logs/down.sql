@@ -1,0 +1,1 @@
+drop table rename_logs;

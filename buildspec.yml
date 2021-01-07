@@ -1,0 +1,35 @@
+version: 0.2
+
+env:
+  secrets-manager:
+    DOCKERHUB_USER: arn:aws:secretsmanager:ap-northeast-1:847110695266:secret:DockerHub-SaAUAX:username
+    DOCKERHUB_PASS: arn:aws:secretsmanager:ap-northeast-1:847110695266:secret:DockerHub-SaAUAX:password
+
+phases:
+  install:
+    runtime-versions:
+      docker: 19
+    commands:
+      - curl https://sh.rustup.rs -sSf > install.sh
+      - sh install.sh -y
+      - . $HOME/.cargo/env
+  pre_build:
+    commands:
+      - echo Logging in to Docker Hub...
+      - echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+  build:
+    commands:
+      - cargo build --release
+      - echo "docker build ./ -t $TARGET_IMAGE_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION"
+      - docker build ./ -t $TARGET_IMAGE_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - docker build ./ -t $TARGET_IMAGE_NAME:latest
+  post_build:
+    commands:
+      - docker push $TARGET_IMAGE_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - docker push $TARGET_IMAGE_NAME:latest
+
+cache:
+  paths:
+    - $HOME/.cargo/**/*
