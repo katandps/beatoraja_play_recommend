@@ -1,105 +1,67 @@
 #[macro_use]
 extern crate lazy_static;
-use serde::{Deserialize, Serialize};
-use std::fs;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum Config {
-    Config(Cfg),
-    Dummy,
-}
+use serde::Deserialize;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Cfg {
-    pub timestamp: Option<i32>,
-    pub local_cache_url: Option<String>,
-    pub mysql_url: Option<String>,
-    pub redis_url: Option<String>,
-    pub song_db_url: Option<String>,
-    pub score_db_url: Option<String>,
-    pub songdata_db_url: Option<String>,
-    pub scorelog_db_url: Option<String>,
-    pub table_urls: Option<Vec<String>>,
-    pub table_index: Option<usize>,
-    pub coloring_table: Option<bool>,
-    pub google_oauth_client_id: Option<String>,
-    pub google_oauth_client_secret: Option<String>,
-    pub google_oauth_redirect_uri: Option<String>,
-    pub client_url: Option<String>,
-    pub client_domain: Option<String>,
-    pub slack_bot_token: Option<String>,
-    pub slack_channel: Option<String>,
-    pub slack_file_name: Option<String>,
-    pub output_type: Option<String>,
+    #[serde(default = "redis_url")]
+    pub redis_url: String,
+
+    #[serde(default = "google_oauth_client_id")]
+    pub google_oauth_client_id: String,
+    #[serde(default = "google_oauth_client_secret")]
+    pub google_oauth_client_secret: String,
+    #[serde(default = "google_oauth_redirect_uri")]
+    pub google_oauth_redirect_uri: String,
+    #[serde(default = "client_url")]
+    pub client_url: String,
+    #[serde(default = "client_domain")]
+    pub client_domain: String,
+    #[serde(default = "mysql_url")]
+    pub mysql_url: String,
 }
 
-macro_rules! string_config {
-    ($name:ident, $default:expr) => {
-        pub fn $name(&self) -> String {
-            match self {
-                Self::Config(cfg) => cfg.$name.clone().unwrap_or(($default).into()),
-                _ => ($default).into(),
-            }
-        }
-    };
+fn mysql_url() -> String {
+    "mysql://root:root@mysql:3306/user_data".into()
 }
 
-impl Config {
-    string_config!(mysql_url, "mysql://root:root@127.0.0.1/user_data");
-    string_config!(redis_url, "redis://localhost:6379/");
-    string_config!(score_db_url, "score_db_url");
-    string_config!(song_db_url, "song_db_url");
-    string_config!(scorelog_db_url, "scorelog_db_url");
-    string_config!(local_cache_url, "local_cache_url");
-    string_config!(slack_bot_token, "Slack bot token is not configure.");
-    string_config!(slack_channel, "Slack channel is not configure.");
-    string_config!(slack_file_name, "Slack file name is not configure");
-    string_config!(output_type, "STDOUT");
-    string_config!(
-        google_oauth_client_id,
-        "hogehoge.apps.googleusercontent.com"
-    );
-    string_config!(google_oauth_client_secret, "secret");
-    string_config!(google_oauth_redirect_uri, "hogehoge.com/auth");
-    string_config!(
-        client_url,
-        "http://localhost:8080/beatoraja_play_recommend_web"
-    );
-    string_config!(client_domain, "localhost:8080");
-
-    pub fn timestamp(&self) -> i32 {
-        match self {
-            Config::Config(cfg) => cfg.timestamp.unwrap_or(1800000000),
-            _ => 1800000000,
-        }
-    }
-    pub fn table_urls(&self) -> Vec<String> {
-        match self {
-            Config::Config(cfg) => cfg.table_urls.clone().unwrap_or(Vec::new()),
-            _ => vec!["table_url".into()],
-        }
-    }
-    pub fn table_index(&self) -> usize {
-        match self {
-            Config::Config(cfg) => cfg.table_index.unwrap_or(0),
-            _ => 0,
-        }
-    }
-    pub fn coloring_table(&self) -> bool {
-        match self {
-            Config::Config(cfg) => cfg.coloring_table.unwrap_or(true),
-            _ => true,
-        }
-    }
+fn redis_url() -> String {
+    "redis://session-redis:6379".into()
 }
 
-pub fn config() -> Config {
+fn client_url() -> String {
+    "http://localhost:8080".into()
+}
+
+fn client_domain() -> String {
+    "localhost".into()
+}
+
+fn google_oauth_client_id() -> String {
+    "746230605395-pc3t46mk87koas61js1k2uu87g2d3q5g.apps.googleusercontent.com".into()
+}
+
+fn google_oauth_client_secret() -> String {
+    "client secret".into()
+}
+
+fn google_oauth_redirect_uri() -> String {
+    "https://localhost:4431/oauth".into()
+}
+
+pub fn config() -> Cfg {
     (*self::CONFIG).clone()
 }
 
 lazy_static! {
-    pub static ref CONFIG: Config = {
-        let file = fs::read_to_string("config.toml").unwrap_or("".to_string());
-        Config::Config(toml::from_str(&file).unwrap())
+    pub static ref CONFIG: Cfg = {
+        match envy::prefixed("APP_").from_env::<Cfg>() {
+            Ok(val) => val,
+            Err(err) => {
+                println!("{}", err);
+                std::process::exit(1)
+            }
+        }
     };
 }

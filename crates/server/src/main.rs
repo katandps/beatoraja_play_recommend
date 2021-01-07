@@ -69,10 +69,6 @@ async fn main() {
         .and(warp::query::<HashMap<String, String>>())
         .and_then(handler::detail::detail_handler);
 
-    let history_route = warp::get()
-        .and(warp::path("history"))
-        .and_then(handler::history_handler);
-
     let score_upload_route = warp::post()
         .and(warp::path("upload"))
         .and(warp::path("score"))
@@ -106,7 +102,6 @@ async fn main() {
         .or(tables_route)
         .or(detail_route)
         .or(my_detail_route)
-        .or(history_route)
         .or(score_upload_route)
         .or(scorelog_upload_route)
         .or(songdata_upload_route)
@@ -152,5 +147,5 @@ fn get_env(key: &str, default: &str) -> String {
 }
 
 fn get_db_pool() -> Pool<ConnectionManager<MysqlConnection>> {
-    Pool::builder().build_unchecked(ConnectionManager::new(config().mysql_url()))
+    Pool::builder().build_unchecked(ConnectionManager::new(config().mysql_url))
 }

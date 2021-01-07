@@ -24,14 +24,6 @@ impl SqliteClient {
         }
     }
 
-    pub fn by_config() -> SqliteClient {
-        SqliteClient::new(
-            config::config().scorelog_db_url(),
-            config::config().song_db_url(),
-            config::config().score_db_url(),
-        )
-    }
-
     fn establish_connection(url: &str) -> Result<SqliteConnection, diesel::ConnectionError> {
         SqliteConnection::establish(&url)
     }

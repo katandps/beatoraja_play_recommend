@@ -9,7 +9,6 @@ services:
       - "443:4431"
     volumes:
       - ./files:/app/files
-      - ./config.toml:/app/config.toml
       - ~/.aws/:/root/.aws/ro
     depends_on:
       - mysql

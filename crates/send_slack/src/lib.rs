@@ -1,3 +1,8 @@
+mod config;
+
+#[macro_use]
+extern crate lazy_static;
+
 use serde_json::Value;
 use std::fs;
 use std::io::Write;
@@ -13,7 +18,7 @@ pub fn send(channel: String, title: String, content: String) -> anyhow::Result<S
         .post("https://slack.com/api/files.upload")
         .multipart(form)
         .query(&[
-            ("token", config().slack_bot_token()),
+            ("token", config::config().slack_bot_token),
             ("title", title),
             ("channels", channel),
             ("pretty", "1".into()),
@@ -38,7 +43,10 @@ pub async fn send_async(content: String) -> anyhow::Result<String> {
     use reqwest::multipart::{Form, Part};
     use reqwest::Client;
 
-    let (channel, title) = (config().slack_channel(), config().slack_file_name());
+    let (channel, title) = (
+        config::config().slack_channel,
+        config::config().slack_file_name,
+    );
     let fp = Part::text(content).file_name("buf.txt");
 
     let form = Form::new().part("file", fp);
@@ -46,7 +54,7 @@ pub async fn send_async(content: String) -> anyhow::Result<String> {
         .post("https://slack.com/api/files.upload")
         .multipart(form)
         .query(&[
-            ("token", config().slack_bot_token()),
+            ("token", config::config().slack_bot_token),
             ("title", title),
             ("channels", channel),
             ("pretty", "1".into()),
@@ -61,14 +69,6 @@ pub async fn send_async(content: String) -> anyhow::Result<String> {
         Some(true) => Ok(String::from(format!("アップロード完了"))),
         Some(false) => Ok(String::from(format!("アップロード失敗:{}", v["error"]))),
         None => Ok(String::from(format!("アップロード失敗:{}", v["error"]))),
-    }
-}
-
-fn config() -> config::Config {
-    if cfg!(test) {
-        config::Config::Dummy
-    } else {
-        config::config()
     }
 }
 

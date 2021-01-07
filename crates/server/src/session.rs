@@ -8,7 +8,7 @@ pub const SESSION_KEY: &str = "session-token";
 const EXPIRE_SECONDS: usize = 2 * 60 * 60;
 
 pub fn get_client() -> RedisResult<Connection> {
-    let client = redis::Client::open(config().redis_url())?;
+    let client = redis::Client::open(config().redis_url)?;
     client.get_connection()
 }
 

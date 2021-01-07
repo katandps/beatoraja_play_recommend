@@ -11,18 +11,12 @@ use config::config;
 use http::StatusCode;
 use model::*;
 use mysql::MySQLClient;
-use sqlite::SqliteClient;
 use std::collections::HashMap;
 use warp::http::Uri;
 use warp::{Rejection, Reply};
 
 pub async fn table_handler(tables: Tables) -> std::result::Result<impl Reply, Rejection> {
     Ok(serde_json::to_string(&tables.format()).unwrap())
-}
-
-pub async fn history_handler() -> std::result::Result<impl Reply, Rejection> {
-    let repos = SqliteClient::by_config();
-    Ok(serde_json::to_string(&repos.player().diff()).unwrap())
 }
 
 pub async fn account_handler(session_key: String) -> Result<impl Reply, Rejection> {
@@ -65,9 +59,9 @@ pub async fn oauth(query: HashMap<String, String>) -> Result<impl Reply, Rejecti
         .cloned()
         .ok_or(HandleError::AuthorizationCodeIsNotFound.rejection())?;
     let mut body = HashMap::new();
-    body.insert("client_id", config().google_oauth_client_id());
-    body.insert("client_secret", config().google_oauth_client_secret());
-    body.insert("redirect_uri", config().google_oauth_redirect_uri());
+    body.insert("client_id", config().google_oauth_client_id);
+    body.insert("client_secret", config().google_oauth_client_secret);
+    body.insert("redirect_uri", config().google_oauth_redirect_uri);
     body.insert("code", code.clone());
     body.insert("grant_type", "authorization_code".to_string());
     let res = reqwest::Client::new()
@@ -134,10 +128,10 @@ pub async fn oauth(query: HashMap<String, String>) -> Result<impl Reply, Rejecti
     let header = format!(
         "session-token={};domain={};max-age=300",
         key,
-        config().client_domain()
+        config().client_domain
     );
 
-    let uri = Uri::from_maybe_shared(format!("{}", config().client_url())).unwrap();
+    let uri = Uri::from_maybe_shared(config().client_url).unwrap();
     let redirect = warp::redirect(uri);
     Ok(warp::reply::with_header(
         redirect,

@@ -240,6 +240,7 @@ dependencies = [
 name = "config"
 version = "0.1.0"
 dependencies = [
+ "envy",
  "lazy_static",
  "serde",
  "serde_json",
@@ -441,6 +442,15 @@ dependencies = [
  "log",
  "regex 1.4.2",
  "termcolor",
+]
+
+[[package]]
+name = "envy"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f47e0157f2cb54f5ae1bd371b30a2ae4311e1c028f575cd4e81de7353215965"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -1141,10 +1151,12 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "chrono",
- "config",
  "diesel 1.4.5",
  "diesel_codegen",
+ "envy",
+ "lazy_static",
  "model",
+ "serde",
 ]
 
 [[package]]
@@ -1946,7 +1958,8 @@ name = "send_slack"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "config",
+ "envy",
+ "lazy_static",
  "reqwest",
  "serde",
  "serde_json",
@@ -2220,7 +2233,8 @@ name = "table"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "config",
+ "envy",
+ "lazy_static",
  "model",
  "reqwest",
  "scraper",

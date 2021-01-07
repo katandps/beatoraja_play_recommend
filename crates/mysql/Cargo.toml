@@ -9,10 +9,13 @@ edition = "2018"
 [dependencies]
 diesel = { version = "1.4.5", features = ["mysql", "chrono"] }
 diesel_codegen = "0.16.1"
+serde = {version = "1.0", features= ["derive"]}
 chrono = "*"
 
 model = { path = "../model" }
-config = { path = "../config" }
 
 #エラー処理
 anyhow = "1.0"
+
+envy = "0.4.2"
+lazy_static = "1.4.0"

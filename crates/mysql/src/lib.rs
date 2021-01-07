@@ -1,3 +1,4 @@
+mod config;
 mod models;
 mod schema;
 
@@ -12,6 +13,9 @@ use std::collections::{HashMap, HashSet};
 extern crate diesel;
 extern crate anyhow;
 
+#[macro_use]
+extern crate lazy_static;
+
 pub struct MySQLClient {
     connection: MysqlConnection,
 }
@@ -19,7 +23,7 @@ pub struct MySQLClient {
 impl MySQLClient {
     pub fn new() -> Self {
         Self {
-            connection: Self::establish_connection(config().mysql_url()),
+            connection: Self::establish_connection(config::config().mysql_url),
         }
     }
 
@@ -428,13 +432,5 @@ impl MySQLClient {
                 builder
             })
             .build()
-    }
-}
-
-fn config() -> config::Config {
-    if cfg!(test) {
-        config::Config::Dummy
-    } else {
-        config::config()
     }
 }

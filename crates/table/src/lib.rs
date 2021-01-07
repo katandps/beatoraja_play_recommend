@@ -1,5 +1,7 @@
+mod config;
 mod schema;
 
+use config::config;
 use model::*;
 use scraper::{Html, Selector};
 use std::fs::File;
@@ -8,6 +10,8 @@ use url::Url;
 
 #[macro_use]
 extern crate anyhow;
+#[macro_use]
+extern crate lazy_static;
 
 pub async fn get_tables(is_local: bool) -> Tables {
     match local(is_local) {
@@ -18,20 +22,20 @@ pub async fn get_tables(is_local: bool) -> Tables {
 
 async fn from_web() -> Tables {
     let mut tables = Vec::new();
-    for url in config().table_urls() {
+    for url in config().table_urls {
         match make_table(url.parse().unwrap()).await {
             Ok(r) => tables.push(r),
             Err(e) => eprintln!("{}", e),
         }
     }
-    let mut file = File::create(config().local_cache_url()).unwrap();
+    let mut file = File::create(config().local_cache_url).unwrap();
     let _ = file.write(serde_json::to_string(&tables).unwrap().as_ref());
     Tables::new(tables)
 }
 
 fn local(is_local: bool) -> anyhow::Result<Tables> {
     fn load() -> anyhow::Result<Tables> {
-        let mut file = File::open(config().local_cache_url())?;
+        let mut file = File::open(config().local_cache_url)?;
         let mut contents = String::new();
         let _ = file.read_to_string(&mut contents);
         let vec = serde_json::from_str(&contents)?;
@@ -71,12 +75,4 @@ async fn make_table(table_url: String) -> anyhow::Result<Table> {
         Charts::make(data.iter().map(|c| c.to_chart()).collect()),
         header.level_order,
     ))
-}
-
-fn config() -> config::Config {
-    if cfg!(test) {
-        config::Config::Dummy
-    } else {
-        config::config()
-    }
 }
