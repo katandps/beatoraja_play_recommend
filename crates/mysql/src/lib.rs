@@ -7,6 +7,7 @@ use anyhow::Result;
 use chrono::Utc;
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
+use diesel::r2d2::PooledConnection;
 use diesel::MysqlConnection;
 use model::*;
 use oauth_google::GoogleProfile;
@@ -15,42 +16,51 @@ use std::collections::{HashMap, HashSet};
 
 #[macro_use]
 extern crate diesel;
+#[macro_use]
 extern crate anyhow;
 
 #[macro_use]
 extern crate lazy_static;
 
+pub type MySqlPool = Pool<ConnectionManager<MysqlConnection>>;
+pub type MySqlPooledConnection = PooledConnection<ConnectionManager<MysqlConnection>>;
+
 pub struct MySQLClient {
-    connection: MysqlConnection,
+    pool: MySqlPool,
+}
+
+pub fn get_db_pool() -> MySqlPool {
+    Pool::builder().build_unchecked(ConnectionManager::new(config::config().mysql_url))
 }
 
 impl MySQLClient {
-    pub fn new() -> Self {
-        Self {
-            connection: Self::establish_connection(config::config().mysql_url),
-        }
+    pub fn new(pool: MySqlPool) -> Self {
+        Self { pool }
     }
 
-    fn establish_connection(url: String) -> MysqlConnection {
-        MysqlConnection::establish(&url).expect(&format!("Error connecting to {}", url))
+    pub fn health(&self) -> Result<()> {
+        match &self.pool.get().unwrap().execute("SELECT 1") {
+            Ok(_) => Ok(()),
+            Err(_) => Err(anyhow!("HealthCheckError")),
+        }
     }
 
     fn songs(&self) -> Vec<models::Song> {
         schema::songs::table
-            .load(&self.connection)
+            .load(&self.pool.get().unwrap())
             .expect("Error loading schema")
     }
 
     fn hash(&self) -> Vec<models::Hash> {
         schema::hashes::table
-            .load(&self.connection)
+            .load(&self.pool.get().unwrap())
             .expect("Error loading schema")
     }
 
     pub fn register(&self, profile: &GoogleProfile) -> Result<Account> {
         let user: Vec<models::User> = schema::users::table
             .filter(schema::users::gmail_address.eq(&profile.email))
-            .load(&self.connection)
+            .load(&self.pool.get().unwrap())
             .expect("Error loading schema");
 
         if user.is_empty() {
@@ -63,7 +73,7 @@ impl MySQLClient {
             println!("Insert new user");
             diesel::insert_into(schema::users::table)
                 .values(user.clone())
-                .execute(&self.connection)?;
+                .execute(&self.pool.get().unwrap())?;
             self.get_account(profile)
         } else {
             Ok(Self::create_account(user[0].clone()))
@@ -73,7 +83,7 @@ impl MySQLClient {
     pub fn account_by_increments(&self, id: i32) -> Result<Account> {
         let user: models::User = schema::users::table
             .filter(schema::users::id.eq(id))
-            .first(&self.connection)?;
+            .first(&self.pool.get().unwrap())?;
 
         Ok(Self::create_account(user))
     }
@@ -91,7 +101,7 @@ impl MySQLClient {
     pub fn account_by_id(&self, google_id: GoogleId) -> Result<Account> {
         let user: models::User = schema::users::table
             .filter(schema::users::google_id.eq(google_id.to_string()))
-            .first(&self.connection)?;
+            .first(&self.pool.get().unwrap())?;
         Ok(Self::create_account(user))
     }
 
@@ -99,7 +109,7 @@ impl MySQLClient {
         println!("Update user name to {}.", account.user_name());
         let user: models::User = schema::users::table
             .filter(schema::users::gmail_address.eq(account.email()))
-            .first(&self.connection)?;
+            .first(&self.pool.get().unwrap())?;
 
         diesel::insert_into(schema::rename_logs::table)
             .values(models::RenameUser {
@@ -108,13 +118,13 @@ impl MySQLClient {
                 new_name: account.user_name(),
                 date: Utc::now().naive_utc(),
             })
-            .execute(&self.connection)?;
+            .execute(&self.pool.get().unwrap())?;
 
         diesel::update(
             schema::users::table.filter(schema::users::gmail_address.eq(account.email())),
         )
         .set(schema::users::name.eq(account.user_name()))
-        .execute(&self.connection)?;
+        .execute(&self.pool.get().unwrap())?;
 
         Ok(())
     }
@@ -122,14 +132,14 @@ impl MySQLClient {
     fn get_account(&self, profile: &GoogleProfile) -> Result<Account> {
         let user: models::User = schema::users::table
             .filter(schema::users::gmail_address.eq(&profile.email))
-            .first(&self.connection)?;
+            .first(&self.pool.get().unwrap())?;
         Ok(Self::create_account(user))
     }
 
     fn score_log(&self, account: &Account) -> HashMap<SongId, SnapShots> {
         let records: Vec<models::ScoreSnap> = schema::score_snaps::table
             .filter(schema::score_snaps::user_id.eq(&account.user_id()))
-            .load(&self.connection)
+            .load(&self.pool.get().unwrap())
             .expect("Error loading schema");
         let mut map = HashMap::new();
         for row in records {
@@ -149,10 +159,10 @@ impl MySQLClient {
     pub fn score(&self, account: &Account) -> Result<Scores> {
         let user: models::User = schema::users::table
             .filter(schema::users::gmail_address.eq(account.email()))
-            .first(&self.connection)?;
+            .first(&self.pool.get().unwrap())?;
         let record: Vec<models::Score> = schema::scores::table
             .filter(schema::scores::user_id.eq(user.id))
-            .load(&self.connection)?;
+            .load(&self.pool.get().unwrap())?;
         let score_log = self.score_log(account);
         Ok(Scores::new(
             record
@@ -186,11 +196,11 @@ impl MySQLClient {
     pub fn save_score(&self, account: Account, score: Scores) -> Result<()> {
         let user = schema::users::table
             .filter(schema::users::gmail_address.eq(account.email()))
-            .first::<models::User>(&self.connection)?;
+            .first::<models::User>(&self.pool.get().unwrap())?;
         let user_id = user.id;
         let saved: Vec<models::Score> = schema::scores::table
             .filter(schema::scores::user_id.eq(user_id))
-            .load(&self.connection)?;
+            .load(&self.pool.get().unwrap())?;
         let saved_song = saved
             .iter()
             .map(|record| {
@@ -205,7 +215,7 @@ impl MySQLClient {
             .collect::<HashMap<_, _>>();
         let saved: Vec<models::ScoreSnap> = schema::score_snaps::table
             .filter(schema::score_snaps::user_id.eq(user_id))
-            .load(&self.connection)?;
+            .load(&self.pool.get().unwrap())?;
 
         let saved_snap = saved
             .iter()
@@ -329,21 +339,21 @@ impl MySQLClient {
             println!("Update {} scores.", v.len());
             let _result = diesel::replace_into(schema::scores::table)
                 .values(v)
-                .execute(&self.connection);
+                .execute(&self.pool.get().unwrap());
         }
 
         for v in div(songs_for_insert, &hashes) {
             println!("Insert {} scores.", v.len());
             diesel::insert_into(schema::scores::table)
                 .values(v)
-                .execute(&self.connection)?;
+                .execute(&self.pool.get().unwrap())?;
         }
 
         for v in div(snaps_for_insert, &hashes) {
             println!("Insert {} score_snaps", v.len());
             diesel::insert_into(schema::score_snaps::table)
                 .values(v)
-                .execute(&self.connection)?;
+                .execute(&self.pool.get().unwrap())?;
         }
 
         Ok(())
@@ -376,7 +386,7 @@ impl MySQLClient {
             println!("Insert {} hashes.", records.len());
             diesel::insert_into(schema::hashes::table)
                 .values(records)
-                .execute(&self.connection)?;
+                .execute(&self.pool.get().unwrap())?;
         }
 
         let exist_songs = self.songs();
@@ -409,7 +419,7 @@ impl MySQLClient {
             println!("Insert {} songs.", records.len());
             diesel::insert_into(schema::songs::table)
                 .values(records)
-                .execute(&self.connection)?;
+                .execute(&self.pool.get().unwrap())?;
         }
         Ok(())
     }
@@ -437,8 +447,4 @@ impl MySQLClient {
             })
             .build()
     }
-}
-
-pub fn get_db_pool() -> Pool<ConnectionManager<MysqlConnection>> {
-    Pool::builder().build_unchecked(ConnectionManager::new(config::config().mysql_url))
 }

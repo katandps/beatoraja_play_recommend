@@ -35,12 +35,14 @@ async fn main() {
 
     let account_route = warp::get()
         .and(warp::path("account"))
+        .and(filter::with_db(db_pool.clone()))
         .and(warp::header::<String>(session::SESSION_KEY))
         .and_then(handler::account_handler);
 
     let change_name_route = warp::post()
         .and(warp::path("update"))
         .and(warp::path("name"))
+        .and(filter::with_db(db_pool.clone()))
         .and(warp::header::<String>(session::SESSION_KEY))
         .and(warp::body::json())
         .and_then(handler::change_name_handler);
@@ -53,6 +55,7 @@ async fn main() {
     let my_detail_route = warp::get()
         .and(warp::path("my_detail"))
         .and(warp::path::end())
+        .and(filter::with_db(db_pool.clone()))
         .and(filter::with_table(tables.clone()))
         .and(warp::header::<String>(session::SESSION_KEY))
         .and(warp::query::<HashMap<String, String>>())
@@ -61,6 +64,7 @@ async fn main() {
     let detail_route = warp::get()
         .and(warp::path("detail"))
         .and(warp::path::end())
+        .and(filter::with_db(db_pool.clone()))
         .and(filter::with_table(tables.clone()))
         .and(warp::query::<HashMap<String, String>>())
         .and_then(handler::detail::detail_handler);
@@ -68,6 +72,7 @@ async fn main() {
     let score_upload_route = warp::post()
         .and(warp::path("upload"))
         .and(warp::path("score"))
+        .and(filter::with_db(db_pool.clone()))
         .and(warp::multipart::form().max_length(100 * 1024 * 1024))
         .and(warp::header::<String>(session::SESSION_KEY))
         .and_then(handler::upload::upload_score_handler);
@@ -75,6 +80,7 @@ async fn main() {
     let scorelog_upload_route = warp::post()
         .and(warp::path("upload"))
         .and(warp::path("score_log"))
+        .and(filter::with_db(db_pool.clone()))
         .and(warp::multipart::form().max_length(100 * 1024 * 1024))
         .and(warp::header::<String>(session::SESSION_KEY))
         .and_then(handler::upload::upload_score_log_handler);
@@ -82,12 +88,14 @@ async fn main() {
     let songdata_upload_route = warp::post()
         .and(warp::path("upload"))
         .and(warp::path("song_data"))
+        .and(filter::with_db(db_pool.clone()))
         .and(warp::multipart::form().max_length(100 * 1024 * 1024))
         .and(warp::header::<String>(session::SESSION_KEY))
         .and_then(handler::upload::upload_song_data_handler);
 
     let oauth_redirect_route = warp::get()
         .and(warp::path("oauth"))
+        .and(filter::with_db(db_pool.clone()))
         .and(warp::query::<HashMap<String, String>>())
         .and_then(handler::oauth);
 

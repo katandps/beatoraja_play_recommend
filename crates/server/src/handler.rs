@@ -17,23 +17,26 @@ pub async fn table_handler(tables: Tables) -> std::result::Result<impl Reply, Re
     Ok(serde_json::to_string(&tables.format()).unwrap())
 }
 
-pub async fn account_handler(session_key: String) -> Result<impl Reply, Rejection> {
-    match crate::session::get_account_by_session(&session_key) {
+pub async fn account_handler(
+    repos: MySQLClient,
+    session_key: String,
+) -> Result<impl Reply, Rejection> {
+    match crate::session::get_account_by_session(&repos, &session_key) {
         Ok(account) => Ok(serde_json::to_string(&account).unwrap()),
         Err(e) => Err(OtherError(e).rejection()),
     }
 }
 
 pub async fn change_name_handler(
+    repos: MySQLClient,
     session_key: String,
     request_body: HashMap<String, String>,
 ) -> Result<impl Reply, Rejection> {
-    match crate::session::get_account_by_session(&session_key) {
+    match crate::session::get_account_by_session(&repos, &session_key) {
         Ok(account) => {
             let changed_name = request_body
                 .get(&"changed_name".to_string())
                 .ok_or(ChangedNameNotFound.rejection())?;
-            let repos = MySQLClient::new();
             let mut new = account.clone();
             new.set_name(changed_name.clone());
             repos
@@ -51,7 +54,10 @@ pub async fn logout_handler(session_key: String) -> Result<impl Reply, Rejection
     Ok(StatusCode::OK)
 }
 
-pub async fn oauth(query: HashMap<String, String>) -> Result<impl Reply, Rejection> {
+pub async fn oauth(
+    repos: MySQLClient,
+    query: HashMap<String, String>,
+) -> Result<impl Reply, Rejection> {
     let code = query
         .get(&"code".to_string())
         .cloned()
@@ -60,7 +66,6 @@ pub async fn oauth(query: HashMap<String, String>) -> Result<impl Reply, Rejecti
         .await
         .map_err(|e| HandleError::OAuthGoogleError(e).rejection())?;
     dbg!(&profile);
-    let repos = MySQLClient::new();
     let account = repos
         .register(&profile)
         .map_err(|_| HandleError::AccountIsNotFound.rejection())?;

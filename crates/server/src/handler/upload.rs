@@ -9,30 +9,30 @@ use warp::filters::multipart::{FormData, Part};
 use warp::{Rejection, Reply};
 
 pub async fn upload_score_handler(
+    mysql_client: MySQLClient,
     form: FormData,
     session_key: String,
 ) -> std::result::Result<impl Reply, Rejection> {
     let user_id =
         crate::session::get_user_id(&session_key).map_err(|_| TokenIsInvalid.rejection())?;
-    let repos = MySQLClient::new();
-    let account = repos.account_by_id(user_id);
+    let account = mysql_client.account_by_id(user_id);
     if account.is_err() {
         return Err(AccountIsNotFound.rejection());
     }
     let account = account.unwrap();
     let dir_name = account.google_id();
     save_sqlite_file(form, dir_name.clone(), "score".into()).await?;
-    update_score_data(account, dir_name).await
+    update_score_data(mysql_client, account, dir_name).await
 }
 
 pub async fn upload_score_log_handler(
+    mysql_client: MySQLClient,
     form: FormData,
     session_key: String,
 ) -> std::result::Result<impl Reply, Rejection> {
     let user_id =
         crate::session::get_user_id(&session_key).map_err(|_| TokenIsInvalid.rejection())?;
-    let repos = MySQLClient::new();
-    let account = repos.account_by_id(user_id);
+    let account = mysql_client.account_by_id(user_id);
     if account.is_err() {
         return Err(AccountIsNotFound.rejection());
     }
@@ -40,10 +40,14 @@ pub async fn upload_score_log_handler(
 
     let dir_name = account.google_id();
     save_sqlite_file(form, dir_name.clone(), "scorelog".into()).await?;
-    update_score_data(account, dir_name).await
+    update_score_data(mysql_client, account, dir_name).await
 }
 
-async fn update_score_data(account: Account, dir_name: String) -> Result<String, Rejection> {
+async fn update_score_data(
+    mysql_client: MySQLClient,
+    account: Account,
+    dir_name: String,
+) -> Result<String, Rejection> {
     let score_file_name = format!("./files/{}/score.db", dir_name);
     let scorelog_file_name = format!("./files/{}/scorelog.db", dir_name);
 
@@ -59,7 +63,6 @@ async fn update_score_data(account: Account, dir_name: String) -> Result<String,
         "".into(),
         score_file_name.clone(),
     );
-    let mysql_client = MySQLClient::new();
 
     let scores = sqlite_client.score();
     mysql_client
@@ -76,12 +79,12 @@ async fn update_score_data(account: Account, dir_name: String) -> Result<String,
 }
 
 pub async fn upload_song_data_handler(
+    mysql_client: MySQLClient,
     form: FormData,
     session_key: String,
 ) -> std::result::Result<String, Rejection> {
     let user_id =
         crate::session::get_user_id(&session_key).map_err(|_| TokenIsInvalid.rejection())?;
-    let mysql_client = MySQLClient::new();
     let account = mysql_client.account_by_id(user_id);
     if account.is_err() {
         return Err(AccountIsNotFound.rejection());

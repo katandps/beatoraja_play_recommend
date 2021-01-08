@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Cfg {
-    //   #[serde(default = "google_oauth_client_id")]
+    #[serde(default = "google_oauth_client_id")]
     pub google_oauth_client_id: String,
     #[serde(default = "google_oauth_client_secret")]
     pub google_oauth_client_secret: String,

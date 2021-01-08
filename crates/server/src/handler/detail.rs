@@ -10,10 +10,10 @@ use warp::{Rejection, Reply};
 /// 詳細表示ハンドラ
 /// user_idをQueryParameterより取得する
 pub async fn detail_handler(
+    repos: MySQLClient,
     tables: Tables,
     query: HashMap<String, String>,
 ) -> Result<impl Reply, Rejection> {
-    let repos = MySQLClient::new();
     let user_id = query
         .get(&"user_id".to_string())
         .ok_or(AccountIsNotSelected.rejection())?;
@@ -35,12 +35,12 @@ pub async fn detail_handler(
 }
 
 pub async fn my_detail_handler(
+    repos: MySQLClient,
     tables: Tables,
     session_key: String,
     query: HashMap<String, String>,
 ) -> Result<impl Reply, Rejection> {
-    let repos = MySQLClient::new();
-    let account = crate::session::get_account_by_session(&session_key)
+    let account = crate::session::get_account_by_session(&repos, &session_key)
         .map_err(|e| OtherError(e).rejection())?;
     let songs = repos.song_data();
     let scores = repos.score(&account).unwrap_or(Scores::new(HashMap::new()));

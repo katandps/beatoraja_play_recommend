@@ -30,14 +30,13 @@ pub fn get_user_id(key: &String) -> Result<GoogleId> {
     Ok(GoogleId::new(redis_connection.get(key)?))
 }
 
-pub fn get_account(user_id: GoogleId) -> anyhow::Result<Account> {
-    let repos = MySQLClient::new();
+pub fn get_account(repos: &MySQLClient, user_id: GoogleId) -> anyhow::Result<Account> {
     repos.account_by_id(user_id)
 }
 
-pub fn get_account_by_session(key: &String) -> Result<Account> {
+pub fn get_account_by_session(repos: &MySQLClient, key: &String) -> Result<Account> {
     let user_id = get_user_id(key)?;
-    Ok(get_account(user_id)?)
+    Ok(get_account(repos, user_id)?)
 }
 
 fn generate_session_key() -> String {
