@@ -68,7 +68,7 @@ pub async fn oauth(
     dbg!(&profile);
     let account = repos
         .register(&profile)
-        .map_err(|_| HandleError::AccountIsNotFound.rejection())?;
+        .map_err(|e| HandleError::AccountIsNotFound(e).rejection())?;
     let key =
         save_user_id(account.google_id).map_err(|e| HandleError::OtherError(e).rejection())?;
     let header = format!(

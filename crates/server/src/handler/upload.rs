@@ -14,12 +14,10 @@ pub async fn upload_score_handler(
     session_key: String,
 ) -> std::result::Result<impl Reply, Rejection> {
     let user_id =
-        crate::session::get_user_id(&session_key).map_err(|_| TokenIsInvalid.rejection())?;
-    let account = mysql_client.account_by_id(user_id);
-    if account.is_err() {
-        return Err(AccountIsNotFound.rejection());
-    }
-    let account = account.unwrap();
+        crate::session::get_user_id(&session_key).map_err(|e| TokenIsInvalid(e).rejection())?;
+    let account = mysql_client
+        .account_by_id(user_id)
+        .map_err(|e| AccountIsNotFound(e).rejection())?;
     let dir_name = account.google_id();
     save_sqlite_file(form, dir_name.clone(), "score".into()).await?;
     update_score_data(mysql_client, account, dir_name).await
@@ -31,13 +29,10 @@ pub async fn upload_score_log_handler(
     session_key: String,
 ) -> std::result::Result<impl Reply, Rejection> {
     let user_id =
-        crate::session::get_user_id(&session_key).map_err(|_| TokenIsInvalid.rejection())?;
-    let account = mysql_client.account_by_id(user_id);
-    if account.is_err() {
-        return Err(AccountIsNotFound.rejection());
-    }
-    let account = account.unwrap();
-
+        crate::session::get_user_id(&session_key).map_err(|e| TokenIsInvalid(e).rejection())?;
+    let account = mysql_client
+        .account_by_id(user_id)
+        .map_err(|e| AccountIsNotFound(e).rejection())?;
     let dir_name = account.google_id();
     save_sqlite_file(form, dir_name.clone(), "scorelog".into()).await?;
     update_score_data(mysql_client, account, dir_name).await
@@ -84,12 +79,10 @@ pub async fn upload_song_data_handler(
     session_key: String,
 ) -> std::result::Result<String, Rejection> {
     let user_id =
-        crate::session::get_user_id(&session_key).map_err(|_| TokenIsInvalid.rejection())?;
-    let account = mysql_client.account_by_id(user_id);
-    if account.is_err() {
-        return Err(AccountIsNotFound.rejection());
-    }
-    let account = account.unwrap();
+        crate::session::get_user_id(&session_key).map_err(|e| TokenIsInvalid(e).rejection())?;
+    let account = mysql_client
+        .account_by_id(user_id)
+        .map_err(|e| AccountIsNotFound(e).rejection())?;
     let dir_name = account.google_id();
     save_sqlite_file(form, dir_name.clone(), "songdata".into()).await?;
 

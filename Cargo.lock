@@ -1147,6 +1147,7 @@ dependencies = [
  "oauth_google",
  "r2d2",
  "serde",
+ "thiserror",
 ]
 
 [[package]]

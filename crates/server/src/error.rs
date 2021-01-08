@@ -1,7 +1,46 @@
 use serde_derive::Serialize;
 use std::convert::Infallible;
+use std::num::ParseIntError;
 use thiserror::Error;
 use warp::{http::StatusCode, Rejection, Reply};
+
+#[derive(Debug, Error)]
+pub enum HandleError {
+    #[error("Code Is Not Found")]
+    AuthorizationCodeIsNotFound,
+
+    #[error("Token Is Invalid: {0:?}")]
+    TokenIsInvalid(anyhow::Error),
+    #[error("Account Not Found: {0:?}")]
+    AccountIsNotFound(anyhow::Error),
+    #[error("Account Is Not Selected")]
+    AccountIsNotSelected,
+    #[error("Account Selection Is Invalid")]
+    AccountSelectionIsInvalid(ParseIntError),
+
+    #[error("IOError: {0:?}")]
+    IOError(std::io::Error),
+
+    #[error("Reading File Error")]
+    ReadingFileError,
+
+    #[error("Upload Failed")]
+    DirectoryCouldNotCreated,
+    #[error("File Is Not Found")]
+    FileIsNotFound,
+    #[error("File Is Not Deleted")]
+    FileIsNotDeleted,
+    #[error("Save Is Not Complete")]
+    SaveIsNotComplete,
+
+    #[error("Changed Name Is Not Found")]
+    ChangedNameNotFound,
+
+    #[error("OAuthGoogleError: {0:?}")]
+    OAuthGoogleError(oauth_google::Error),
+    #[error("Other Error: {0}")]
+    OtherError(anyhow::Error),
+}
 
 #[derive(Serialize)]
 struct ErrorResponse {
@@ -16,10 +55,10 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
         (
             match e {
                 AuthorizationCodeIsNotFound => StatusCode::BAD_REQUEST,
-                TokenIsInvalid => StatusCode::UNAUTHORIZED,
-                AccountIsNotFound => StatusCode::BAD_REQUEST,
+                TokenIsInvalid(_) => StatusCode::UNAUTHORIZED,
+                AccountIsNotFound(_) => StatusCode::BAD_REQUEST,
                 AccountIsNotSelected => StatusCode::BAD_REQUEST,
-                AccountSelectionIsInvalid => StatusCode::BAD_REQUEST,
+                AccountSelectionIsInvalid(_) => StatusCode::BAD_REQUEST,
                 ReadingFileError => StatusCode::BAD_REQUEST,
                 FileIsNotFound => StatusCode::OK,
                 SaveIsNotComplete => StatusCode::OK,
@@ -47,43 +86,6 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
     Ok(warp::reply::with_status(json, code))
 }
 
-#[derive(Debug, Error)]
-pub enum HandleError {
-    #[error("Code Is Not Found")]
-    AuthorizationCodeIsNotFound,
-
-    #[error("Token Is Invalid")]
-    TokenIsInvalid,
-    #[error("Account Not Found")]
-    AccountIsNotFound,
-    #[error("Account Is Not Selected")]
-    AccountIsNotSelected,
-    #[error("Account Selection Is Invalid")]
-    AccountSelectionIsInvalid,
-
-    #[error("IOError: {0:?}")]
-    IOError(std::io::Error),
-
-    #[error("Reading File Error")]
-    ReadingFileError,
-
-    #[error("Upload Failed")]
-    DirectoryCouldNotCreated,
-    #[error("File Is Not Found")]
-    FileIsNotFound,
-    #[error("File Is Not Deleted")]
-    FileIsNotDeleted,
-    #[error("Save Is Not Complete")]
-    SaveIsNotComplete,
-
-    #[error("Changed Name Is Not Found")]
-    ChangedNameNotFound,
-
-    #[error("OAuthGoogleError: {0:?}")]
-    OAuthGoogleError(oauth_google::Error),
-    #[error("Other Error: {0}")]
-    OtherError(anyhow::Error),
-}
 impl HandleError {
     pub fn rejection(self) -> Rejection {
         warp::reject::custom(self)

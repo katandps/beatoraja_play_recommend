@@ -19,11 +19,11 @@ pub async fn detail_handler(
         .ok_or(AccountIsNotSelected.rejection())?;
     let user_id = user_id
         .parse::<i32>()
-        .map_err(|_| AccountSelectionIsInvalid.rejection())?;
+        .map_err(|e| AccountSelectionIsInvalid(e).rejection())?;
     let account = repos
         .account_by_increments(user_id)
-        .map_err(|_| AccountIsNotFound.rejection())?;
-    let songs = repos.song_data();
+        .map_err(|e| AccountIsNotFound(e).rejection())?;
+    let songs = repos.song_data().unwrap_or(SongsBuilder::new().build());
     let scores = repos.score(&account).unwrap_or(Scores::new(HashMap::new()));
     let date = super::date(&query);
     let response = DetailResponse {
@@ -42,7 +42,7 @@ pub async fn my_detail_handler(
 ) -> Result<impl Reply, Rejection> {
     let account = crate::session::get_account_by_session(&repos, &session_key)
         .map_err(|e| OtherError(e).rejection())?;
-    let songs = repos.song_data();
+    let songs = repos.song_data().unwrap_or(SongsBuilder::new().build());
     let scores = repos.score(&account).unwrap_or(Scores::new(HashMap::new()));
     let date = super::date(&query);
     let response = DetailResponse {

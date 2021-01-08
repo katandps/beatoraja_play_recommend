@@ -1,5 +1,7 @@
 mod config;
+mod error;
 mod models;
+mod query;
 mod schema;
 
 use crate::models::{CanGetHash, RegisteredScore, ScoreSnapForUpdate};
@@ -26,7 +28,7 @@ pub type MySqlPool = Pool<ConnectionManager<MysqlConnection>>;
 pub type MySqlPooledConnection = PooledConnection<ConnectionManager<MysqlConnection>>;
 
 pub struct MySQLClient {
-    pool: MySqlPool,
+    connection: MySqlPooledConnection,
 }
 
 pub fn get_db_pool() -> MySqlPool {
@@ -34,58 +36,45 @@ pub fn get_db_pool() -> MySqlPool {
 }
 
 impl MySQLClient {
-    pub fn new(pool: MySqlPool) -> Self {
-        Self { pool }
+    pub fn new(connection: MySqlPooledConnection) -> Self {
+        Self { connection }
     }
 
     pub fn health(&self) -> Result<()> {
-        match &self.pool.get().unwrap().execute("SELECT 1") {
+        match &self.connection.execute("SELECT 1") {
             Ok(_) => Ok(()),
             Err(_) => Err(anyhow!("HealthCheckError")),
         }
     }
 
-    fn songs(&self) -> Vec<models::Song> {
-        schema::songs::table
-            .load(&self.pool.get().unwrap())
-            .expect("Error loading schema")
-    }
-
-    fn hash(&self) -> Vec<models::Hash> {
-        schema::hashes::table
-            .load(&self.pool.get().unwrap())
-            .expect("Error loading schema")
-    }
-
     pub fn register(&self, profile: &GoogleProfile) -> Result<Account> {
-        let user: Vec<models::User> = schema::users::table
-            .filter(schema::users::gmail_address.eq(&profile.email))
-            .load(&self.pool.get().unwrap())
-            .expect("Error loading schema");
-
-        if user.is_empty() {
-            let user = models::RegisteringUser {
-                google_id: profile.user_id.clone(),
-                gmail_address: profile.email.clone(),
-                name: profile.name.to_string(),
-                registered_date: Utc::now().naive_utc(),
-            };
-            println!("Insert new user");
-            diesel::insert_into(schema::users::table)
-                .values(user.clone())
-                .execute(&self.pool.get().unwrap())?;
-            self.get_account(profile)
-        } else {
-            Ok(Self::create_account(user[0].clone()))
+        let user = query::account_by_email(&self.connection, &profile.email);
+        match user {
+            Ok(user) => Ok(Self::create_account(user)),
+            Err(_) => {
+                let user = models::RegisteringUser {
+                    google_id: profile.user_id.clone(),
+                    gmail_address: profile.email.clone(),
+                    name: profile.name.to_string(),
+                    registered_date: Utc::now().naive_utc(),
+                };
+                println!("Insert new user");
+                diesel::insert_into(schema::users::table)
+                    .values(user.clone())
+                    .execute(&self.connection)?;
+                Ok(Self::create_account(query::account_by_email(
+                    &self.connection,
+                    &profile.email,
+                )?))
+            }
         }
     }
 
     pub fn account_by_increments(&self, id: i32) -> Result<Account> {
-        let user: models::User = schema::users::table
-            .filter(schema::users::id.eq(id))
-            .first(&self.pool.get().unwrap())?;
-
-        Ok(Self::create_account(user))
+        Ok(Self::create_account(query::account_by_id(
+            &self.connection,
+            id,
+        )?))
     }
 
     fn create_account(model: models::User) -> Account {
@@ -99,18 +88,15 @@ impl MySQLClient {
     }
 
     pub fn account_by_id(&self, google_id: GoogleId) -> Result<Account> {
-        let user: models::User = schema::users::table
-            .filter(schema::users::google_id.eq(google_id.to_string()))
-            .first(&self.pool.get().unwrap())?;
-        Ok(Self::create_account(user))
+        Ok(Self::create_account(query::account_by_google_id(
+            &self.connection,
+            &google_id.to_string(),
+        )?))
     }
 
     pub fn rename_account(&self, account: &Account) -> Result<()> {
         println!("Update user name to {}.", account.user_name());
-        let user: models::User = schema::users::table
-            .filter(schema::users::gmail_address.eq(account.email()))
-            .first(&self.pool.get().unwrap())?;
-
+        let user = query::account_by_email(&self.connection, &account.email())?;
         diesel::insert_into(schema::rename_logs::table)
             .values(models::RenameUser {
                 user_id: user.id.clone(),
@@ -118,29 +104,19 @@ impl MySQLClient {
                 new_name: account.user_name(),
                 date: Utc::now().naive_utc(),
             })
-            .execute(&self.pool.get().unwrap())?;
+            .execute(&self.connection)?;
 
         diesel::update(
             schema::users::table.filter(schema::users::gmail_address.eq(account.email())),
         )
         .set(schema::users::name.eq(account.user_name()))
-        .execute(&self.pool.get().unwrap())?;
+        .execute(&self.connection)?;
 
         Ok(())
     }
 
-    fn get_account(&self, profile: &GoogleProfile) -> Result<Account> {
-        let user: models::User = schema::users::table
-            .filter(schema::users::gmail_address.eq(&profile.email))
-            .first(&self.pool.get().unwrap())?;
-        Ok(Self::create_account(user))
-    }
-
-    fn score_log(&self, account: &Account) -> HashMap<SongId, SnapShots> {
-        let records: Vec<models::ScoreSnap> = schema::score_snaps::table
-            .filter(schema::score_snaps::user_id.eq(&account.user_id()))
-            .load(&self.pool.get().unwrap())
-            .expect("Error loading schema");
+    fn score_log(&self, account: &Account) -> Result<HashMap<SongId, SnapShots>> {
+        let records = query::score_snaps_by_user_id(&self.connection, account.user_id())?;
         let mut map = HashMap::new();
         for row in records {
             let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
@@ -153,17 +129,13 @@ impl MySQLClient {
             );
             map.entry(song_id).or_insert(SnapShots::default()).add(snap);
         }
-        map
+        Ok(map)
     }
 
     pub fn score(&self, account: &Account) -> Result<Scores> {
-        let user: models::User = schema::users::table
-            .filter(schema::users::gmail_address.eq(account.email()))
-            .first(&self.pool.get().unwrap())?;
-        let record: Vec<models::Score> = schema::scores::table
-            .filter(schema::scores::user_id.eq(user.id))
-            .load(&self.pool.get().unwrap())?;
-        let score_log = self.score_log(account);
+        let user = query::account_by_email(&self.connection, &account.email())?;
+        let record = query::scores_by_user_id(&self.connection, user.id)?;
+        let score_log = self.score_log(account)?;
         Ok(Scores::new(
             record
                 .iter()
@@ -194,13 +166,9 @@ impl MySQLClient {
     }
 
     pub fn save_score(&self, account: Account, score: Scores) -> Result<()> {
-        let user = schema::users::table
-            .filter(schema::users::gmail_address.eq(account.email()))
-            .first::<models::User>(&self.pool.get().unwrap())?;
+        let user = query::account_by_email(&self.connection, &account.email())?;
         let user_id = user.id;
-        let saved: Vec<models::Score> = schema::scores::table
-            .filter(schema::scores::user_id.eq(user_id))
-            .load(&self.pool.get().unwrap())?;
+        let saved = query::scores_by_user_id(&self.connection, user.id)?;
         let saved_song = saved
             .iter()
             .map(|record| {
@@ -213,10 +181,7 @@ impl MySQLClient {
                 )
             })
             .collect::<HashMap<_, _>>();
-        let saved: Vec<models::ScoreSnap> = schema::score_snaps::table
-            .filter(schema::score_snaps::user_id.eq(user_id))
-            .load(&self.pool.get().unwrap())?;
-
+        let saved = query::score_snaps_by_user_id(&self.connection, user.id)?;
         let saved_snap = saved
             .iter()
             .map(|record| {
@@ -233,8 +198,7 @@ impl MySQLClient {
             })
             .collect::<HashMap<_, _>>();
 
-        let hashes = self
-            .hash()
+        let hashes = query::hashes(&self.connection)?
             .iter()
             .map(|h| h.sha256.clone())
             .collect::<HashSet<_>>();
@@ -339,28 +303,28 @@ impl MySQLClient {
             println!("Update {} scores.", v.len());
             let _result = diesel::replace_into(schema::scores::table)
                 .values(v)
-                .execute(&self.pool.get().unwrap());
+                .execute(&self.connection);
         }
 
         for v in div(songs_for_insert, &hashes) {
             println!("Insert {} scores.", v.len());
             diesel::insert_into(schema::scores::table)
                 .values(v)
-                .execute(&self.pool.get().unwrap())?;
+                .execute(&self.connection)?;
         }
 
         for v in div(snaps_for_insert, &hashes) {
             println!("Insert {} score_snaps", v.len());
             diesel::insert_into(schema::score_snaps::table)
                 .values(v)
-                .execute(&self.pool.get().unwrap())?;
+                .execute(&self.connection)?;
         }
 
         Ok(())
     }
 
     pub fn save_song(&self, songs: &Songs) -> Result<()> {
-        let exist_hashes = self.hash();
+        let exist_hashes = query::hashes(&self.connection)?;
         let mut hashmap = songs.converter.sha256_to_md5.clone();
         for row in exist_hashes {
             hashmap.remove(&HashSha256::new(row.sha256));
@@ -386,10 +350,10 @@ impl MySQLClient {
             println!("Insert {} hashes.", records.len());
             diesel::insert_into(schema::hashes::table)
                 .values(records)
-                .execute(&self.pool.get().unwrap())?;
+                .execute(&self.connection)?;
         }
 
-        let exist_songs = self.songs();
+        let exist_songs = query::songs(&self.connection)?;
         let mut songs = songs.songs.clone();
         for row in exist_songs {
             songs.remove(&HashSha256::new(row.sha256));
@@ -419,20 +383,19 @@ impl MySQLClient {
             println!("Insert {} songs.", records.len());
             diesel::insert_into(schema::songs::table)
                 .values(records)
-                .execute(&self.pool.get().unwrap())?;
+                .execute(&self.connection)?;
         }
         Ok(())
     }
 
-    pub fn song_data(&self) -> Songs {
-        let record = self.songs();
-        let hash: HashMap<String, String> = self
-            .hash()
+    pub fn song_data(&self) -> Result<Songs> {
+        let record = query::songs(&self.connection)?;
+        let hash: HashMap<String, String> = query::hashes(&self.connection)?
             .iter()
             .map(|hash| (hash.sha256.clone(), hash.md5.clone()))
             .collect();
 
-        record
+        Ok(record
             .iter()
             .fold(SongsBuilder::new(), |mut builder, row| {
                 let md5 = HashMd5::new(hash.get(&row.sha256).unwrap().clone());
@@ -445,6 +408,6 @@ impl MySQLClient {
                 );
                 builder
             })
-            .build()
+            .build())
     }
 }

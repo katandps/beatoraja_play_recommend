@@ -18,6 +18,7 @@ oauth_google = { path = "../oauth_google" }
 
 #エラー処理
 anyhow = "1.0"
+thiserror = "1.0.23"
 
 #コンフィグ処理
 envy = "0.4.2"
