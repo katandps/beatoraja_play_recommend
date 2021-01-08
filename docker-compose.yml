@@ -16,12 +16,12 @@ services:
       - mysql
       - session-redis
     #開発時はコメントアウト
-    #logging:
-    #  driver: awslogs
-    #  options:
-    #    awslogs-region: ap-northeast-1
-    #    awslogs-group: dev-beatoraja-play-recommend-log
-    #    awslogs-stream: app
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ap-northeast-1
+        awslogs-group: dev-beatoraja-play-recommend-log
+        awslogs-stream: app
 
   mysql:
     image: mysql:5.7.16
@@ -32,8 +32,8 @@ services:
       - ./db/data:/var/lib/mysql
       - ./db/my.cnf:/etc/mysql/conf.d/my.cnf:ro
       #- ./db/sql:/docker-entrypoint-initdb.d:ro
-      - /etc/group:/etc/group:ro
-      - /etc/passwd:/etc/passwd:ro
+      #- /etc/group:/etc/group:ro
+      #- /etc/passwd:/etc/passwd:ro
     ports:
       - "3306:3306"
     environment:
