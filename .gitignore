@@ -2,4 +2,4 @@
 /.idea
 /files
 /db/data
-*.env
+.env*
