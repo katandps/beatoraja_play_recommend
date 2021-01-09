@@ -1,7 +1,6 @@
 use crate::*;
 use itertools::Itertools;
 use std::collections::HashMap;
-use std::fmt;
 
 #[derive(Clone)]
 pub struct Scores(pub HashMap<SongId, Score>);
@@ -49,16 +48,6 @@ impl Scores {
             })
             .sorted_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()))
             .collect()
-    }
-}
-
-impl fmt::Display for Scores {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut result = String::new();
-        for (song_id, score) in &self.0 {
-            result.push_str(&format!("{}: {}\n", song_id, score.view()));
-        }
-        write!(f, "{}", result)
     }
 }
 

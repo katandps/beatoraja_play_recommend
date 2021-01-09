@@ -1,5 +1,6 @@
 use crate::*;
-use std::fmt;
+use num_derive::FromPrimitive;
+use num_traits::FromPrimitive;
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug, Serialize, Deserialize)]
 pub struct SongId(HashSha256, PlayMode);
@@ -18,23 +19,23 @@ impl SongId {
     }
 }
 
-impl fmt::Display for SongId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "[{} {}]", self.0, self.1)
-    }
-}
-
 #[derive(Eq, PartialEq, Hash, Clone, Debug, Serialize, Deserialize)]
-pub struct PlayMode(pub i32);
+pub struct PlayMode(pub LnMode);
 
 impl PlayMode {
     pub fn new(mode: i32) -> Self {
-        PlayMode(mode)
+        let lm = match FromPrimitive::from_i32(mode % 10) {
+            Some(lm) => lm,
+            None => LnMode::LongNote,
+        };
+
+        PlayMode(lm)
     }
 }
 
-impl fmt::Display for PlayMode {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
+#[derive(Eq, PartialEq, Hash, Clone, Debug, Serialize, Deserialize, FromPrimitive)]
+pub enum LnMode {
+    LongNote = 0,
+    ChargeNote = 1,
+    HellChargeNote = 2,
 }

@@ -215,7 +215,7 @@ impl MySQLClient {
                             id: saved.id,
                             user_id,
                             sha256: song_id.sha256().to_string(),
-                            mode: song_id.mode().0,
+                            mode: song_id.mode().0 as i32,
                             clear: score.clear.to_integer(),
                             epg: score.judge.early_pgreat,
                             lpg: score.judge.late_pgreat,
@@ -240,7 +240,7 @@ impl MySQLClient {
                 None => songs_for_insert.push(RegisteredScore {
                     user_id,
                     sha256: song_id.sha256().to_string(),
-                    mode: song_id.mode().0,
+                    mode: song_id.mode().0 as i32,
                     clear: score.clear.to_integer(),
                     epg: score.judge.early_pgreat,
                     lpg: score.judge.late_pgreat,
@@ -267,7 +267,7 @@ impl MySQLClient {
                     None => snaps_for_insert.push(ScoreSnapForUpdate {
                         user_id,
                         sha256: song_id.sha256().to_string(),
-                        mode: song_id.mode().0,
+                        mode: song_id.mode().0 as i32,
                         date: snapshot.updated_at.naive_datetime(),
                         clear: snapshot.clear_type.to_integer(),
                         score: snapshot.score.ex_score(),
