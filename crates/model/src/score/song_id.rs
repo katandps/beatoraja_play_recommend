@@ -32,6 +32,10 @@ impl PlayMode {
         PlayMode(lm)
     }
 
+    pub fn default() -> Self {
+        PlayMode::new(LnMode::LongNote as i32)
+    }
+
     pub fn to_int(&self) -> i32 {
         self.0 as i32
     }

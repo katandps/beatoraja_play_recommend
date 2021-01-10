@@ -1,6 +1,4 @@
-use crate::error::HandleError::{
-    AccountIsNotFound, AccountIsNotSelected, AccountSelectionIsInvalid,
-};
+use crate::filter::DetailQuery;
 use model::*;
 use mysql::MySQLClient;
 use serde::Serialize;
@@ -12,20 +10,12 @@ use warp::{Rejection, Reply};
 pub async fn detail_handler(
     repos: MySQLClient,
     tables: Tables,
-    query: HashMap<String, String>,
+    query: DetailQuery,
+    account: Account,
 ) -> Result<impl Reply, Rejection> {
-    let user_id = query
-        .get(&"user_id".to_string())
-        .ok_or(AccountIsNotSelected.rejection())?;
-    let user_id = user_id
-        .parse::<i32>()
-        .map_err(|e| AccountSelectionIsInvalid(e).rejection())?;
-    let account = repos
-        .account_by_increments(user_id)
-        .map_err(|e| AccountIsNotFound(e).rejection())?;
     let songs = repos.song_data().unwrap_or(SongsBuilder::new().build());
     let scores = repos.score(&account).unwrap_or(Scores::new(HashMap::new()));
-    let date = super::date(&query);
+    let date = query.date;
     let response = DetailResponse {
         user_id: account.user_id(),
         user_name: account.user_name(),
@@ -37,13 +27,12 @@ pub async fn detail_handler(
 pub async fn my_detail_handler(
     repos: MySQLClient,
     tables: Tables,
-    session_key: String,
-    query: HashMap<String, String>,
+    account: Account,
+    query: DetailQuery,
 ) -> Result<impl Reply, Rejection> {
-    let account = crate::session::get_account_by_session(&repos, &session_key)?;
     let songs = repos.song_data().unwrap_or(SongsBuilder::new().build());
     let scores = repos.score(&account).unwrap_or(Scores::new(HashMap::new()));
-    let date = super::date(&query);
+    let date = query.date;
     let response = DetailResponse {
         user_id: account.user_id(),
         user_name: account.user_name(),

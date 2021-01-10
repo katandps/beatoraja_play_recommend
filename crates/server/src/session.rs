@@ -4,6 +4,7 @@ use anyhow::Result;
 use model::*;
 use mysql::MySQLClient;
 use redis::{Commands, Connection, RedisResult};
+use warp::Rejection;
 
 pub const SESSION_KEY: &str = "session-token";
 const EXPIRE_SECONDS: usize = 2 * 60 * 60;
@@ -35,9 +36,9 @@ pub fn get_account(repos: &MySQLClient, user_id: GoogleId) -> Result<Account, Ha
     Ok(repos.account_by_id(user_id)?)
 }
 
-pub fn get_account_by_session(repos: &MySQLClient, key: &String) -> Result<Account, HandleError> {
-    let user_id = get_user_id(key)?;
-    Ok(get_account(repos, user_id)?)
+pub async fn get_account_by_session(repos: MySQLClient, key: String) -> Result<Account, Rejection> {
+    let user_id = get_user_id(&key)?;
+    Ok(get_account(&repos, user_id)?)
 }
 
 fn generate_session_key() -> String {

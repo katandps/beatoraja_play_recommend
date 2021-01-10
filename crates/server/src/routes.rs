@@ -2,7 +2,6 @@ use crate::filter::*;
 use crate::handler::*;
 use model::Tables;
 use mysql::MySqlPool;
-use std::collections::HashMap;
 use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Reply};
@@ -37,14 +36,14 @@ fn tables(tables: &Tables) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("tables"))
         .and(with_table(tables.clone()))
-        .and_then(table_handler)
+        .and_then(tables::table_handler)
         .boxed()
 }
 
 fn health(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("health"))
-        .and(with_db(db_pool.clone()))
+        .and(with_db(&db_pool))
         .and_then(health::health_handler)
         .boxed()
 }
@@ -52,9 +51,8 @@ fn health(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
 fn account(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("account"))
-        .and(with_db(db_pool.clone()))
-        .and(receive_session_key())
-        .and_then(account_handler)
+        .and(account_by_session(&db_pool))
+        .and_then(account::account_handler)
         .boxed()
 }
 
@@ -62,9 +60,9 @@ fn change_name(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::post()
         .and(path("update"))
         .and(path("name"))
-        .and(with_db(db_pool.clone()))
-        .and(receive_session_key())
-        .and(warp::body::json())
+        .and(with_db(&db_pool))
+        .and(account_by_session(&db_pool))
+        .and(changed_name_by_query())
         .and_then(change_name::change_name_handler)
         .boxed()
 }
@@ -73,17 +71,17 @@ fn logout() -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("logout"))
         .and(receive_session_key())
-        .and_then(logout_handler)
+        .and_then(logout::logout_handler)
         .boxed()
 }
 
 fn my_detail(db_pool: &MySqlPool, tables: &Tables) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("my_detail"))
-        .and(with_db(db_pool.clone()))
+        .and(with_db(&db_pool))
         .and(with_table(tables.clone()))
-        .and(receive_session_key())
-        .and(warp::query::<HashMap<String, String>>())
+        .and(account_by_session(&db_pool))
+        .and(detail_query())
         .and_then(detail::my_detail_handler)
         .boxed()
 }
@@ -91,9 +89,10 @@ fn my_detail(db_pool: &MySqlPool, tables: &Tables) -> BoxedFilter<(impl Reply,)>
 fn detail(db_pool: &MySqlPool, tables: &Tables) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("detail"))
-        .and(with_db(db_pool.clone()))
+        .and(with_db(&db_pool))
         .and(with_table(tables.clone()))
-        .and(warp::query::<HashMap<String, String>>())
+        .and(detail_query())
+        .and(account_id_query(&db_pool))
         .and_then(detail::detail_handler)
         .boxed()
 }
@@ -102,7 +101,7 @@ fn score_upload(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::post()
         .and(path("upload"))
         .and(path("score"))
-        .and(with_db(db_pool.clone()))
+        .and(with_db(&db_pool))
         .and(receive_sqlite_file())
         .and(receive_session_key())
         .and_then(upload::upload_score_handler)
@@ -113,7 +112,7 @@ fn score_log_upload(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::post()
         .and(path("upload"))
         .and(path("score_log"))
-        .and(with_db(db_pool.clone()))
+        .and(with_db(&db_pool))
         .and(receive_sqlite_file())
         .and(receive_session_key())
         .and_then(upload::upload_score_log_handler)
@@ -124,7 +123,7 @@ fn song_data_upload_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::post()
         .and(path("upload"))
         .and(path("song_data"))
-        .and(with_db(db_pool.clone()))
+        .and(with_db(&db_pool))
         .and(receive_sqlite_file())
         .and(receive_session_key())
         .and_then(upload::upload_song_data_handler)
@@ -134,7 +133,7 @@ fn song_data_upload_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
 fn oauth_redirect_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("oauth"))
-        .and(with_db(db_pool.clone()))
+        .and(with_db(&db_pool))
         .and(google_oauth_code())
         .and_then(oauth_redirect::oauth_handler)
         .boxed()
