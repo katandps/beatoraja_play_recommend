@@ -41,12 +41,24 @@ pub fn get_account_by_session(repos: &MySQLClient, key: &String) -> Result<Accou
 }
 
 fn generate_session_key() -> String {
-    use bigint::U256;
     use rand::prelude::*;
     use rand_chacha::ChaCha20Rng;
 
     let mut csp_rng = ChaCha20Rng::from_entropy();
     let mut data = [0u8; 32];
     csp_rng.fill_bytes(&mut data);
-    format!("{}", U256::from(data))
+    format!("{}", data.iter().map(|u| u.to_string()).collect::<String>())
+}
+
+#[cfg(test)]
+mod test {
+
+    #[test]
+    fn test() {
+        let mut data = [1u8, 2, 3, 4, 5, 6, 7, 8, 123];
+        assert_eq!(
+            "12345678123".to_string(),
+            data.iter().map(|u| u.to_string()).collect::<String>()
+        )
+    }
 }
