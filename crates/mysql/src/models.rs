@@ -12,6 +12,7 @@ pub struct Song {
     pub sub_artist: String,
     pub notes: i32,
     pub length: i32,
+    pub features: i32,
 }
 
 #[derive(Debug, Clone, Queryable, Insertable)]

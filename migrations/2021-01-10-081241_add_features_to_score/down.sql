@@ -1,0 +1,1 @@
+alter table songs drop column features;

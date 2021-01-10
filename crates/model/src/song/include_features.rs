@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 /// 各種特殊ノートを含む譜面かどうか
 #[derive(Clone, Debug)]
 pub struct IncludeFeatures {
@@ -31,6 +33,18 @@ impl From<i32> for IncludeFeatures {
     }
 }
 
+impl Into<i32> for IncludeFeatures {
+    fn into(self) -> i32 {
+        0 + if self.undefined_ln.0 { 1 } else { 0 }
+            + if self.mine_note.0 { 2 } else { 0 }
+            + if self.random.0 { 4 } else { 0 }
+            + if self.long_note.0 { 8 } else { 0 }
+            + if self.charge_note.0 { 16 } else { 0 }
+            + if self.hell_charge_note.0 { 32 } else { 0 }
+            + if self.stop_sequence.0 { 64 } else { 0 }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct UndefinedLn(bool);
 #[derive(Clone, Debug)]
@@ -45,11 +59,16 @@ pub struct ChargeNote(bool);
 pub struct HellChargeNote(bool);
 #[derive(Clone, Debug)]
 pub struct StopSequence(bool);
-//
-// 	public static final int FEATURE_UNDEFINEDLN = 1;
-// 	public static final int FEATURE_MINENOTE = 2;
-// 	public static final int FEATURE_RANDOM = 4;
-// 	public static final int FEATURE_LONGNOTE = 8;
-// 	public static final int FEATURE_CHARGENOTE = 16;
-// 	public static final int FEATURE_HELLCHARGENOTE = 32;
-// 	public static final int FEATURE_STOPSEQUENCE = 64;
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test() {
+        for i in 0..128 {
+            let i_f = IncludeFeatures::from(i);
+            assert_eq!(i, i_f.into());
+        }
+    }
+}

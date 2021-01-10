@@ -1,0 +1,1 @@
+alter table songs add column features int not null default 0;

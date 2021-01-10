@@ -43,4 +43,7 @@ impl Song {
     pub fn get_hash(&self) -> &HashSha256 {
         &self.hash
     }
+    pub fn features(&self) -> &IncludeFeatures {
+        &self.include_features
+    }
 }

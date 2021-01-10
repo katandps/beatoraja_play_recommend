@@ -369,6 +369,7 @@ impl MySQLClient {
                 sub_artist: "".into(),
                 notes: song.notes(),
                 length: 0,
+                features: song.features().clone().into(),
             })
             .collect::<Vec<_>>();
         let mut index = 0;
@@ -406,7 +407,7 @@ impl MySQLClient {
                     Title::new(format!("{}{}", row.title, row.subtitle)),
                     Artist::new(row.artist.clone()),
                     row.notes,
-                    IncludeFeatures::from(0),
+                    IncludeFeatures::from(row.features),
                 );
                 builder
             })
