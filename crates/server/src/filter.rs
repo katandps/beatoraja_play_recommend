@@ -11,7 +11,7 @@ pub fn with_db(
     db_pool: &MySqlPool,
 ) -> impl Filter<Extract = (MySQLClient,), Error = Infallible> + Clone {
     let db_pool = db_pool.clone();
-    warp::any().map(move || MySQLClient::new(db_pool.clone().get().unwrap()))
+    warp::any().map(move || MySQLClient::new(db_pool.get().unwrap()))
 }
 
 pub fn with_table(tables: Tables) -> impl Filter<Extract = (Tables,), Error = Infallible> + Clone {
