@@ -4,6 +4,7 @@ mod models;
 mod query;
 mod schema;
 
+pub use crate::error::Error;
 use crate::models::{CanGetHash, RegisteredScore, ScoreSnapForUpdate};
 use anyhow::Result;
 use chrono::Utc;
@@ -87,14 +88,14 @@ impl MySQLClient {
         )
     }
 
-    pub fn account_by_id(&self, google_id: GoogleId) -> Result<Account> {
+    pub fn account_by_id(&self, google_id: GoogleId) -> Result<Account, Error> {
         Ok(Self::create_account(query::account_by_google_id(
             &self.connection,
             &google_id.to_string(),
         )?))
     }
 
-    pub fn rename_account(&self, account: &Account) -> Result<()> {
+    pub fn rename_account(&self, account: &Account) -> Result<(), Error> {
         println!("Update user name to {}.", account.user_name());
         let user = query::account_by_email(&self.connection, &account.email())?;
         diesel::insert_into(schema::rename_logs::table)
@@ -115,7 +116,7 @@ impl MySQLClient {
         Ok(())
     }
 
-    fn score_log(&self, account: &Account) -> Result<HashMap<ScoreId, SnapShots>> {
+    fn score_log(&self, account: &Account) -> Result<HashMap<ScoreId, SnapShots>, Error> {
         let records = query::score_snaps_by_user_id(&self.connection, account.user_id())?;
         let mut map = HashMap::new();
         for row in records {
@@ -132,7 +133,7 @@ impl MySQLClient {
         Ok(map)
     }
 
-    pub fn score(&self, account: &Account) -> Result<Scores> {
+    pub fn score(&self, account: &Account) -> Result<Scores, Error> {
         let user = query::account_by_email(&self.connection, &account.email())?;
         let record = query::scores_by_user_id(&self.connection, user.id)?;
         let score_log = self.score_log(account)?;
@@ -324,7 +325,7 @@ impl MySQLClient {
         Ok(())
     }
 
-    pub fn save_song(&self, songs: &Songs) -> Result<()> {
+    pub fn save_song(&self, songs: &Songs) -> Result<(), Error> {
         let exist_hashes = query::hashes(&self.connection)?;
         let mut hashmap = songs.converter.sha256_to_md5.clone();
         for row in exist_hashes {

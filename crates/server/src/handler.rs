@@ -1,9 +1,9 @@
+pub mod change_name;
 pub mod detail;
 pub mod health;
 pub mod upload;
 
 use crate::config::config;
-use crate::error::HandleError::{ChangedNameNotFound, OtherError};
 use crate::error::*;
 use crate::session::save_user_id;
 use http::StatusCode;
@@ -21,56 +21,31 @@ pub async fn account_handler(
     repos: MySQLClient,
     session_key: String,
 ) -> Result<impl Reply, Rejection> {
-    match crate::session::get_account_by_session(&repos, &session_key) {
-        Ok(account) => Ok(serde_json::to_string(&account).unwrap()),
-        Err(e) => Err(OtherError(e).rejection()),
-    }
-}
-
-pub async fn change_name_handler(
-    repos: MySQLClient,
-    session_key: String,
-    request_body: HashMap<String, String>,
-) -> Result<impl Reply, Rejection> {
-    match crate::session::get_account_by_session(&repos, &session_key) {
-        Ok(account) => {
-            let changed_name = request_body
-                .get(&"changed_name".to_string())
-                .ok_or(ChangedNameNotFound.rejection())?;
-            let mut new = account.clone();
-            new.set_name(changed_name.clone());
-            repos
-                .rename_account(&new)
-                .map_err(|e| OtherError(e).rejection())?;
-            Ok(serde_json::to_string(&new).unwrap())
-        }
-        Err(e) => Err(OtherError(e).rejection()),
-    }
+    let account = crate::session::get_account_by_session(&repos, &session_key)?;
+    Ok(serde_json::to_string(&account).unwrap())
 }
 
 pub async fn logout_handler(session_key: String) -> Result<impl Reply, Rejection> {
-    crate::session::remove_session(&session_key)
-        .map_err(|e| HandleError::OtherError(e).rejection())?;
+    crate::session::remove_session(&session_key)?;
     Ok(StatusCode::OK)
 }
 
-pub async fn oauth(
+pub async fn oauth_handler(
     repos: MySQLClient,
     query: HashMap<String, String>,
 ) -> Result<impl Reply, Rejection> {
     let code = query
         .get(&"code".to_string())
         .cloned()
-        .ok_or(HandleError::AuthorizationCodeIsNotFound.rejection())?;
+        .ok_or(HandleError::AuthorizationCodeIsNotFound)?;
     let profile = oauth_google::verify(code)
         .await
-        .map_err(|e| HandleError::OAuthGoogleError(e).rejection())?;
+        .map_err(|e| HandleError::OAuthGoogleError(e))?;
     dbg!(&profile);
     let account = repos
         .register(&profile)
-        .map_err(|e| HandleError::AccountIsNotFound(e).rejection())?;
-    let key =
-        save_user_id(account.google_id).map_err(|e| HandleError::OtherError(e).rejection())?;
+        .map_err(|e| HandleError::AccountIsNotFound(e))?;
+    let key = save_user_id(account.google_id).map_err(|e| HandleError::OtherError(e))?;
     let header = format!(
         "session-token={};domain={};max-age=300",
         key,

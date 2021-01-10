@@ -45,7 +45,7 @@ async fn main() {
         .and(filter::with_db(db_pool.clone()))
         .and(warp::header::<String>(session::SESSION_KEY))
         .and(warp::body::json())
-        .and_then(handler::change_name_handler);
+        .and_then(handler::change_name::change_name_handler);
 
     let logout_route = warp::get()
         .and(warp::path("logout"))
@@ -97,7 +97,7 @@ async fn main() {
         .and(warp::path("oauth"))
         .and(filter::with_db(db_pool.clone()))
         .and(warp::query::<HashMap<String, String>>())
-        .and_then(handler::oauth);
+        .and_then(handler::oauth_handler);
 
     let route = health_route
         .or(account_route)

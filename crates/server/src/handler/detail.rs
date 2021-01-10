@@ -1,5 +1,5 @@
 use crate::error::HandleError::{
-    AccountIsNotFound, AccountIsNotSelected, AccountSelectionIsInvalid, OtherError,
+    AccountIsNotFound, AccountIsNotSelected, AccountSelectionIsInvalid,
 };
 use model::*;
 use mysql::MySQLClient;
@@ -40,8 +40,7 @@ pub async fn my_detail_handler(
     session_key: String,
     query: HashMap<String, String>,
 ) -> Result<impl Reply, Rejection> {
-    let account = crate::session::get_account_by_session(&repos, &session_key)
-        .map_err(|e| OtherError(e).rejection())?;
+    let account = crate::session::get_account_by_session(&repos, &session_key)?;
     let songs = repos.song_data().unwrap_or(SongsBuilder::new().build());
     let scores = repos.score(&account).unwrap_or(Scores::new(HashMap::new()));
     let date = super::date(&query);

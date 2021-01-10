@@ -1,5 +1,6 @@
 use crate::{Judge, PlayCount, UpdatedAt};
 use serde::Serialize;
+use std::cmp::Ordering;
 
 #[derive(Debug)]
 pub struct PlayerStates {
@@ -17,7 +18,7 @@ impl PlayerStates {
 
     pub fn diff(&self) -> Vec<PlayerStateDiff> {
         let mut log = self.log.clone();
-        log.sort_by(|a, b| a.date.cmp(&b.date));
+        log.sort_by(PlayerState::cmp_by_date);
         let mut ret = Vec::new();
         for i in 1..log.len() {
             let before = log[i - 1].clone();
@@ -59,6 +60,10 @@ impl PlayerState {
             date,
             total_judge,
         }
+    }
+
+    pub fn cmp_by_date(&self, other: &PlayerState) -> Ordering {
+        self.date.cmp(&other.date)
     }
 }
 

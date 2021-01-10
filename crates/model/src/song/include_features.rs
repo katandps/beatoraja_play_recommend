@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 /// 各種特殊ノートを含む譜面かどうか
 #[derive(Clone, Debug)]
 pub struct IncludeFeatures {

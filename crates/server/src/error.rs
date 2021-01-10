@@ -1,3 +1,4 @@
+use crate::error::HandleError::{IOError, MySqlError, OtherError, RedisError, WarpError};
 use serde_derive::Serialize;
 use std::convert::Infallible;
 use std::num::ParseIntError;
@@ -9,8 +10,6 @@ pub enum HandleError {
     #[error("Code Is Not Found")]
     AuthorizationCodeIsNotFound,
 
-    #[error("Token Is Invalid: {0:?}")]
-    TokenIsInvalid(anyhow::Error),
     #[error("Account Not Found: {0:?}")]
     AccountIsNotFound(anyhow::Error),
     #[error("Account Is Not Selected")]
@@ -20,9 +19,11 @@ pub enum HandleError {
 
     #[error("IOError: {0:?}")]
     IOError(std::io::Error),
+    #[error("MySqlError: {0:?}")]
+    MySqlError(mysql::Error),
 
-    #[error("Reading File Error")]
-    ReadingFileError,
+    #[error("WarpError: {0:?}")]
+    WarpError(warp::Error),
 
     #[error("Upload Failed")]
     DirectoryCouldNotCreated,
@@ -40,6 +41,8 @@ pub enum HandleError {
     OAuthGoogleError(oauth_google::Error),
     #[error("Other Error: {0}")]
     OtherError(anyhow::Error),
+    #[error("RedisError: {0:?}")]
+    RedisError(redis::RedisError),
 }
 
 #[derive(Serialize)]
@@ -55,11 +58,10 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
         (
             match e {
                 AuthorizationCodeIsNotFound => StatusCode::BAD_REQUEST,
-                TokenIsInvalid(_) => StatusCode::UNAUTHORIZED,
                 AccountIsNotFound(_) => StatusCode::BAD_REQUEST,
                 AccountIsNotSelected => StatusCode::BAD_REQUEST,
                 AccountSelectionIsInvalid(_) => StatusCode::BAD_REQUEST,
-                ReadingFileError => StatusCode::BAD_REQUEST,
+                WarpError(_) => StatusCode::BAD_REQUEST,
                 FileIsNotFound => StatusCode::OK,
                 SaveIsNotComplete => StatusCode::OK,
                 FileIsNotDeleted => StatusCode::OK,
@@ -93,3 +95,39 @@ impl HandleError {
 }
 
 impl warp::reject::Reject for HandleError {}
+
+impl From<HandleError> for Rejection {
+    fn from(e: HandleError) -> Self {
+        warp::reject::custom(e)
+    }
+}
+
+impl From<anyhow::Error> for HandleError {
+    fn from(e: anyhow::Error) -> Self {
+        OtherError(e)
+    }
+}
+
+impl From<std::io::Error> for HandleError {
+    fn from(e: std::io::Error) -> Self {
+        IOError(e)
+    }
+}
+
+impl From<warp::Error> for HandleError {
+    fn from(e: warp::Error) -> Self {
+        WarpError(e)
+    }
+}
+
+impl From<redis::RedisError> for HandleError {
+    fn from(e: redis::RedisError) -> Self {
+        RedisError(e)
+    }
+}
+
+impl From<mysql::Error> for HandleError {
+    fn from(e: mysql::Error) -> Self {
+        MySqlError(e)
+    }
+}
