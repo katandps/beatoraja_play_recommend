@@ -406,6 +406,7 @@ impl MySQLClient {
                     Title::new(format!("{}{}", row.title, row.subtitle)),
                     Artist::new(row.artist.clone()),
                     row.notes,
+                    IncludeFeatures::from(0),
                 );
                 builder
             })

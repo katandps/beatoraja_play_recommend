@@ -1,6 +1,7 @@
 mod artist;
 mod hash;
 mod hash_converter;
+mod include_features;
 mod level;
 mod prelude;
 mod song;

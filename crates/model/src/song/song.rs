@@ -1,3 +1,4 @@
+use crate::song::include_features::IncludeFeatures;
 use crate::*;
 
 #[derive(Clone, Debug)]
@@ -6,15 +7,23 @@ pub struct Song {
     title: Title,
     artist: Artist,
     notes: i32,
+    include_features: IncludeFeatures,
 }
 
 impl Song {
-    pub fn new(hash: HashSha256, title: Title, artist: Artist, notes: i32) -> Song {
+    pub fn new(
+        hash: HashSha256,
+        title: Title,
+        artist: Artist,
+        notes: i32,
+        include_features: IncludeFeatures,
+    ) -> Song {
         Song {
             hash,
             title,
             artist,
             notes,
+            include_features,
         }
     }
 

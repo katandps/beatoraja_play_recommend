@@ -61,8 +61,9 @@ impl SongsBuilder {
         title: Title,
         artist: Artist,
         notes: i32,
+        include_features: IncludeFeatures,
     ) {
-        let song = Song::new(sha256.clone(), title, artist, notes);
+        let song = Song::new(sha256.clone(), title, artist, notes, include_features);
         self.songs.insert(sha256.clone(), song);
         self.sha256_to_md5.insert(sha256.clone(), md5.clone());
         self.md5_to_sha256.insert(md5, sha256);

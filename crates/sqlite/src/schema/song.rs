@@ -11,6 +11,7 @@ table! {
         maxbpm -> Integer,
         minbpm -> Integer,
         length -> Integer,
+        feature -> Integer,
     }
 }
 
@@ -27,4 +28,5 @@ pub struct Song {
     pub maxbpm: i32,
     pub minbpm: i32,
     pub length: i32,
+    pub feature: i32,
 }

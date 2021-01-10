@@ -81,6 +81,7 @@ impl SqliteClient {
                     Title::new(format!("{}{}", row.title, row.subtitle)),
                     Artist::new(row.artist.clone()),
                     row.notes,
+                    IncludeFeatures::from(row.feature),
                 );
                 builder
             })
