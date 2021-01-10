@@ -3,22 +3,25 @@ use itertools::Itertools;
 use std::collections::HashMap;
 
 #[derive(Clone)]
-pub struct Scores(pub HashMap<SongId, Score>);
+pub struct Scores(HashMap<ScoreId, Score>);
 
 impl Scores {
-    pub fn new(scores: HashMap<SongId, Score>) -> Scores {
+    pub fn new(scores: HashMap<ScoreId, Score>) -> Scores {
         Scores(scores)
     }
     pub fn count(&self) -> usize {
         self.0.len()
     }
-    pub fn get(&self, song_id: &SongId) -> Option<&Score> {
+    pub fn get(&self, song_id: &ScoreId) -> Option<&Score> {
         self.0.get(song_id)
+    }
+    pub fn get_map(&self) -> &HashMap<ScoreId, Score> {
+        &self.0
     }
 
     /// Tableに存在する曲ログに絞り込む ログが存在しない曲は未プレイとして作成される
     fn filter_by_table(&self, table: &Table, songs: &Songs) -> Self {
-        let song_ids: Vec<SongId> = table
+        let song_ids: Vec<ScoreId> = table
             .get_song(songs)
             .iter()
             .map(|song| song.song_id())
@@ -46,7 +49,7 @@ impl Scores {
             .map(|(id, score)| {
                 SongDetail::new(songs.song_by_id(id), score.clone(), date, level.clone())
             })
-            .sorted_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()))
+            .sorted_by(SongDetail::cmp_title)
             .collect()
     }
 }

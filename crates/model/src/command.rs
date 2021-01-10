@@ -17,7 +17,7 @@ pub struct DetailByLevel {
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct SongDetail {
-    pub title: String,
+    title: String,
     total_notes: i32,
     level: Level,
     clear_rank: ClearRank,
@@ -59,7 +59,11 @@ impl SongDetail {
             score: score_snap,
             updated_at: score.updated_at,
             play_count: score.play_count,
-            hash: song.hash.clone(),
+            hash: song.get_hash().clone(),
         }
+    }
+
+    pub fn cmp_title(&self, other: &SongDetail) -> std::cmp::Ordering {
+        self.title.to_lowercase().cmp(&other.title.to_lowercase())
     }
 }

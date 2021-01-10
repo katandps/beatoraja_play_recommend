@@ -15,7 +15,7 @@ impl Songs {
         }
     }
 
-    pub fn song_by_id(&self, id: &SongId) -> &Song {
+    pub fn song_by_id(&self, id: &ScoreId) -> &Song {
         self.songs.get(&id.sha256()).unwrap()
     }
 
@@ -31,9 +31,9 @@ impl Songs {
         self.converter.get_sha256(md5)
     }
 
-    pub fn song_id(&self, md5: &HashMd5) -> Option<SongId> {
+    pub fn song_id(&self, md5: &HashMd5) -> Option<ScoreId> {
         match self.get_sha256(md5) {
-            Some(s) => Some(SongId::new(s, PlayMode::new(0))),
+            Some(s) => Some(ScoreId::new(s, PlayMode::new(0))),
             _ => None,
         }
     }
@@ -62,12 +62,7 @@ impl SongsBuilder {
         artist: Artist,
         notes: i32,
     ) {
-        let song = Song {
-            hash: sha256.clone(),
-            title,
-            artist,
-            notes,
-        };
+        let song = Song::new(sha256.clone(), title, artist, notes);
         self.songs.insert(sha256.clone(), song);
         self.sha256_to_md5.insert(sha256.clone(), md5.clone());
         self.md5_to_sha256.insert(md5, sha256);

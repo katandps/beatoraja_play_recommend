@@ -11,6 +11,6 @@ impl<'a> SongWithSnap<'a> {
     }
 
     pub fn clear_rank(&self) -> ClearRank {
-        ClearRank::from_notes_score(self.song.notes, self.snap.score())
+        ClearRank::from_notes_score(self.song.notes(), self.snap.score())
     }
 }

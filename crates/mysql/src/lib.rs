@@ -115,11 +115,11 @@ impl MySQLClient {
         Ok(())
     }
 
-    fn score_log(&self, account: &Account) -> Result<HashMap<SongId, SnapShots>> {
+    fn score_log(&self, account: &Account) -> Result<HashMap<ScoreId, SnapShots>> {
         let records = query::score_snaps_by_user_id(&self.connection, account.user_id())?;
         let mut map = HashMap::new();
         for row in records {
-            let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
+            let song_id = ScoreId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
             let snap = SnapShot::from_data(
                 row.clear,
                 row.score,
@@ -140,7 +140,8 @@ impl MySQLClient {
             record
                 .iter()
                 .map(|row| {
-                    let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
+                    let song_id =
+                        ScoreId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
                     (
                         song_id.clone(),
                         Score::new(
@@ -161,7 +162,7 @@ impl MySQLClient {
                         ),
                     )
                 })
-                .collect::<HashMap<SongId, Score>>(),
+                .collect::<HashMap<ScoreId, Score>>(),
         ))
     }
 
@@ -173,7 +174,7 @@ impl MySQLClient {
             .iter()
             .map(|record| {
                 (
-                    SongId::new(
+                    ScoreId::new(
                         HashSha256::new(record.sha256.clone()),
                         PlayMode::new(record.mode),
                     ),
@@ -187,7 +188,7 @@ impl MySQLClient {
             .map(|record| {
                 (
                     (
-                        SongId::new(
+                        ScoreId::new(
                             HashSha256::new(record.sha256.clone()),
                             PlayMode::new(record.mode),
                         ),
@@ -207,7 +208,7 @@ impl MySQLClient {
         let mut songs_for_update = Vec::new();
         let mut snaps_for_insert = Vec::new();
 
-        for (song_id, score) in score.0 {
+        for (song_id, score) in score.get_map() {
             match saved_song.get(&song_id) {
                 Some(saved) => {
                     if UpdatedAt::from_naive_datetime(saved.date) < score.updated_at {
@@ -215,7 +216,7 @@ impl MySQLClient {
                             id: saved.id,
                             user_id,
                             sha256: song_id.sha256().to_string(),
-                            mode: song_id.mode().0 as i32,
+                            mode: song_id.mode().to_int(),
                             clear: score.clear.to_integer(),
                             epg: score.judge.early_pgreat,
                             lpg: score.judge.late_pgreat,
@@ -240,7 +241,7 @@ impl MySQLClient {
                 None => songs_for_insert.push(RegisteredScore {
                     user_id,
                     sha256: song_id.sha256().to_string(),
-                    mode: song_id.mode().0 as i32,
+                    mode: song_id.mode().to_int(),
                     clear: score.clear.to_integer(),
                     epg: score.judge.early_pgreat,
                     lpg: score.judge.late_pgreat,
@@ -267,7 +268,7 @@ impl MySQLClient {
                     None => snaps_for_insert.push(ScoreSnapForUpdate {
                         user_id,
                         sha256: song_id.sha256().to_string(),
-                        mode: song_id.mode().0 as i32,
+                        mode: song_id.mode().to_int(),
                         date: snapshot.updated_at.naive_datetime(),
                         clear: snapshot.clear_type.to_integer(),
                         score: snapshot.score.ex_score(),
@@ -361,12 +362,12 @@ impl MySQLClient {
         let new_songs = songs
             .iter()
             .map(|(_, song)| models::Song {
-                sha256: song.hash.to_string(),
-                title: song.title.to_string(),
+                sha256: song.get_hash().to_string(),
+                title: song.title(),
                 subtitle: "".into(),
-                artist: song.artist.to_string(),
+                artist: song.artist(),
                 sub_artist: "".into(),
-                notes: song.notes,
+                notes: song.notes(),
                 length: 0,
             })
             .collect::<Vec<_>>();

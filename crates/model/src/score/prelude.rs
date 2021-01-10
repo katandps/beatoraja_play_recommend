@@ -12,6 +12,6 @@ pub use crate::score::{
     scores::{ScoreRepository, Scores},
     snapshot::SnapShot,
     snapshots::SnapShots,
-    song_id::{PlayMode, SongId},
+    song_id::{PlayMode, ScoreId},
     updated_at::UpdatedAt,
 };

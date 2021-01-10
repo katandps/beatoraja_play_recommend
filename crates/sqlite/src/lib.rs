@@ -28,7 +28,7 @@ impl SqliteClient {
         SqliteConnection::establish(&url)
     }
 
-    fn score_log(&self) -> HashMap<SongId, SnapShots> {
+    fn score_log(&self) -> HashMap<ScoreId, SnapShots> {
         use schema::score_log::scorelog::dsl::*;
         let connection = Self::establish_connection(&self.scorelog_db_url).unwrap();
         let record: Vec<schema::score_log::ScoreLog> =
@@ -36,7 +36,7 @@ impl SqliteClient {
 
         let mut map = HashMap::new();
         for row in record {
-            let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
+            let song_id = ScoreId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
             let snap =
                 SnapShot::from_data(row.clear, row.score, row.combo, row.minbp, row.date as i64);
             map.entry(song_id).or_insert(SnapShots::default()).add(snap);
@@ -99,7 +99,8 @@ impl ScoreRepository for SqliteClient {
             record
                 .iter()
                 .map(|row| {
-                    let song_id = SongId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
+                    let song_id =
+                        ScoreId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
                     (
                         song_id.clone(),
                         Score::new(
@@ -120,7 +121,7 @@ impl ScoreRepository for SqliteClient {
                         ),
                     )
                 })
-                .collect::<HashMap<SongId, Score>>(),
+                .collect::<HashMap<ScoreId, Score>>(),
         )
     }
 
