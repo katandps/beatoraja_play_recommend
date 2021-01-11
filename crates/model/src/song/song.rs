@@ -1,6 +1,10 @@
 use crate::song::include_features::IncludeFeatures;
 use crate::*;
 
+///
+/// 楽曲データ
+/// 所持しているのでsha256がわかっている
+///
 #[derive(Clone, Debug)]
 pub struct Song {
     hash: HashSha256,
@@ -24,6 +28,16 @@ impl Song {
             artist,
             notes,
             include_features,
+        }
+    }
+
+    pub fn make_from_chart(chart: &Chart) -> Song {
+        Song {
+            hash: HashSha256::default(),
+            title: chart.title(),
+            artist: chart.artist(),
+            notes: 0,
+            include_features: IncludeFeatures::from(0),
         }
     }
 

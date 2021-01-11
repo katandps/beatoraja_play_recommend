@@ -19,6 +19,9 @@ impl HashSha256 {
     pub fn new(sha256: String) -> HashSha256 {
         HashSha256(sha256)
     }
+    pub fn default() -> HashSha256 {
+        HashSha256("".into())
+    }
 }
 
 impl fmt::Display for HashSha256 {

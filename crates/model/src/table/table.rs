@@ -99,7 +99,7 @@ impl Table {
     pub fn levels(&self) -> &Levels {
         &self.levels
     }
-    pub fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
+    pub fn get_song(&self, song_data: &Songs) -> Vec<Song> {
         self.charts.get_song(song_data)
     }
     pub fn make_detail(

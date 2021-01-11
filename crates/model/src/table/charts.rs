@@ -13,13 +13,10 @@ impl Charts {
     pub fn new() -> Self {
         Charts { charts: Vec::new() }
     }
-    pub fn get_song<'a>(&self, song_data: &'a Songs) -> Vec<&'a Song> {
+    pub fn get_song(&self, song_data: &Songs) -> Vec<Song> {
         self.charts
             .iter()
-            .flat_map(|c| match song_data.song(&c.md5) {
-                Some(s) => Some(s),
-                _ => None,
-            })
+            .map(|c| c.matched_song(song_data))
             .collect()
     }
     pub fn level_specified(&self, level: &Level) -> Self {

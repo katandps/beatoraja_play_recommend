@@ -1,11 +1,15 @@
 use crate::*;
 use serde::{Deserialize, Serialize};
 
+///
+/// 難易度表上の楽曲データ
+/// 楽曲データベース上に存在するとは限らない
+///
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Chart {
-    pub(super) title: Title,
-    pub(super) artist: Artist,
-    pub(super) md5: HashMd5,
+    title: Title,
+    artist: Artist,
+    md5: HashMd5,
     pub(super) level: Level,
 }
 
@@ -19,6 +23,19 @@ impl Chart {
         }
     }
 
+    pub fn matched_song(&self, songs: &Songs) -> Song {
+        match songs.song(&self.md5) {
+            Some(s) => s.clone(),
+            None => Song::make_from_chart(&self),
+        }
+    }
+
+    pub fn title(&self) -> Title {
+        self.title.clone()
+    }
+    pub fn artist(&self) -> Artist {
+        self.artist.clone()
+    }
     pub fn level(&self) -> Level {
         self.level.clone()
     }

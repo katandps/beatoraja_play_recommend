@@ -19,6 +19,16 @@ impl Scores {
         &self.0
     }
 
+    pub fn filter(&self, ids: &Vec<ScoreId>) -> HashMap<ScoreId, &Score> {
+        let mut ret = HashMap::new();
+        for id in ids {
+            if let Some(score) = self.get(id) {
+                ret.insert(id.clone(), score);
+            }
+        }
+        ret
+    }
+
     /// Tableに存在する曲ログに絞り込む ログが存在しない曲は未プレイとして作成される
     fn filter_by_table(&self, table: &Table, songs: &Songs) -> Self {
         let song_ids: Vec<ScoreId> = table
