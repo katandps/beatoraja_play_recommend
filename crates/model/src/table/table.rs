@@ -23,17 +23,6 @@ impl Tables {
             .collect()
     }
 
-    pub fn get_table(&self, mut index: usize) -> Table {
-        if index >= self.len() {
-            index = 0;
-        }
-        self.0[index].clone()
-    }
-
-    pub fn len(&self) -> usize {
-        self.0.len()
-    }
-
     pub fn make_detail(
         &self,
         songs: &Songs,
@@ -47,7 +36,7 @@ impl Tables {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Table {
     name: String,
     symbol: String,
@@ -81,7 +70,7 @@ impl Table {
             .collect()
     }
 
-    pub fn level_specified(&self, level: &Level) -> Self {
+    fn level_specified(&self, level: &Level) -> Self {
         Table {
             name: self.name.clone(),
             symbol: self.symbol.clone(),
@@ -90,13 +79,13 @@ impl Table {
         }
     }
 
-    pub fn name(&self) -> String {
+    fn name(&self) -> String {
         self.name.clone()
     }
-    pub fn symbol(&self) -> String {
+    fn symbol(&self) -> String {
         self.symbol.clone()
     }
-    pub fn levels(&self) -> &Levels {
+    fn levels(&self) -> &Levels {
         &self.levels
     }
     pub fn get_song(&self, song_data: &Songs) -> Vec<Song> {

@@ -1,7 +1,7 @@
 use crate::*;
 use itertools::Itertools;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Charts {
     pub(super) charts: Vec<Chart>,
 }
