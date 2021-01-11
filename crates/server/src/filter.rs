@@ -14,7 +14,8 @@ pub fn with_db(
     warp::any().map(move || MySQLClient::new(db_pool.get().unwrap()))
 }
 
-pub fn with_table(tables: Tables) -> impl Filter<Extract = (Tables,), Error = Infallible> + Clone {
+pub fn with_table(tables: &Tables) -> impl Filter<Extract = (Tables,), Error = Infallible> + Clone {
+    let tables = tables.clone();
     warp::any().map(move || tables.clone())
 }
 

@@ -35,7 +35,7 @@ pub fn all_routes(db_pool: &MySqlPool, t: &Tables) -> BoxedFilter<(impl Reply,)>
 fn tables(tables: &Tables) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("tables"))
-        .and(with_table(tables.clone()))
+        .and(with_table(&tables))
         .and_then(tables::table_handler)
         .boxed()
 }
@@ -79,7 +79,7 @@ fn my_detail(db_pool: &MySqlPool, tables: &Tables) -> BoxedFilter<(impl Reply,)>
     warp::get()
         .and(path("my_detail"))
         .and(with_db(&db_pool))
-        .and(with_table(tables.clone()))
+        .and(with_table(&tables))
         .and(account_by_session(&db_pool))
         .and(detail_query())
         .and_then(detail::my_detail_handler)
@@ -90,7 +90,7 @@ fn detail(db_pool: &MySqlPool, tables: &Tables) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("detail"))
         .and(with_db(&db_pool))
-        .and(with_table(tables.clone()))
+        .and(with_table(&tables))
         .and(detail_query())
         .and(account_id_query(&db_pool))
         .and_then(detail::detail_handler)
