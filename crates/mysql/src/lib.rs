@@ -363,7 +363,7 @@ impl MySQLClient {
         let new_songs = songs
             .iter()
             .map(|(_, song)| models::Song {
-                sha256: song.get_hash().to_string(),
+                sha256: song.get_sha256().to_string(),
                 title: song.title(),
                 subtitle: "".into(),
                 artist: song.artist(),

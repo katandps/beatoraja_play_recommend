@@ -7,7 +7,8 @@ use crate::*;
 ///
 #[derive(Clone, Debug)]
 pub struct Song {
-    hash: HashSha256,
+    md5: HashMd5,
+    sha256: HashSha256,
     title: Title,
     artist: Artist,
     notes: i32,
@@ -16,14 +17,16 @@ pub struct Song {
 
 impl Song {
     pub fn new(
-        hash: HashSha256,
+        md5: HashMd5,
+        sha256: HashSha256,
         title: Title,
         artist: Artist,
         notes: i32,
         include_features: IncludeFeatures,
     ) -> Song {
         Song {
-            hash,
+            md5,
+            sha256,
             title,
             artist,
             notes,
@@ -33,7 +36,8 @@ impl Song {
 
     pub fn make_from_chart(chart: &Chart) -> Song {
         Song {
-            hash: HashSha256::default(),
+            md5: chart.md5.clone(),
+            sha256: HashSha256::default(),
             title: chart.title(),
             artist: chart.artist(),
             notes: 0,
@@ -42,7 +46,7 @@ impl Song {
     }
 
     pub fn song_id(&self) -> ScoreId {
-        ScoreId::new(self.hash.clone(), PlayMode::new(0))
+        ScoreId::new(self.sha256.clone(), PlayMode::new(0))
     }
 
     pub fn title(&self) -> String {
@@ -54,8 +58,11 @@ impl Song {
     pub fn notes(&self) -> i32 {
         self.notes
     }
-    pub fn get_hash(&self) -> &HashSha256 {
-        &self.hash
+    pub fn get_md5(&self) -> &HashMd5 {
+        &self.md5
+    }
+    pub fn get_sha256(&self) -> &HashSha256 {
+        &self.sha256
     }
     pub fn features(&self) -> &IncludeFeatures {
         &self.include_features

@@ -27,6 +27,7 @@ pub struct SongDetail {
     updated_at: UpdatedAt,
     play_count: PlayCount,
     hash: HashSha256,
+    md5: HashMd5,
 }
 
 impl DetailResult {
@@ -57,7 +58,8 @@ impl SongDetail {
             score: score_snap,
             updated_at: score.updated_at,
             play_count: score.play_count,
-            hash: song.get_hash().clone(),
+            hash: song.get_sha256().clone(),
+            md5: song.get_md5().clone(),
         }
     }
 
