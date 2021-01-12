@@ -1,5 +1,4 @@
 use crate::*;
-use itertools::Itertools;
 use std::collections::HashMap;
 
 #[derive(Clone)]
@@ -29,43 +28,22 @@ impl Scores {
         ret
     }
 
-    /// Tableに存在する曲ログに絞り込む ログが存在しない曲は未プレイとして作成される
-    fn filter_by_table(&self, table: &Table, songs: &Songs) -> Self {
-        let song_ids: Vec<ScoreId> = table
-            .get_song(songs)
-            .iter()
-            .map(|song| song.song_id())
-            .collect();
-        let mut map = HashMap::new();
-        for song_id in &song_ids {
-            map.insert(
-                song_id.clone(),
-                self.get(&song_id).cloned().unwrap_or(Score::default()),
-            );
-        }
-        Scores(map)
-    }
-
-    pub fn detail(
+    pub fn out(
         &self,
-        table: &Table,
+        tables: &Tables,
         songs: &Songs,
-        date: &UpdatedAt,
-        level: Level,
-    ) -> Vec<SongDetail> {
-        self.filter_by_table(table, songs)
-            .0
-            .iter()
-            .map(|(id, score)| {
-                SongDetail::new(songs.song_by_id(id), score.clone(), date, level.clone())
-            })
-            .sorted_by(SongDetail::cmp_title)
-            .collect()
+        date: UpdatedAt,
+    ) -> HashMap<HashMd5, SongDetail> {
+        let mut map = HashMap::new();
+        let charts = tables.get_charts();
+        for chart in &charts {
+            let song = songs.song(chart);
+            let score = match self.get(&song.song_id()) {
+                Some(s) => s.clone(),
+                None => Score::default(),
+            };
+            map.insert(chart.md5.clone(), SongDetail::new(&song, &score, &date));
+        }
+        map
     }
-}
-
-use anyhow::Result;
-pub trait ScoreRepository {
-    fn score(&self) -> Scores;
-    fn save_score(&self, _account: Account, _score: Scores) -> Result<()>;
 }

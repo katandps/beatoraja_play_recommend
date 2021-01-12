@@ -8,19 +8,12 @@ pub struct Songs {
 }
 
 impl Songs {
-    pub fn song(&self, hash: &HashMd5) -> Option<&Song> {
-        match self.get_sha256(hash) {
-            Some(sha256) => self.songs.get(&sha256),
-            _ => None,
+    pub fn song(&self, chart: &Chart) -> Song {
+        let sha256 = self.get_sha256(&chart.md5);
+        match sha256 {
+            Some(sha256) => self.songs.get(&sha256).cloned().unwrap(),
+            None => Song::make_from_chart(chart),
         }
-    }
-
-    pub fn song_by_id(&self, id: &ScoreId) -> &Song {
-        self.songs.get(&id.sha256()).unwrap()
-    }
-
-    pub fn song_by_sha256(&self, hash: &HashSha256) -> Option<&Song> {
-        self.songs.get(hash)
     }
 
     pub fn get_md5(&self, sha256: &HashSha256) -> Option<HashMd5> {
@@ -29,13 +22,6 @@ impl Songs {
 
     pub fn get_sha256(&self, md5: &HashMd5) -> Option<HashSha256> {
         self.converter.get_sha256(md5)
-    }
-
-    pub fn song_id(&self, md5: &HashMd5) -> Option<ScoreId> {
-        match self.get_sha256(md5) {
-            Some(s) => Some(ScoreId::new(s, PlayMode::new(0))),
-            _ => None,
-        }
     }
 }
 

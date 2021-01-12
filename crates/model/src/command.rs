@@ -19,7 +19,6 @@ pub struct DetailByLevel {
 pub struct SongDetail {
     title: String,
     total_notes: i32,
-    level: Level,
     clear_rank: ClearRank,
     max_combo: MaxCombo,
     score: ScoreSnap,
@@ -43,15 +42,14 @@ impl DetailByLevel {
 }
 
 impl SongDetail {
-    pub fn new(song: &Song, score: Score, date: &UpdatedAt, level: Level) -> SongDetail {
+    pub fn new(song: &Song, score: &Score, date: &UpdatedAt) -> SongDetail {
         let score_snap = score.score_snap(date);
         let clear_snap = score.clear_type_snap(date);
         let min_bp_snap = score.min_bp_snap(date);
-        let score = score.at(date).clone();
+        let score = score.clone().at(date).clone();
         SongDetail {
             title: song.title(),
             total_notes: song.notes(),
-            level,
             clear_type: clear_snap,
             clear_rank: ClearRank::from_notes_score(song.notes(), score.score),
             max_combo: score.max_combo.clone(),

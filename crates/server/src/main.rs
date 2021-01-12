@@ -17,9 +17,9 @@ async fn main() {
     env_logger::init();
     let log = warp::log("example");
     let db_pool = mysql::get_db_pool();
-    let tables = table::get_tables(false).await;
+    let new_tables = table::from_web().await;
 
-    let route = routes::all_routes(&db_pool, &tables)
+    let route = routes::all_routes(&db_pool, &new_tables)
         .recover(error::handle_rejection)
         .with(
             warp::cors()

@@ -9,7 +9,7 @@ pub use crate::score::{
     play_count::PlayCount,
     rank::ClearRank,
     score::{ClearTypeSnap, MinBPSnap, Score, ScoreSnap},
-    scores::{ScoreRepository, Scores},
+    scores::Scores,
     snapshot::SnapShot,
     snapshots::SnapShots,
     song_id::{PlayMode, ScoreId},

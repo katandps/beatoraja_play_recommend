@@ -1,15 +1,10 @@
+use lazy_static::*;
 use serde::Deserialize;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Cfg {
-    #[serde(default = "local_cache_url")]
-    pub local_cache_url: String,
     #[serde(default = "default_table_urls")]
     pub table_urls: Vec<String>,
-}
-
-fn local_cache_url() -> String {
-    "./files/cache.json".into()
 }
 
 fn default_table_urls() -> Vec<String> {

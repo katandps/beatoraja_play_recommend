@@ -4,23 +4,9 @@ mod schema;
 use config::config;
 use model::*;
 use scraper::{Html, Selector};
-use std::fs::File;
-use std::io::{Read, Write};
 use url::Url;
 
-#[macro_use]
-extern crate anyhow;
-#[macro_use]
-extern crate lazy_static;
-
-pub async fn get_tables(is_local: bool) -> Tables {
-    match local(is_local) {
-        Ok(t) => t,
-        _ => from_web().await,
-    }
-}
-
-async fn from_web() -> Tables {
+pub async fn from_web() -> Tables {
     let mut tables = Vec::new();
     for url in config().table_urls {
         match make_table(url.parse().unwrap()).await {
@@ -28,24 +14,7 @@ async fn from_web() -> Tables {
             Err(e) => eprintln!("{}", e),
         }
     }
-    let mut file = File::create(config().local_cache_url).unwrap();
-    let _ = file.write(serde_json::to_string(&tables).unwrap().as_ref());
-    Tables::new(tables)
-}
-
-fn local(is_local: bool) -> anyhow::Result<Tables> {
-    fn load() -> anyhow::Result<Tables> {
-        let mut file = File::open(config().local_cache_url)?;
-        let mut contents = String::new();
-        let _ = file.read_to_string(&mut contents);
-        let vec = serde_json::from_str(&contents)?;
-        Ok(Tables::new(vec))
-    }
-
-    match is_local {
-        true => load(),
-        false => Err(anyhow!("No Local Access")),
-    }
+    Tables::make(tables)
 }
 
 async fn make_table(table_url: String) -> anyhow::Result<Table> {
@@ -69,10 +38,12 @@ async fn make_table(table_url: String) -> anyhow::Result<Table> {
     let data: Vec<crate::schema::Chart> =
         serde_json::from_str(data_text.trim_start_matches('\u{feff}')).unwrap();
 
-    Ok(Table::make(
-        header.name,
-        header.symbol,
-        Charts::make(data.iter().map(|c| c.to_chart()).collect()),
-        header.level_order,
-    ))
+    let charts = Charts::make(data.iter().map(|c| c.to_chart()).collect());
+    let order = match header.level_order {
+        Some(s) => s,
+        None => charts.get_levels().iter().map(Level::to_string).collect(),
+    };
+    let levels = charts.make_levels(&order);
+
+    Ok(Table::make(header.name, header.symbol, levels))
 }

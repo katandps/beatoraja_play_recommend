@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 pub struct Chart {
     title: Title,
     artist: Artist,
-    md5: HashMd5,
+    pub md5: HashMd5,
     pub(super) level: Level,
 }
 
@@ -20,13 +20,6 @@ impl Chart {
             artist: Artist::new(artist),
             md5,
             level: Level::make(level),
-        }
-    }
-
-    pub fn matched_song(&self, songs: &Songs) -> Song {
-        match songs.song(&self.md5) {
-            Some(s) => s.clone(),
-            None => Song::make_from_chart(&self),
         }
     }
 

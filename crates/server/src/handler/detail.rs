@@ -18,7 +18,7 @@ pub async fn detail_handler(
     let response = DetailResponse {
         user_id: account.user_id(),
         user_name: account.user_name(),
-        score: tables.make_detail(&songs, &scores, &query.date),
+        score: scores.out(&tables, &songs, query.date),
     };
     Ok(serde_json::to_string(&response).unwrap())
 }
@@ -34,7 +34,7 @@ pub async fn my_detail_handler(
     let response = DetailResponse {
         user_id: account.user_id(),
         user_name: account.user_name(),
-        score: tables.make_detail(&songs, &scores, &query.date),
+        score: scores.out(&tables, &songs, query.date),
     };
     Ok(serde_json::to_string(&response).unwrap())
 }
@@ -43,5 +43,5 @@ pub async fn my_detail_handler(
 struct DetailResponse {
     user_id: i32,
     user_name: String,
-    score: Vec<DetailResult>,
+    score: HashMap<HashMd5, SongDetail>,
 }

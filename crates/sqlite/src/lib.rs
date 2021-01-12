@@ -87,10 +87,7 @@ impl SqliteClient {
             })
             .build())
     }
-}
-
-impl ScoreRepository for SqliteClient {
-    fn score(&self) -> Scores {
+    pub fn score(&self) -> Scores {
         let connection = Self::establish_connection(&self.score_db_url).unwrap();
         let record = schema::score::score::table
             .load::<schema::score::Score>(&connection)
@@ -124,9 +121,5 @@ impl ScoreRepository for SqliteClient {
                 })
                 .collect::<HashMap<ScoreId, Score>>(),
         )
-    }
-
-    fn save_score(&self, _account: Account, _score: Scores) -> Result<()> {
-        unimplemented!()
     }
 }

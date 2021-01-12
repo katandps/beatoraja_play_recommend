@@ -1,125 +1,121 @@
 use crate::*;
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct Tables(Vec<Table>);
+#[derive(Debug, Clone)]
+pub struct Tables {
+    v: Vec<Table>,
+}
 
 impl Tables {
-    pub fn new(v: Vec<Table>) -> Self {
-        Tables(v)
+    pub fn make(v: Vec<Table>) -> Self {
+        Self { v }
     }
 
-    pub fn format(&self) -> Vec<TableFormat> {
-        self.0
-            .iter()
-            .map(|t| TableFormat {
-                name: t.name(),
-                levels: t
-                    .levels()
-                    .iter()
-                    .cloned()
-                    .map(|l| format!("{}{}", t.symbol(), l.to_string()))
-                    .collect::<Vec<_>>(),
-            })
-            .collect()
-    }
-
-    pub fn make_detail(
-        &self,
-        songs: &Songs,
-        scores: &Scores,
-        updated_at: &UpdatedAt,
-    ) -> Vec<DetailResult> {
-        self.0
-            .iter()
-            .map(|table| table.make_detail(songs, scores, updated_at))
-            .collect::<Vec<_>>()
+    pub fn get_charts(&self) -> Vec<&Chart> {
+        self.v.iter().map(|t| t.get_charts()).flatten().collect()
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct Table {
-    name: String,
-    symbol: String,
-    charts: Charts,
-    levels: Levels,
+    title: TableName,
+    symbol: TableSymbol,
+    levels: TableLevels,
 }
 
 impl Table {
-    pub fn make(
-        name: impl Into<String>,
-        symbol: impl Into<String>,
-        charts: Charts,
-        levels: Option<Vec<String>>,
-    ) -> Self {
-        let levels: Levels = match levels {
-            Some(l) => l.iter().map(|s| Level::make(s.clone())).collect(),
-            _ => charts.get_levels(),
-        };
+    pub fn make(title: impl Into<String>, symbol: impl Into<String>, levels: TableLevels) -> Self {
         Table {
-            name: name.into(),
-            symbol: symbol.into(),
-            charts,
+            title: TableName(title.into()),
+            symbol: TableSymbol(symbol.into()),
             levels,
         }
     }
 
-    fn level_specified_vec(&self) -> Vec<Table> {
-        self.levels()
-            .iter()
-            .map(|level| self.level_specified(level))
-            .collect()
+    pub fn get_charts(&self) -> Vec<&Chart> {
+        self.levels.get_charts()
     }
 
-    fn level_specified(&self, level: &Level) -> Self {
-        Table {
-            name: self.name.clone(),
-            symbol: self.symbol.clone(),
-            charts: self.charts.level_specified(level),
-            levels: vec![level.clone()],
-        }
-    }
-
-    fn name(&self) -> String {
-        self.name.clone()
-    }
-    fn symbol(&self) -> String {
-        self.symbol.clone()
-    }
-    fn levels(&self) -> &Levels {
-        &self.levels
-    }
-    pub fn get_song(&self, song_data: &Songs) -> Vec<Song> {
-        self.charts.get_song(song_data)
-    }
-    pub fn make_detail(
-        &self,
-        songs: &Songs,
-        scores: &Scores,
-        updated_at: &UpdatedAt,
-    ) -> DetailResult {
-        DetailResult::new(
-            self.name(),
-            self.level_specified_vec()
-                .iter()
-                .map(|table| {
-                    let level = table
-                        .levels
-                        .first()
-                        .unwrap()
-                        .clone()
-                        .add_symbol(self.symbol());
-                    DetailByLevel::new(
-                        level.to_string(),
-                        scores.detail(table, songs, updated_at, level),
-                    )
-                })
-                .collect(),
-        )
+    pub fn symbol(&self) -> String {
+        self.symbol.0.clone()
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct TableName(String);
+
+#[derive(Debug, Clone)]
+pub struct TableSymbol(String);
+
+#[derive(Debug, Clone)]
+pub struct TableLevels {
+    v: Vec<TableLevel>,
+}
+
+impl TableLevels {
+    pub fn make(v: Vec<TableLevel>) -> Self {
+        Self { v }
+    }
+
+    pub fn get_charts(&self) -> Vec<&Chart> {
+        self.v.iter().map(|l| l.get_charts()).flatten().collect()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct TableLevel {
+    label: String,
+    charts: Charts,
+}
+
+impl TableLevel {
+    pub fn make(label: String, charts: Charts) -> Self {
+        Self { label, charts }
+    }
+
+    pub fn get_charts(&self) -> Vec<&Chart> {
+        self.charts.get_charts()
+    }
+
+    pub fn get_label(&self, t: &Table) -> String {
+        format!("{}{}", t.symbol(), self.label)
+    }
+}
+
+/// フロント出力用フォーマット
+/// name: 難易度表名
+/// levels: HashMap<レベル名, 曲のHashMd5>
+use std::collections::HashMap;
 
 #[derive(Serialize)]
 pub struct TableFormat {
     name: String,
-    levels: Vec<String>,
+    level_list: Vec<String>,
+    levels: HashMap<String, Vec<String>>,
+}
+
+impl From<&Table> for TableFormat {
+    fn from(t: &Table) -> TableFormat {
+        let mut map = HashMap::new();
+        for level in &t.levels.v {
+            for chart in &level.charts.charts {
+                map.entry(level.get_label(t))
+                    .or_insert(Vec::new())
+                    .push(chart.md5.to_string())
+            }
+        }
+        TableFormat {
+            name: t.title.0.clone(),
+            level_list: t.levels.v.iter().map(|l| l.get_label(t)).collect(),
+            levels: map,
+        }
+    }
+}
+
+#[derive(Serialize)]
+pub struct TablesFormat(Vec<TableFormat>);
+
+impl From<Tables> for TablesFormat {
+    fn from(t: Tables) -> TablesFormat {
+        TablesFormat(t.v.iter().map(TableFormat::from).collect())
+    }
 }
