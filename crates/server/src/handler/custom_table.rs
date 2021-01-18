@@ -26,12 +26,12 @@ pub async fn body_handler(
     tables: Tables,
     repos: MySQLClient,
 ) -> Result<impl Reply, Rejection> {
-    body(user_id, repos)?;
-    Ok(serde_json::to_string(&tables.get().get_charts()).unwrap())
+    Ok(body(user_id, repos, tables.get())?)
 }
 
-fn body(user_id: i32, repos: MySQLClient) -> Result<impl Reply, HandleError> {
+fn body(user_id: i32, repos: MySQLClient, table: &Table) -> Result<impl Reply, HandleError> {
     let account = repos.account_by_increments(user_id)?;
-    let _score = repos.score(&account)?;
-    Ok(serde_json::to_string("")?)
+    let score = repos.score(&account)?;
+    let songs = repos.song_data()?;
+    Ok(serde_json::to_string(&table.filter_score(&score, &songs)).unwrap())
 }

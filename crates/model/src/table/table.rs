@@ -48,6 +48,10 @@ impl Table {
     pub fn get_level_list(&self) -> Vec<String> {
         self.levels.get_list()
     }
+
+    pub fn filter_score(&self, scores: &Scores, songs: &Songs) -> Vec<&Chart> {
+        self.levels.filter_score(scores, songs)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -85,6 +89,14 @@ impl TableLevels {
     pub fn get_list(&self) -> Vec<String> {
         self.v.iter().map(|l| l.label.clone()).collect()
     }
+
+    pub fn filter_score(&self, scores: &Scores, songs: &Songs) -> Vec<&Chart> {
+        self.v
+            .iter()
+            .map(|l| l.pick_old_score_chart(scores, songs))
+            .flatten()
+            .collect()
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -104,6 +116,10 @@ impl TableLevel {
 
     pub fn get_label(&self, t: &Table) -> String {
         format!("{}{}", t.symbol(), self.label)
+    }
+
+    pub fn pick_old_score_chart(&self, scores: &Scores, songs: &Songs) -> Vec<&Chart> {
+        self.charts.pick_old_score_chart(scores, songs)
     }
 }
 

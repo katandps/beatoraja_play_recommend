@@ -18,16 +18,6 @@ impl Scores {
         &self.0
     }
 
-    pub fn filter(&self, ids: &Vec<ScoreId>) -> HashMap<ScoreId, &Score> {
-        let mut ret = HashMap::new();
-        for id in ids {
-            if let Some(score) = self.get(id) {
-                ret.insert(id.clone(), score);
-            }
-        }
-        ret
-    }
-
     pub fn out(
         &self,
         tables: &Tables,
