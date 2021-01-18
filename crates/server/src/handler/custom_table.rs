@@ -18,7 +18,10 @@ pub async fn table_handler(_user_id: i32) -> Result<impl Reply, Rejection> {
 }
 
 pub async fn header_handler(_user_id: i32, tables: Tables) -> Result<impl Reply, Rejection> {
-    Ok(serde_json::to_string(&CustomTableHeader::from(tables.get())).unwrap())
+    Ok(serde_json::to_string(
+        &CustomTableHeader::from(tables.get()).set_name("おすすめ譜面表".into()),
+    )
+    .unwrap())
 }
 
 pub async fn body_handler(

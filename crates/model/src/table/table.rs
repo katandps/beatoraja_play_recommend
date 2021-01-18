@@ -170,6 +170,17 @@ pub struct CustomTableHeader {
     level_order: Vec<String>,
 }
 
+impl CustomTableHeader {
+    pub fn set_name(&self, name: String) -> CustomTableHeader {
+        CustomTableHeader {
+            name,
+            data_url: self.data_url.clone(),
+            symbol: self.symbol.clone(),
+            level_order: self.level_order.clone(),
+        }
+    }
+}
+
 impl From<&Table> for CustomTableHeader {
     fn from(t: &Table) -> CustomTableHeader {
         CustomTableHeader {
