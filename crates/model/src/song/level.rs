@@ -1,12 +1,16 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash, Deserialize, Serialize)]
 pub struct Level(String);
 
 impl Level {
     pub fn make(str: String) -> Level {
-        Level(format!("{:>3}", str))
+        Level(str)
+    }
+
+    pub fn cmp(&self, b: &Level) -> std::cmp::Ordering {
+        format!("{:>3}", self.0).cmp(&format!("{:>3}", b.0))
     }
 
     pub fn add_symbol(self, symbol: String) -> Self {

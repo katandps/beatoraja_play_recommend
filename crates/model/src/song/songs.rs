@@ -9,7 +9,7 @@ pub struct Songs {
 
 impl Songs {
     pub fn song(&self, chart: &Chart) -> Song {
-        let sha256 = self.get_sha256(&chart.md5);
+        let sha256 = self.get_sha256(&chart.md5());
         match sha256 {
             Some(sha256) => self.songs.get(&sha256).cloned().unwrap(),
             None => Song::make_from_chart(chart),

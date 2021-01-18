@@ -18,7 +18,7 @@ impl Charts {
         Charts::make(
             self.charts
                 .iter()
-                .filter(|&c| &c.level == level)
+                .filter(|&c| &c.level() == level)
                 .cloned()
                 .collect(),
         )
@@ -30,7 +30,7 @@ impl Charts {
             .map(Chart::level)
             .unique()
             .collect::<Vec<Level>>();
-        vec.sort();
+        vec.sort_by(Level::cmp);
         vec
     }
 
@@ -41,7 +41,7 @@ impl Charts {
     pub fn make_levels(&self, order: &Vec<String>) -> TableLevels {
         let mut m = HashMap::new();
         for chart in &self.charts {
-            m.entry(chart.level.to_string())
+            m.entry(chart.level().to_string())
                 .or_insert(Vec::new())
                 .push(chart.clone());
         }

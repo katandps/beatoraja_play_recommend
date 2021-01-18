@@ -36,7 +36,7 @@ impl Song {
 
     pub fn make_from_chart(chart: &Chart) -> Song {
         Song {
-            md5: chart.md5.clone(),
+            md5: chart.md5(),
             sha256: HashSha256::default(),
             title: chart.title(),
             artist: chart.artist(),

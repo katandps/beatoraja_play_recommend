@@ -13,6 +13,12 @@ impl Tables {
     pub fn get_charts(&self) -> Vec<&Chart> {
         self.v.iter().map(|t| t.get_charts()).flatten().collect()
     }
+
+    /// 4つ目のテーブル(Satellite)を返す
+    /// @todo 指定されたテーブルを返す
+    pub fn get(&self) -> &Table {
+        &self.v[3]
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -38,13 +44,29 @@ impl Table {
     pub fn symbol(&self) -> String {
         self.symbol.0.clone()
     }
+
+    pub fn get_level_list(&self) -> Vec<String> {
+        self.levels.get_list()
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct TableName(String);
 
+impl Into<String> for TableName {
+    fn into(self) -> String {
+        self.0
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct TableSymbol(String);
+
+impl Into<String> for TableSymbol {
+    fn into(self) -> String {
+        self.0
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct TableLevels {
@@ -58,6 +80,10 @@ impl TableLevels {
 
     pub fn get_charts(&self) -> Vec<&Chart> {
         self.v.iter().map(|l| l.get_charts()).flatten().collect()
+    }
+
+    pub fn get_list(&self) -> Vec<String> {
+        self.v.iter().map(|l| l.label.clone()).collect()
     }
 }
 
@@ -100,7 +126,7 @@ impl From<&Table> for TableFormat {
             for chart in &level.charts.charts {
                 map.entry(level.get_label(t))
                     .or_insert(Vec::new())
-                    .push(chart.md5.to_string())
+                    .push(chart.md5().to_string())
             }
         }
         TableFormat {
@@ -117,5 +143,24 @@ pub struct TablesFormat(Vec<TableFormat>);
 impl From<Tables> for TablesFormat {
     fn from(t: Tables) -> TablesFormat {
         TablesFormat(t.v.iter().map(TableFormat::from).collect())
+    }
+}
+
+#[derive(Serialize)]
+pub struct CustomTableHeader {
+    name: String,
+    data_url: String,
+    symbol: String,
+    level_order: Vec<String>,
+}
+
+impl From<&Table> for CustomTableHeader {
+    fn from(t: &Table) -> CustomTableHeader {
+        CustomTableHeader {
+            name: t.title.clone().into(),
+            data_url: "score.json".to_string(),
+            symbol: t.symbol.clone().into(),
+            level_order: t.get_level_list(),
+        }
     }
 }

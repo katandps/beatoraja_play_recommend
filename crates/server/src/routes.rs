@@ -1,3 +1,6 @@
+mod custom_table;
+mod uploads;
+
 use crate::filter::*;
 use crate::handler::*;
 use model::Tables;
@@ -7,27 +10,23 @@ use warp::path;
 use warp::{Filter, Reply};
 
 pub fn all_routes(db_pool: &MySqlPool, t: &Tables) -> BoxedFilter<(impl Reply,)> {
-    let tables_route = tables(&t);
-    let health_route = health(&db_pool);
-    let account_route = account(&db_pool);
-    let change_name_route = change_name(&db_pool);
+    let tables_route = tables(t);
+    let health_route = health(db_pool);
+    let account_route = account(db_pool);
+    let change_name_route = change_name(db_pool);
+    let custom_table_route = custom_table::custom_tables(db_pool, t);
     let logout_route = logout();
-    let my_detail_route = my_detail(&db_pool, &t);
-    let detail_route = detail(&db_pool, &t);
-    let score_upload_route = score_upload(&db_pool);
-    let score_log_upload_route = score_log_upload(&db_pool);
-    let song_data_upload_route = song_data_upload_route(&db_pool);
-    let oauth_redirect_route = oauth_redirect_route(&db_pool);
+    let detail_route = detail(db_pool, t);
+    let upload_route = uploads::uploads(db_pool);
+    let oauth_redirect_route = oauth_redirect_route(db_pool);
     health_route
         .or(account_route)
         .or(change_name_route)
         .or(logout_route)
         .or(tables_route)
         .or(detail_route)
-        .or(my_detail_route)
-        .or(score_upload_route)
-        .or(score_log_upload_route)
-        .or(song_data_upload_route)
+        .or(upload_route)
+        .or(custom_table_route)
         .or(oauth_redirect_route)
         .boxed()
 }
@@ -75,17 +74,6 @@ fn logout() -> BoxedFilter<(impl Reply,)> {
         .boxed()
 }
 
-fn my_detail(db_pool: &MySqlPool, tables: &Tables) -> BoxedFilter<(impl Reply,)> {
-    warp::get()
-        .and(path("my_detail"))
-        .and(with_db(&db_pool))
-        .and(with_table(&tables))
-        .and(account_by_session(&db_pool))
-        .and(detail_query())
-        .and_then(detail::my_detail_handler)
-        .boxed()
-}
-
 fn detail(db_pool: &MySqlPool, tables: &Tables) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("detail"))
@@ -94,39 +82,6 @@ fn detail(db_pool: &MySqlPool, tables: &Tables) -> BoxedFilter<(impl Reply,)> {
         .and(detail_query())
         .and(account_id_query(&db_pool))
         .and_then(detail::detail_handler)
-        .boxed()
-}
-
-fn score_upload(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
-    warp::post()
-        .and(path("upload"))
-        .and(path("score"))
-        .and(with_db(&db_pool))
-        .and(receive_sqlite_file())
-        .and(receive_session_key())
-        .and_then(upload::upload_score_handler)
-        .boxed()
-}
-
-fn score_log_upload(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
-    warp::post()
-        .and(path("upload"))
-        .and(path("score_log"))
-        .and(with_db(&db_pool))
-        .and(receive_sqlite_file())
-        .and(receive_session_key())
-        .and_then(upload::upload_score_log_handler)
-        .boxed()
-}
-
-fn song_data_upload_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
-    warp::post()
-        .and(path("upload"))
-        .and(path("song_data"))
-        .and(with_db(&db_pool))
-        .and(receive_sqlite_file())
-        .and(receive_session_key())
-        .and_then(upload::upload_song_data_handler)
         .boxed()
 }
 

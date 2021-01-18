@@ -1,5 +1,6 @@
 pub mod account;
 pub mod change_name;
+pub mod custom_table;
 pub mod detail;
 pub mod health;
 pub mod logout;

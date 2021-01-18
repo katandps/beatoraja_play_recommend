@@ -2,18 +2,16 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
-pub struct Title {
-    title: String,
-}
+pub struct Title(String);
 
 impl Title {
     pub fn new(title: String) -> Title {
-        Title { title }
+        Title(title)
     }
 }
 
 impl fmt::Display for Title {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.title)
+        write!(f, "{}", self.0)
     }
 }

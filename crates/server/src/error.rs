@@ -1,4 +1,4 @@
-use crate::error::HandleError::{IOError, MySqlError, OtherError, RedisError, WarpError};
+use crate::error::HandleError::*;
 use serde_derive::Serialize;
 use std::convert::Infallible;
 use std::num::ParseIntError;
@@ -43,6 +43,8 @@ pub enum HandleError {
     OtherError(anyhow::Error),
     #[error("RedisError: {0:?}")]
     RedisError(redis::RedisError),
+    #[error("SerdeJsonError: {0:?}")]
+    SerdeJsonError(serde_json::Error),
 }
 
 #[derive(Serialize)]
@@ -129,5 +131,11 @@ impl From<redis::RedisError> for HandleError {
 impl From<mysql::Error> for HandleError {
     fn from(e: mysql::Error) -> Self {
         MySqlError(e)
+    }
+}
+
+impl From<serde_json::Error> for HandleError {
+    fn from(e: serde_json::Error) -> Self {
+        SerdeJsonError(e)
     }
 }

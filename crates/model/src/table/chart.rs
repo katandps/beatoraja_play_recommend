@@ -7,29 +7,26 @@ use serde::{Deserialize, Serialize};
 ///
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Chart {
-    title: Title,
-    artist: Artist,
-    pub md5: HashMd5,
-    pub(super) level: Level,
+    title: String,
+    artist: Option<String>,
+    md5: String,
+    level: String,
+    url: Option<String>,
+    url_diff: Option<String>,
+    comment: Option<String>,
 }
 
 impl Chart {
-    pub fn new(title: String, artist: String, md5: HashMd5, level: String) -> Chart {
-        Chart {
-            title: Title::new(title),
-            artist: Artist::new(artist),
-            md5,
-            level: Level::make(level),
-        }
-    }
-
     pub fn title(&self) -> Title {
-        self.title.clone()
+        Title::new(self.title.clone())
     }
     pub fn artist(&self) -> Artist {
-        self.artist.clone()
+        Artist::new(self.artist.clone().unwrap_or("".to_string()))
     }
     pub fn level(&self) -> Level {
-        self.level.clone()
+        Level::make(self.level.clone())
+    }
+    pub fn md5(&self) -> HashMd5 {
+        HashMd5::new(self.md5.clone())
     }
 }

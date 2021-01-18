@@ -42,7 +42,7 @@ impl Scores {
                 Some(s) => s.clone(),
                 None => Score::default(),
             };
-            map.insert(chart.md5.clone(), SongDetail::new(&song, &score, &date));
+            map.insert(chart.md5(), SongDetail::new(&song, &score, &date));
         }
         map
     }
