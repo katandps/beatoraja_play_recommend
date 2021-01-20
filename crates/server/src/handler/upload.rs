@@ -141,7 +141,7 @@ async fn get_stream(part: Part) -> Result<Vec<u8>, HandleError> {
 }
 
 async fn create_dir(dir_name: String) -> Result<(), HandleError> {
-    tokio::fs::create_dir_all(format!("./files/{}", dir_name)).await?;
+    tokio::fs::create_dir_all(dir_name).await?;
     Ok(())
 }
 
