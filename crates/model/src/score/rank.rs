@@ -17,6 +17,9 @@ pub enum ClearRank {
 impl ClearRank {
     pub fn from_notes_score(notes: i32, score: ExScore) -> ClearRank {
         let max = notes * 2;
+        if max == 0 {
+            return ClearRank::F;
+        }
         match score.ex_score() {
             x if x >= max * 8 / 9 => ClearRank::AAA,
             x if x >= max * 7 / 9 => ClearRank::AA,
