@@ -10,7 +10,7 @@ use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Reply};
 
-pub fn all_routes(
+pub fn api_routes(
     db_pool: &MySqlPool,
     t: &Tables,
     song_data: &SongData,
@@ -19,7 +19,6 @@ pub fn all_routes(
     let health_route = health(db_pool);
     let account_route = account(db_pool);
     let change_name_route = change_name(db_pool);
-    let custom_table_route = custom_table::custom_tables(db_pool, t, song_data);
     let logout_route = logout();
     let detail_route = detail(db_pool, t, song_data);
     let upload_route = uploads::uploads(db_pool, song_data);
@@ -31,9 +30,16 @@ pub fn all_routes(
         .or(tables_route)
         .or(detail_route)
         .or(upload_route)
-        .or(custom_table_route)
         .or(oauth_redirect_route)
         .boxed()
+}
+
+pub fn table_routes(
+    db_pool: &MySqlPool,
+    t: &Tables,
+    song_data: &SongData,
+) -> BoxedFilter<(impl Reply,)> {
+    custom_table::custom_tables(db_pool, t, song_data)
 }
 
 fn tables(tables: &Tables) -> BoxedFilter<(impl Reply,)> {

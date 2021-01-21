@@ -15,6 +15,7 @@ extern crate lazy_static;
 
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use warp::filters::cors::Builder;
 
 pub type SongData = Arc<Mutex<SongDB>>;
 
@@ -30,29 +31,15 @@ async fn main() {
         song: client.song_data().unwrap(),
     }));
 
-    let route = routes::all_routes(&db_pool, &new_tables, &song_data)
-        .recover(error::handle_rejection)
-        .with(
-            warp::cors()
-                .allow_any_origin()
-                .allow_methods(vec!["GET", "POST", "OPTIONS"])
-                .allow_headers(vec![
-                    "x-requested-with",
-                    "origin",
-                    "referer",
-                    "x-csrftoken",
-                    "oauth-token",
-                    "content-type",
-                    "content-length",
-                    "accept",
-                    "accept-encoding",
-                    "accept-language",
-                    "user-agent",
-                    session::SESSION_KEY,
-                ]),
-        )
-        .with(warp::compression::gzip())
+    let table_route = routes::table_routes(&db_pool, &new_tables, &song_data)
+        .with(cors_header())
         .with(log);
+    let route = routes::api_routes(&db_pool, &new_tables, &song_data)
+        .recover(error::handle_rejection)
+        .with(cors_header())
+        .with(warp::compression::gzip())
+        .with(log)
+        .or(table_route);
 
     let (http_addr, http_warp) = warp::serve(route.clone()).bind_ephemeral(([0, 0, 0, 0], 8000));
     let (https_addr, https_warp) = warp::serve(route.clone())
@@ -63,6 +50,26 @@ async fn main() {
 
     log::info!("Starting Listen with {:?} and {:?}", http_addr, https_addr);
     futures::future::join(http_warp, https_warp).await;
+}
+
+fn cors_header() -> Builder {
+    warp::cors()
+        .allow_any_origin()
+        .allow_methods(vec!["GET", "POST", "OPTIONS"])
+        .allow_headers(vec![
+            "x-requested-with",
+            "origin",
+            "referer",
+            "x-csrftoken",
+            "oauth-token",
+            "content-type",
+            "content-length",
+            "accept",
+            "accept-encoding",
+            "accept-language",
+            "user-agent",
+            session::SESSION_KEY,
+        ])
 }
 
 pub struct SongDB {
