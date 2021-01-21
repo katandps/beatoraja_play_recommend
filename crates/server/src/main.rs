@@ -15,7 +15,7 @@ extern crate lazy_static;
 async fn main() {
     std::env::set_var("RUST_LOG", "info");
     env_logger::init();
-    let log = warp::log("example");
+    let log = warp::log("access");
     let db_pool = mysql::get_db_pool();
     let new_tables = table::from_web().await;
 
@@ -49,7 +49,6 @@ async fn main() {
         .key_path(config().tls_key_path)
         .bind_ephemeral(([0, 0, 0, 0], 4431));
 
-    dbg!(http_addr, https_addr);
-
+    log::info!("Starting Listen with {:?} and {:?}", http_addr, https_addr);
     futures::future::join(http_warp, https_warp).await;
 }

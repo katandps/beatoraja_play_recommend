@@ -7,14 +7,14 @@ use warp::{http::StatusCode, Rejection, Reply};
 
 #[derive(Debug, Error)]
 pub enum HandleError {
-    #[error("Code Is Not Found")]
+    #[error("AuthorizationCodeIsNotFound")]
     AuthorizationCodeIsNotFound,
 
-    #[error("Account Not Found: {0:?}")]
+    #[error("AccountIsNotFound: {0:?}")]
     AccountIsNotFound(anyhow::Error),
-    #[error("Account Is Not Selected")]
+    #[error("AccountIsNotSelected")]
     AccountIsNotSelected,
-    #[error("Account Selection Is Invalid")]
+    #[error("AccountSelectionIsInvalid")]
     AccountSelectionIsInvalid(ParseIntError),
 
     #[error("IOError: {0:?}")]
@@ -25,21 +25,21 @@ pub enum HandleError {
     #[error("WarpError: {0:?}")]
     WarpError(warp::Error),
 
-    #[error("Upload Failed")]
+    #[error("DirectoryCouldNotCreated")]
     DirectoryCouldNotCreated,
-    #[error("File Is Not Found")]
+    #[error("FileIsNotFound")]
     FileIsNotFound,
-    #[error("File Is Not Deleted")]
+    #[error("FileIsNotDeleted")]
     FileIsNotDeleted,
-    #[error("Save Is Not Complete")]
+    #[error("SaveIsNotComplete")]
     SaveIsNotComplete,
 
-    #[error("Changed Name Is Not Found")]
+    #[error("ChangedNameNotFound")]
     ChangedNameNotFound,
 
     #[error("OAuthGoogleError: {0:?}")]
     OAuthGoogleError(oauth_google::Error),
-    #[error("Other Error: {0}")]
+    #[error("OtherError: {0}")]
     OtherError(anyhow::Error),
     #[error("RedisError: {0:?}")]
     RedisError(redis::RedisError),
@@ -76,14 +76,14 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
     } else if let Some(_) = err.find::<warp::reject::MethodNotAllowed>() {
         (StatusCode::UNAUTHORIZED, "Method Not Allowed".into())
     } else {
-        eprintln!("unhandled error: {:?}", err);
+        log::error!("unhandled error: {:?}", err);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             "Internal Server Error".into(),
         )
     };
 
-    println!("{} {}", code, message);
+    log::error!("{} {}", code, message);
     let json = warp::reply::json(&ErrorResponse {
         error: message.into(),
     });
