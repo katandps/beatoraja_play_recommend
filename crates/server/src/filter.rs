@@ -1,9 +1,11 @@
 use crate::error::HandleError;
+use crate::SongData;
 use model::*;
 use mysql::{MySQLClient, MySqlPool};
 use oauth_google::GoogleProfile;
 use std::collections::HashMap;
 use std::convert::Infallible;
+use std::sync::Arc;
 use warp::filters::multipart::FormData;
 use warp::{Filter, Rejection};
 
@@ -17,6 +19,13 @@ pub fn with_db(
 pub fn with_table(tables: &Tables) -> impl Filter<Extract = (Tables,), Error = Infallible> + Clone {
     let tables = tables.clone();
     warp::any().map(move || tables.clone())
+}
+
+pub fn with_song_data(
+    song_data: &SongData,
+) -> impl Filter<Extract = (SongData,), Error = Infallible> + Clone {
+    let song_data = Arc::clone(song_data);
+    warp::any().map(move || song_data.clone())
 }
 
 pub fn receive_sqlite_file() -> impl Filter<Extract = (FormData,), Error = Rejection> + Clone {

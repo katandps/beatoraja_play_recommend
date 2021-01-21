@@ -1,4 +1,5 @@
 use crate::error::HandleError;
+use crate::SongData;
 use model::*;
 use mysql::MySQLClient;
 use warp::{Rejection, Reply};
@@ -28,13 +29,19 @@ pub async fn body_handler(
     user_id: i32,
     tables: Tables,
     repos: MySQLClient,
+    song_data: SongData,
 ) -> Result<impl Reply, Rejection> {
-    Ok(body(user_id, repos, tables.get())?)
+    Ok(body(user_id, repos, tables.get(), song_data).await?)
 }
 
-fn body(user_id: i32, repos: MySQLClient, table: &Table) -> Result<impl Reply, HandleError> {
+async fn body(
+    user_id: i32,
+    repos: MySQLClient,
+    table: &Table,
+    song_data: SongData,
+) -> Result<impl Reply, HandleError> {
     let account = repos.account_by_increments(user_id)?;
     let score = repos.score(&account)?;
-    let songs = repos.song_data()?;
-    Ok(serde_json::to_string(&table.filter_score(&score, &songs)).unwrap())
+    let songs = song_data.lock().await;
+    Ok(serde_json::to_string(&table.filter_score(&score, &songs.song)).unwrap())
 }

@@ -48,18 +48,20 @@ fn generate_session_key() -> String {
     let mut csp_rng = ChaCha20Rng::from_entropy();
     let mut data = [0u8; 32];
     csp_rng.fill_bytes(&mut data);
-    format!("{}", data.iter().map(|u| u.to_string()).collect::<String>())
+    join(&data)
+}
+
+fn join(data: &[u8]) -> String {
+    data.iter().map(|u| u.to_string()).collect()
 }
 
 #[cfg(test)]
 mod test {
+    use super::*;
 
     #[test]
     fn test() {
-        let mut data = [1u8, 2, 3, 4, 5, 6, 7, 8, 123];
-        assert_eq!(
-            "12345678123".to_string(),
-            data.iter().map(|u| u.to_string()).collect::<String>()
-        )
+        let data = [1u8, 2, 3, 4, 5, 6, 7, 8, 123];
+        assert_eq!("12345678123".to_string(), join(&data))
     }
 }

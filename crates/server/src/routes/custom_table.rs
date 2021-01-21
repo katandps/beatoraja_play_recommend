@@ -1,14 +1,19 @@
 use crate::filter::*;
 use crate::handler::*;
+use crate::SongData;
 use model::Tables;
 use mysql::MySqlPool;
 use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Reply};
 
-pub fn custom_tables(db_pool: &MySqlPool, tables: &Tables) -> BoxedFilter<(impl Reply,)> {
+pub fn custom_tables(
+    db_pool: &MySqlPool,
+    tables: &Tables,
+    song_data: &SongData,
+) -> BoxedFilter<(impl Reply,)> {
     custom_table_header(tables)
-        .or(custom_table_body(db_pool, tables))
+        .or(custom_table_body(db_pool, tables, song_data))
         .or(custom_table())
         .boxed()
 }
@@ -32,13 +37,18 @@ fn custom_table_header(tables: &Tables) -> BoxedFilter<(impl Reply,)> {
         .boxed()
 }
 
-fn custom_table_body(db_pool: &MySqlPool, tables: &Tables) -> BoxedFilter<(impl Reply,)> {
+fn custom_table_body(
+    db_pool: &MySqlPool,
+    tables: &Tables,
+    song_data: &SongData,
+) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("recommend_table"))
         .and(path::param())
         .and(path("score.json"))
         .and(with_table(tables))
-        .and(with_db(&db_pool))
+        .and(with_db(db_pool))
+        .and(with_song_data(song_data))
         .and_then(custom_table::body_handler)
         .boxed()
 }

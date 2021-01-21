@@ -6,20 +6,31 @@ mod routes;
 mod session;
 
 use config::config;
+use model::Songs;
+use mysql::MySQLClient;
 use warp::Filter;
 
 #[macro_use]
 extern crate lazy_static;
 
+use std::sync::Arc;
+use tokio::sync::Mutex;
+
+pub type SongData = Arc<Mutex<SongDB>>;
+
 #[tokio::main]
 async fn main() {
-    std::env::set_var("RUST_LOG", "info");
     env_logger::init();
     let log = warp::log("access");
     let db_pool = mysql::get_db_pool();
     let new_tables = table::from_web().await;
 
-    let route = routes::all_routes(&db_pool, &new_tables)
+    let client = MySQLClient::new(db_pool.get().unwrap());
+    let song_data = Arc::new(Mutex::new(SongDB {
+        song: client.song_data().unwrap(),
+    }));
+
+    let route = routes::all_routes(&db_pool, &new_tables, &song_data)
         .recover(error::handle_rejection)
         .with(
             warp::cors()
@@ -51,4 +62,14 @@ async fn main() {
 
     log::info!("Starting Listen with {:?} and {:?}", http_addr, https_addr);
     futures::future::join(http_warp, https_warp).await;
+}
+
+pub struct SongDB {
+    song: Songs,
+}
+
+impl SongDB {
+    pub fn update(&mut self, new: Songs) {
+        self.song = new;
+    }
 }

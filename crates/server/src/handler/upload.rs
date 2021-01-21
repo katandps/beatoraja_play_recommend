@@ -1,9 +1,11 @@
 use crate::error::HandleError;
+use crate::SongData;
 use bytes::BufMut;
 use futures::TryStreamExt;
 use model::*;
 use mysql::MySQLClient;
 use sqlite::SqliteClient;
+use std::sync::Arc;
 use warp::filters::multipart::{FormData, Part};
 use warp::{Rejection, Reply};
 
@@ -72,14 +74,16 @@ async fn update_score_data(
 
 pub async fn upload_song_data_handler(
     mysql_client: MySQLClient,
+    song_data: SongData,
     form: FormData,
     session_key: String,
 ) -> std::result::Result<String, Rejection> {
-    save_song(mysql_client, form, session_key).await?;
+    save_song(mysql_client, song_data, form, session_key).await?;
     Ok("SongData Is Updated.".into())
 }
 async fn save_song(
     mysql_client: MySQLClient,
+    song_data: SongData,
     form: FormData,
     session_key: String,
 ) -> Result<(), HandleError> {
@@ -96,6 +100,8 @@ async fn save_song(
     let songs = sqlite_client.song_data()?;
 
     mysql_client.save_song(&songs)?;
+    let song_db = Arc::clone(&song_data);
+    song_db.lock().await.update(songs);
 
     remove_file(&song_file_name).await
 }

@@ -3,21 +3,26 @@ mod uploads;
 
 use crate::filter::*;
 use crate::handler::*;
+use crate::SongData;
 use model::Tables;
 use mysql::MySqlPool;
 use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Reply};
 
-pub fn all_routes(db_pool: &MySqlPool, t: &Tables) -> BoxedFilter<(impl Reply,)> {
+pub fn all_routes(
+    db_pool: &MySqlPool,
+    t: &Tables,
+    song_data: &SongData,
+) -> BoxedFilter<(impl Reply,)> {
     let tables_route = tables(t);
     let health_route = health(db_pool);
     let account_route = account(db_pool);
     let change_name_route = change_name(db_pool);
-    let custom_table_route = custom_table::custom_tables(db_pool, t);
+    let custom_table_route = custom_table::custom_tables(db_pool, t, song_data);
     let logout_route = logout();
-    let detail_route = detail(db_pool, t);
-    let upload_route = uploads::uploads(db_pool);
+    let detail_route = detail(db_pool, t, song_data);
+    let upload_route = uploads::uploads(db_pool, song_data);
     let oauth_redirect_route = oauth_redirect_route(db_pool);
     health_route
         .or(account_route)
@@ -74,13 +79,18 @@ fn logout() -> BoxedFilter<(impl Reply,)> {
         .boxed()
 }
 
-fn detail(db_pool: &MySqlPool, tables: &Tables) -> BoxedFilter<(impl Reply,)> {
+fn detail(
+    db_pool: &MySqlPool,
+    tables: &Tables,
+    song_data: &SongData,
+) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("detail"))
-        .and(with_db(&db_pool))
-        .and(with_table(&tables))
+        .and(with_db(db_pool))
+        .and(with_table(tables))
         .and(detail_query())
-        .and(account_id_query(&db_pool))
+        .and(account_id_query(db_pool))
+        .and(with_song_data(song_data))
         .and_then(detail::detail_handler)
         .boxed()
 }
