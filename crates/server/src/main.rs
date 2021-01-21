@@ -51,6 +51,7 @@ async fn main() {
                     session::SESSION_KEY,
                 ]),
         )
+        .with(warp::compression::gzip())
         .with(log);
 
     let (http_addr, http_warp) = warp::serve(route.clone()).bind_ephemeral(([0, 0, 0, 0], 8000));
