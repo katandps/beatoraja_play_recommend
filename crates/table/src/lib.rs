@@ -97,18 +97,6 @@ pub enum TableParseError {
     FailedToParseData(serde_json::Error),
 }
 
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[tokio::test]
-    async fn test() {
-        let res = make_table("http://localhost:8000/recommend_table/1/".into()).await;
-        dbg!(&res);
-        assert!(res.is_ok());
-    }
-}
-
 use serde;
 use serde::Deserialize;
 

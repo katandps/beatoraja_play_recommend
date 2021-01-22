@@ -1,7 +1,7 @@
 use crate::*;
 use std::cmp::Ordering;
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, Default)]
 pub struct SnapShot {
     pub clear_type: ClearType,
     pub score: ExScore,
@@ -11,15 +11,6 @@ pub struct SnapShot {
 }
 
 impl SnapShot {
-    pub fn new() -> SnapShot {
-        SnapShot {
-            clear_type: ClearType::NoPlay,
-            score: ExScore::new(),
-            max_combo: MaxCombo::new(),
-            min_bp: MinBP::new(),
-            updated_at: UpdatedAt::new(),
-        }
-    }
     pub fn from_data(
         clear_type: i32,
         score: i32,

@@ -5,10 +5,13 @@ use std::fmt;
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct MinBP(pub i32);
 
-impl MinBP {
-    pub fn new() -> MinBP {
+impl Default for MinBP {
+    fn default() -> Self {
         MinBP(-1)
     }
+}
+
+impl MinBP {
     pub fn from_bp(bp: i32) -> MinBP {
         MinBP(bp)
     }

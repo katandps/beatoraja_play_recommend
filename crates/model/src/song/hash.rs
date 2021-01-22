@@ -3,10 +3,10 @@ use std::fmt;
 use std::str;
 use std::string::ParseError;
 
-#[derive(PartialEq, Eq, Hash, Clone, Debug, Deserialize, Serialize)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug, Deserialize, Serialize, Default)]
 pub struct HashMd5(String);
 
-#[derive(PartialEq, Eq, Hash, Clone, Debug, Deserialize, Serialize)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug, Deserialize, Serialize, Default)]
 pub struct HashSha256(String);
 
 impl HashMd5 {
@@ -18,9 +18,6 @@ impl HashMd5 {
 impl HashSha256 {
     pub fn new(sha256: String) -> HashSha256 {
         HashSha256(sha256)
-    }
-    pub fn default() -> HashSha256 {
-        HashSha256("".into())
     }
 }
 

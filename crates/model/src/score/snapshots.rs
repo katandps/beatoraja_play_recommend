@@ -1,74 +1,128 @@
 use crate::*;
 use std::collections::BTreeSet;
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct SnapShots(pub BTreeSet<SnapShot>);
 
 impl SnapShots {
-    pub fn new(snapshots: Vec<SnapShot>) -> SnapShots {
+    pub fn create_by_snaps(snapshots: Vec<SnapShot>) -> SnapShots {
         SnapShots(snapshots.iter().cloned().collect())
     }
 
     pub fn default() -> SnapShots {
-        SnapShots::new(Vec::new())
+        SnapShots::create_by_snaps(Vec::new())
     }
 
     pub fn add(&mut self, snapshot: SnapShot) {
         self.0.insert(snapshot);
     }
 
+    /// deprecated
     pub fn get_snap(&self, date: &UpdatedAt) -> SnapShot {
-        let snap = self.0.iter().filter(|&s| s.updated_at.le(date)).last();
-        match snap {
-            Some(s) => s.clone(),
-            _ => SnapShot::new(),
+        self.snap(date).unwrap_or_default()
+    }
+
+    pub fn snap(&self, date: &UpdatedAt) -> Option<SnapShot> {
+        self.0
+            .iter()
+            .filter(|&s| s.updated_at.le(date))
+            .last()
+            .cloned()
+    }
+
+    pub fn score_snap(&self, date: &UpdatedAt) -> Option<ScoreSnap> {
+        match self.snap(date) {
+            Some(last) => {
+                let mut last_date = &last.updated_at;
+                let mut s = None;
+                for snap in self.0.iter().rev() {
+                    if snap.score >= last.score {
+                        last_date = &snap.updated_at;
+                        continue;
+                    }
+                    let one_day_before = self.get_snap(&last_date.sub(1));
+                    s = Some(ScoreSnap::new(
+                        last.score,
+                        last_date.clone(),
+                        one_day_before.score,
+                    ));
+                    break;
+                }
+                match s {
+                    Some(s) => Some(s),
+                    None => Some(ScoreSnap::new(
+                        last.score,
+                        last_date.clone(),
+                        Default::default(),
+                    )),
+                }
+            }
+            None => None,
         }
     }
 
-    pub fn score_snap(&self, date: &UpdatedAt) -> ScoreSnap {
-        let last = self.get_snap(date);
-        let mut last_date = &last.updated_at;
-        for snap in self.0.iter().rev() {
-            if snap.score >= last.score {
-                last_date = &snap.updated_at;
-                continue;
+    pub fn min_bp_snap(&self, date: &UpdatedAt) -> Option<MinBPSnap> {
+        match self.snap(date) {
+            Some(last) => {
+                let mut last_date = &last.updated_at;
+
+                let mut s = None;
+                for snap in self.0.iter().rev() {
+                    if snap.min_bp <= last.min_bp {
+                        last_date = &snap.updated_at;
+                        continue;
+                    }
+                    let one_day_before = self.get_snap(&last_date.sub(1));
+                    s = Some(MinBPSnap::new(
+                        last.min_bp,
+                        last_date.clone(),
+                        one_day_before.min_bp,
+                    ));
+                    break;
+                }
+                match s {
+                    Some(s) => Some(s),
+                    None => Some(MinBPSnap::new(
+                        last.min_bp,
+                        last_date.clone(),
+                        Default::default(),
+                    )),
+                }
             }
-            let one_day_before = self.get_snap(&last_date.sub(1));
-            return ScoreSnap::new(last.score, last_date.clone(), one_day_before.score);
+            None => None,
         }
-        ScoreSnap::new(last.score, last_date.clone(), ExScore::new())
     }
 
-    pub fn min_bp_snap(&self, date: &UpdatedAt) -> MinBPSnap {
-        let last = self.get_snap(date);
-        let mut last_date = &last.updated_at;
-        for snap in self.0.iter().rev() {
-            if snap.min_bp <= last.min_bp {
-                last_date = &snap.updated_at;
-                continue;
-            }
-            let one_day_before = self.get_snap(&last_date.sub(1));
-            return MinBPSnap::new(last.min_bp, last_date.clone(), one_day_before.min_bp);
-        }
-        MinBPSnap::new(last.min_bp, last_date.clone(), MinBP::new())
-    }
+    pub fn clear_type_snap(&self, date: &UpdatedAt) -> Option<ClearTypeSnap> {
+        match self.snap(date) {
+            Some(last) => {
+                let mut last_date = &last.updated_at;
 
-    pub fn clear_type_snap(&self, date: &UpdatedAt) -> ClearTypeSnap {
-        let last = self.get_snap(date);
-        let mut last_date = &last.updated_at;
-        for snap in self.0.iter().rev() {
-            if snap.clear_type >= last.clear_type {
-                last_date = &snap.updated_at;
-                continue;
+                let mut s = None;
+                for snap in self.0.iter().rev() {
+                    if snap.clear_type >= last.clear_type {
+                        last_date = &snap.updated_at;
+                        continue;
+                    }
+                    let one_day_before = self.get_snap(&last_date.sub(1));
+                    s = Some(ClearTypeSnap::new(
+                        last.clear_type,
+                        last_date.clone(),
+                        one_day_before.clear_type,
+                    ));
+                    break;
+                }
+                match s {
+                    Some(s) => Some(s),
+                    None => Some(ClearTypeSnap::new(
+                        last.clear_type,
+                        last_date.clone(),
+                        Default::default(),
+                    )),
+                }
             }
-            let one_day_before = self.get_snap(&last_date.sub(1));
-            return ClearTypeSnap::new(
-                last.clear_type,
-                last_date.clone(),
-                one_day_before.clear_type,
-            );
+            None => None,
         }
-        ClearTypeSnap::new(last.clear_type, last_date.clone(), ClearType::NoPlay)
     }
 }
 
@@ -83,7 +137,7 @@ mod test {
         let shot3 = SnapShot::from_data(1, 2, 3, 4, 33);
         let shot4 = SnapShot::from_data(1, 2, 3, 4, 44);
 
-        let shots = SnapShots::new(vec![
+        let shots = SnapShots::create_by_snaps(vec![
             shot1.clone(),
             shot2.clone(),
             shot3.clone(),
@@ -102,7 +156,9 @@ mod test {
         const DAY: i64 = 86400;
 
         fn asrt(snapshots: &SnapShots, current: ClearType, before: ClearType, timestamp: i64) {
-            let snap = snapshots.clear_type_snap(&UpdatedAt::from_timestamp(timestamp));
+            let snap = snapshots
+                .clear_type_snap(&UpdatedAt::from_timestamp(timestamp))
+                .unwrap_or_default();
             assert_eq!(current, snap.current);
             assert_eq!(before, snap.before);
         }
@@ -124,7 +180,7 @@ mod test {
         //30日目 exhard
         let shot_exhard = SnapShot::from_data(7, 2, 3, 4, DAY * 30);
 
-        let shots = SnapShots::new(vec![
+        let shots = SnapShots::create_by_snaps(vec![
             shot_failed.clone(),
             shot_failed2.clone(),
             shot_assist.clone(),

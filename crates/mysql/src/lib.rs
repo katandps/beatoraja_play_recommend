@@ -137,7 +137,7 @@ impl MySQLClient {
         let user = query::account_by_email(&self.connection, &account.email())?;
         let record = query::scores_by_user_id(&self.connection, user.id)?;
         let score_log = self.score_log(account)?;
-        Ok(Scores::new(
+        Ok(Scores::create_by_map(
             record
                 .iter()
                 .map(|row| {
@@ -156,10 +156,7 @@ impl MySQLClient {
                             PlayCount::new(row.play_count),
                             ClearCount::new(row.clear_count),
                             MinBP::from_bp(row.min_bp),
-                            score_log
-                                .get(&song_id)
-                                .unwrap_or(&SnapShots::default())
-                                .clone(),
+                            score_log.get(&song_id).cloned().unwrap_or_default(),
                         ),
                     )
                 })

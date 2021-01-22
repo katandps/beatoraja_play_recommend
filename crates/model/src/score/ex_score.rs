@@ -2,14 +2,10 @@ use crate::*;
 use std::cmp::Ordering;
 use std::fmt;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize, Default)]
 pub struct ExScore(i32);
 
 impl ExScore {
-    pub fn new() -> ExScore {
-        ExScore(0)
-    }
-
     pub fn from_score(score: i32) -> ExScore {
         ExScore(score)
     }

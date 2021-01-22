@@ -18,6 +18,12 @@ pub enum ClearType {
     Unknown,
 }
 
+impl Default for ClearType {
+    fn default() -> ClearType {
+        ClearType::NoPlay
+    }
+}
+
 impl ClearType {
     pub fn from_integer(int: i32) -> ClearType {
         match int {

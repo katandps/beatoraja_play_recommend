@@ -56,11 +56,11 @@ pub fn detail_query() -> impl Filter<Extract = (DetailQuery,), Error = Rejection
 }
 
 async fn parse_detail_query(query: HashMap<String, String>) -> Result<DetailQuery, Rejection> {
-    let date = if let Some(date) = query.get("date".into()) {
-        UpdatedAt::from_str(date).sub(-1)
-    } else {
-        UpdatedAt::new()
-    };
+    let date = query
+        .get("date".into())
+        .map(UpdatedAt::from_string)
+        .map(|u| u.sub(-1))
+        .unwrap_or_default();
     let play_mode = if let Some(mode) = query.get("mode".into()) {
         match mode.parse::<i32>() {
             Ok(mode) => PlayMode::new(mode),

@@ -1,6 +1,6 @@
 use crate::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Score {
     pub clear: ClearType,
     pub updated_at: UpdatedAt,
@@ -38,19 +38,6 @@ impl Score {
         }
     }
 
-    pub fn default() -> Score {
-        Score::new(
-            ClearType::NoPlay,
-            UpdatedAt::new(),
-            Judge::default(),
-            MaxCombo::new(),
-            PlayCount::new(0),
-            ClearCount::new(0),
-            MinBP::new(),
-            SnapShots::default(),
-        )
-    }
-
     pub fn view(&self) -> String {
         format!(
             "{} {} score:{} bp:{} combo:{}",
@@ -70,29 +57,29 @@ impl Score {
             Score {
                 clear: snap.clear_type,
                 updated_at: snap.updated_at,
-                judge: Judge::default(),
+                judge: Default::default(),
                 score: snap.score,
                 max_combo: snap.max_combo,
                 play_count: PlayCount::new(-1),
                 min_bp: snap.min_bp,
-                log: SnapShots::default(),
+                log: Default::default(),
                 clear_count: ClearCount::new(-1),
             }
         }
     }
 
-    pub fn score_snap(&self, date: &UpdatedAt) -> ScoreSnap {
+    pub fn score_snap(&self, date: &UpdatedAt) -> Option<ScoreSnap> {
         self.log.score_snap(date)
     }
-    pub fn min_bp_snap(&self, date: &UpdatedAt) -> MinBPSnap {
+    pub fn min_bp_snap(&self, date: &UpdatedAt) -> Option<MinBPSnap> {
         self.log.min_bp_snap(date)
     }
-    pub fn clear_type_snap(&self, date: &UpdatedAt) -> ClearTypeSnap {
+    pub fn clear_type_snap(&self, date: &UpdatedAt) -> Option<ClearTypeSnap> {
         self.log.clear_type_snap(date)
     }
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug, Default)]
 pub struct ScoreSnap {
     pub current: ExScore,
     pub updated_at: UpdatedAt,
@@ -109,7 +96,7 @@ impl ScoreSnap {
     }
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug, Default)]
 pub struct MinBPSnap {
     pub current: MinBP,
     pub updated_at: UpdatedAt,
@@ -126,7 +113,7 @@ impl MinBPSnap {
     }
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug, Default)]
 pub struct ClearTypeSnap {
     pub current: ClearType,
     pub updated_at: UpdatedAt,

@@ -93,7 +93,7 @@ impl SqliteClient {
             .load::<schema::score::Score>(&connection)
             .expect("Error loading schema");
         let score_log = self.score_log();
-        Scores::new(
+        Scores::create_by_map(
             record
                 .iter()
                 .map(|row| {
@@ -112,10 +112,7 @@ impl SqliteClient {
                             PlayCount::new(row.playcount),
                             ClearCount::new(row.clearcount),
                             MinBP::from_bp(row.minbp),
-                            score_log
-                                .get(&song_id)
-                                .unwrap_or(&SnapShots::default())
-                                .clone(),
+                            score_log.get(&song_id).cloned().unwrap_or_default(),
                         ),
                     )
                 })

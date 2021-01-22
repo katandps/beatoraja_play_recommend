@@ -5,10 +5,13 @@ use std::fmt;
 #[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct UpdatedAt(DateTime<Local>);
 
-impl UpdatedAt {
-    pub fn new() -> UpdatedAt {
+impl Default for UpdatedAt {
+    fn default() -> UpdatedAt {
         UpdatedAt(DateTime::from(Local.timestamp(0, 0)))
     }
+}
+
+impl UpdatedAt {
     pub fn from_timestamp(timestamp: i64) -> UpdatedAt {
         UpdatedAt(DateTime::from(Local.timestamp(timestamp, 0)))
     }
@@ -18,6 +21,10 @@ impl UpdatedAt {
             _ => Self::now(),
         }
     }
+    pub fn from_string(str: &String) -> UpdatedAt {
+        Self::from_str(str)
+    }
+
     pub fn now() -> UpdatedAt {
         UpdatedAt(Local::now())
     }

@@ -28,7 +28,9 @@ pub async fn detail_handler(
     let songs = log_duration!("GetSongs", song_data.lock().await);
     let scores = log_duration!(
         "GetScores",
-        repos.score(&account).unwrap_or(Scores::new(HashMap::new()))
+        repos
+            .score(&account)
+            .unwrap_or(Scores::create_by_map(HashMap::new()))
     );
     let response = log_duration!(
         "MakeResponse",

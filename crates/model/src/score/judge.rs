@@ -1,7 +1,7 @@
 use crate::score::ex_score::ExScore;
 use serde::Serialize;
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Default)]
 pub struct Judge {
     pub early_pgreat: i32,
     pub late_pgreat: i32,
@@ -46,9 +46,6 @@ impl Judge {
             early_miss,
             late_miss,
         }
-    }
-    pub fn default() -> Judge {
-        Self::new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     }
     pub fn ex_score(&self) -> ExScore {
         ExScore::from_score(

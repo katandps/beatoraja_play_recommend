@@ -19,7 +19,7 @@ impl ScoreId {
     }
 }
 
-#[derive(Eq, PartialEq, Hash, Clone, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Hash, Clone, Debug, Serialize, Deserialize, Default)]
 pub struct PlayMode(LnMode);
 
 impl PlayMode {
@@ -32,10 +32,6 @@ impl PlayMode {
         PlayMode(lm)
     }
 
-    pub fn default() -> Self {
-        PlayMode::new(LnMode::LongNote as i32)
-    }
-
     pub fn to_int(&self) -> i32 {
         self.0 as i32
     }
@@ -46,4 +42,10 @@ pub enum LnMode {
     LongNote = 0,
     ChargeNote = 1,
     HellChargeNote = 2,
+}
+
+impl Default for LnMode {
+    fn default() -> LnMode {
+        LnMode::LongNote
+    }
 }
