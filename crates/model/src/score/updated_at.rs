@@ -1,6 +1,7 @@
 use crate::*;
 use chrono::{DateTime, Duration, Local, NaiveDateTime, TimeZone};
 use std::fmt;
+use std::ops::Sub;
 
 #[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct UpdatedAt(DateTime<Local>);
@@ -33,11 +34,7 @@ impl UpdatedAt {
     }
 
     pub fn is_future(&self) -> bool {
-        self > &UpdatedAt::day_start(UpdatedAt::now().sub(1))
-    }
-
-    pub fn sub(&self, days: i64) -> UpdatedAt {
-        UpdatedAt(self.0 - Duration::days(days))
+        self > &UpdatedAt::day_start(&UpdatedAt::now() - Duration::days(1))
     }
 
     pub fn naive_datetime(&self) -> NaiveDateTime {
@@ -46,6 +43,17 @@ impl UpdatedAt {
 
     pub fn from_naive_datetime(time: NaiveDateTime) -> Self {
         Self::from_timestamp((time - Duration::hours(9)).timestamp())
+    }
+}
+
+///
+/// 日付を巻き戻す意味合いになる
+///
+impl Sub<Duration> for &UpdatedAt {
+    type Output = UpdatedAt;
+
+    fn sub(self, rhs: Duration) -> Self::Output {
+        UpdatedAt(self.0 - rhs)
     }
 }
 
@@ -71,7 +79,7 @@ mod test {
     pub fn test_sub() {
         assert_eq!(
             "1992-11-20 00:00:00",
-            UpdatedAt::from_str("1992-11-21").sub(1).to_string()
+            (&UpdatedAt::from_str("1992-11-21") - Duration::days(1)).to_string()
         )
     }
 
@@ -79,13 +87,13 @@ mod test {
     pub fn test_future() {
         let date = UpdatedAt::day_start(UpdatedAt::now());
         assert_eq!(true, date.is_future());
-        assert_eq!(false, date.sub(1).is_future());
+        assert_eq!(false, (&date - Duration::days(1)).is_future());
     }
 
     #[test]
     pub fn test_cmp() {
         let date1 = UpdatedAt::now();
-        let date2 = date1.sub(1);
+        let date2 = &date1 - Duration::days(1);
 
         assert!(date1 > date2);
     }

@@ -1,5 +1,6 @@
 use crate::error::HandleError;
 use crate::SongData;
+use chrono::Duration;
 use model::*;
 use mysql::{MySQLClient, MySqlPool};
 use oauth_google::GoogleProfile;
@@ -59,7 +60,7 @@ async fn parse_detail_query(query: HashMap<String, String>) -> Result<DetailQuer
     let date = query
         .get("date".into())
         .map(UpdatedAt::from_string)
-        .map(|u| u.sub(-1))
+        .map(|u| &u - Duration::days(-1))
         .unwrap_or_default();
     let play_mode = if let Some(mode) = query.get("mode".into()) {
         match mode.parse::<i32>() {

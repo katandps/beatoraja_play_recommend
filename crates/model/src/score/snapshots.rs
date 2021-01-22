@@ -1,4 +1,5 @@
 use crate::*;
+use chrono::Duration;
 use std::collections::BTreeSet;
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
@@ -40,7 +41,7 @@ impl SnapShots {
                         last_date = &snap.updated_at;
                         continue;
                     }
-                    let one_day_before = self.get_snap(&last_date.sub(1));
+                    let one_day_before = self.get_snap(&(last_date - Duration::days(1)));
                     s = Some(ScoreSnap::new(
                         last.score,
                         last_date.clone(),
@@ -72,7 +73,7 @@ impl SnapShots {
                         last_date = &snap.updated_at;
                         continue;
                     }
-                    let one_day_before = self.get_snap(&last_date.sub(1));
+                    let one_day_before = self.get_snap(&(last_date - Duration::days(1)));
                     s = Some(MinBPSnap::new(
                         last.min_bp,
                         last_date.clone(),
@@ -104,7 +105,7 @@ impl SnapShots {
                         last_date = &snap.updated_at;
                         continue;
                     }
-                    let one_day_before = self.get_snap(&last_date.sub(1));
+                    let one_day_before = self.get_snap(&(last_date - Duration::days(1)));
                     s = Some(ClearTypeSnap::new(
                         last.clear_type,
                         last_date.clone(),
