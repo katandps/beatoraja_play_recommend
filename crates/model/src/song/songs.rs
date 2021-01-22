@@ -16,12 +16,46 @@ impl Songs {
         }
     }
 
+    fn song_a(&self, chart: &Chart) -> Option<&Song> {
+        match self.get_sha256(&chart.md5()) {
+            Some(sha256) => self.songs.get(&sha256),
+            None => None,
+        }
+    }
+
     pub fn get_md5(&self, sha256: &HashSha256) -> Option<HashMd5> {
         self.converter.get_md5(sha256)
     }
 
     pub fn get_sha256(&self, md5: &HashMd5) -> Option<HashSha256> {
         self.converter.get_sha256(md5)
+    }
+
+    pub fn get_list(&self, chart: &Vec<&Chart>) -> Vec<SongFormat> {
+        chart
+            .iter()
+            .filter_map(|c| self.song_a(c))
+            .map(SongFormat::from)
+            .collect()
+    }
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct SongFormat {
+    title: String,
+    notes: i32,
+    sha256: HashSha256,
+    md5: HashMd5,
+}
+
+impl From<&Song> for SongFormat {
+    fn from(s: &Song) -> Self {
+        SongFormat {
+            title: s.title(),
+            notes: s.notes(),
+            sha256: s.get_sha256().clone(),
+            md5: s.get_md5().clone(),
+        }
     }
 }
 

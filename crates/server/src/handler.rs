@@ -5,5 +5,6 @@ pub mod detail;
 pub mod health;
 pub mod logout;
 pub mod oauth_redirect;
+pub mod songs;
 pub mod tables;
 pub mod upload;

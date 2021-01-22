@@ -16,6 +16,7 @@ pub fn api_routes(
     song_data: &SongData,
 ) -> BoxedFilter<(impl Reply,)> {
     let tables_route = tables(t);
+    let songs_route = songs(t, song_data);
     let health_route = health(db_pool);
     let account_route = account(db_pool);
     let change_name_route = change_name(db_pool);
@@ -28,6 +29,7 @@ pub fn api_routes(
         .or(change_name_route)
         .or(logout_route)
         .or(tables_route)
+        .or(songs_route)
         .or(detail_route)
         .or(upload_route)
         .or(oauth_redirect_route)
@@ -45,8 +47,16 @@ pub fn table_routes(
 fn tables(tables: &Tables) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("tables"))
-        .and(with_table(&tables))
+        .and(with_table(tables))
         .and_then(tables::table_handler)
+        .boxed()
+}
+fn songs(tables: &Tables, songs: &SongData) -> BoxedFilter<(impl Reply,)> {
+    warp::get()
+        .and(path("songs"))
+        .and(with_table(tables))
+        .and(with_song_data(songs))
+        .and_then(songs::songs_handler)
         .boxed()
 }
 
