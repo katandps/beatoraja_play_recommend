@@ -14,6 +14,12 @@ pub enum ClearRank {
     Unknown,
 }
 
+impl Default for ClearRank {
+    fn default() -> ClearRank {
+        ClearRank::F
+    }
+}
+
 impl ClearRank {
     pub fn from_notes_score(notes: i32, score: ExScore) -> ClearRank {
         let max = notes * 2;

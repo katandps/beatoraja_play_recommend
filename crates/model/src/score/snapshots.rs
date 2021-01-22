@@ -1,3 +1,4 @@
+use crate::score::score::{ClearTypeSnap, MinBPSnap, ScoreSnap};
 use crate::*;
 use chrono::Duration;
 use std::collections::BTreeSet;
@@ -18,17 +19,12 @@ impl SnapShots {
         self.0.insert(snapshot);
     }
 
-    /// deprecated
     pub fn get_snap(&self, date: &UpdatedAt) -> SnapShot {
-        self.snap(date).unwrap_or_default()
+        self.snap(date).cloned().unwrap_or_default()
     }
 
-    pub fn snap(&self, date: &UpdatedAt) -> Option<SnapShot> {
-        self.0
-            .iter()
-            .filter(|&s| s.updated_at.le(date))
-            .last()
-            .cloned()
+    pub fn snap(&self, date: &UpdatedAt) -> Option<&SnapShot> {
+        self.0.iter().filter(|&s| s.updated_at.le(date)).last()
     }
 
     pub fn score_snap(&self, date: &UpdatedAt) -> Option<ScoreSnap> {

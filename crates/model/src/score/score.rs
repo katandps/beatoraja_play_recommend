@@ -38,34 +38,8 @@ impl Score {
         }
     }
 
-    pub fn view(&self) -> String {
-        format!(
-            "{} {} score:{} bp:{} combo:{}",
-            self.updated_at,
-            self.clear,
-            self.judge.ex_score(),
-            self.min_bp,
-            self.max_combo
-        )
-    }
-
-    pub fn at(self, date: &UpdatedAt) -> Score {
-        if date.is_future() {
-            self
-        } else {
-            let snap = self.log.get_snap(date);
-            Score {
-                clear: snap.clear_type,
-                updated_at: snap.updated_at,
-                judge: Default::default(),
-                score: snap.score,
-                max_combo: snap.max_combo,
-                play_count: PlayCount::new(-1),
-                min_bp: snap.min_bp,
-                log: Default::default(),
-                clear_count: ClearCount::new(-1),
-            }
-        }
+    pub fn snap(&self, date: &UpdatedAt) -> Option<&SnapShot> {
+        self.log.snap(date)
     }
 
     pub fn score_snap(&self, date: &UpdatedAt) -> Option<ScoreSnap> {
@@ -76,6 +50,36 @@ impl Score {
     }
     pub fn clear_type_snap(&self, date: &UpdatedAt) -> Option<ClearTypeSnap> {
         self.log.clear_type_snap(date)
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+pub struct ScoreDetail {
+    max_combo: MaxCombo,
+    score: Option<ScoreSnap>,
+    min_bp: Option<MinBPSnap>,
+    clear_type: Option<ClearTypeSnap>,
+    updated_at: UpdatedAt,
+    play_count: PlayCount,
+}
+
+impl ScoreDetail {
+    pub fn new(score: &Score, date: &UpdatedAt) -> ScoreDetail {
+        match score.snap(date) {
+            Some(snap) => ScoreDetail {
+                clear_type: score.clear_type_snap(date),
+                min_bp: score.min_bp_snap(date),
+                score: score.score_snap(date),
+                max_combo: snap.max_combo.clone(),
+                updated_at: snap.updated_at.clone(),
+                play_count: if date.is_future() {
+                    PlayCount::new(-1)
+                } else {
+                    score.play_count.clone()
+                },
+            },
+            None => Default::default(),
+        }
     }
 }
 
