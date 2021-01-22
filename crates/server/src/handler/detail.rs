@@ -47,5 +47,5 @@ pub async fn detail_handler(
 struct DetailResponse {
     user_id: i32,
     user_name: String,
-    score: HashMap<HashMd5, SongDetail>,
+    score: HashMap<HashMd5, ScoreDetail>,
 }

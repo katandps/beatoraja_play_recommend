@@ -2,7 +2,7 @@ use crate::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct SongDetail {
+pub struct ScoreDetail {
     clear_rank: ClearRank,
     max_combo: MaxCombo,
     score: Option<ScoreSnap>,
@@ -12,10 +12,10 @@ pub struct SongDetail {
     play_count: PlayCount,
 }
 
-impl SongDetail {
-    pub fn new(song: &Song, score: &Score, date: &UpdatedAt) -> SongDetail {
+impl ScoreDetail {
+    pub fn new(song: &Song, score: &Score, date: &UpdatedAt) -> ScoreDetail {
         let score = score.clone().at(date).clone();
-        SongDetail {
+        ScoreDetail {
             clear_type: score.clear_type_snap(date),
             clear_rank: ClearRank::from_notes_score(song.notes(), score.score),
             max_combo: score.max_combo.clone(),

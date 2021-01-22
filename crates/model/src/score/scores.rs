@@ -23,7 +23,7 @@ impl Scores {
         tables: &Tables,
         songs: &Songs,
         date: UpdatedAt,
-    ) -> HashMap<HashMd5, SongDetail> {
+    ) -> HashMap<HashMd5, ScoreDetail> {
         let mut map = HashMap::new();
         let charts = tables.get_charts();
         for chart in &charts {
@@ -32,7 +32,7 @@ impl Scores {
                 Some(s) => s.clone(),
                 None => Score::default(),
             };
-            map.insert(chart.md5(), SongDetail::new(&song, &score, &date));
+            map.insert(chart.md5(), ScoreDetail::new(&song, &score, &date));
         }
         map
     }
