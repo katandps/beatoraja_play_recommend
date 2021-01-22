@@ -1267,7 +1267,6 @@ dependencies = [
  "anyhow",
  "chrono",
  "diesel 1.4.5",
- "diesel_codegen",
  "envy",
  "lazy_static",
  "model",
