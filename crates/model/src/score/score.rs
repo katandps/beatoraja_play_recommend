@@ -72,7 +72,7 @@ impl ScoreDetail {
                 score: score.score_snap(date),
                 max_combo: snap.max_combo.clone(),
                 updated_at: snap.updated_at.clone(),
-                play_count: if date.is_future() {
+                play_count: if !date.is_future() {
                     PlayCount::new(-1)
                 } else {
                     score.play_count.clone()
