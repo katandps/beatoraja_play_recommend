@@ -1,4 +1,4 @@
-use crate::score::score::{ClearTypeSnap, MinBPSnap, ScoreSnap};
+use crate::score::score::ParamSnap;
 use crate::*;
 use chrono::Duration;
 use std::collections::BTreeSet;
@@ -11,112 +11,28 @@ impl SnapShots {
         SnapShots(snapshots.iter().cloned().collect())
     }
 
-    pub fn default() -> SnapShots {
-        SnapShots::create_by_snaps(Vec::new())
-    }
-
     pub fn add(&mut self, snapshot: SnapShot) {
         self.0.insert(snapshot);
     }
 
-    pub fn get_snap(&self, date: &UpdatedAt) -> SnapShot {
-        self.snap(date).cloned().unwrap_or_default()
-    }
-
     pub fn snap(&self, date: &UpdatedAt) -> Option<&SnapShot> {
-        self.0.iter().filter(|&s| s.updated_at.le(date)).last()
+        self.0.iter().rev().find(|&s| s.updated_at.le(date))
     }
 
-    pub fn score_snap(&self, date: &UpdatedAt) -> Option<ScoreSnap> {
+    pub fn param_snap<T: ParamSnap>(&self, date: &UpdatedAt) -> Option<T> {
         match self.snap(date) {
             Some(last) => {
                 let mut last_date = &last.updated_at;
-                let mut s = None;
+                let mut one_day_before = None;
                 for snap in self.0.iter().rev() {
-                    if snap.score >= last.score {
+                    if T::cmp(snap, last) {
                         last_date = &snap.updated_at;
-                        continue;
+                    } else {
+                        one_day_before = self.snap(&(last_date - Duration::days(1)));
+                        break;
                     }
-                    let one_day_before = self.get_snap(&(last_date - Duration::days(1)));
-                    s = Some(ScoreSnap::new(
-                        last.score,
-                        last_date.clone(),
-                        one_day_before.score,
-                    ));
-                    break;
                 }
-                match s {
-                    Some(s) => Some(s),
-                    None => Some(ScoreSnap::new(
-                        last.score,
-                        last_date.clone(),
-                        Default::default(),
-                    )),
-                }
-            }
-            None => None,
-        }
-    }
-
-    pub fn min_bp_snap(&self, date: &UpdatedAt) -> Option<MinBPSnap> {
-        match self.snap(date) {
-            Some(last) => {
-                let mut last_date = &last.updated_at;
-
-                let mut s = None;
-                for snap in self.0.iter().rev() {
-                    if snap.min_bp <= last.min_bp {
-                        last_date = &snap.updated_at;
-                        continue;
-                    }
-                    let one_day_before = self.get_snap(&(last_date - Duration::days(1)));
-                    s = Some(MinBPSnap::new(
-                        last.min_bp,
-                        last_date.clone(),
-                        one_day_before.min_bp,
-                    ));
-                    break;
-                }
-                match s {
-                    Some(s) => Some(s),
-                    None => Some(MinBPSnap::new(
-                        last.min_bp,
-                        last_date.clone(),
-                        Default::default(),
-                    )),
-                }
-            }
-            None => None,
-        }
-    }
-
-    pub fn clear_type_snap(&self, date: &UpdatedAt) -> Option<ClearTypeSnap> {
-        match self.snap(date) {
-            Some(last) => {
-                let mut last_date = &last.updated_at;
-
-                let mut s = None;
-                for snap in self.0.iter().rev() {
-                    if snap.clear_type >= last.clear_type {
-                        last_date = &snap.updated_at;
-                        continue;
-                    }
-                    let one_day_before = self.get_snap(&(last_date - Duration::days(1)));
-                    s = Some(ClearTypeSnap::new(
-                        last.clear_type,
-                        last_date.clone(),
-                        one_day_before.clear_type,
-                    ));
-                    break;
-                }
-                match s {
-                    Some(s) => Some(s),
-                    None => Some(ClearTypeSnap::new(
-                        last.clear_type,
-                        last_date.clone(),
-                        Default::default(),
-                    )),
-                }
+                Some(T::make(last, last_date.clone(), one_day_before))
             }
             None => None,
         }
@@ -126,6 +42,7 @@ impl SnapShots {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::score::score::ClearTypeSnap;
 
     #[test]
     pub fn test() {
@@ -141,11 +58,11 @@ mod test {
             shot4.clone(),
         ]);
 
-        assert_eq!(shot1, shots.get_snap(&UpdatedAt::from_timestamp(21)));
-        assert_eq!(shot2, shots.get_snap(&UpdatedAt::from_timestamp(22)));
-        assert_eq!(shot2, shots.get_snap(&UpdatedAt::from_timestamp(23)));
-        assert_eq!(shot2, shots.get_snap(&UpdatedAt::from_timestamp(32)));
-        assert_eq!(shot3, shots.get_snap(&UpdatedAt::from_timestamp(33)));
+        assert_eq!(Some(&shot1), shots.snap(&UpdatedAt::from_timestamp(21)));
+        assert_eq!(Some(&shot2), shots.snap(&UpdatedAt::from_timestamp(22)));
+        assert_eq!(Some(&shot2), shots.snap(&UpdatedAt::from_timestamp(23)));
+        assert_eq!(Some(&shot2), shots.snap(&UpdatedAt::from_timestamp(32)));
+        assert_eq!(Some(&shot3), shots.snap(&UpdatedAt::from_timestamp(33)));
     }
 
     #[test]
@@ -154,7 +71,7 @@ mod test {
 
         fn asrt(snapshots: &SnapShots, current: ClearType, before: ClearType, timestamp: i64) {
             let snap = snapshots
-                .clear_type_snap(&UpdatedAt::from_timestamp(timestamp))
+                .param_snap::<ClearTypeSnap>(&UpdatedAt::from_timestamp(timestamp))
                 .unwrap_or_default();
             assert_eq!(current, snap.current);
             assert_eq!(before, snap.before);

@@ -42,14 +42,8 @@ impl Score {
         self.log.snap(date)
     }
 
-    pub fn score_snap(&self, date: &UpdatedAt) -> Option<ScoreSnap> {
-        self.log.score_snap(date)
-    }
-    pub fn min_bp_snap(&self, date: &UpdatedAt) -> Option<MinBPSnap> {
-        self.log.min_bp_snap(date)
-    }
-    pub fn clear_type_snap(&self, date: &UpdatedAt) -> Option<ClearTypeSnap> {
-        self.log.clear_type_snap(date)
+    pub fn param_snap<T: ParamSnap>(&self, date: &UpdatedAt) -> Option<T> {
+        self.log.param_snap::<T>(date)
     }
 }
 
@@ -67,9 +61,9 @@ impl ScoreDetail {
     pub fn new(score: &Score, date: &UpdatedAt) -> ScoreDetail {
         match score.snap(date) {
             Some(snap) => ScoreDetail {
-                clear_type: score.clear_type_snap(date),
-                min_bp: score.min_bp_snap(date),
-                score: score.score_snap(date),
+                clear_type: score.param_snap(date),
+                min_bp: score.param_snap(date),
+                score: score.param_snap(date),
                 max_combo: snap.max_combo.clone(),
                 updated_at: snap.updated_at.clone(),
                 play_count: if !date.is_future() {
@@ -90,13 +84,22 @@ pub struct ScoreSnap {
     pub before: ExScore,
 }
 
-impl ScoreSnap {
-    pub fn new(current: ExScore, updated_at: UpdatedAt, before: ExScore) -> Self {
+impl ParamSnap for ScoreSnap {
+    fn make(current: &SnapShot, updated_at: UpdatedAt, before_snap: Option<&SnapShot>) -> Self {
         ScoreSnap {
-            current,
+            current: current.score,
             updated_at,
-            before,
+            before: match before_snap {
+                Some(s) => s.score,
+                None => Default::default(),
+            },
         }
+    }
+}
+
+impl SnapCmp for ScoreSnap {
+    fn cmp(a: &SnapShot, b: &SnapShot) -> bool {
+        a.score >= b.score
     }
 }
 
@@ -107,13 +110,22 @@ pub struct MinBPSnap {
     pub before: MinBP,
 }
 
-impl MinBPSnap {
-    pub fn new(current: MinBP, updated_at: UpdatedAt, before: MinBP) -> Self {
+impl ParamSnap for MinBPSnap {
+    fn make(current: &SnapShot, updated_at: UpdatedAt, before_snap: Option<&SnapShot>) -> Self {
         MinBPSnap {
-            current,
+            current: current.min_bp,
             updated_at,
-            before,
+            before: match before_snap {
+                Some(s) => s.min_bp,
+                None => Default::default(),
+            },
         }
+    }
+}
+
+impl SnapCmp for MinBPSnap {
+    fn cmp(a: &SnapShot, b: &SnapShot) -> bool {
+        a.min_bp <= b.min_bp
     }
 }
 
@@ -124,12 +136,28 @@ pub struct ClearTypeSnap {
     pub before: ClearType,
 }
 
-impl ClearTypeSnap {
-    pub fn new(current: ClearType, updated_at: UpdatedAt, before: ClearType) -> Self {
+impl ParamSnap for ClearTypeSnap {
+    fn make(current: &SnapShot, updated_at: UpdatedAt, before_snap: Option<&SnapShot>) -> Self {
         ClearTypeSnap {
-            current,
+            current: current.clear_type,
             updated_at,
-            before,
+            before: match before_snap {
+                Some(s) => s.clear_type,
+                None => Default::default(),
+            },
         }
     }
+}
+
+impl SnapCmp for ClearTypeSnap {
+    fn cmp(a: &SnapShot, b: &SnapShot) -> bool {
+        a.clear_type >= b.clear_type
+    }
+}
+
+pub trait SnapCmp {
+    fn cmp(a: &SnapShot, b: &SnapShot) -> bool;
+}
+pub trait ParamSnap: SnapCmp {
+    fn make(current: &SnapShot, updated_at: UpdatedAt, before_snap: Option<&SnapShot>) -> Self;
 }

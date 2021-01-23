@@ -34,14 +34,21 @@ impl SqliteClient {
         let record: Vec<schema::score_log::ScoreLog> =
             scorelog.load(&connection).expect("Error loading schema");
 
-        let mut map = HashMap::new();
-        for row in record {
-            let song_id = ScoreId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
-            let snap =
-                SnapShot::from_data(row.clear, row.score, row.combo, row.minbp, row.date as i64);
-            map.entry(song_id).or_insert(SnapShots::default()).add(snap);
-        }
-        map
+        record.iter().fold(HashMap::new(), |mut map, row| {
+            map.entry(ScoreId::new(
+                row.sha256.parse().unwrap(),
+                PlayMode::new(row.mode),
+            ))
+            .or_default()
+            .add(SnapShot::from_data(
+                row.clear,
+                row.score,
+                row.combo,
+                row.minbp,
+                row.date as i64,
+            ));
+            map
+        })
     }
 
     pub fn player(&self) -> PlayerStates {
