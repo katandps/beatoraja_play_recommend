@@ -58,7 +58,7 @@ async fn update_score_data(
         score_file_name.clone(),
     );
 
-    let scores = sqlite_client.score();
+    let scores = get_score(&sqlite_client)?;
     mysql_client
         .save_score(account, scores)
         .map_err(|_| HandleError::SaveIsNotComplete.rejection())?;
@@ -70,6 +70,10 @@ async fn update_score_data(
         .await
         .map_err(|_| HandleError::FileIsNotDeleted.rejection());
     Ok("Score Is Updated.".into())
+}
+
+fn get_score(client: &SqliteClient) -> Result<Scores, HandleError> {
+    Ok(client.score()?)
 }
 
 pub async fn upload_song_data_handler(

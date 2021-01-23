@@ -21,6 +21,8 @@ pub enum HandleError {
     IOError(std::io::Error),
     #[error("MySqlError: {0:?}")]
     MySqlError(mysql::Error),
+    #[error("SqliteError: {0:?}")]
+    SqliteError(sqlite::SqliteError),
 
     #[error("WarpError: {0:?}")]
     WarpError(warp::Error),
@@ -131,6 +133,12 @@ impl From<redis::RedisError> for HandleError {
 impl From<mysql::Error> for HandleError {
     fn from(e: mysql::Error) -> Self {
         MySqlError(e)
+    }
+}
+
+impl From<sqlite::SqliteError> for HandleError {
+    fn from(e: sqlite::SqliteError) -> Self {
+        SqliteError(e)
     }
 }
 

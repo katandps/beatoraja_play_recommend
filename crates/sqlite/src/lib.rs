@@ -1,13 +1,12 @@
 mod schema;
 
-use anyhow::Result;
 use diesel::prelude::*;
 use model::*;
 use std::collections::HashMap;
+use thiserror::Error;
 
 #[macro_use]
 extern crate diesel;
-extern crate anyhow;
 
 pub struct SqliteClient {
     scorelog_db_url: String,
@@ -28,13 +27,12 @@ impl SqliteClient {
         SqliteConnection::establish(&url)
     }
 
-    fn score_log(&self) -> HashMap<ScoreId, SnapShots> {
+    fn score_log(&self) -> Result<HashMap<ScoreId, SnapShots>, SqliteError> {
         use schema::score_log::scorelog::dsl::*;
-        let connection = Self::establish_connection(&self.scorelog_db_url).unwrap();
-        let record: Vec<schema::score_log::ScoreLog> =
-            scorelog.load(&connection).expect("Error loading schema");
+        let connection = Self::establish_connection(&self.scorelog_db_url)?;
+        let record: Vec<schema::score_log::ScoreLog> = scorelog.load(&connection)?;
 
-        record.iter().fold(HashMap::new(), |mut map, row| {
+        Ok(record.iter().fold(HashMap::new(), |mut map, row| {
             map.entry(ScoreId::new(
                 row.sha256.parse().unwrap(),
                 PlayMode::new(row.mode),
@@ -48,7 +46,7 @@ impl SqliteClient {
                 row.date as i64,
             ));
             map
-        })
+        }))
     }
 
     pub fn player(&self) -> PlayerStates {
@@ -75,7 +73,7 @@ impl SqliteClient {
         PlayerStates::new(log)
     }
 
-    pub fn song_data(&self) -> Result<Songs> {
+    pub fn song_data(&self) -> Result<Songs, SqliteError> {
         let connection = Self::establish_connection(&self.song_db_url)?;
         let record: Vec<schema::song::Song> = schema::song::song::table.load(&connection)?;
 
@@ -94,13 +92,11 @@ impl SqliteClient {
             })
             .build())
     }
-    pub fn score(&self) -> Scores {
-        let connection = Self::establish_connection(&self.score_db_url).unwrap();
-        let record = schema::score::score::table
-            .load::<schema::score::Score>(&connection)
-            .expect("Error loading schema");
-        let score_log = self.score_log();
-        Scores::create_by_map(
+    pub fn score(&self) -> Result<Scores, SqliteError> {
+        let connection = Self::establish_connection(&self.score_db_url)?;
+        let record = schema::score::score::table.load::<schema::score::Score>(&connection)?;
+        let score_log = self.score_log()?;
+        Ok(Scores::create_by_map(
             record
                 .iter()
                 .map(|row| {
@@ -124,6 +120,25 @@ impl SqliteClient {
                     )
                 })
                 .collect::<HashMap<ScoreId, Score>>(),
-        )
+        ))
+    }
+}
+
+#[derive(Debug, Error)]
+pub enum SqliteError {
+    #[error("ConnectionError {0:?}")]
+    ConnectionError(diesel::ConnectionError),
+    #[error("DieselResultError {0:?}")]
+    DieselResultError(diesel::result::Error),
+}
+
+impl From<diesel::ConnectionError> for SqliteError {
+    fn from(e: ConnectionError) -> Self {
+        SqliteError::ConnectionError(e)
+    }
+}
+impl From<diesel::result::Error> for SqliteError {
+    fn from(e: diesel::result::Error) -> Self {
+        SqliteError::DieselResultError(e)
     }
 }
