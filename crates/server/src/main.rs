@@ -22,7 +22,6 @@ pub type SongData = Arc<Mutex<SongDB>>;
 #[tokio::main]
 async fn main() {
     env_logger::init();
-    let log = warp::log("access");
     let db_pool = mysql::get_db_pool();
     let new_tables = table::from_web().await;
 
@@ -31,15 +30,10 @@ async fn main() {
         song: client.song_data().unwrap(),
     }));
 
-    let table_route = routes::table_routes(&db_pool, &new_tables, &song_data)
-        .with(cors_header())
-        .with(log);
+    let table_route = routes::table_routes(&db_pool, &new_tables, &song_data);
     let route = routes::api_routes(&db_pool, &new_tables, &song_data)
-        .recover(error::handle_rejection)
-        .with(cors_header())
-        .with(warp::compression::gzip())
-        .with(log)
-        .or(table_route);
+        .or(table_route)
+        .recover(error::handle_rejection);
 
     let (http_addr, http_warp) = warp::serve(route.clone()).bind_ephemeral(([0, 0, 0, 0], 8000));
     let (https_addr, https_warp) = warp::serve(route.clone())
@@ -52,7 +46,7 @@ async fn main() {
     futures::future::join(http_warp, https_warp).await;
 }
 
-fn cors_header() -> Builder {
+pub fn cors_header() -> Builder {
     warp::cors()
         .allow_any_origin()
         .allow_methods(vec!["GET", "POST", "OPTIONS"])

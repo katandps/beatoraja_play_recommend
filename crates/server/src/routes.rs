@@ -33,15 +33,24 @@ pub fn api_routes(
         .or(detail_route)
         .or(upload_route)
         .or(oauth_redirect_route)
+        .with(crate::cors_header())
+        .with(warp::compression::gzip())
+        .with(warp::log("api_access"))
         .boxed()
 }
 
 pub fn table_routes(
     db_pool: &MySqlPool,
-    t: &Tables,
+    tables: &Tables,
     song_data: &SongData,
 ) -> BoxedFilter<(impl Reply,)> {
-    custom_table::custom_tables(db_pool, t, song_data)
+    use custom_table::*;
+    custom_table_header(tables)
+        .or(custom_table_body(db_pool, tables, song_data))
+        .or(custom_table())
+        .with(crate::cors_header())
+        .with(warp::log("table_access"))
+        .boxed()
 }
 
 fn tables(tables: &Tables) -> BoxedFilter<(impl Reply,)> {

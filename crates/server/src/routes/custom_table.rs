@@ -7,18 +7,7 @@ use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Reply};
 
-pub fn custom_tables(
-    db_pool: &MySqlPool,
-    tables: &Tables,
-    song_data: &SongData,
-) -> BoxedFilter<(impl Reply,)> {
-    custom_table_header(tables)
-        .or(custom_table_body(db_pool, tables, song_data))
-        .or(custom_table())
-        .boxed()
-}
-
-fn custom_table() -> BoxedFilter<(impl Reply,)> {
+pub fn custom_table() -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("recommend_table"))
         .and(path::param())
@@ -27,7 +16,7 @@ fn custom_table() -> BoxedFilter<(impl Reply,)> {
         .boxed()
 }
 
-fn custom_table_header(tables: &Tables) -> BoxedFilter<(impl Reply,)> {
+pub fn custom_table_header(tables: &Tables) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("recommend_table"))
         .and(path::param())
@@ -37,7 +26,7 @@ fn custom_table_header(tables: &Tables) -> BoxedFilter<(impl Reply,)> {
         .boxed()
 }
 
-fn custom_table_body(
+pub fn custom_table_body(
     db_pool: &MySqlPool,
     tables: &Tables,
     song_data: &SongData,
