@@ -20,7 +20,16 @@ pub async fn from_web() -> Tables {
 }
 
 async fn make_table(url: String) -> Result<Table, TableParseError> {
-    let res = reqwest::get(&url)
+    let header_url = get_header_url(&url).await?;
+    let header = get_header(&header_url).await?;
+    let data_url = make_data_url(&header_url, &header)?;
+    let charts = get_charts(&data_url).await?;
+    let levels = make_levels(&header, &charts);
+    Ok(Table::make(header.name, header.symbol, levels))
+}
+
+async fn get_header_url(url: &String) -> Result<Url, TableParseError> {
+    let res = reqwest::get(url)
         .await
         .map_err(|e| FailedToAccessTableURL(e))?;
     let body = res.text().await.map_err(|e| FailedToGetTableURL(e))?;
@@ -35,36 +44,45 @@ async fn make_table(url: String) -> Result<Table, TableParseError> {
             .join(header_url_fragment)
             .map_err(|e| InvalidHeaderURL(e))?;
     }
+    Ok(header_url)
+}
 
-    let header_text: String = reqwest::get(&header_url.to_string())
+async fn get_header(url: &Url) -> Result<Header, TableParseError> {
+    let header_text: String = reqwest::get(&url.to_string())
         .await
         .map_err(|e| FailedToAccessHeaderURL(e))?
         .text()
         .await
         .map_err(|e| FailedToAccessHeaderURL(e))?;
-    let header: Header = serde_json::from_str(header_text.trim_start_matches('\u{feff}'))
-        .map_err(|e| FailedToParseHeader(e))?;
+    serde_json::from_str(header_text.trim_start_matches('\u{feff}'))
+        .map_err(|e| FailedToParseHeader(e))
+}
 
-    let data_url = header_url
+fn make_data_url(header_url: &Url, header: &Header) -> Result<Url, TableParseError> {
+    header_url
         .join(header.data_url.as_ref())
-        .map_err(|e| InvalidDataURL(e))?;
-    let data_text = reqwest::get(&data_url.to_string())
+        .map_err(|e| InvalidDataURL(e))
+}
+
+async fn get_charts(url: &Url) -> Result<Charts, TableParseError> {
+    let data_text = reqwest::get(&url.to_string())
         .await
         .map_err(|e| FailedToAccessDataURL(e))?
         .text()
         .await
         .map_err(|e| FailedToGetDataURL(e))?;
-    let charts = Charts::make(
+    Ok(Charts::make(
         serde_json::from_str(data_text.trim_start_matches('\u{feff}'))
             .map_err(|e| FailedToParseData(e))?,
-    );
-    let order = match header.level_order {
-        Some(s) => s,
+    ))
+}
+
+fn make_levels(header: &Header, charts: &Charts) -> TableLevels {
+    let order = match &header.level_order {
+        Some(s) => s.clone(),
         None => charts.get_levels().iter().map(Level::to_string).collect(),
     };
-    let levels = charts.make_levels(&order);
-
-    Ok(Table::make(header.name, header.symbol, levels))
+    charts.make_levels(&order)
 }
 
 #[derive(Debug, Error)]
