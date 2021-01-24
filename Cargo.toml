@@ -6,5 +6,6 @@ members = [
     "crates/sqlite",
     "crates/mysql",
     "crates/server",
-    "crates/oauth_google"
+    "crates/oauth_google",
+    "crates/bpr_web"
 ]
