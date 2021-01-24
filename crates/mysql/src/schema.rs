@@ -79,11 +79,21 @@ table! {
     }
 }
 
+table! {
+    user_statuses (id) {
+        id -> Integer,
+        user_id -> Integer,
+        visible -> Bool,
+        score_updated_at -> Datetime,
+    }
+}
+
 joinable!(score_snaps -> hashes (sha256));
 joinable!(score_snaps -> users (user_id));
 joinable!(scores -> hashes (sha256));
 joinable!(scores -> users (user_id));
 joinable!(songs -> hashes (sha256));
+joinable!(user_statuses -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
     hashes,
@@ -92,4 +102,5 @@ allow_tables_to_appear_in_same_query!(
     score_snaps,
     songs,
     users,
+    user_statuses,
 );

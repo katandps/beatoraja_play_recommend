@@ -150,3 +150,19 @@ impl CanGetHash for ScoreSnapForUpdate {
         self.sha256.clone()
     }
 }
+
+#[derive(Debug, Clone, Queryable)]
+pub struct UserStatus {
+    pub id: i32,
+    pub user_id: i32,
+    pub visible: bool,
+    pub score_updated_at: NaiveDateTime,
+}
+
+#[derive(Debug, Clone, Insertable)]
+#[table_name = "user_statuses"]
+pub struct UserStatusForInsert {
+    pub user_id: i32,
+    pub visible: bool,
+    pub score_updated_at: NaiveDateTime,
+}
