@@ -8,7 +8,7 @@ pub async fn change_name_handler(
     mut account: Account,
     changed_name: String,
 ) -> Result<impl Reply, Rejection> {
-    account.set_name(changed_name.clone());
+    account.set_name(&changed_name);
     rename_account(&repos, &account)?;
     Ok(serde_json::to_string(&account).unwrap())
 }

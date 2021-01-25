@@ -1,5 +1,6 @@
 use crate::config::config;
 use crate::error::HandleError;
+use crate::error::HandleError::SessionError;
 use anyhow::Result;
 use model::*;
 use mysql::MySQLClient;
@@ -29,7 +30,9 @@ pub fn remove_session(key: &String) -> Result<(), HandleError> {
 
 pub fn get_user_id(key: &String) -> Result<GoogleId, HandleError> {
     let mut redis_connection = get_client()?;
-    Ok(GoogleId::new(redis_connection.get(key)?))
+    Ok(GoogleId::new(
+        redis_connection.get(key).map_err(|e| SessionError(e))?,
+    ))
 }
 
 pub fn get_account(repos: &MySQLClient, user_id: GoogleId) -> Result<Account, HandleError> {

@@ -26,6 +26,8 @@ pub enum HandleError {
 
     #[error("WarpError: {0:?}")]
     WarpError(warp::Error),
+    #[error("SessionIsNotFound:{0:?}")]
+    SessionError(redis::RedisError),
 
     #[error("DirectoryCouldNotCreated")]
     DirectoryCouldNotCreated,
