@@ -19,7 +19,6 @@ use std::collections::{HashMap, HashSet};
 
 #[macro_use]
 extern crate diesel;
-
 #[macro_use]
 extern crate lazy_static;
 
@@ -57,7 +56,7 @@ impl MySQLClient {
                     name: profile.name.to_string(),
                     registered_date: Utc::now().naive_utc(),
                 };
-                println!("Insert new user");
+                log::info!("Insert new user: {}", profile.email);
                 diesel::insert_into(schema::users::table)
                     .values(user.clone())
                     .execute(&self.connection)?;
@@ -95,7 +94,7 @@ impl MySQLClient {
     }
 
     pub fn rename_account(&self, account: &Account) -> Result<(), Error> {
-        println!("Update user name to {}.", account.user_name());
+        log::info!("Update user name to {}.", account.user_name());
         let user = query::account_by_email(&self.connection, &account.email())?;
         diesel::insert_into(schema::rename_logs::table)
             .values(models::RenameUser {
@@ -283,9 +282,9 @@ impl MySQLClient {
                 }
             }
         }
-        dbg!(&songs_for_insert.len());
-        dbg!(&songs_for_update.len());
-        dbg!(&snaps_for_insert.len());
+        log::info!("Songs for Insert {} records.", songs_for_insert.len());
+        log::info!("Songs for Update {} records.", songs_for_update.len());
+        log::info!("Snaps for Insert {} records.", snaps_for_insert.len());
         fn div<T: Clone + CanGetHash>(v: Vec<T>, hashes: &HashSet<String>) -> Vec<Vec<T>> {
             let mut index = 0;
             let mut ret = Vec::new();
@@ -346,14 +345,14 @@ impl MySQLClient {
         let mut index = 0;
         loop {
             let mut records = Vec::new();
-            while index < new_hashes.len() && records.len() < 100 {
+            while index < new_hashes.len() && records.len() < 1000 {
                 records.push(new_hashes[index].clone());
                 index += 1;
             }
             if records.is_empty() {
                 break;
             }
-            println!("Insert {} hashes.", records.len());
+            log::info!("Insert {} hashes.", records.len());
             diesel::insert_into(schema::hashes::table)
                 .values(records)
                 .execute(&self.connection)?;
@@ -387,7 +386,7 @@ impl MySQLClient {
             if records.is_empty() {
                 break;
             }
-            println!("Insert {} songs.", records.len());
+            log::info!("Insert {} songs.", records.len());
             diesel::insert_into(schema::songs::table)
                 .values(records)
                 .execute(&self.connection)?;
