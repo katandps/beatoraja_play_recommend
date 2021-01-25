@@ -5,7 +5,7 @@ mod query;
 mod schema;
 
 pub use crate::error::Error;
-use crate::models::{CanGetHash, RegisteredScore, ScoreSnapForUpdate};
+use crate::models::{CanGetHash, ScoreSnapForUpdate};
 use anyhow::anyhow;
 use anyhow::Result;
 use chrono::Utc;
@@ -216,55 +216,12 @@ impl MySQLClient {
             match saved_song.get(&song_id) {
                 Some(saved) => {
                     if UpdatedAt::from_naive_datetime(saved.date) < score.updated_at {
-                        songs_for_update.push(models::Score {
-                            id: saved.id,
-                            user_id,
-                            sha256: song_id.sha256().to_string(),
-                            mode: song_id.mode().to_int(),
-                            clear: score.clear.to_integer(),
-                            epg: score.judge.early_pgreat,
-                            lpg: score.judge.late_pgreat,
-                            egr: score.judge.early_great,
-                            lgr: score.judge.late_great,
-                            egd: score.judge.early_good,
-                            lgd: score.judge.late_good,
-                            ebd: score.judge.early_bad,
-                            lbd: score.judge.late_bad,
-                            epr: score.judge.early_poor,
-                            lpr: score.judge.late_poor,
-                            ems: score.judge.early_miss,
-                            lms: score.judge.late_miss,
-                            combo: score.max_combo.0,
-                            min_bp: score.min_bp.0,
-                            play_count: score.play_count.0,
-                            clear_count: 0,
-                            date: score.updated_at.naive_datetime(),
-                        })
+                        songs_for_update
+                            .push(models::Score::from_score(saved, score, user_id, song_id))
                     }
                 }
-                None => songs_for_insert.push(RegisteredScore {
-                    user_id,
-                    sha256: song_id.sha256().to_string(),
-                    mode: song_id.mode().to_int(),
-                    clear: score.clear.to_integer(),
-                    epg: score.judge.early_pgreat,
-                    lpg: score.judge.late_pgreat,
-                    egr: score.judge.early_great,
-                    lgr: score.judge.late_great,
-                    egd: score.judge.early_good,
-                    lgd: score.judge.late_good,
-                    ebd: score.judge.early_bad,
-                    lbd: score.judge.late_bad,
-                    epr: score.judge.early_poor,
-                    lpr: score.judge.late_poor,
-                    ems: score.judge.early_miss,
-                    lms: score.judge.late_miss,
-                    combo: score.max_combo.0,
-                    min_bp: score.min_bp.0,
-                    play_count: score.play_count.0,
-                    clear_count: 0,
-                    date: score.updated_at.naive_datetime(),
-                }),
+                None => songs_for_insert
+                    .push(models::RegisteredScore::from_score(user_id, score, song_id)),
             };
             for snapshot in &score.log.0 {
                 match saved_snap.get(&(song_id.clone(), snapshot.updated_at.naive_datetime())) {

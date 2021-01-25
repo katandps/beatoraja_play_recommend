@@ -1,5 +1,6 @@
 use crate::schema::*;
 use chrono::NaiveDateTime;
+use model::ScoreId;
 
 #[derive(Debug, Clone, Queryable, Insertable)]
 #[table_name = "scores"]
@@ -26,6 +27,35 @@ pub struct Score {
     pub play_count: i32,
     pub clear_count: i32,
     pub date: NaiveDateTime,
+}
+
+impl Score {
+    pub fn from_score(saved: &Self, score: &model::Score, user_id: i32, song_id: &ScoreId) -> Self {
+        Self {
+            id: saved.id,
+            user_id,
+            sha256: song_id.sha256().to_string(),
+            mode: song_id.mode().to_int(),
+            clear: score.clear.to_integer(),
+            epg: score.judge.early_pgreat,
+            lpg: score.judge.late_pgreat,
+            egr: score.judge.early_great,
+            lgr: score.judge.late_great,
+            egd: score.judge.early_good,
+            lgd: score.judge.late_good,
+            ebd: score.judge.early_bad,
+            lbd: score.judge.late_bad,
+            epr: score.judge.early_poor,
+            lpr: score.judge.late_poor,
+            ems: score.judge.early_miss,
+            lms: score.judge.late_miss,
+            combo: score.max_combo.0,
+            min_bp: score.min_bp.0,
+            play_count: score.play_count.0,
+            clear_count: 0,
+            date: score.updated_at.naive_datetime(),
+        }
+    }
 }
 
 impl CanGetHash for Score {
@@ -58,6 +88,34 @@ pub struct RegisteredScore {
     pub play_count: i32,
     pub clear_count: i32,
     pub date: NaiveDateTime,
+}
+
+impl RegisteredScore {
+    pub fn from_score(user_id: i32, score: &model::Score, song_id: &ScoreId) -> Self {
+        RegisteredScore {
+            user_id,
+            sha256: song_id.sha256().to_string(),
+            mode: song_id.mode().to_int(),
+            clear: score.clear.to_integer(),
+            epg: score.judge.early_pgreat,
+            lpg: score.judge.late_pgreat,
+            egr: score.judge.early_great,
+            lgr: score.judge.late_great,
+            egd: score.judge.early_good,
+            lgd: score.judge.late_good,
+            ebd: score.judge.early_bad,
+            lbd: score.judge.late_bad,
+            epr: score.judge.early_poor,
+            lpr: score.judge.late_poor,
+            ems: score.judge.early_miss,
+            lms: score.judge.late_miss,
+            combo: score.max_combo.0,
+            min_bp: score.min_bp.0,
+            play_count: score.play_count.0,
+            clear_count: 0,
+            date: score.updated_at.naive_datetime(),
+        }
+    }
 }
 
 impl CanGetHash for RegisteredScore {
