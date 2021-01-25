@@ -87,7 +87,7 @@ fn account(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
 
 fn change_name(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::post()
-        .and(path("update"))
+        .and(path("user"))
         .and(path("name"))
         .and(with_db(&db_pool))
         .and(account_by_session(&db_pool))
