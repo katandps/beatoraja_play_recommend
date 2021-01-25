@@ -145,27 +145,31 @@ impl MySQLClient {
         Ok(Scores::create_by_map(
             record
                 .iter()
-                .map(|row| {
-                    let song_id =
-                        ScoreId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
-                    (
-                        song_id.clone(),
-                        Score::new(
-                            ClearType::from_integer(row.clear),
-                            UpdatedAt::from_timestamp(row.date.timestamp()),
-                            Judge::new(
-                                row.epg, row.lpg, row.egr, row.lgr, row.egd, row.lgd, row.ebd,
-                                row.lbd, row.epr, row.lpr, row.ems, row.lms,
-                            ),
-                            MaxCombo::from_combo(row.combo),
-                            PlayCount::new(row.play_count),
-                            ClearCount::new(row.clear_count),
-                            MinBP::from_bp(row.min_bp),
-                            score_log.get(&song_id).cloned().unwrap_or_default(),
-                        ),
-                    )
-                })
+                .filter_map(|row| Self::make_score(row, &score_log).ok())
                 .collect::<HashMap<ScoreId, Score>>(),
+        ))
+    }
+
+    fn make_score(
+        score: &models::Score,
+        log: &HashMap<ScoreId, SnapShots>,
+    ) -> Result<(ScoreId, Score)> {
+        let song_id = ScoreId::new(score.sha256.parse()?, PlayMode::new(score.mode));
+        Ok((
+            song_id.clone(),
+            Score::new(
+                ClearType::from_integer(score.clear),
+                UpdatedAt::from_timestamp(score.date.timestamp()),
+                Judge::new(
+                    score.epg, score.lpg, score.egr, score.lgr, score.egd, score.lgd, score.ebd,
+                    score.lbd, score.epr, score.lpr, score.ems, score.lms,
+                ),
+                MaxCombo::from_combo(score.combo),
+                PlayCount::new(score.play_count),
+                ClearCount::new(score.clear_count),
+                MinBP::from_bp(score.min_bp),
+                log.get(&song_id).cloned().unwrap_or_default(),
+            ),
         ))
     }
 
@@ -395,10 +399,10 @@ impl MySQLClient {
 
     pub fn song_data(&self) -> Result<Songs> {
         let record = query::songs(&self.connection)?;
-        let hash: HashMap<String, String> = query::hashes(&self.connection)?
+        let hash = query::hashes(&self.connection)?
             .iter()
             .map(|hash| (hash.sha256.clone(), hash.md5.clone()))
-            .collect();
+            .collect::<HashMap<String, String>>();
 
         Ok(record
             .iter()
