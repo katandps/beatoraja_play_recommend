@@ -5,5 +5,6 @@ mod prelude;
 mod registered_date;
 mod user_id;
 mod user_name;
+mod visibility;
 
 pub use prelude::*;

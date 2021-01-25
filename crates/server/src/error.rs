@@ -40,6 +40,8 @@ pub enum HandleError {
 
     #[error("ChangedNameNotFound")]
     ChangedNameNotFound,
+    #[error("ChangedVisibilityNotFound")]
+    ChangedVisibilityNotFound,
 
     #[error("OAuthGoogleError: {0:?}")]
     OAuthGoogleError(oauth_google::Error),
@@ -71,6 +73,7 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
                 FileIsNotFound => StatusCode::OK,
                 SaveIsNotComplete => StatusCode::OK,
                 FileIsNotDeleted => StatusCode::OK,
+                SessionError(_) => StatusCode::UNAUTHORIZED,
                 _ => StatusCode::INTERNAL_SERVER_ERROR,
             },
             e.to_string(),

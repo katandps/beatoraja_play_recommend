@@ -20,6 +20,7 @@ pub fn api_routes(
     let health_route = health(db_pool);
     let account_route = account(db_pool);
     let change_name_route = change_name(db_pool);
+    let change_visibility_route = change_visibility(db_pool);
     let logout_route = logout();
     let detail_route = detail(db_pool, t, song_data);
     let upload_route = uploads::uploads(db_pool, song_data);
@@ -27,6 +28,7 @@ pub fn api_routes(
     health_route
         .or(account_route)
         .or(change_name_route)
+        .or(change_visibility_route)
         .or(logout_route)
         .or(tables_route)
         .or(songs_route)
@@ -89,10 +91,21 @@ fn change_name(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::post()
         .and(path("user"))
         .and(path("name"))
-        .and(with_db(&db_pool))
-        .and(account_by_session(&db_pool))
+        .and(with_db(db_pool))
+        .and(account_by_session(db_pool))
         .and(changed_name_by_query())
         .and_then(change_name::change_name_handler)
+        .boxed()
+}
+
+fn change_visibility(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
+    warp::post()
+        .and(path("user"))
+        .and(path("visibility"))
+        .and(with_db(db_pool))
+        .and(account_by_session(db_pool))
+        .and(changed_visibility_by_query())
+        .and_then(change_visibility::change_visibility_handler)
         .boxed()
 }
 

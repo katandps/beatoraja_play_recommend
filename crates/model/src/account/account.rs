@@ -9,6 +9,7 @@ pub struct Account {
     pub gmail_address: GmailAddress,
     pub name: UserName,
     pub registered_date: RegisteredDate,
+    pub visibility: Visibility,
 }
 
 impl Account {
@@ -18,6 +19,7 @@ impl Account {
         gmail_address: GmailAddress,
         name: UserName,
         registered_date: RegisteredDate,
+        visibility: Visibility,
     ) -> Self {
         Self {
             user_id,
@@ -25,6 +27,7 @@ impl Account {
             gmail_address,
             name,
             registered_date,
+            visibility,
         }
     }
 
@@ -51,4 +54,6 @@ impl Account {
     pub fn set_name(&mut self, new_name: &String) {
         self.name = UserName::new(new_name.clone());
     }
+
+    pub fn set_visibility(&mut self, _new_visibility: bool) {}
 }

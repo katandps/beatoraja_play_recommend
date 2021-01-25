@@ -109,11 +109,22 @@ pub fn changed_name_by_query() -> impl Filter<Extract = (String,), Error = Rejec
     warp::body::json().and_then(get_changed_name_query)
 }
 
+pub fn changed_visibility_by_query() -> impl Filter<Extract = (bool,), Error = Rejection> + Clone {
+    warp::body::json().and_then(get_changed_visibility_query)
+}
+
 async fn get_changed_name_query(body: HashMap<String, String>) -> Result<String, Rejection> {
     let changed_name = body
         .get(&"changed_name".to_string())
         .ok_or(HandleError::ChangedNameNotFound)?;
     Ok(changed_name.clone())
+}
+
+async fn get_changed_visibility_query(body: HashMap<String, String>) -> Result<bool, Rejection> {
+    let changed_visibility = body
+        .get(&"visibility".to_string())
+        .ok_or(HandleError::ChangedVisibilityNotFound)?;
+    Ok(changed_visibility == &"true".to_string())
 }
 
 pub struct DetailQuery {

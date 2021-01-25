@@ -85,6 +85,7 @@ impl MySQLClient {
             GmailAddress::new(model.gmail_address),
             UserName::new(model.name),
             RegisteredDate::new(model.registered_date),
+            Visibility::new(true),
         )
     }
 
@@ -113,6 +114,10 @@ impl MySQLClient {
         .set(schema::users::name.eq(account.user_name()))
         .execute(&self.connection)?;
 
+        Ok(())
+    }
+
+    pub fn change_account_visibility(&self, _account: &Account) -> Result<(), Error> {
         Ok(())
     }
 
