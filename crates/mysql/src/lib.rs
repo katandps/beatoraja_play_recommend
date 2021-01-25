@@ -6,11 +6,11 @@ mod schema;
 
 pub use crate::error::Error;
 use crate::models::{CanGetHash, RegisteredScore, ScoreSnapForUpdate};
+use anyhow::anyhow;
 use anyhow::Result;
 use chrono::Utc;
 use diesel::prelude::*;
-use diesel::r2d2::ConnectionManager;
-use diesel::r2d2::PooledConnection;
+use diesel::r2d2::{ConnectionManager, PooledConnection};
 use diesel::MysqlConnection;
 use model::*;
 use oauth_google::GoogleProfile;
@@ -19,8 +19,6 @@ use std::collections::{HashMap, HashSet};
 
 #[macro_use]
 extern crate diesel;
-#[macro_use]
-extern crate anyhow;
 
 #[macro_use]
 extern crate lazy_static;
