@@ -43,33 +43,32 @@ async fn update_score_data(
     dir_name: String,
 ) -> Result<String, Rejection> {
     let score_file_name = format!("./files/{}/score.db", dir_name);
-    let scorelog_file_name = format!("./files/{}/scorelog.db", dir_name);
+    let score_log_file_name = format!("./files/{}/scorelog.db", dir_name);
 
-    let _score_file = tokio::fs::read(&score_file_name)
-        .await
-        .map_err(|_| HandleError::FileIsNotFound.rejection())?;
-    let _scorelog_file = tokio::fs::read(&scorelog_file_name)
-        .await
-        .map_err(|_| HandleError::FileIsNotFound.rejection())?;
+    let score_file = tokio::fs::read(&score_file_name).await;
+    let score_log_files = tokio::fs::read(&score_log_file_name).await;
+    if let (Ok(_), Ok(_)) = (score_file, score_log_files) {
+        let sqlite_client = SqliteClient::new(
+            score_log_file_name.clone(),
+            "".into(),
+            score_file_name.clone(),
+        );
 
-    let sqlite_client = SqliteClient::new(
-        scorelog_file_name.clone(),
-        "".into(),
-        score_file_name.clone(),
-    );
+        let scores = get_score(&sqlite_client)?;
+        mysql_client
+            .save_score(account, scores)
+            .map_err(|_| HandleError::SaveIsNotComplete.rejection())?;
 
-    let scores = get_score(&sqlite_client)?;
-    mysql_client
-        .save_score(account, scores)
-        .map_err(|_| HandleError::SaveIsNotComplete.rejection())?;
-
-    let _remove_score = tokio::fs::remove_file(&score_file_name)
-        .await
-        .map_err(|_| HandleError::FileIsNotDeleted.rejection());
-    let _remove_score_log = tokio::fs::remove_file(&scorelog_file_name)
-        .await
-        .map_err(|_| HandleError::FileIsNotDeleted.rejection());
-    Ok("Score Is Updated.".into())
+        let _remove_score = tokio::fs::remove_file(&score_file_name)
+            .await
+            .map_err(|_| HandleError::FileIsNotDeleted.rejection());
+        let _remove_score_log = tokio::fs::remove_file(&score_log_file_name)
+            .await
+            .map_err(|_| HandleError::FileIsNotDeleted.rejection());
+        Ok("Score Is Updated.".into())
+    } else {
+        Ok("Score Is Not Updated.".into())
+    }
 }
 
 fn get_score(client: &SqliteClient) -> Result<Scores, HandleError> {
