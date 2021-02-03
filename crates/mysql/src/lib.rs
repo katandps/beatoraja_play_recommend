@@ -8,7 +8,7 @@ pub use crate::error::Error;
 use crate::models::{CanGetHash, ScoreSnapForUpdate};
 use anyhow::anyhow;
 use anyhow::Result;
-use chrono::Utc;
+use chrono::{NaiveDateTime, Utc};
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, PooledConnection};
 use diesel::MysqlConnection;
@@ -123,7 +123,7 @@ impl MySQLClient {
         let records = query::score_snaps_by_user_id(&self.connection, account.user_id())?;
         let mut map = HashMap::new();
         for row in records {
-            let song_id = ScoreId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
+            let song_id = ScoreId::new(row.sha256.parse().unwrap(), PlayMode::from(row.mode));
             let snap = SnapShot::from_data(
                 row.clear,
                 row.score,
@@ -142,8 +142,8 @@ impl MySQLClient {
         let score_log = self.score_log(account)?;
         Ok(Scores::create_by_map(
             record
-                .iter()
-                .filter_map(|row| Self::make_score(row, &score_log).ok())
+                .into_iter()
+                .filter_map(|row| Self::make_score(&row, &score_log).ok())
                 .collect::<HashMap<ScoreId, Score>>(),
         ))
     }
@@ -152,7 +152,7 @@ impl MySQLClient {
         score: &models::Score,
         log: &HashMap<ScoreId, SnapShots>,
     ) -> Result<(ScoreId, Score)> {
-        let song_id = ScoreId::new(score.sha256.parse()?, PlayMode::new(score.mode));
+        let song_id = ScoreId::new(score.sha256.parse()?, PlayMode::from(score.mode));
         Ok((
             song_id.clone(),
             Score::new(
@@ -171,38 +171,49 @@ impl MySQLClient {
         ))
     }
 
-    pub fn save_score(&self, account: Account, score: Scores) -> Result<()> {
-        let user = query::account_by_email(&self.connection, &account.email())?;
-        let user_id = user.id;
-        let saved = query::scores_by_user_id(&self.connection, user.id)?;
-        let saved_song = saved
-            .iter()
+    fn saved_song(&self, user_id: i32) -> Result<HashMap<ScoreId, models::Score>> {
+        let saved = query::scores_by_user_id(&self.connection, user_id)?;
+        Ok(saved
+            .into_iter()
             .map(|record| {
                 (
                     ScoreId::new(
                         HashSha256::from_str(&record.sha256).unwrap(),
-                        PlayMode::new(record.mode),
+                        PlayMode::from(record.mode),
                     ),
                     record,
                 )
             })
-            .collect::<HashMap<_, _>>();
-        let saved = query::score_snaps_by_user_id(&self.connection, user.id)?;
-        let saved_snap = saved
-            .iter()
+            .collect::<HashMap<_, _>>())
+    }
+
+    fn saved_snap(
+        &self,
+        user_id: i32,
+    ) -> Result<HashMap<(ScoreId, NaiveDateTime), models::ScoreSnap>> {
+        let saved = query::score_snaps_by_user_id(&self.connection, user_id)?;
+        Ok(saved
+            .into_iter()
             .map(|record| {
                 (
                     (
                         ScoreId::new(
                             HashSha256::from_str(&record.sha256).unwrap(),
-                            PlayMode::new(record.mode),
+                            PlayMode::from(record.mode),
                         ),
                         record.date.clone(),
                     ),
                     record,
                 )
             })
-            .collect::<HashMap<_, _>>();
+            .collect::<HashMap<_, _>>())
+    }
+
+    pub fn save_score(&self, account: Account, score: Scores) -> Result<()> {
+        let user = query::account_by_email(&self.connection, &account.email())?;
+        let user_id = user.id;
+        let saved_song = self.saved_song(user_id)?;
+        let saved_snap = self.saved_snap(user_id)?;
 
         let hashes = query::hashes(&self.connection)?
             .iter()
@@ -323,16 +334,7 @@ impl MySQLClient {
         }
         let new_songs = songs
             .iter()
-            .map(|(_, song)| models::Song {
-                sha256: song.get_sha256().to_string(),
-                title: song.title(),
-                subtitle: "".into(),
-                artist: song.artist(),
-                sub_artist: "".into(),
-                notes: song.notes(),
-                length: 0,
-                features: song.features().clone().into(),
-            })
+            .map(|(_, song)| models::Song::from_song(song))
             .collect::<Vec<_>>();
         let mut index = 0;
         loop {

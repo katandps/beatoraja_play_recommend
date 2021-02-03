@@ -18,6 +18,21 @@ pub struct Song {
     pub features: i32,
 }
 
+impl Song {
+    pub fn from_song(song: &model::Song) -> Self {
+        Self {
+            sha256: song.get_sha256().to_string(),
+            title: song.title(),
+            subtitle: "".into(),
+            artist: song.artist(),
+            sub_artist: "".into(),
+            notes: song.notes(),
+            length: 0,
+            features: song.features().clone().into(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Queryable, Insertable)]
 #[table_name = "hashes"]
 pub struct Hash {

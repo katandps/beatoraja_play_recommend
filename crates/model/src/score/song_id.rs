@@ -23,17 +23,19 @@ impl ScoreId {
 pub struct PlayMode(LnMode);
 
 impl PlayMode {
-    pub fn new(mode: i32) -> Self {
+    pub fn to_int(&self) -> i32 {
+        self.0 as i32
+    }
+}
+
+impl From<i32> for PlayMode {
+    fn from(mode: i32) -> Self {
         let lm = match FromPrimitive::from_i32(mode % 10) {
             Some(lm) => lm,
             None => LnMode::LongNote,
         };
 
         PlayMode(lm)
-    }
-
-    pub fn to_int(&self) -> i32 {
-        self.0 as i32
     }
 }
 

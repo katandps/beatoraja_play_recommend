@@ -33,10 +33,10 @@ impl SqliteClient {
         let connection = Self::establish_connection(&self.scorelog_db_url)?;
         let record: Vec<schema::score_log::ScoreLog> = scorelog.load(&connection)?;
 
-        Ok(record.iter().fold(HashMap::new(), |mut map, row| {
+        Ok(record.into_iter().fold(HashMap::new(), |mut map, row| {
             map.entry(ScoreId::new(
                 row.sha256.parse().unwrap(),
-                PlayMode::new(row.mode),
+                PlayMode::from(row.mode),
             ))
             .or_default()
             .add(SnapShot::from_data(
@@ -102,7 +102,7 @@ impl SqliteClient {
                 .iter()
                 .map(|row| {
                     let song_id =
-                        ScoreId::new(row.sha256.parse().unwrap(), PlayMode::new(row.mode));
+                        ScoreId::new(row.sha256.parse().unwrap(), PlayMode::from(row.mode));
                     (
                         song_id.clone(),
                         Score::new(

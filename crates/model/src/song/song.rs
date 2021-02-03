@@ -46,7 +46,7 @@ impl Song {
     }
 
     pub fn song_id(&self) -> ScoreId {
-        ScoreId::new(self.sha256.clone(), PlayMode::new(0))
+        ScoreId::new(self.sha256.clone(), PlayMode::default())
     }
 
     pub fn title(&self) -> String {

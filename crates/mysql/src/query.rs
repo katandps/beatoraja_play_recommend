@@ -65,3 +65,10 @@ pub fn score_snaps_by_user_id(
         .load(connection)
         .map_err(|e| DieselError(e))
 }
+
+pub fn user_list(connection: &MySqlPooledConnection) -> Result<Vec<models::UserStatus>, Error> {
+    schema::user_statuses::table
+        .filter(schema::user_statuses::visible.eq(true))
+        .load(connection)
+        .map_err(|e| DieselError(e))
+}

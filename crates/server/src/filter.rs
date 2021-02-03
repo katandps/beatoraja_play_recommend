@@ -64,7 +64,7 @@ async fn parse_detail_query(query: HashMap<String, String>) -> Result<DetailQuer
         .unwrap_or_default();
     let play_mode = if let Some(mode) = query.get("mode".into()) {
         match mode.parse::<i32>() {
-            Ok(mode) => PlayMode::new(mode),
+            Ok(mode) => PlayMode::from(mode),
             Err(_) => PlayMode::default(),
         }
     } else {
