@@ -45,6 +45,24 @@ impl Score {
     pub fn param_snap<T: ParamSnap>(&self, date: &UpdatedAt) -> Option<T> {
         self.log.param_snap::<T>(date)
     }
+
+    pub fn make_detail(&self, date: &UpdatedAt) -> ScoreDetail {
+        match self.snap(date) {
+            Some(snap) => ScoreDetail {
+                clear_type: self.param_snap(date),
+                min_bp: self.param_snap(date),
+                score: self.param_snap(date),
+                max_combo: snap.max_combo.clone(),
+                updated_at: snap.updated_at.clone(),
+                play_count: if !date.is_future() {
+                    PlayCount::new(-1)
+                } else {
+                    self.play_count.clone()
+                },
+            },
+            None => Default::default(),
+        }
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
@@ -55,26 +73,6 @@ pub struct ScoreDetail {
     clear_type: Option<ClearTypeSnap>,
     updated_at: UpdatedAt,
     play_count: PlayCount,
-}
-
-impl ScoreDetail {
-    pub fn new(score: &Score, date: &UpdatedAt) -> ScoreDetail {
-        match score.snap(date) {
-            Some(snap) => ScoreDetail {
-                clear_type: score.param_snap(date),
-                min_bp: score.param_snap(date),
-                score: score.param_snap(date),
-                max_combo: snap.max_combo.clone(),
-                updated_at: snap.updated_at.clone(),
-                play_count: if !date.is_future() {
-                    PlayCount::new(-1)
-                } else {
-                    score.play_count.clone()
-                },
-            },
-            None => Default::default(),
-        }
-    }
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug, Default)]

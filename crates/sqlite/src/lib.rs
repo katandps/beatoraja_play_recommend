@@ -3,6 +3,7 @@ mod schema;
 use diesel::prelude::*;
 use model::*;
 use std::collections::HashMap;
+use std::str::FromStr;
 use thiserror::Error;
 
 #[macro_use]
@@ -81,8 +82,8 @@ impl SqliteClient {
             .iter()
             .fold(SongsBuilder::new(), |mut builder, row| {
                 builder.push(
-                    HashMd5::new(row.md5.clone()),
-                    HashSha256::new(row.sha256.clone()),
+                    HashMd5::from_str(&row.md5).unwrap(),
+                    HashSha256::from_str(&row.sha256).unwrap(),
                     Title::new(format!("{}{}", row.title, row.subtitle)),
                     Artist::new(row.artist.clone()),
                     row.notes,

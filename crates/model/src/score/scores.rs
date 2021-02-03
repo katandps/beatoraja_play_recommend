@@ -18,22 +18,33 @@ impl Scores {
         &self.0
     }
 
-    pub fn out(
+    pub fn out<'a>(
         &self,
-        tables: &Tables,
-        songs: &Songs,
-        date: UpdatedAt,
-    ) -> HashMap<HashMd5, ScoreDetail> {
+        tables: &'a Tables,
+        songs: &'a Songs,
+        date: &'a UpdatedAt,
+        account: &'a Account,
+    ) -> DetailResponse<'a> {
         let mut map = HashMap::new();
         let charts = tables.get_charts();
         for chart in &charts {
             let song = songs.song(chart);
-            let score = match self.get(&song.song_id()) {
-                Some(s) => s.clone(),
-                None => Score::default(),
-            };
-            map.insert(chart.md5(), ScoreDetail::new(&score, &date));
+            map.insert(
+                chart.md5(),
+                self.get(&song.song_id()).map(|s| s.make_detail(date)),
+            );
         }
-        map
+        DetailResponse {
+            user_id: account.user_id(),
+            user_name: account.user_name(),
+            score: map,
+        }
     }
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct DetailResponse<'a> {
+    user_id: i32,
+    user_name: String,
+    score: HashMap<&'a HashMd5, Option<ScoreDetail>>,
 }

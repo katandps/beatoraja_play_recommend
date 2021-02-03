@@ -16,6 +16,7 @@ use model::*;
 use oauth_google::GoogleProfile;
 use r2d2::Pool;
 use std::collections::{HashMap, HashSet};
+use std::str::FromStr;
 
 #[macro_use]
 extern crate diesel;
@@ -179,7 +180,7 @@ impl MySQLClient {
             .map(|record| {
                 (
                     ScoreId::new(
-                        HashSha256::new(record.sha256.clone()),
+                        HashSha256::from_str(&record.sha256).unwrap(),
                         PlayMode::new(record.mode),
                     ),
                     record,
@@ -193,7 +194,7 @@ impl MySQLClient {
                 (
                     (
                         ScoreId::new(
-                            HashSha256::new(record.sha256.clone()),
+                            HashSha256::from_str(&record.sha256).unwrap(),
                             PlayMode::new(record.mode),
                         ),
                         record.date.clone(),
@@ -289,7 +290,7 @@ impl MySQLClient {
         let exist_hashes = query::hashes(&self.connection)?;
         let mut hashmap = songs.converter.sha256_to_md5.clone();
         for row in exist_hashes {
-            hashmap.remove(&HashSha256::new(row.sha256));
+            let _ = HashSha256::from_str(&row.sha256).map(|hash| hashmap.remove(&hash));
         }
         let new_hashes = hashmap
             .iter()
@@ -318,7 +319,7 @@ impl MySQLClient {
         let exist_songs = query::songs(&self.connection)?;
         let mut songs = songs.songs.clone();
         for row in exist_songs {
-            songs.remove(&HashSha256::new(row.sha256));
+            let _ = HashSha256::from_str(&row.sha256).map(|hash| songs.remove(&hash));
         }
         let new_songs = songs
             .iter()
@@ -353,18 +354,18 @@ impl MySQLClient {
 
     pub fn song_data(&self) -> Result<Songs> {
         let record = query::songs(&self.connection)?;
-        let hash = query::hashes(&self.connection)?
+        let hash = query::hashes(&self.connection)?;
+        let hash = hash
             .iter()
-            .map(|hash| (hash.sha256.clone(), hash.md5.clone()))
-            .collect::<HashMap<String, String>>();
+            .map(|hash| (&hash.sha256, &hash.md5))
+            .collect::<HashMap<&String, &String>>();
 
         Ok(record
             .iter()
             .fold(SongsBuilder::new(), |mut builder, row| {
-                let md5 = HashMd5::new(hash.get(&row.sha256).unwrap().clone());
                 builder.push(
-                    md5,
-                    HashSha256::new(row.sha256.clone()),
+                    HashMd5::from_str(hash.get(&row.sha256).unwrap()).unwrap(),
+                    HashSha256::from_str(&row.sha256).unwrap(),
                     Title::new(format!("{}{}", row.title, row.subtitle)),
                     Artist::new(row.artist.clone()),
                     row.notes,

@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 pub struct Chart {
     title: String,
     artist: Option<String>,
-    md5: String,
+    md5: HashMd5,
     level: String,
     url: Option<String>,
     url_diff: Option<String>,
@@ -26,7 +26,7 @@ impl Chart {
     pub fn level(&self) -> Level {
         Level::make(self.level.clone())
     }
-    pub fn md5(&self) -> HashMd5 {
-        HashMd5::new(self.md5.clone())
+    pub fn md5(&self) -> &HashMd5 {
+        &self.md5
     }
 }
