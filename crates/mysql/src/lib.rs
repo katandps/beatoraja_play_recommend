@@ -51,15 +51,9 @@ impl MySQLClient {
         match user {
             Ok(user) => Ok(Self::create_account(user)),
             Err(_) => {
-                let user = models::RegisteringUser {
-                    google_id: profile.user_id.clone(),
-                    gmail_address: profile.email.clone(),
-                    name: profile.name.to_string(),
-                    registered_date: Utc::now().naive_utc(),
-                };
                 log::info!("Insert new user: {}", profile.email);
                 diesel::insert_into(schema::users::table)
-                    .values(user.clone())
+                    .values(models::RegisteringUser::from_profile(profile))
                     .execute(&self.connection)?;
                 Ok(Self::create_account(query::account_by_email(
                     &self.connection,
@@ -368,7 +362,7 @@ impl MySQLClient {
                 builder.push(
                     HashMd5::from_str(hash.get(&row.sha256).unwrap()).unwrap(),
                     HashSha256::from_str(&row.sha256).unwrap(),
-                    Title::new(format!("{}{}", row.title, row.subtitle)),
+                    Title::from_title_and_subtitle(&row.title, &row.subtitle),
                     Artist::new(row.artist.clone()),
                     row.notes,
                     IncludeFeatures::from(row.features),

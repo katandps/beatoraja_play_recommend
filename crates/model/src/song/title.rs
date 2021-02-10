@@ -5,6 +5,10 @@ use std::fmt;
 pub struct Title(String);
 
 impl Title {
+    pub fn from_title_and_subtitle(title: &String, subtitle: &String) -> Title {
+        Title(format!("{}{}", title, subtitle))
+    }
+
     pub fn new(title: String) -> Title {
         Title(title)
     }

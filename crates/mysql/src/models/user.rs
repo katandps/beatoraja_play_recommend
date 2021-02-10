@@ -1,6 +1,7 @@
 use crate::schema::*;
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, Utc};
 use diesel::Identifiable;
+use oauth_google::GoogleProfile;
 
 #[derive(Debug, Clone, Queryable, Insertable, Identifiable)]
 pub struct User {
@@ -18,6 +19,17 @@ pub struct RegisteringUser {
     pub gmail_address: String,
     pub name: String,
     pub registered_date: NaiveDateTime,
+}
+
+impl RegisteringUser {
+    pub fn from_profile(profile: &GoogleProfile) -> RegisteringUser {
+        RegisteringUser {
+            google_id: profile.user_id.clone(),
+            gmail_address: profile.email.clone(),
+            name: profile.name.to_string(),
+            registered_date: Utc::now().naive_utc(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Insertable)]
