@@ -1,4 +1,6 @@
+use crate::models::DieselResult;
 use crate::schema::*;
+use crate::MySqlPooledConnection;
 use chrono::NaiveDateTime;
 use model::ScoreId;
 
@@ -140,6 +142,16 @@ pub struct ScoreSnap {
     pub score: i32,
     pub combo: i32,
     pub min_bp: i32,
+}
+
+impl ScoreSnap {
+    pub fn by_user_id(
+        connection: &MySqlPooledConnection,
+        query_id: i32,
+    ) -> DieselResult<Vec<ScoreSnap>> {
+        use crate::schema::score_snaps::dsl::*;
+        score_snaps.filter(user_id.eq(query_id)).load(connection)
+    }
 }
 
 #[derive(Debug, Clone, Insertable)]

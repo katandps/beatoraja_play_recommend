@@ -5,7 +5,7 @@ mod query;
 mod schema;
 
 pub use crate::error::Error;
-use crate::models::{CanGetHash, ScoreSnapForUpdate};
+use crate::models::{CanGetHash, ScoreSnapForUpdate, User, UserStatus, UserStatusForInsert};
 use anyhow::anyhow;
 use anyhow::Result;
 use chrono::{NaiveDateTime, Utc};
@@ -47,17 +47,18 @@ impl MySQLClient {
     }
 
     pub fn register(&self, profile: &GoogleProfile) -> Result<Account> {
-        let user = query::account_by_email(&self.connection, &profile.email);
+        let user = User::by_google_profile(&self.connection, &profile);
         match user {
             Ok(user) => Ok(Self::create_account(user)),
             Err(_) => {
+                use crate::schema::users::dsl::*;
                 log::info!("Insert new user: {}", profile.email);
-                diesel::insert_into(schema::users::table)
+                diesel::insert_into(users)
                     .values(models::RegisteringUser::from_profile(profile))
                     .execute(&self.connection)?;
-                Ok(Self::create_account(query::account_by_email(
+                Ok(Self::create_account(User::by_google_profile(
                     &self.connection,
-                    &profile.email,
+                    &profile,
                 )?))
             }
         }
@@ -90,7 +91,7 @@ impl MySQLClient {
 
     pub fn rename_account(&self, account: &Account) -> Result<(), Error> {
         log::info!("Update user name to {}.", account.user_name());
-        let user = query::account_by_email(&self.connection, &account.email())?;
+        let user = User::by_account(&self.connection, account)?;
         diesel::insert_into(schema::rename_logs::table)
             .values(models::RenameUser {
                 user_id: user.id.clone(),
@@ -109,7 +110,33 @@ impl MySQLClient {
         Ok(())
     }
 
-    pub fn change_account_visibility(&self, _account: &Account) -> Result<(), Error> {
+    pub fn change_account_visibility(&self, account: &Account) -> Result<(), Error> {
+        log::info!(
+            "Update visibility to {}. : {}",
+            account.visibility,
+            account.user_id()
+        );
+        let user = User::by_account(&self.connection, account)?;
+        let user_status = UserStatus::by_user(&self.connection, &user);
+        match user_status {
+            Ok(status) => {
+                use crate::schema::user_statuses::dsl::*;
+                diesel::update(user_statuses.filter(id.eq(status.id)))
+                    .set(visible.eq(account.visibility()))
+                    .execute(&self.connection)?;
+            }
+            Err(_) => {
+                use crate::schema::user_statuses::dsl::*;
+                let new = UserStatusForInsert {
+                    user_id: user.id,
+                    visible: account.visibility(),
+                    score_updated_at: Utc::now().naive_utc(),
+                };
+                diesel::insert_into(user_statuses)
+                    .values(new)
+                    .execute(&self.connection)?;
+            }
+        }
         Ok(())
     }
 
@@ -131,7 +158,7 @@ impl MySQLClient {
     }
 
     pub fn score(&self, account: &Account) -> Result<Scores, Error> {
-        let user = query::account_by_email(&self.connection, &account.email())?;
+        let user = User::by_account(&self.connection, account)?;
         let record = query::scores_by_user_id(&self.connection, user.id)?;
         let score_log = self.score_log(account)?;
         Ok(Scores::create_by_map(
@@ -204,7 +231,7 @@ impl MySQLClient {
     }
 
     pub fn save_score(&self, account: Account, score: Scores) -> Result<()> {
-        let user = query::account_by_email(&self.connection, &account.email())?;
+        let user = User::by_account(&self.connection, &account)?;
         let user_id = user.id;
         let saved_song = self.saved_song(user_id)?;
         let saved_snap = self.saved_snap(user_id)?;
@@ -371,4 +398,30 @@ impl MySQLClient {
             })
             .build())
     }
+}
+
+pub trait PublishedUsers {
+    fn fetch_users(&self) -> Result<Vec<VisibleAccount>>;
+}
+
+impl PublishedUsers for MySQLClient {
+    fn fetch_users(&self) -> Result<Vec<VisibleAccount>> {
+        let list = UserStatus::visible_with_account(&self.connection)?;
+        let mut res = Vec::new();
+        for (_status, user) in list {
+            res.push(VisibleAccount {
+                id: user.id,
+                name: user.name,
+            })
+        }
+        Ok(res)
+    }
+}
+
+use serde::Serialize;
+
+#[derive(Serialize)]
+pub struct VisibleAccount {
+    id: i32,
+    name: String,
 }

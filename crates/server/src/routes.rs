@@ -15,29 +15,28 @@ pub fn api_routes(
     t: &Tables,
     song_data: &SongData,
 ) -> BoxedFilter<(impl Reply,)> {
-    let tables_route = tables(t);
-    let songs_route = songs(t, song_data);
-    let health_route = health(db_pool);
-    let account_route = account(db_pool);
-    let change_name_route = change_name(db_pool);
-    let change_visibility_route = change_visibility(db_pool);
-    let logout_route = logout();
-    let detail_route = detail(db_pool, t, song_data);
-    let upload_route = uploads::uploads(db_pool, song_data);
-    let oauth_redirect_route = oauth_redirect_route(db_pool);
-    health_route
-        .or(account_route)
-        .or(change_name_route)
-        .or(change_visibility_route)
-        .or(logout_route)
-        .or(tables_route)
-        .or(songs_route)
-        .or(detail_route)
-        .or(upload_route)
-        .or(oauth_redirect_route)
+    health(db_pool)
+        .or(account(db_pool))
+        .or(users_route(db_pool))
+        .or(change_name(db_pool))
+        .or(change_visibility(db_pool))
+        .or(logout())
+        .or(tables(t))
+        .or(songs(t, song_data))
+        .or(detail(db_pool, t, song_data))
+        .or(uploads::uploads(db_pool, song_data))
+        .or(oauth_redirect_route(db_pool))
         .with(crate::cors_header())
         .with(warp::compression::gzip())
         .with(warp::log("api_access"))
+        .boxed()
+}
+
+fn users_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
+    warp::get()
+        .and(path("users"))
+        .and(with_db(db_pool))
+        .and_then(users::users_handler)
         .boxed()
 }
 

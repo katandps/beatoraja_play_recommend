@@ -1,3 +1,5 @@
+pub use diesel::prelude::*;
+
 table! {
     hashes (sha256) {
         sha256 -> Char,

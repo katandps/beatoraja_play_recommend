@@ -9,3 +9,4 @@ pub mod oauth_redirect;
 pub mod songs;
 pub mod tables;
 pub mod upload;
+pub mod users;

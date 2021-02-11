@@ -47,6 +47,10 @@ impl Account {
         self.name.to_string()
     }
 
+    pub fn visibility(&self) -> bool {
+        self.visibility.to_bool()
+    }
+
     pub fn registered(&self) -> NaiveDateTime {
         self.registered_date.to_naive_date_time()
     }
@@ -55,5 +59,7 @@ impl Account {
         self.name = UserName::new(new_name.clone());
     }
 
-    pub fn set_visibility(&mut self, _new_visibility: bool) {}
+    pub fn set_visibility(&mut self, new_visibility: bool) {
+        self.visibility = Visibility::new(new_visibility)
+    }
 }

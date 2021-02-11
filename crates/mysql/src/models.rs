@@ -5,6 +5,8 @@ use crate::schema::*;
 pub use score::*;
 pub use user::*;
 
+pub(crate) type DieselResult<T> = Result<T, diesel::result::Error>;
+
 #[derive(Debug, Clone, Queryable, Insertable)]
 #[table_name = "songs"]
 pub struct Song {

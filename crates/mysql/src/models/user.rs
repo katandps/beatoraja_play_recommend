@@ -1,6 +1,9 @@
+use crate::models::DieselResult;
 use crate::schema::*;
+use crate::MySqlPooledConnection;
 use chrono::{NaiveDateTime, Utc};
 use diesel::Identifiable;
+use model::Account;
 use oauth_google::GoogleProfile;
 
 #[derive(Debug, Clone, Queryable, Insertable, Identifiable)]
@@ -10,6 +13,25 @@ pub struct User {
     pub gmail_address: String,
     pub name: String,
     pub registered_date: NaiveDateTime,
+}
+
+impl User {
+    pub fn by_account(connection: &MySqlPooledConnection, account: &Account) -> DieselResult<Self> {
+        use crate::schema::users::dsl::*;
+        users
+            .filter(gmail_address.eq(account.email()))
+            .first(connection)
+    }
+
+    pub fn by_google_profile(
+        connection: &MySqlPooledConnection,
+        profile: &GoogleProfile,
+    ) -> DieselResult<Self> {
+        use crate::schema::users::dsl::*;
+        users
+            .filter(gmail_address.eq(&profile.email))
+            .first(connection)
+    }
 }
 
 #[derive(Debug, Clone, Insertable)]
@@ -47,6 +69,23 @@ pub struct UserStatus {
     pub user_id: i32,
     pub visible: bool,
     pub score_updated_at: NaiveDateTime,
+}
+
+impl UserStatus {
+    pub fn visible_with_account(
+        connection: &MySqlPooledConnection,
+    ) -> DieselResult<Vec<(UserStatus, User)>> {
+        use crate::schema::user_statuses::dsl::*;
+        user_statuses
+            .filter(visible.eq(true))
+            .inner_join(crate::schema::users::table)
+            .load(connection)
+    }
+
+    pub fn by_user(connection: &MySqlPooledConnection, user: &User) -> DieselResult<UserStatus> {
+        use crate::schema::user_statuses::dsl::*;
+        user_statuses.filter(user_id.eq(user.id)).first(connection)
+    }
 }
 
 #[derive(Debug, Clone, Insertable)]

@@ -26,16 +26,6 @@ pub fn account_by_id(
         .map_err(|e| DieselError(e))
 }
 
-pub fn account_by_email(
-    connection: &MySqlPooledConnection,
-    email: &String,
-) -> Result<models::User, Error> {
-    schema::users::table
-        .filter(schema::users::gmail_address.eq(email))
-        .first(connection)
-        .map_err(|e| DieselError(e))
-}
-
 pub fn account_by_google_id(
     connection: &MySqlPooledConnection,
     google_id: &String,
@@ -62,13 +52,6 @@ pub fn score_snaps_by_user_id(
 ) -> Result<Vec<models::ScoreSnap>, Error> {
     schema::score_snaps::table
         .filter(schema::score_snaps::user_id.eq(user_id))
-        .load(connection)
-        .map_err(|e| DieselError(e))
-}
-
-pub fn user_list(connection: &MySqlPooledConnection) -> Result<Vec<models::UserStatus>, Error> {
-    schema::user_statuses::table
-        .filter(schema::user_statuses::visible.eq(true))
         .load(connection)
         .map_err(|e| DieselError(e))
 }
