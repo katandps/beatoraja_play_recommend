@@ -32,6 +32,14 @@ pub struct Score {
 }
 
 impl Score {
+    pub fn by_user_id(
+        connection: &MySqlPooledConnection,
+        query_id: i32,
+    ) -> DieselResult<Vec<Self>> {
+        use crate::schema::scores::dsl::*;
+        scores.filter(user_id.eq(query_id)).load(connection)
+    }
+
     pub fn from_score(saved: &Self, score: &model::Score, user_id: i32, song_id: &ScoreId) -> Self {
         Self {
             id: saved.id,

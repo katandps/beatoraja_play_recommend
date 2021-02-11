@@ -2,6 +2,7 @@ mod score;
 mod user;
 
 use crate::schema::*;
+use crate::MySqlPooledConnection;
 pub use score::*;
 pub use user::*;
 
@@ -33,6 +34,11 @@ impl Song {
             features: song.features().clone().into(),
         }
     }
+
+    pub fn all(connection: &MySqlPooledConnection) -> DieselResult<Vec<Self>> {
+        use crate::schema::songs::dsl::*;
+        songs.load(connection)
+    }
 }
 
 #[derive(Debug, Clone, Queryable, Insertable)]
@@ -40,4 +46,11 @@ impl Song {
 pub struct Hash {
     pub sha256: String,
     pub md5: String,
+}
+
+impl Hash {
+    pub fn all(connection: &MySqlPooledConnection) -> DieselResult<Vec<Self>> {
+        use crate::schema::hashes::dsl::*;
+        hashes.load(connection)
+    }
 }

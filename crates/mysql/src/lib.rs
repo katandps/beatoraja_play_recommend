@@ -1,11 +1,10 @@
 mod config;
 mod error;
 mod models;
-mod query;
 mod schema;
 
 pub use crate::error::Error;
-use crate::models::{CanGetHash, ScoreSnapForUpdate, User, UserStatus, UserStatusForInsert};
+use crate::models::{CanGetHash, Hash, ScoreSnapForUpdate, User, UserStatus, UserStatusForInsert};
 use anyhow::anyhow;
 use anyhow::Result;
 use chrono::{NaiveDateTime, Utc};
@@ -65,7 +64,7 @@ impl MySQLClient {
     }
 
     pub fn account_by_increments(&self, id: i32) -> Result<Account> {
-        Ok(Self::create_account(query::account_by_id(
+        Ok(Self::create_account(User::by_user_id(
             &self.connection,
             id,
         )?))
@@ -83,9 +82,9 @@ impl MySQLClient {
     }
 
     pub fn account_by_id(&self, google_id: GoogleId) -> Result<Account, Error> {
-        Ok(Self::create_account(query::account_by_google_id(
+        Ok(Self::create_account(User::by_google_id(
             &self.connection,
-            &google_id.to_string(),
+            google_id.to_string(),
         )?))
     }
 
@@ -141,7 +140,7 @@ impl MySQLClient {
     }
 
     fn score_log(&self, account: &Account) -> Result<HashMap<ScoreId, SnapShots>, Error> {
-        let records = query::score_snaps_by_user_id(&self.connection, account.user_id())?;
+        let records = models::ScoreSnap::by_user_id(&self.connection, account.user_id())?;
         let mut map = HashMap::new();
         for row in records {
             let song_id = ScoreId::new(row.sha256.parse().unwrap(), PlayMode::from(row.mode));
@@ -159,7 +158,7 @@ impl MySQLClient {
 
     pub fn score(&self, account: &Account) -> Result<Scores, Error> {
         let user = User::by_account(&self.connection, account)?;
-        let record = query::scores_by_user_id(&self.connection, user.id)?;
+        let record = models::Score::by_user_id(&self.connection, user.id)?;
         let score_log = self.score_log(account)?;
         Ok(Scores::create_by_map(
             record
@@ -193,7 +192,7 @@ impl MySQLClient {
     }
 
     fn saved_song(&self, user_id: i32) -> Result<HashMap<ScoreId, models::Score>> {
-        let saved = query::scores_by_user_id(&self.connection, user_id)?;
+        let saved = models::Score::by_user_id(&self.connection, user_id)?;
         Ok(saved
             .into_iter()
             .map(|record| {
@@ -212,7 +211,7 @@ impl MySQLClient {
         &self,
         user_id: i32,
     ) -> Result<HashMap<(ScoreId, NaiveDateTime), models::ScoreSnap>> {
-        let saved = query::score_snaps_by_user_id(&self.connection, user_id)?;
+        let saved = models::ScoreSnap::by_user_id(&self.connection, user_id)?;
         Ok(saved
             .into_iter()
             .map(|record| {
@@ -236,7 +235,7 @@ impl MySQLClient {
         let saved_song = self.saved_song(user_id)?;
         let saved_snap = self.saved_snap(user_id)?;
 
-        let hashes = query::hashes(&self.connection)?
+        let hashes = Hash::all(&self.connection)?
             .iter()
             .map(|h| h.sha256.clone())
             .collect::<HashSet<_>>();
@@ -319,7 +318,7 @@ impl MySQLClient {
     }
 
     pub fn save_song(&self, songs: &Songs) -> Result<(), Error> {
-        let exist_hashes = query::hashes(&self.connection)?;
+        let exist_hashes = Hash::all(&self.connection)?;
         let mut hashmap = songs.converter.sha256_to_md5.clone();
         for row in exist_hashes {
             let _ = HashSha256::from_str(&row.sha256).map(|hash| hashmap.remove(&hash));
@@ -348,7 +347,7 @@ impl MySQLClient {
                 .execute(&self.connection)?;
         }
 
-        let exist_songs = query::songs(&self.connection)?;
+        let exist_songs = models::Song::all(&self.connection)?;
         let mut songs = songs.songs.clone();
         for row in exist_songs {
             let _ = HashSha256::from_str(&row.sha256).map(|hash| songs.remove(&hash));
@@ -376,8 +375,8 @@ impl MySQLClient {
     }
 
     pub fn song_data(&self) -> Result<Songs> {
-        let record = query::songs(&self.connection)?;
-        let hash = query::hashes(&self.connection)?;
+        let record = models::Song::all(&self.connection)?;
+        let hash = Hash::all(&self.connection)?;
         let hash = hash
             .iter()
             .map(|hash| (&hash.sha256, &hash.md5))

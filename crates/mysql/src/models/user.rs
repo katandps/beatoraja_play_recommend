@@ -32,6 +32,21 @@ impl User {
             .filter(gmail_address.eq(&profile.email))
             .first(connection)
     }
+
+    pub fn by_google_id(
+        connection: &MySqlPooledConnection,
+        google_id_string: String,
+    ) -> DieselResult<Self> {
+        use crate::schema::users::dsl::*;
+        users
+            .filter(google_id.eq(google_id_string))
+            .first(connection)
+    }
+
+    pub fn by_user_id(connection: &MySqlPooledConnection, user_id: i32) -> DieselResult<Self> {
+        use crate::schema::users::dsl::*;
+        users.filter(id.eq(user_id)).first(connection)
+    }
 }
 
 #[derive(Debug, Clone, Insertable)]
