@@ -82,8 +82,8 @@ pub fn account_id_query(
         .and_then(get_account_by_query)
 }
 
-async fn get_account_by_query(
-    repos: MySQLClient,
+async fn get_account_by_query<C: AccountByIncrement>(
+    repos: C,
     query: HashMap<String, String>,
 ) -> Result<Account, Rejection> {
     let user_id = query

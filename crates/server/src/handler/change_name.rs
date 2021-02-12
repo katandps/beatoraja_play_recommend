@@ -1,10 +1,10 @@
 use crate::error::HandleError;
 use model::Account;
-use mysql::MySQLClient;
+use repository::RenameAccount;
 use warp::{Rejection, Reply};
 
-pub async fn change_name_handler(
-    repos: MySQLClient,
+pub async fn change_name_handler<C: RenameAccount>(
+    repos: C,
     mut account: Account,
     changed_name: String,
 ) -> Result<impl Reply, Rejection> {
@@ -13,6 +13,6 @@ pub async fn change_name_handler(
     Ok(serde_json::to_string(&account).unwrap())
 }
 
-fn rename_account(repos: &MySQLClient, account: &Account) -> Result<(), HandleError> {
-    Ok(repos.rename_account(account)?)
+fn rename_account<C: RenameAccount>(repos: &C, account: &Account) -> Result<(), HandleError> {
+    Ok(repos.rename(account)?)
 }

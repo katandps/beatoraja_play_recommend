@@ -1,21 +1,21 @@
 use crate::config::config;
 use crate::error::HandleError;
 use model::GoogleId;
-use mysql::MySQLClient;
 use oauth_google::{GoogleProfile, RegisterUser};
+use repository::AccountByGoogleId;
 use warp::http::Uri;
 use warp::{Rejection, Reply};
 
-pub async fn oauth_handler(
-    repos: MySQLClient,
+pub async fn oauth_handler<C: RegisterUser + AccountByGoogleId>(
+    repos: C,
     profile: GoogleProfile,
 ) -> Result<impl Reply, Rejection> {
     repos
         .register(&profile)
         .map_err(|e| HandleError::OtherError(e))?;
     let account = repos
-        .account_by_id(&GoogleId::new(profile.user_id))
-        .map_err(|e| HandleError::MySqlError(e))?;
+        .user(&GoogleId::new(profile.user_id))
+        .map_err(|e| HandleError::OtherError(e))?;
     let key =
         crate::session::save_user_id(account.google_id).map_err(|e| HandleError::OtherError(e))?;
     let header = format!(

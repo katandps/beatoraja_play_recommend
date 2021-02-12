@@ -3,8 +3,8 @@ use crate::error::HandleError;
 use crate::error::HandleError::SessionError;
 use anyhow::Result;
 use model::*;
-use mysql::MySQLClient;
 use redis::{Commands, Connection, RedisResult};
+use repository::AccountByGoogleId;
 use warp::Rejection;
 
 pub const SESSION_KEY: &str = "session-token";
@@ -35,11 +35,17 @@ pub fn get_user_id(key: &String) -> Result<GoogleId, HandleError> {
     ))
 }
 
-pub fn get_account(repos: &MySQLClient, user_id: GoogleId) -> Result<Account, HandleError> {
-    Ok(repos.account_by_id(&user_id)?)
+pub fn get_account<C: AccountByGoogleId>(
+    repos: &C,
+    user_id: GoogleId,
+) -> Result<Account, HandleError> {
+    Ok(repos.user(&user_id)?)
 }
 
-pub async fn get_account_by_session(repos: MySQLClient, key: String) -> Result<Account, Rejection> {
+pub async fn get_account_by_session<C: AccountByGoogleId>(
+    repos: C,
+    key: String,
+) -> Result<Account, Rejection> {
     let user_id = get_user_id(&key)?;
     Ok(get_account(&repos, user_id)?)
 }

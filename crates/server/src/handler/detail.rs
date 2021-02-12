@@ -1,7 +1,6 @@
 use crate::filter::DetailQuery;
 use crate::SongData;
 use model::*;
-use mysql::MySQLClient;
 use repository::ScoresByAccount;
 use std::collections::HashMap;
 use warp::{Rejection, Reply};
@@ -18,8 +17,8 @@ macro_rules! log_duration {
 
 /// 詳細表示ハンドラ
 /// user_idをQueryParameterより取得する
-pub async fn detail_handler(
-    repos: MySQLClient,
+pub async fn detail_handler<C: ScoresByAccount>(
+    repos: C,
     tables: Tables,
     query: DetailQuery,
     account: Account,

@@ -3,42 +3,45 @@ use crate::SongData;
 use bytes::BufMut;
 use futures::TryStreamExt;
 use model::*;
-use mysql::MySQLClient;
+use repository::{AccountByGoogleId, SaveScoreData, SaveSongData};
 use sqlite::SqliteClient;
 use std::sync::Arc;
 use warp::filters::multipart::{FormData, Part};
 use warp::{Rejection, Reply};
 
-pub async fn upload_score_handler(
-    mysql_client: MySQLClient,
+pub async fn upload_score_handler<C: SaveScoreData + AccountByGoogleId>(
+    repository: C,
     form: FormData,
     session_key: String,
 ) -> std::result::Result<impl Reply, Rejection> {
     let user_id = crate::session::get_user_id(&session_key)?;
-    let account = get_account(&mysql_client, user_id)?;
+    let account = get_account(&repository, user_id)?;
     let dir_name = account.google_id();
     save_sqlite_file(form, dir_name.clone(), "score".into()).await?;
-    update_score_data(mysql_client, account, dir_name).await
+    update_score_data(repository, account, dir_name).await
 }
 
-pub async fn upload_score_log_handler(
-    mysql_client: MySQLClient,
+pub async fn upload_score_log_handler<C: SaveScoreData + AccountByGoogleId>(
+    repository: C,
     form: FormData,
     session_key: String,
 ) -> std::result::Result<impl Reply, Rejection> {
     let user_id = crate::session::get_user_id(&session_key)?;
-    let account = get_account(&mysql_client, user_id)?;
+    let account = get_account(&repository, user_id)?;
     let dir_name = account.google_id();
     save_sqlite_file(form, dir_name.clone(), "scorelog".into()).await?;
-    update_score_data(mysql_client, account, dir_name).await
+    update_score_data(repository, account, dir_name).await
 }
 
-fn get_account(mysql_client: &MySQLClient, user_id: GoogleId) -> Result<Account, HandleError> {
-    Ok(mysql_client.account_by_id(&user_id)?)
+fn get_account<C: AccountByGoogleId>(
+    mysql_client: &C,
+    user_id: GoogleId,
+) -> Result<Account, HandleError> {
+    Ok(mysql_client.user(&user_id)?)
 }
 
-async fn update_score_data(
-    mysql_client: MySQLClient,
+async fn update_score_data<C: SaveScoreData>(
+    repository: C,
     account: Account,
     dir_name: String,
 ) -> Result<String, Rejection> {
@@ -55,8 +58,8 @@ async fn update_score_data(
         );
 
         let scores = get_score(&sqlite_client)?;
-        mysql_client
-            .save_score(account, scores)
+        repository
+            .save_score(&account, &scores)
             .map_err(|_| HandleError::SaveIsNotComplete.rejection())?;
 
         let _remove_score = tokio::fs::remove_file(&score_file_name)
@@ -75,8 +78,8 @@ fn get_score(client: &SqliteClient) -> Result<Scores, HandleError> {
     Ok(client.score()?)
 }
 
-pub async fn upload_song_data_handler(
-    mysql_client: MySQLClient,
+pub async fn upload_song_data_handler<C: SaveSongData + AccountByGoogleId>(
+    mysql_client: C,
     song_data: SongData,
     form: FormData,
     session_key: String,
@@ -84,14 +87,14 @@ pub async fn upload_song_data_handler(
     save_song(mysql_client, song_data, form, session_key).await?;
     Ok("SongData Is Updated.".into())
 }
-async fn save_song(
-    mysql_client: MySQLClient,
+async fn save_song<C: SaveSongData + AccountByGoogleId>(
+    client: C,
     song_data: SongData,
     form: FormData,
     session_key: String,
 ) -> Result<(), HandleError> {
     let user_id = crate::session::get_user_id(&session_key)?;
-    let account = mysql_client.account_by_id(&user_id)?;
+    let account = client.user(&user_id)?;
     let dir_name = account.google_id();
     save_sqlite_file(form, dir_name.clone(), "songdata".into()).await?;
 
@@ -102,7 +105,7 @@ async fn save_song(
 
     let songs = sqlite_client.song_data()?;
 
-    mysql_client.save_song(&songs)?;
+    client.save_song(&songs)?;
     let song_db = Arc::clone(&song_data);
     song_db.lock().await.update(songs);
 

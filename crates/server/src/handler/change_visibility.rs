@@ -1,10 +1,10 @@
 use crate::error::HandleError;
 use model::Account;
-use mysql::MySQLClient;
+use repository::ChangeAccountVisibility;
 use warp::{Rejection, Reply};
 
-pub async fn change_visibility_handler(
-    repos: MySQLClient,
+pub async fn change_visibility_handler<C: ChangeAccountVisibility>(
+    repos: C,
     mut account: Account,
     changed_visibility: bool,
 ) -> Result<impl Reply, Rejection> {
@@ -13,6 +13,9 @@ pub async fn change_visibility_handler(
     Ok(serde_json::to_string(&account).unwrap())
 }
 
-fn change_visibility(repos: &MySQLClient, account: &Account) -> Result<(), HandleError> {
-    Ok(repos.change_account_visibility(account)?)
+fn change_visibility<C: ChangeAccountVisibility>(
+    repos: &C,
+    account: &Account,
+) -> Result<(), HandleError> {
+    Ok(repos.change_visibility(account)?)
 }

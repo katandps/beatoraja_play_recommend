@@ -1,7 +1,6 @@
 use crate::error::HandleError;
 use crate::SongData;
 use model::*;
-use mysql::MySQLClient;
 use repository::{AccountByIncrement, ScoresByAccount};
 use warp::{Rejection, Reply};
 
@@ -26,18 +25,18 @@ pub async fn header_handler(_user_id: i32, tables: Tables) -> Result<impl Reply,
     .unwrap())
 }
 
-pub async fn body_handler(
+pub async fn body_handler<C: AccountByIncrement + ScoresByAccount>(
     user_id: i32,
     tables: Tables,
-    repos: MySQLClient,
+    repos: C,
     song_data: SongData,
 ) -> Result<impl Reply, Rejection> {
     Ok(body(user_id, repos, tables.get(), song_data).await?)
 }
 
-async fn body(
+async fn body<C: AccountByIncrement + ScoresByAccount>(
     user_id: i32,
-    repos: MySQLClient,
+    repos: C,
     table: &Table,
     song_data: SongData,
 ) -> Result<impl Reply, HandleError> {

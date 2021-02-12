@@ -66,16 +66,14 @@ impl AccountByIncrement for MySQLClient {
     }
 }
 
-impl MySQLClient {
-    pub fn new(connection: MySqlPooledConnection) -> Self {
-        Self { connection }
-    }
-
-    pub fn account_by_id(&self, google_id: &GoogleId) -> Result<Account, Error> {
+impl AccountByGoogleId for MySQLClient {
+    fn user(&self, google_id: &GoogleId) -> Result<Account> {
         Ok(User::by_google_id(&self.connection, google_id.to_string())?.into())
     }
+}
 
-    pub fn rename_account(&self, account: &Account) -> Result<(), Error> {
+impl RenameAccount for MySQLClient {
+    fn rename(&self, account: &Account) -> Result<()> {
         log::info!("Update user name to {}.", account.user_name());
         let user = User::by_account(&self.connection, account)?;
         diesel::insert_into(schema::rename_logs::table)
@@ -95,8 +93,10 @@ impl MySQLClient {
 
         Ok(())
     }
+}
 
-    pub fn change_account_visibility(&self, account: &Account) -> Result<(), Error> {
+impl ChangeAccountVisibility for MySQLClient {
+    fn change_visibility(&self, account: &Account) -> Result<()> {
         log::info!(
             "Update visibility to {}. : {}",
             account.visibility,
@@ -124,6 +124,12 @@ impl MySQLClient {
             }
         }
         Ok(())
+    }
+}
+
+impl MySQLClient {
+    pub fn new(connection: MySqlPooledConnection) -> Self {
+        Self { connection }
     }
 
     fn score_log(&self, account: &Account) -> Result<HashMap<ScoreId, SnapShots>, Error> {
@@ -203,8 +209,36 @@ impl MySQLClient {
             })
             .collect::<HashMap<_, _>>())
     }
+}
 
-    pub fn save_score(&self, account: Account, score: Scores) -> Result<()> {
+impl AllSongData for MySQLClient {
+    fn song_data(&self) -> Result<Songs> {
+        let record = models::Song::all(&self.connection)?;
+        let hash = Hash::all(&self.connection)?;
+        let hash = hash
+            .iter()
+            .map(|hash| (&hash.sha256, &hash.md5))
+            .collect::<HashMap<&String, &String>>();
+
+        Ok(record
+            .iter()
+            .fold(SongsBuilder::new(), |mut builder, row| {
+                builder.push(
+                    HashMd5::from_str(hash.get(&row.sha256).unwrap()).unwrap(),
+                    HashSha256::from_str(&row.sha256).unwrap(),
+                    Title::from_title_and_subtitle(&row.title, &row.subtitle),
+                    Artist::new(row.artist.clone()),
+                    row.notes,
+                    IncludeFeatures::from(row.features),
+                );
+                builder
+            })
+            .build())
+    }
+}
+
+impl SaveScoreData for MySQLClient {
+    fn save_score(&self, account: &Account, score: &Scores) -> Result<()> {
         let user = User::by_account(&self.connection, &account)?;
         let user_id = user.id;
         let saved_song = self.saved_song(user_id)?;
@@ -291,8 +325,10 @@ impl MySQLClient {
 
         Ok(())
     }
+}
 
-    pub fn save_song(&self, songs: &Songs) -> Result<(), Error> {
+impl SaveSongData for MySQLClient {
+    fn save_song(&self, songs: &Songs) -> Result<()> {
         let exist_hashes = Hash::all(&self.connection)?;
         let mut hashmap = songs.converter.sha256_to_md5.clone();
         for row in exist_hashes {
@@ -347,30 +383,6 @@ impl MySQLClient {
                 .execute(&self.connection)?;
         }
         Ok(())
-    }
-
-    pub fn song_data(&self) -> Result<Songs> {
-        let record = models::Song::all(&self.connection)?;
-        let hash = Hash::all(&self.connection)?;
-        let hash = hash
-            .iter()
-            .map(|hash| (&hash.sha256, &hash.md5))
-            .collect::<HashMap<&String, &String>>();
-
-        Ok(record
-            .iter()
-            .fold(SongsBuilder::new(), |mut builder, row| {
-                builder.push(
-                    HashMd5::from_str(hash.get(&row.sha256).unwrap()).unwrap(),
-                    HashSha256::from_str(&row.sha256).unwrap(),
-                    Title::from_title_and_subtitle(&row.title, &row.subtitle),
-                    Artist::new(row.artist.clone()),
-                    row.notes,
-                    IncludeFeatures::from(row.features),
-                );
-                builder
-            })
-            .build())
     }
 }
 
