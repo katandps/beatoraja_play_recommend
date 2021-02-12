@@ -60,7 +60,7 @@ impl RegisterUser for MySQLClient {
     }
 }
 
-impl AccountByIncrement for MySQLClient {
+impl AccountByUserId for MySQLClient {
     fn user(&self, id: i32) -> Result<Account> {
         Ok(User::by_user_id(&self.connection, id)?.into())
     }
@@ -154,38 +154,17 @@ impl MySQLClient {
         log: &HashMap<ScoreId, SnapShots>,
     ) -> Result<(ScoreId, Score)> {
         let song_id = ScoreId::new(score.sha256.parse()?, PlayMode::from(score.mode));
-        Ok((
-            song_id.clone(),
-            Score::new(
-                ClearType::from_integer(score.clear),
-                UpdatedAt::from_timestamp(score.date.timestamp()),
-                Judge::new(
-                    score.epg, score.lpg, score.egr, score.lgr, score.egd, score.lgd, score.ebd,
-                    score.lbd, score.epr, score.lpr, score.ems, score.lms,
-                ),
-                MaxCombo::from_combo(score.combo),
-                PlayCount::new(score.play_count),
-                ClearCount::new(score.clear_count),
-                MinBP::from_bp(score.min_bp),
-                log.get(&song_id).cloned().unwrap_or_default(),
-            ),
-        ))
+        let log = log.get(&song_id).cloned().unwrap_or_default();
+        Ok((song_id, score.to_score().with_log(log)))
     }
 
     fn saved_song(&self, user_id: i32) -> Result<HashMap<ScoreId, models::Score>> {
         let saved = models::Score::by_user_id(&self.connection, user_id)?;
-        Ok(saved
+        let map = saved
             .into_iter()
-            .map(|record| {
-                (
-                    ScoreId::new(
-                        HashSha256::from_str(&record.sha256).unwrap(),
-                        PlayMode::from(record.mode),
-                    ),
-                    record,
-                )
-            })
-            .collect::<HashMap<_, _>>())
+            .map(|record| (record.get_score_id(), record))
+            .collect::<HashMap<_, _>>();
+        Ok(map)
     }
 
     fn saved_snap(
@@ -195,18 +174,7 @@ impl MySQLClient {
         let saved = models::ScoreSnap::by_user_id(&self.connection, user_id)?;
         Ok(saved
             .into_iter()
-            .map(|record| {
-                (
-                    (
-                        ScoreId::new(
-                            HashSha256::from_str(&record.sha256).unwrap(),
-                            PlayMode::from(record.mode),
-                        ),
-                        record.date.clone(),
-                    ),
-                    record,
-                )
-            })
+            .map(|record| ((record.get_score_id(), record.date.clone()), record))
             .collect::<HashMap<_, _>>())
     }
 }

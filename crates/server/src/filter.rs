@@ -4,7 +4,7 @@ use chrono::Duration;
 use model::*;
 use mysql::{MySQLClient, MySqlPool};
 use oauth_google::GoogleProfile;
-use repository::AccountByIncrement;
+use repository::AccountByUserId;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::sync::Arc;
@@ -82,7 +82,7 @@ pub fn account_id_query(
         .and_then(get_account_by_query)
 }
 
-async fn get_account_by_query<C: AccountByIncrement>(
+async fn get_account_by_query<C: AccountByUserId>(
     repos: C,
     query: HashMap<String, String>,
 ) -> Result<Account, Rejection> {

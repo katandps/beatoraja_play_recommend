@@ -1,7 +1,7 @@
 use crate::error::HandleError;
 use crate::SongData;
 use model::*;
-use repository::{AccountByIncrement, ScoresByAccount};
+use repository::{AccountByUserId, ScoresByAccount};
 use warp::{Rejection, Reply};
 
 pub async fn table_handler(_user_id: i32) -> Result<impl Reply, Rejection> {
@@ -25,7 +25,7 @@ pub async fn header_handler(_user_id: i32, tables: Tables) -> Result<impl Reply,
     .unwrap())
 }
 
-pub async fn body_handler<C: AccountByIncrement + ScoresByAccount>(
+pub async fn body_handler<C: AccountByUserId + ScoresByAccount>(
     user_id: i32,
     tables: Tables,
     repos: C,
@@ -34,7 +34,7 @@ pub async fn body_handler<C: AccountByIncrement + ScoresByAccount>(
     Ok(body(user_id, repos, tables.get(), song_data).await?)
 }
 
-async fn body<C: AccountByIncrement + ScoresByAccount>(
+async fn body<C: AccountByUserId + ScoresByAccount>(
     user_id: i32,
     repos: C,
     table: &Table,

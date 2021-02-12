@@ -38,6 +38,10 @@ impl Score {
         }
     }
 
+    pub fn with_log(self, log: SnapShots) -> Self {
+        Score { log, ..self }
+    }
+
     pub fn snap(&self, date: &UpdatedAt) -> Option<&SnapShot> {
         self.log.snap(date)
     }

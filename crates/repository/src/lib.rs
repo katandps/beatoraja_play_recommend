@@ -16,8 +16,8 @@ pub trait HealthCheck {
     fn health(&self) -> Result<()>;
 }
 
-pub trait AccountByIncrement {
-    fn user(&self, increment: i32) -> Result<Account>;
+pub trait AccountByUserId {
+    fn user(&self, user_id: i32) -> Result<Account>;
 }
 
 pub trait AccountByGoogleId {

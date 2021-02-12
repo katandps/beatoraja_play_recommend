@@ -2,7 +2,11 @@ use crate::models::DieselResult;
 use crate::schema::*;
 use crate::MySqlPooledConnection;
 use chrono::NaiveDateTime;
-use model::ScoreId;
+use model::{
+    ClearCount, ClearType, HashSha256, Judge, MaxCombo, MinBP, PlayCount, PlayMode, ScoreId,
+    SnapShots, UpdatedAt,
+};
+use std::str::FromStr;
 
 #[derive(Debug, Clone, Queryable, Insertable)]
 #[table_name = "scores"]
@@ -65,6 +69,29 @@ impl Score {
             clear_count: 0,
             date: score.updated_at.naive_datetime(),
         }
+    }
+
+    pub fn to_score(&self) -> model::Score {
+        model::Score::new(
+            ClearType::from_integer(self.clear),
+            UpdatedAt::from_timestamp(self.date.timestamp()),
+            Judge::new(
+                self.epg, self.lpg, self.egr, self.lgr, self.egd, self.lgd, self.ebd, self.lbd,
+                self.epr, self.lpr, self.ems, self.lms,
+            ),
+            MaxCombo::from_combo(self.combo),
+            PlayCount::new(self.play_count),
+            ClearCount::new(self.clear_count),
+            MinBP::from_bp(self.min_bp),
+            SnapShots::default(),
+        )
+    }
+
+    pub fn get_score_id(&self) -> model::ScoreId {
+        ScoreId::new(
+            HashSha256::from_str(&self.sha256).unwrap(),
+            PlayMode::from(self.mode),
+        )
     }
 }
 
