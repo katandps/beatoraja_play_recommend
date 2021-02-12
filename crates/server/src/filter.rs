@@ -4,6 +4,7 @@ use chrono::Duration;
 use model::*;
 use mysql::{MySQLClient, MySqlPool};
 use oauth_google::GoogleProfile;
+use repository::AccountByIncrement;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::sync::Arc;
@@ -92,7 +93,7 @@ async fn get_account_by_query(
         .parse::<i32>()
         .map_err(|e| HandleError::AccountSelectionIsInvalid(e))?;
     let account = repos
-        .account_by_increments(user_id)
+        .user(user_id)
         .map_err(|e| HandleError::AccountIsNotFound(e))?;
     Ok(account)
 }

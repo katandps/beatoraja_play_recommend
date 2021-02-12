@@ -4,6 +4,7 @@ mod error;
 #[macro_use]
 extern crate lazy_static;
 
+use anyhow::Result;
 use config::config;
 pub use error::Error;
 use serde_json::{Map, Value};
@@ -104,4 +105,8 @@ pub struct GoogleProfile {
     pub user_id: String,
     pub email: String,
     pub name: String,
+}
+
+pub trait RegisterUser {
+    fn register(&self, profile: &GoogleProfile) -> Result<()>;
 }

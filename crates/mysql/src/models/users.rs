@@ -3,7 +3,7 @@ use crate::schema::*;
 use crate::MySqlPooledConnection;
 use chrono::{NaiveDateTime, Utc};
 use diesel::Identifiable;
-use model::Account;
+use model::*;
 use oauth_google::GoogleProfile;
 
 #[derive(Debug, Clone, Queryable, Insertable, Identifiable)]
@@ -13,6 +13,19 @@ pub struct User {
     pub gmail_address: String,
     pub name: String,
     pub registered_date: NaiveDateTime,
+}
+
+impl Into<Account> for User {
+    fn into(self) -> Account {
+        Account::new(
+            UserId::new(self.id),
+            GoogleId::new(self.google_id),
+            GmailAddress::new(self.gmail_address),
+            UserName::new(self.name),
+            RegisteredDate::new(self.registered_date),
+            Visibility::new(false),
+        )
+    }
 }
 
 impl User {

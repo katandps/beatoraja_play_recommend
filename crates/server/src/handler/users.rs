@@ -1,6 +1,6 @@
 use crate::error::HandleError;
-use mysql::PublishedUsers;
-use mysql::{MySQLClient, VisibleAccount};
+use mysql::MySQLClient;
+use repository::{PublishedUsers, VisibleAccount};
 use warp::{Rejection, Reply};
 
 pub async fn users_handler(repos: MySQLClient) -> std::result::Result<impl Reply, Rejection> {

@@ -34,7 +34,7 @@ pub async fn upload_score_log_handler(
 }
 
 fn get_account(mysql_client: &MySQLClient, user_id: GoogleId) -> Result<Account, HandleError> {
-    Ok(mysql_client.account_by_id(user_id)?)
+    Ok(mysql_client.account_by_id(&user_id)?)
 }
 
 async fn update_score_data(
@@ -91,7 +91,7 @@ async fn save_song(
     session_key: String,
 ) -> Result<(), HandleError> {
     let user_id = crate::session::get_user_id(&session_key)?;
-    let account = mysql_client.account_by_id(user_id)?;
+    let account = mysql_client.account_by_id(&user_id)?;
     let dir_name = account.google_id();
     save_sqlite_file(form, dir_name.clone(), "songdata".into()).await?;
 

@@ -1258,6 +1258,7 @@ dependencies = [
  "model",
  "oauth_google",
  "r2d2",
+ "repository",
  "serde",
  "thiserror",
 ]
@@ -1975,6 +1976,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "repository"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "model",
+ "oauth_google",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
 name = "reqwest"
 version = "0.10.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2267,6 +2279,7 @@ dependencies = [
  "rand 0.8.2",
  "rand_chacha 0.3.0",
  "redis",
+ "repository",
  "reqwest",
  "serde",
  "serde_derive",

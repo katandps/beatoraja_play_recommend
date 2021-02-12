@@ -2,6 +2,7 @@ use crate::error::HandleError;
 use crate::SongData;
 use model::*;
 use mysql::MySQLClient;
+use repository::{AccountByIncrement, ScoresByAccount};
 use warp::{Rejection, Reply};
 
 pub async fn table_handler(_user_id: i32) -> Result<impl Reply, Rejection> {
@@ -40,7 +41,7 @@ async fn body(
     table: &Table,
     song_data: SongData,
 ) -> Result<impl Reply, HandleError> {
-    let account = repos.account_by_increments(user_id)?;
+    let account = repos.user(user_id)?;
     let score = repos.score(&account)?;
     let songs = song_data.lock().await;
     Ok(serde_json::to_string(&table.filter_score(&score, &songs.song)).unwrap())

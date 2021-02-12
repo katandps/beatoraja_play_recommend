@@ -36,7 +36,7 @@ pub fn get_user_id(key: &String) -> Result<GoogleId, HandleError> {
 }
 
 pub fn get_account(repos: &MySQLClient, user_id: GoogleId) -> Result<Account, HandleError> {
-    Ok(repos.account_by_id(user_id)?)
+    Ok(repos.account_by_id(&user_id)?)
 }
 
 pub async fn get_account_by_session(repos: MySQLClient, key: String) -> Result<Account, Rejection> {

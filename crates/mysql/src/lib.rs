@@ -12,8 +12,9 @@ use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, PooledConnection};
 use diesel::MysqlConnection;
 use model::*;
-use oauth_google::GoogleProfile;
+use oauth_google::{GoogleProfile, RegisterUser};
 use r2d2::Pool;
+use repository::*;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
@@ -33,59 +34,45 @@ pub fn get_db_pool() -> MySqlPool {
     Pool::builder().build_unchecked(ConnectionManager::new(config::config().mysql_url))
 }
 
-impl MySQLClient {
-    pub fn new(connection: MySqlPooledConnection) -> Self {
-        Self { connection }
-    }
-
-    pub fn health(&self) -> Result<()> {
+impl HealthCheck for MySQLClient {
+    fn health(&self) -> Result<()> {
         match &self.connection.execute("SELECT 1") {
             Ok(_) => Ok(()),
             Err(_) => Err(anyhow!("HealthCheckError")),
         }
     }
+}
 
-    pub fn register(&self, profile: &GoogleProfile) -> Result<Account> {
+impl RegisterUser for MySQLClient {
+    fn register(&self, profile: &GoogleProfile) -> Result<()> {
         let user = User::by_google_profile(&self.connection, &profile);
         match user {
-            Ok(user) => Ok(Self::create_account(user)),
+            Ok(_) => Ok(()),
             Err(_) => {
                 use crate::schema::users::dsl::*;
                 log::info!("Insert new user: {}", profile.email);
                 diesel::insert_into(users)
                     .values(models::RegisteringUser::from_profile(profile))
                     .execute(&self.connection)?;
-                Ok(Self::create_account(User::by_google_profile(
-                    &self.connection,
-                    &profile,
-                )?))
+                Ok(())
             }
         }
     }
+}
 
-    pub fn account_by_increments(&self, id: i32) -> Result<Account> {
-        Ok(Self::create_account(User::by_user_id(
-            &self.connection,
-            id,
-        )?))
+impl AccountByIncrement for MySQLClient {
+    fn user(&self, id: i32) -> Result<Account> {
+        Ok(User::by_user_id(&self.connection, id)?.into())
+    }
+}
+
+impl MySQLClient {
+    pub fn new(connection: MySqlPooledConnection) -> Self {
+        Self { connection }
     }
 
-    fn create_account(model: models::User) -> Account {
-        Account::new(
-            UserId::new(model.id),
-            GoogleId::new(model.google_id),
-            GmailAddress::new(model.gmail_address),
-            UserName::new(model.name),
-            RegisteredDate::new(model.registered_date),
-            Visibility::new(true),
-        )
-    }
-
-    pub fn account_by_id(&self, google_id: GoogleId) -> Result<Account, Error> {
-        Ok(Self::create_account(User::by_google_id(
-            &self.connection,
-            google_id.to_string(),
-        )?))
+    pub fn account_by_id(&self, google_id: &GoogleId) -> Result<Account, Error> {
+        Ok(User::by_google_id(&self.connection, google_id.to_string())?.into())
     }
 
     pub fn rename_account(&self, account: &Account) -> Result<(), Error> {
@@ -154,18 +141,6 @@ impl MySQLClient {
             map.entry(song_id).or_insert(SnapShots::default()).add(snap);
         }
         Ok(map)
-    }
-
-    pub fn score(&self, account: &Account) -> Result<Scores, Error> {
-        let user = User::by_account(&self.connection, account)?;
-        let record = models::Score::by_user_id(&self.connection, user.id)?;
-        let score_log = self.score_log(account)?;
-        Ok(Scores::create_by_map(
-            record
-                .into_iter()
-                .filter_map(|row| Self::make_score(&row, &score_log).ok())
-                .collect::<HashMap<ScoreId, Score>>(),
-        ))
     }
 
     fn make_score(
@@ -399,8 +374,18 @@ impl MySQLClient {
     }
 }
 
-pub trait PublishedUsers {
-    fn fetch_users(&self) -> Result<Vec<VisibleAccount>>;
+impl ScoresByAccount for MySQLClient {
+    fn score(&self, account: &Account) -> Result<Scores> {
+        let user = User::by_account(&self.connection, account)?;
+        let record = models::Score::by_user_id(&self.connection, user.id)?;
+        let score_log = self.score_log(account)?;
+        Ok(Scores::create_by_map(
+            record
+                .into_iter()
+                .filter_map(|row| Self::make_score(&row, &score_log).ok())
+                .collect::<HashMap<ScoreId, Score>>(),
+        ))
+    }
 }
 
 impl PublishedUsers for MySQLClient {
@@ -415,12 +400,4 @@ impl PublishedUsers for MySQLClient {
         }
         Ok(res)
     }
-}
-
-use serde::Serialize;
-
-#[derive(Serialize)]
-pub struct VisibleAccount {
-    id: i32,
-    name: String,
 }

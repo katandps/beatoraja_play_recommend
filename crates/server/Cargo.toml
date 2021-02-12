@@ -43,3 +43,4 @@ table = { path = "../table" }
 sqlite = { path = "../sqlite" }
 mysql = { path = "../mysql" }
 oauth_google = { path = "../oauth_google" }
+repository = { path = "../repository" }

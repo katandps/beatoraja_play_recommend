@@ -1,4 +1,5 @@
 use mysql::MySQLClient;
+use repository::HealthCheck;
 use warp::http::StatusCode;
 use warp::{Rejection, Reply};
 

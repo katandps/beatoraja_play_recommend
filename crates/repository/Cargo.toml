@@ -1,5 +1,5 @@
 [package]
-name = "mysql"
+name = "repository"
 version = "0.1.0"
 authors = ["katand <katandps@gmail.com>"]
 edition = "2018"
@@ -7,20 +7,9 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-diesel = { version = "1.4.5", features = ["mysql", "chrono", "r2d2"] }
 serde = { version = "1.0", features = ["derive"] }
-r2d2 = "0.8.9"
-chrono = "*"
-log = "0.4.13"
-
 model = { path = "../model" }
-repository = { path = "../repository" }
 oauth_google = { path = "../oauth_google" }
 
-#エラー処理
 anyhow = "1.0"
 thiserror = "1.0.23"
-
-#コンフィグ処理
-envy = "0.4.2"
-lazy_static = "1.4.0"

@@ -2,6 +2,7 @@ use crate::filter::DetailQuery;
 use crate::SongData;
 use model::*;
 use mysql::MySQLClient;
+use repository::ScoresByAccount;
 use std::collections::HashMap;
 use warp::{Rejection, Reply};
 
