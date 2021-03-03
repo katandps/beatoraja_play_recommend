@@ -1,9 +1,30 @@
 use crate::filter::DetailQuery;
+use crate::filter::{account_id_query, detail_query, with_db, with_song_data, with_table};
 use crate::SongData;
+use model::Account;
 use model::*;
+use mysql::MySqlPool;
 use repository::ScoresByAccount;
 use std::collections::HashMap;
-use warp::{Rejection, Reply};
+use warp::filters::BoxedFilter;
+use warp::path;
+use warp::{Filter, Rejection, Reply};
+
+pub fn detail_route(
+    db_pool: &MySqlPool,
+    tables: &Tables,
+    song_data: &SongData,
+) -> BoxedFilter<(impl Reply,)> {
+    warp::get()
+        .and(path("detail"))
+        .and(with_db(db_pool))
+        .and(with_table(tables))
+        .and(detail_query())
+        .and(account_id_query(db_pool))
+        .and(with_song_data(song_data))
+        .and_then(detail_handler)
+        .boxed()
+}
 
 macro_rules! log_duration {
     ($name:expr, $x:expr) => {{
@@ -17,7 +38,7 @@ macro_rules! log_duration {
 
 /// 詳細表示ハンドラ
 /// user_idをQueryParameterより取得する
-pub async fn detail_handler<C: ScoresByAccount>(
+async fn detail_handler<C: ScoresByAccount>(
     repos: C,
     tables: Tables,
     query: DetailQuery,

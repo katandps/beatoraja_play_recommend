@@ -20,7 +20,7 @@ pub async fn table_handler(_user_id: i32) -> Result<impl Reply, Rejection> {
 
 pub async fn header_handler(_user_id: i32, tables: Tables) -> Result<impl Reply, Rejection> {
     Ok(serde_json::to_string(
-        &CustomTableHeader::from(tables.get()).set_name("おすすめ譜面表".into()),
+        &CustomTableHeader::from(tables.get(3)).set_name("おすすめ譜面表".into()),
     )
     .unwrap())
 }
@@ -31,7 +31,7 @@ pub async fn body_handler<C: AccountByUserId + ScoresByAccount>(
     repos: C,
     song_data: SongData,
 ) -> Result<impl Reply, Rejection> {
-    Ok(body(user_id, repos, tables.get(), song_data).await?)
+    Ok(body(user_id, repos, tables.get(3), song_data).await?)
 }
 
 async fn body<C: AccountByUserId + ScoresByAccount>(

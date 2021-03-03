@@ -23,7 +23,7 @@ fn score_upload(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
         .and(with_db(&db_pool))
         .and(receive_sqlite_file())
         .and(receive_session_key())
-        .and_then(upload::upload_score_handler)
+        .and_then(upload_score_handler)
         .boxed()
 }
 
@@ -34,7 +34,7 @@ fn score_log_upload(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
         .and(with_db(&db_pool))
         .and(receive_sqlite_file())
         .and(receive_session_key())
-        .and_then(upload::upload_score_log_handler)
+        .and_then(upload_score_log_handler)
         .boxed()
 }
 
@@ -46,6 +46,6 @@ fn song_data_upload_route(db_pool: &MySqlPool, song_data: &SongData) -> BoxedFil
         .and(with_song_data(song_data))
         .and(receive_sqlite_file())
         .and(receive_session_key())
-        .and_then(upload::upload_song_data_handler)
+        .and_then(upload_song_data_handler)
         .boxed()
 }

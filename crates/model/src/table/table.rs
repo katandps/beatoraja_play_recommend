@@ -14,10 +14,8 @@ impl Tables {
         self.v.iter().map(|t| t.get_charts()).flatten().collect()
     }
 
-    /// 4つ目のテーブル(Satellite)を返す
-    /// @todo 指定されたテーブルを返す
-    pub fn get(&self) -> &Table {
-        &self.v[3]
+    pub fn get(&self, index: usize) -> &Table {
+        &self.v[std::cmp::min(std::cmp::max(0, index), self.v.len() - 1)]
     }
 }
 
