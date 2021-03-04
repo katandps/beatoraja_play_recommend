@@ -1,9 +1,7 @@
 use crate::error::HandleError;
 use crate::SongData;
-use chrono::Duration;
 use model::*;
 use mysql::{MySQLClient, MySqlPool};
-use oauth_google::GoogleProfile;
 use repository::AccountByUserId;
 use std::collections::HashMap;
 use std::convert::Infallible;
@@ -36,42 +34,6 @@ pub fn receive_sqlite_file() -> impl Filter<Extract = (FormData,), Error = Rejec
 
 pub fn receive_session_key() -> impl Filter<Extract = (String,), Error = Rejection> + Clone {
     warp::header::<String>(crate::session::SESSION_KEY)
-}
-
-pub fn google_oauth_code() -> impl Filter<Extract = (GoogleProfile,), Error = Rejection> + Clone {
-    warp::query::<HashMap<String, String>>().and_then(verify)
-}
-
-async fn verify(query: HashMap<String, String>) -> Result<GoogleProfile, Rejection> {
-    let code = query
-        .get(&"code".to_string())
-        .cloned()
-        .ok_or(HandleError::AuthorizationCodeIsNotFound)?;
-    let profile = oauth_google::verify(code)
-        .await
-        .map_err(|e| HandleError::OAuthGoogleError(e))?;
-    Ok(profile)
-}
-
-pub fn detail_query() -> impl Filter<Extract = (DetailQuery,), Error = Rejection> + Clone {
-    warp::query::<HashMap<String, String>>().and_then(parse_detail_query)
-}
-
-async fn parse_detail_query(query: HashMap<String, String>) -> Result<DetailQuery, Rejection> {
-    let date = query
-        .get("date".into())
-        .map(UpdatedAt::from_string)
-        .map(|u| &u - Duration::days(-1))
-        .unwrap_or_default();
-    let play_mode = if let Some(mode) = query.get("mode".into()) {
-        match mode.parse::<i32>() {
-            Ok(mode) => PlayMode::from(mode),
-            Err(_) => PlayMode::default(),
-        }
-    } else {
-        PlayMode::default()
-    };
-    Ok(DetailQuery { date, play_mode })
 }
 
 pub fn account_id_query(

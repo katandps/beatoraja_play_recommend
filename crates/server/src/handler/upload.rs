@@ -1,15 +1,53 @@
 use crate::error::HandleError;
+use crate::filter::*;
 use crate::SongData;
 use bytes::BufMut;
 use futures::TryStreamExt;
 use model::*;
+use mysql::MySqlPool;
 use repository::{AccountByGoogleId, SaveScoreData, SaveSongData};
 use sqlite::SqliteClient;
 use std::sync::Arc;
 use warp::filters::multipart::{FormData, Part};
-use warp::{Rejection, Reply};
+use warp::filters::BoxedFilter;
+use warp::path;
+use warp::{Filter, Rejection, Reply};
 
-pub async fn upload_score_handler<C: SaveScoreData + AccountByGoogleId>(
+pub fn score_upload_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
+    warp::post()
+        .and(path!("upload" / "score"))
+        .and(with_db(db_pool))
+        .and(receive_sqlite_file())
+        .and(receive_session_key())
+        .and_then(upload_score_handler)
+        .boxed()
+}
+
+pub fn score_log_upload_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
+    warp::post()
+        .and(path!("upload" / "score_log"))
+        .and(with_db(db_pool))
+        .and(receive_sqlite_file())
+        .and(receive_session_key())
+        .and_then(upload_score_log_handler)
+        .boxed()
+}
+
+pub fn song_data_upload_route(
+    db_pool: &MySqlPool,
+    song_data: &SongData,
+) -> BoxedFilter<(impl Reply,)> {
+    warp::post()
+        .and(path!("upload" / "song_data"))
+        .and(with_db(db_pool))
+        .and(with_song_data(song_data))
+        .and(receive_sqlite_file())
+        .and(receive_session_key())
+        .and_then(upload_song_data_handler)
+        .boxed()
+}
+
+async fn upload_score_handler<C: SaveScoreData + AccountByGoogleId>(
     repository: C,
     form: FormData,
     session_key: String,
@@ -21,7 +59,7 @@ pub async fn upload_score_handler<C: SaveScoreData + AccountByGoogleId>(
     update_score_data(repository, account, dir_name).await
 }
 
-pub async fn upload_score_log_handler<C: SaveScoreData + AccountByGoogleId>(
+async fn upload_score_log_handler<C: SaveScoreData + AccountByGoogleId>(
     repository: C,
     form: FormData,
     session_key: String,
@@ -78,7 +116,7 @@ fn get_score(client: &SqliteClient) -> Result<Scores, HandleError> {
     Ok(client.score()?)
 }
 
-pub async fn upload_song_data_handler<C: SaveSongData + AccountByGoogleId>(
+async fn upload_song_data_handler<C: SaveSongData + AccountByGoogleId>(
     mysql_client: C,
     song_data: SongData,
     form: FormData,

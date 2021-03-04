@@ -3,7 +3,7 @@ mod error;
 mod filter;
 mod handler;
 mod routes;
-mod session;
+pub mod session;
 
 use config::config;
 use model::Songs;
@@ -16,7 +16,6 @@ extern crate lazy_static;
 use repository::AllSongData;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use warp::filters::cors::Builder;
 
 pub type SongData = Arc<Mutex<SongDB>>;
 
@@ -45,26 +44,6 @@ async fn main() {
 
     log::info!("Starting Listen with {:?} and {:?}", http_addr, https_addr);
     futures::future::join(http_warp, https_warp).await;
-}
-
-pub fn cors_header() -> Builder {
-    warp::cors()
-        .allow_any_origin()
-        .allow_methods(vec!["GET", "POST", "OPTIONS"])
-        .allow_headers(vec![
-            "x-requested-with",
-            "origin",
-            "referer",
-            "x-csrftoken",
-            "oauth-token",
-            "content-type",
-            "content-length",
-            "accept",
-            "accept-encoding",
-            "accept-language",
-            "user-agent",
-            session::SESSION_KEY,
-        ])
 }
 
 pub struct SongDB {

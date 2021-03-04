@@ -1,6 +1,3 @@
-mod custom_table;
-mod uploads;
-
 use crate::handler::*;
 use crate::SongData;
 use model::Tables;
@@ -22,9 +19,11 @@ pub fn api_routes(
         .or(tables_route(t))
         .or(songs_route(t, song_data))
         .or(detail_route(db_pool, t, song_data))
-        .or(uploads::uploads(db_pool, song_data))
+        .or(score_upload_route(db_pool))
+        .or(score_log_upload_route(db_pool))
+        .or(song_data_upload_route(db_pool, song_data))
         .or(oauth_redirect_route(db_pool))
-        .with(crate::cors_header())
+        .with(cors_header())
         .with(warp::compression::gzip())
         .with(warp::log("api_access"))
         .boxed()
@@ -35,11 +34,31 @@ pub fn table_routes(
     tables: &Tables,
     song_data: &SongData,
 ) -> BoxedFilter<(impl Reply,)> {
-    use custom_table::*;
     custom_table_header(tables)
         .or(custom_table_body(db_pool, tables, song_data))
-        .or(custom_table())
-        .with(crate::cors_header())
+        .or(custom_table_route())
+        .with(cors_header())
         .with(warp::log("table_access"))
         .boxed()
+}
+
+use warp::filters::cors::Builder;
+fn cors_header() -> Builder {
+    warp::cors()
+        .allow_any_origin()
+        .allow_methods(vec!["GET", "POST", "OPTIONS"])
+        .allow_headers(vec![
+            "x-requested-with",
+            "origin",
+            "referer",
+            "x-csrftoken",
+            "oauth-token",
+            "content-type",
+            "content-length",
+            "accept",
+            "accept-encoding",
+            "accept-language",
+            "user-agent",
+            crate::session::SESSION_KEY,
+        ])
 }

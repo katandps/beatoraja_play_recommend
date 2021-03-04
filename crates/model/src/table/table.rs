@@ -35,6 +35,10 @@ impl Table {
         }
     }
 
+    pub fn title(&self) -> String {
+        self.title.clone().into()
+    }
+
     pub fn get_charts(&self) -> Vec<&Chart> {
         self.levels.get_charts()
     }

@@ -1,6 +1,7 @@
 use crate::filter::DetailQuery;
-use crate::filter::{account_id_query, detail_query, with_db, with_song_data, with_table};
+use crate::filter::{account_id_query, with_db, with_song_data, with_table};
 use crate::SongData;
+use chrono::Duration;
 use model::Account;
 use model::*;
 use mysql::MySqlPool;
@@ -19,11 +20,28 @@ pub fn detail_route(
         .and(path("detail"))
         .and(with_db(db_pool))
         .and(with_table(tables))
-        .and(detail_query())
+        .and(warp::query::<HashMap<String, String>>().and_then(parse_detail_query))
         .and(account_id_query(db_pool))
         .and(with_song_data(song_data))
         .and_then(detail_handler)
         .boxed()
+}
+
+async fn parse_detail_query(query: HashMap<String, String>) -> Result<DetailQuery, Rejection> {
+    let date = query
+        .get("date".into())
+        .map(UpdatedAt::from_string)
+        .map(|u| &u - Duration::days(-1))
+        .unwrap_or_default();
+    let play_mode = if let Some(mode) = query.get("mode".into()) {
+        match mode.parse::<i32>() {
+            Ok(mode) => PlayMode::from(mode),
+            Err(_) => PlayMode::default(),
+        }
+    } else {
+        PlayMode::default()
+    };
+    Ok(DetailQuery { date, play_mode })
 }
 
 macro_rules! log_duration {
