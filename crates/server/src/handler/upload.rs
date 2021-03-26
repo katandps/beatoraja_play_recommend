@@ -5,7 +5,7 @@ use bytes::BufMut;
 use futures::TryStreamExt;
 use model::*;
 use mysql::MySqlPool;
-use repository::{AccountByGoogleId, SaveScoreData, SaveSongData};
+use repository::{AccountByGoogleId, AllSongData, SaveScoreData, SaveSongData};
 use sqlite::SqliteClient;
 use std::sync::Arc;
 use warp::filters::multipart::{FormData, Part};
@@ -116,7 +116,7 @@ fn get_score(client: &SqliteClient) -> Result<Scores, HandleError> {
     Ok(client.score()?)
 }
 
-async fn upload_song_data_handler<C: SaveSongData + AccountByGoogleId>(
+async fn upload_song_data_handler<C: SaveSongData + AccountByGoogleId + AllSongData>(
     mysql_client: C,
     song_data: SongData,
     form: FormData,
@@ -125,7 +125,7 @@ async fn upload_song_data_handler<C: SaveSongData + AccountByGoogleId>(
     save_song(mysql_client, song_data, form, session_key).await?;
     Ok("SongData Is Updated.".into())
 }
-async fn save_song<C: SaveSongData + AccountByGoogleId>(
+async fn save_song<C: SaveSongData + AccountByGoogleId + AllSongData>(
     client: C,
     song_data: SongData,
     form: FormData,
@@ -145,6 +145,7 @@ async fn save_song<C: SaveSongData + AccountByGoogleId>(
 
     client.save_song(&songs)?;
     let song_db = Arc::clone(&song_data);
+    let songs = client.song_data().unwrap();
     song_db.lock().await.update(songs);
 
     remove_file(&song_file_name).await
