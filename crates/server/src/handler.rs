@@ -21,5 +21,5 @@ pub use logout::logout;
 pub use oauth_redirect::oauth_redirect_route;
 pub use songs::songs_route;
 pub use tables::tables_route;
-pub use upload::{score_log_upload_route, score_upload_route, song_data_upload_route};
+pub use upload::{play_data_upload_route, song_data_upload_route};
 pub use users::users_route;

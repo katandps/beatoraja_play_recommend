@@ -16,7 +16,7 @@ pub struct SqliteClient {
 }
 
 impl SqliteClient {
-    pub fn new(scorelog_db_url: String, song_db_url: String, score_db_url: String) -> SqliteClient {
+    fn new(scorelog_db_url: String, song_db_url: String, score_db_url: String) -> SqliteClient {
         SqliteClient {
             scorelog_db_url,
             score_db_url,
@@ -24,8 +24,17 @@ impl SqliteClient {
         }
     }
 
-    fn establish_connection(url: &str) -> Result<SqliteConnection, diesel::ConnectionError> {
-        SqliteConnection::establish(&url)
+    pub fn for_score(score_db_url: &str, scorelog_db_url: &str) -> SqliteClient {
+        SqliteClient::new(scorelog_db_url.into(), "".into(), score_db_url.into())
+    }
+
+    pub fn for_song(song_db_url: &str) -> SqliteClient {
+        SqliteClient::new("".into(), song_db_url.into(), "".into())
+    }
+
+    fn establish_connection(url: &str) -> SqliteResult<SqliteConnection> {
+        let connection = SqliteConnection::establish(&url)?;
+        Ok(connection)
     }
 
     fn score_log(&self) -> Result<HashMap<ScoreId, SnapShots>, SqliteError> {
@@ -50,12 +59,10 @@ impl SqliteClient {
         }))
     }
 
-    pub fn player(&self) -> PlayerStates {
+    pub fn player(&self) -> SqliteResult<PlayerStates> {
         use schema::player::player::dsl::*;
-        let connection = Self::establish_connection(&self.score_db_url).unwrap();
-        let records: Vec<schema::player::Player> = player
-            .load::<schema::player::Player>(&connection)
-            .expect("Error loading schema");
+        let connection = Self::establish_connection(&self.score_db_url)?;
+        let records: Vec<schema::player::Player> = player.load(&connection)?;
 
         let mut log = Vec::new();
         for row in records {
@@ -71,7 +78,7 @@ impl SqliteClient {
             );
             log.push(pl);
         }
-        PlayerStates::new(log)
+        Ok(PlayerStates::new(log))
     }
 
     pub fn song_data(&self) -> Result<Songs, SqliteError> {
@@ -93,9 +100,10 @@ impl SqliteClient {
             })
             .build())
     }
-    pub fn score(&self) -> Result<Scores, SqliteError> {
+
+    pub fn score(&self) -> SqliteResult<Scores> {
         let connection = Self::establish_connection(&self.score_db_url)?;
-        let record = schema::score::score::table.load::<schema::score::Score>(&connection)?;
+        let record: Vec<schema::score::Score> = schema::score::score::table.load(&connection)?;
         let score_log = self.score_log()?;
         Ok(Scores::create_by_map(
             record
@@ -124,6 +132,8 @@ impl SqliteClient {
         ))
     }
 }
+
+pub type SqliteResult<T> = Result<T, SqliteError>;
 
 #[derive(Debug, Error)]
 pub enum SqliteError {

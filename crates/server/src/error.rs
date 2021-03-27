@@ -37,6 +37,8 @@ pub enum HandleError {
     FileIsNotDeleted,
     #[error("SaveIsNotComplete")]
     SaveIsNotComplete,
+    #[error("FormIsIncomplete")]
+    FormIsIncomplete,
 
     #[error("ChangedNameNotFound")]
     ChangedNameNotFound,

@@ -15,13 +15,5 @@ pub fn config() -> Cfg {
 }
 
 lazy_static! {
-    pub static ref CONFIG: Cfg = {
-        dbg!(&envy::prefixed("").from_env::<Cfg>());
-        match envy::prefixed("").from_env::<Cfg>() {
-            Ok(val) => val,
-            Err(e) => {
-                panic!(format!("{}", e))
-            }
-        }
-    };
+    pub static ref CONFIG: Cfg = envy::from_env::<Cfg>().unwrap();
 }
