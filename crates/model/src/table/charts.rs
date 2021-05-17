@@ -2,7 +2,7 @@ use crate::*;
 use itertools::Itertools;
 use std::collections::HashMap;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone)]
 pub struct Charts {
     pub(super) charts: Vec<Chart>,
 }

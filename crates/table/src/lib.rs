@@ -24,7 +24,7 @@ async fn make_table(url: String) -> Result<Table, TableParseError> {
     let header = get_header(&header_url).await?;
     let data_url = make_data_url(&header_url, &header)?;
     let charts = get_charts(&data_url).await?;
-    let levels = make_levels(&header, &charts);
+    let levels = make_levels(&header, charts);
     Ok(Table::make(header.name, header.symbol, levels))
 }
 
@@ -64,20 +64,19 @@ fn make_data_url(header_url: &Url, header: &Header) -> Result<Url, TableParseErr
         .map_err(|e| InvalidDataURL(e))
 }
 
-async fn get_charts(url: &Url) -> Result<Charts, TableParseError> {
+async fn get_charts(url: &Url) -> Result<Vec<Chart>, TableParseError> {
     let data_text = reqwest::get(&url.to_string())
         .await
         .map_err(|e| FailedToAccessDataURL(e))?
         .text()
         .await
         .map_err(|e| FailedToGetDataURL(e))?;
-    Ok(Charts::make(
-        serde_json::from_str(data_text.trim_start_matches('\u{feff}'))
-            .map_err(|e| FailedToParseData(e))?,
-    ))
+    let data_text = data_text.trim_start_matches('\u{feff}');
+    Ok(serde_json::from_str(data_text).map_err(|e| FailedToParseData(e))?)
 }
 
-fn make_levels(header: &Header, charts: &Charts) -> TableLevels {
+fn make_levels(header: &Header, charts: Vec<Chart>) -> TableLevels {
+    let charts = Charts::make(charts.into_iter().map(|c| c.into()).collect());
     let order = match &header.level_order {
         Some(s) => s.clone(),
         None => charts.get_levels().iter().map(Level::to_string).collect(),
@@ -117,6 +116,7 @@ pub enum TableParseError {
 
 use serde;
 use serde::Deserialize;
+use serde_json::Value;
 
 #[derive(Deserialize, Debug)]
 pub struct Header {
@@ -151,4 +151,32 @@ pub struct Trophy {
     name: String,
     missrate: f32,
     scorerate: f32,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Chart {
+    title: String,
+    artist: Option<String>,
+    md5: HashMd5,
+    level: Value,
+    url: Option<String>,
+    url_diff: Option<String>,
+    comment: Option<String>,
+}
+
+impl Into<model::Chart> for Chart {
+    fn into(self) -> model::Chart {
+        model::Chart::new(
+            self.title,
+            self.artist,
+            self.md5,
+            match self.level {
+                Value::String(s) => s,
+                p => p.to_string(),
+            },
+            self.url,
+            self.url_diff,
+            self.comment,
+        )
+    }
 }
