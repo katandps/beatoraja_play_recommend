@@ -139,6 +139,7 @@ impl TableLevel {
     }
 }
 
+use itertools::Itertools;
 /// フロント出力用フォーマット
 /// name: 難易度表名
 /// levels: HashMap<レベル名, 曲のHashMd5>
@@ -174,7 +175,18 @@ pub struct TablesFormat(Vec<TableFormat>);
 
 impl From<Tables> for TablesFormat {
     fn from(t: Tables) -> TablesFormat {
-        TablesFormat(t.v.iter().map(|(_i, t)| TableFormat::from(t)).collect())
+        let indexes =
+            t.v.iter()
+                .map(|(&table_index, _t)| table_index)
+                .sorted()
+                .collect::<Vec<_>>();
+
+        TablesFormat(
+            indexes
+                .into_iter()
+                .map(|i| TableFormat::from(t.get(i).unwrap()))
+                .collect(),
+        )
     }
 }
 
