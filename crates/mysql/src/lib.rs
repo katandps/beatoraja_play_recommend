@@ -26,12 +26,64 @@ extern crate lazy_static;
 pub type MySqlPool = Pool<ConnectionManager<MysqlConnection>>;
 pub type MySqlPooledConnection = PooledConnection<ConnectionManager<MysqlConnection>>;
 
+pub fn get_db_pool() -> MySqlPool {
+    Pool::builder().build_unchecked(ConnectionManager::new(config::config().mysql_url))
+}
+
 pub struct MySQLClient {
     connection: MySqlPooledConnection,
 }
 
-pub fn get_db_pool() -> MySqlPool {
-    Pool::builder().build_unchecked(ConnectionManager::new(config::config().mysql_url))
+impl MySQLClient {
+    pub fn new(connection: MySqlPooledConnection) -> Self {
+        Self { connection }
+    }
+
+    fn score_log(&self, account: &Account) -> Result<HashMap<ScoreId, SnapShots>, Error> {
+        let records = models::ScoreSnap::by_user_id(&self.connection, account.user_id())?;
+        let mut map = HashMap::new();
+        for row in records {
+            let song_id = ScoreId::new(row.sha256.parse().unwrap(), PlayMode::from(row.mode));
+            let snap = SnapShot::from_data(
+                row.clear,
+                row.score,
+                row.combo,
+                row.min_bp,
+                row.date.timestamp(),
+            );
+            map.entry(song_id).or_insert(SnapShots::default()).add(snap);
+        }
+        Ok(map)
+    }
+
+    fn make_score(
+        score: &models::Score,
+        log: &HashMap<ScoreId, SnapShots>,
+    ) -> Result<(ScoreId, Score)> {
+        let song_id = ScoreId::new(score.sha256.parse()?, PlayMode::from(score.mode));
+        let log = log.get(&song_id).cloned().unwrap_or_default();
+        Ok((song_id, score.to_score().with_log(log)))
+    }
+
+    fn saved_song(&self, user_id: i32) -> Result<HashMap<ScoreId, models::Score>> {
+        let saved = models::Score::by_user_id(&self.connection, user_id)?;
+        let map = saved
+            .into_iter()
+            .map(|record| (record.get_score_id(), record))
+            .collect::<HashMap<_, _>>();
+        Ok(map)
+    }
+
+    fn saved_snap(
+        &self,
+        user_id: i32,
+    ) -> Result<HashMap<(ScoreId, NaiveDateTime), models::ScoreSnap>> {
+        let saved = models::ScoreSnap::by_user_id(&self.connection, user_id)?;
+        Ok(saved
+            .into_iter()
+            .map(|record| ((record.get_score_id(), record.date.clone()), record))
+            .collect::<HashMap<_, _>>())
+    }
 }
 
 impl HealthCheck for MySQLClient {
@@ -124,58 +176,6 @@ impl ChangeAccountVisibility for MySQLClient {
             }
         }
         Ok(())
-    }
-}
-
-impl MySQLClient {
-    pub fn new(connection: MySqlPooledConnection) -> Self {
-        Self { connection }
-    }
-
-    fn score_log(&self, account: &Account) -> Result<HashMap<ScoreId, SnapShots>, Error> {
-        let records = models::ScoreSnap::by_user_id(&self.connection, account.user_id())?;
-        let mut map = HashMap::new();
-        for row in records {
-            let song_id = ScoreId::new(row.sha256.parse().unwrap(), PlayMode::from(row.mode));
-            let snap = SnapShot::from_data(
-                row.clear,
-                row.score,
-                row.combo,
-                row.min_bp,
-                row.date.timestamp(),
-            );
-            map.entry(song_id).or_insert(SnapShots::default()).add(snap);
-        }
-        Ok(map)
-    }
-
-    fn make_score(
-        score: &models::Score,
-        log: &HashMap<ScoreId, SnapShots>,
-    ) -> Result<(ScoreId, Score)> {
-        let song_id = ScoreId::new(score.sha256.parse()?, PlayMode::from(score.mode));
-        let log = log.get(&song_id).cloned().unwrap_or_default();
-        Ok((song_id, score.to_score().with_log(log)))
-    }
-
-    fn saved_song(&self, user_id: i32) -> Result<HashMap<ScoreId, models::Score>> {
-        let saved = models::Score::by_user_id(&self.connection, user_id)?;
-        let map = saved
-            .into_iter()
-            .map(|record| (record.get_score_id(), record))
-            .collect::<HashMap<_, _>>();
-        Ok(map)
-    }
-
-    fn saved_snap(
-        &self,
-        user_id: i32,
-    ) -> Result<HashMap<(ScoreId, NaiveDateTime), models::ScoreSnap>> {
-        let saved = models::ScoreSnap::by_user_id(&self.connection, user_id)?;
-        Ok(saved
-            .into_iter()
-            .map(|record| ((record.get_score_id(), record.date.clone()), record))
-            .collect::<HashMap<_, _>>())
     }
 }
 

@@ -1,6 +1,13 @@
 pub use diesel::prelude::*;
 
 table! {
+    admins (id) {
+        id -> Integer,
+        user_id -> Integer,
+    }
+}
+
+table! {
     hashes (sha256) {
         sha256 -> Char,
         md5 -> Char,
@@ -90,6 +97,7 @@ table! {
     }
 }
 
+joinable!(admins -> users (user_id));
 joinable!(score_snaps -> hashes (sha256));
 joinable!(score_snaps -> users (user_id));
 joinable!(scores -> hashes (sha256));
@@ -98,6 +106,7 @@ joinable!(songs -> hashes (sha256));
 joinable!(user_statuses -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
+    admins,
     hashes,
     rename_logs,
     scores,

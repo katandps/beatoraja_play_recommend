@@ -43,7 +43,7 @@ async fn header_handler(
     table_index: usize,
     tables: Tables,
 ) -> Result<impl Reply, Rejection> {
-    let table = tables.get(table_index);
+    let table = tables.get(table_index).unwrap();
     let header =
         &CustomTableHeader::from(table).set_name(format!("おすすめ譜面表: {}", table.title()));
     Ok(serde_json::to_string(&header).unwrap())
@@ -70,7 +70,7 @@ async fn body_handler<C: AccountByUserId + ScoresByAccount>(
     repos: C,
     song_data: SongData,
 ) -> Result<impl Reply, Rejection> {
-    Ok(body(user_id, repos, tables.get(table_index), song_data).await?)
+    Ok(body(user_id, repos, tables.get(table_index).unwrap(), song_data).await?)
 }
 
 async fn body<C: AccountByUserId + ScoresByAccount>(

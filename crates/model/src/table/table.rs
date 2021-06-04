@@ -1,21 +1,35 @@
 use crate::*;
 
 #[derive(Debug, Clone)]
+pub struct TableSource {
+    v: HashMap<usize, String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct TableId(i64);
+
+#[derive(Debug, Clone)]
 pub struct Tables {
-    v: Vec<Table>,
+    v: HashMap<usize, Table>,
 }
 
 impl Tables {
     pub fn make(v: Vec<Table>) -> Self {
-        Self { v }
+        Self {
+            v: (0..).zip(v).collect(),
+        }
     }
 
     pub fn get_charts(&self) -> Vec<&Chart> {
-        self.v.iter().map(|t| t.get_charts()).flatten().collect()
+        self.v
+            .iter()
+            .map(|(_i, t)| t.get_charts())
+            .flatten()
+            .collect()
     }
 
-    pub fn get(&self, index: usize) -> &Table {
-        &self.v[std::cmp::min(std::cmp::max(0, index), self.v.len() - 1)]
+    pub fn get(&self, index: usize) -> Option<&Table> {
+        self.v.get(&index)
     }
 }
 
@@ -160,7 +174,7 @@ pub struct TablesFormat(Vec<TableFormat>);
 
 impl From<Tables> for TablesFormat {
     fn from(t: Tables) -> TablesFormat {
-        TablesFormat(t.v.iter().map(TableFormat::from).collect())
+        TablesFormat(t.v.iter().map(|(_i, t)| TableFormat::from(t)).collect())
     }
 }
 

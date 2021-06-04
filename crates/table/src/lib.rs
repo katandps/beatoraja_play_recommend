@@ -2,6 +2,7 @@ mod config;
 
 use anyhow::anyhow;
 use config::config;
+use futures::stream::StreamExt;
 use model::*;
 use scraper::{Html, Selector};
 use thiserror::Error;
@@ -9,14 +10,22 @@ use url::Url;
 use TableParseError::*;
 
 pub async fn from_web() -> Tables {
-    let mut tables = Vec::new();
-    for url in config().table_urls {
-        match make_table(url.parse().unwrap()).await {
-            Ok(r) => tables.push(r),
-            Err(e) => eprintln!("{}", e.to_string()),
-        }
-    }
-    Tables::make(tables)
+    let tables = futures::stream::iter(config().table_urls)
+        .then(make_table)
+        .collect::<Vec<_>>()
+        .await;
+    Tables::make(
+        tables
+            .into_iter()
+            .filter_map(|t| match t {
+                Ok(t) => Some(t),
+                Err(e) => {
+                    eprintln!("{:?}", e);
+                    None
+                }
+            })
+            .collect(),
+    )
 }
 
 async fn make_table(url: String) -> Result<Table, TableParseError> {
