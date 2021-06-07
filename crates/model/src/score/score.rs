@@ -133,19 +133,19 @@ impl SnapCmp for MinBPSnap {
 
 #[derive(Deserialize, Serialize, Clone, Debug, Default)]
 pub struct ClearTypeSnap {
-    pub current: ClearType,
+    pub current: i32,
     pub updated_at: UpdatedAt,
-    pub before: ClearType,
+    pub before: i32,
 }
 
 impl ParamSnap for ClearTypeSnap {
     fn make(current: &SnapShot, updated_at: UpdatedAt, before_snap: Option<&SnapShot>) -> Self {
         ClearTypeSnap {
-            current: current.clear_type,
+            current: current.clear_type.to_integer(),
             updated_at,
             before: match before_snap {
-                Some(s) => s.clear_type,
-                None => Default::default(),
+                Some(s) => s.clear_type.to_integer(),
+                None => ClearType::default().to_integer(),
             },
         }
     }

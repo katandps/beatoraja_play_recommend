@@ -25,19 +25,20 @@ impl Scores {
         date: &'a UpdatedAt,
         account: &'a Account,
     ) -> DetailResponse<'a> {
-        let mut map = HashMap::new();
-        let charts = tables.get_charts();
-        for chart in &charts {
-            let song = songs.song(chart);
-            map.insert(
-                chart.md5(),
-                self.get(&song.song_id()).map(|s| s.make_detail(date)),
-            );
-        }
         DetailResponse {
             user_id: account.user_id(),
             user_name: account.user_name(),
-            score: map,
+            score: tables
+                .get_charts()
+                .into_iter()
+                .filter_map(|chart| {
+                    let song = songs.song(chart);
+                    match self.get(&song.song_id()).map(|s| s.make_detail(date)) {
+                        Some(score) => Some((chart.md5(), score)),
+                        None => None,
+                    }
+                })
+                .collect(),
         }
     }
 }
@@ -46,5 +47,5 @@ impl Scores {
 pub struct DetailResponse<'a> {
     user_id: i32,
     user_name: String,
-    score: HashMap<&'a HashMd5, Option<ScoreDetail>>,
+    score: HashMap<&'a HashMd5, ScoreDetail>,
 }
