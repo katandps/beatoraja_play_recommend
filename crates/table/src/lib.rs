@@ -141,25 +141,25 @@ pub struct Header {
 
 #[derive(Deserialize, Debug)]
 pub struct Grade {
-    name: String,
-    style: String,
-    md5: Vec<String>,
+    name: Option<String>,
+    style: Option<String>,
+    md5: Option<Vec<String>>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Course {
-    name: String,
-    constraint: Vec<String>,
-    trophy: Vec<Trophy>,
-    style: String,
-    md5: Vec<String>,
+    name: Option<String>,
+    constraint: Option<Vec<String>>,
+    trophy: Option<Vec<Trophy>>,
+    style: Option<String>,
+    md5: Option<Vec<String>>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Trophy {
-    name: String,
-    missrate: f32,
-    scorerate: f32,
+    name: Option<String>,
+    missrate: Option<f32>,
+    scorerate: Option<f32>,
 }
 
 #[derive(Deserialize, Debug)]
