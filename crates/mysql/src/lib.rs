@@ -40,8 +40,8 @@ impl MySQLClient {
     }
 
     fn score_log(&self, account: &Account) -> Result<HashMap<ScoreId, SnapShots>, Error> {
-        let records = models::ScoreSnap::by_user_id(&self.connection, account.user_id())?;
-        let mut map = HashMap::new();
+        let records = models::ScoreSnap::by_user_id(&self.connection, account.user_id().get())?;
+        let mut map: HashMap<ScoreId, SnapShots> = HashMap::new();
         for row in records {
             let song_id = ScoreId::new(row.sha256.parse().unwrap(), PlayMode::from(row.mode));
             let snap = SnapShot::from_data(
@@ -51,18 +51,29 @@ impl MySQLClient {
                 row.min_bp,
                 row.date.timestamp(),
             );
-            map.entry(song_id).or_insert(SnapShots::default()).add(snap);
+            map.entry(song_id).or_default().add(snap);
         }
         Ok(map)
     }
 
-    fn make_score(
-        score: &models::Score,
-        log: &HashMap<ScoreId, SnapShots>,
-    ) -> Result<(ScoreId, Score)> {
-        let song_id = ScoreId::new(score.sha256.parse()?, PlayMode::from(score.mode));
-        let log = log.get(&song_id).cloned().unwrap_or_default();
-        Ok((song_id, score.to_score().with_log(log)))
+    fn score_log_by_sha256(
+        &self,
+        sha256: &HashSha256,
+    ) -> Result<HashMap<UserId, SnapShots>, Error> {
+        let records = models::ScoreSnap::by_sha256(&self.connection, &sha256.to_string())?;
+        let mut map: HashMap<UserId, SnapShots> = HashMap::new();
+        for row in records {
+            let user_id = UserId::new(row.user_id);
+            let snap = SnapShot::from_data(
+                row.clear,
+                row.score,
+                row.combo,
+                row.min_bp,
+                row.date.timestamp(),
+            );
+            map.entry(user_id).or_default().add(snap);
+        }
+        Ok(map)
     }
 
     fn saved_song(&self, user_id: i32) -> Result<HashMap<ScoreId, models::Score>> {
@@ -152,7 +163,7 @@ impl ChangeAccountVisibility for MySQLClient {
         log::info!(
             "Update visibility to {}. : {}",
             account.visibility,
-            account.user_id()
+            account.user_id().get()
         );
         let user = User::by_account(&self.connection, account)?;
         let user_status = UserStatus::by_user(&self.connection, &user);
@@ -362,8 +373,34 @@ impl ScoresByAccount for MySQLClient {
         Ok(Scores::create_by_map(
             record
                 .into_iter()
-                .filter_map(|row| Self::make_score(&row, &score_log).ok())
+                .filter_map(|row| {
+                    let sha256 = row.sha256.parse();
+                    if sha256.is_err() {
+                        None
+                    } else {
+                        let score_id = ScoreId::new(sha256.unwrap(), PlayMode::from(row.mode));
+                        let log = score_log.get(&score_id).cloned().unwrap_or_default();
+                        Some((score_id, row.to_score().with_log(log)))
+                    }
+                })
                 .collect::<HashMap<ScoreId, Score>>(),
+        ))
+    }
+}
+
+impl ScoresBySha256 for MySQLClient {
+    fn score(&self, hash: &HashSha256) -> Result<RankedScore> {
+        let record = models::Score::by_sha256(&self.connection, &hash.to_string())?;
+        let score_log = self.score_log_by_sha256(hash)?;
+        Ok(RankedScore::create_by_map(
+            record
+                .into_iter()
+                .filter_map(|row| {
+                    let user_id = UserId::new(row.user_id);
+                    let log = score_log.get(&user_id).cloned().unwrap_or_default();
+                    Some((user_id, row.to_score().with_log(log)))
+                })
+                .collect::<HashMap<UserId, Score>>(),
         ))
     }
 }

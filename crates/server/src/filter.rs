@@ -94,3 +94,9 @@ pub struct DetailQuery {
     pub date: UpdatedAt,
     pub play_mode: PlayMode,
 }
+
+pub struct RankingQuery {
+    pub date: UpdatedAt,
+    pub play_mode: PlayMode,
+    pub sha256: HashSha256,
+}

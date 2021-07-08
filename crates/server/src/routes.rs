@@ -18,6 +18,7 @@ pub fn api_routes(
         .or(logout())
         .or(tables_route(t))
         .or(songs_route(t, song_data))
+        .or(ranking_route(db_pool, song_data))
         .or(detail_route(db_pool, t, song_data))
         .or(play_data_upload_route(db_pool))
         .or(song_data_upload_route(db_pool, song_data))

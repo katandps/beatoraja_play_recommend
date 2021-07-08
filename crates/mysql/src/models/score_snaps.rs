@@ -28,6 +28,14 @@ impl ScoreSnap {
         score_snaps.filter(user_id.eq(query_id)).load(connection)
     }
 
+    pub fn by_sha256(
+        connection: &MySqlPooledConnection,
+        query_hash: &String,
+    ) -> DieselResult<Vec<ScoreSnap>> {
+        use crate::schema::score_snaps::dsl::*;
+        score_snaps.filter(sha256.eq(query_hash)).load(connection)
+    }
+
     pub fn get_score_id(&self) -> model::ScoreId {
         ScoreId::new(
             HashSha256::from_str(&self.sha256).unwrap(),

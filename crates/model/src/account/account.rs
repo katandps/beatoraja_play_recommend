@@ -31,8 +31,8 @@ impl Account {
         }
     }
 
-    pub fn user_id(&self) -> i32 {
-        self.user_id.get()
+    pub fn user_id(&self) -> UserId {
+        self.user_id.clone()
     }
 
     pub fn google_id(&self) -> String {

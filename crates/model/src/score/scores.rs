@@ -5,7 +5,7 @@ use std::collections::HashMap;
 pub struct Scores(HashMap<ScoreId, Score>);
 
 impl Scores {
-    pub fn create_by_map(scores: HashMap<ScoreId, Score>) -> Scores {
+    pub fn create_by_map(scores: HashMap<ScoreId, Score>) -> Self {
         Scores(scores)
     }
     pub fn count(&self) -> usize {
@@ -18,7 +18,7 @@ impl Scores {
         &self.0
     }
 
-    pub fn out<'a>(
+    pub fn table_scores<'a>(
         &self,
         tables: &'a Tables,
         songs: &'a Songs,
@@ -45,7 +45,7 @@ impl Scores {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct DetailResponse<'a> {
-    user_id: i32,
+    user_id: UserId,
     user_name: String,
     score: HashMap<&'a HashMd5, ScoreDetail>,
 }

@@ -16,6 +16,10 @@ impl Songs {
         }
     }
 
+    pub fn song_by_sha256(&self, sha256: &HashSha256) -> Option<&Song> {
+        self.songs.get(sha256)
+    }
+
     fn song_a(&self, chart: &Chart) -> Option<&Song> {
         match self.get_sha256(&chart.md5()) {
             Some(sha256) => self.songs.get(&sha256),
@@ -48,9 +52,20 @@ pub struct SongFormat {
     md5: HashMd5,
 }
 
+impl Default for SongFormat {
+    fn default() -> Self {
+        Self {
+            title: "曲データなし".to_string(),
+            notes: 0,
+            sha256: Default::default(),
+            md5: Default::default(),
+        }
+    }
+}
+
 impl From<&Song> for SongFormat {
     fn from(s: &Song) -> Self {
-        SongFormat {
+        Self {
             title: s.title(),
             notes: s.notes(),
             sha256: s.get_sha256().clone(),

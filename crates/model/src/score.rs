@@ -7,6 +7,7 @@ mod min_bp;
 mod play_count;
 mod prelude;
 mod rank;
+mod ranking;
 mod score;
 mod scores;
 mod snapshot;

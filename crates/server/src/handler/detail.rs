@@ -72,7 +72,7 @@ async fn detail_handler<C: ScoresByAccount>(
     );
     let response = log_duration!(
         MakeResponse,
-        scores.out(&tables, &songs.song, &query.date, &account)
+        scores.table_scores(&tables, &songs.song, &query.date, &account)
     );
     log_duration!(Serialize, Ok(serde_json::to_string(&response).unwrap()))
 }

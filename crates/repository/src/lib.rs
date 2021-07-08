@@ -1,5 +1,5 @@
 use anyhow::Result;
-use model::{Account, GoogleId, Scores, Songs};
+use model::{Account, GoogleId, HashSha256, RankedScore, Scores, Songs};
 use serde::Serialize;
 
 pub trait PublishedUsers {
@@ -26,6 +26,10 @@ pub trait AccountByGoogleId {
 
 pub trait ScoresByAccount {
     fn score(&self, account: &Account) -> Result<Scores>;
+}
+
+pub trait ScoresBySha256 {
+    fn score(&self, hash: &HashSha256) -> Result<RankedScore>;
 }
 
 pub trait RenameAccount {

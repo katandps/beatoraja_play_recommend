@@ -14,6 +14,7 @@ use warp::Filter;
 extern crate lazy_static;
 
 use repository::AllSongData;
+use std::ops::Deref;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -53,5 +54,13 @@ pub struct SongDB {
 impl SongDB {
     pub fn update(&mut self, new: Songs) {
         self.song = new;
+    }
+}
+
+impl Deref for SongDB {
+    type Target = Songs;
+
+    fn deref(&self) -> &Self::Target {
+        &self.song
     }
 }
