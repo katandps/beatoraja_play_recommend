@@ -31,15 +31,15 @@ impl From<i32> for IncludeFeatures {
     }
 }
 
-impl Into<i32> for IncludeFeatures {
-    fn into(self) -> i32 {
-        0 + if self.undefined_ln.0 { 1 } else { 0 }
-            + if self.mine_note.0 { 2 } else { 0 }
-            + if self.random.0 { 4 } else { 0 }
-            + if self.long_note.0 { 8 } else { 0 }
-            + if self.charge_note.0 { 16 } else { 0 }
-            + if self.hell_charge_note.0 { 32 } else { 0 }
-            + if self.stop_sequence.0 { 64 } else { 0 }
+impl From<IncludeFeatures> for i32 {
+    fn from(feature: IncludeFeatures) -> Self {
+        (if feature.undefined_ln.0 { 1 } else { 0 })
+            + if feature.mine_note.0 { 2 } else { 0 }
+            + if feature.random.0 { 4 } else { 0 }
+            + if feature.long_note.0 { 8 } else { 0 }
+            + if feature.charge_note.0 { 16 } else { 0 }
+            + if feature.hell_charge_note.0 { 32 } else { 0 }
+            + if feature.stop_sequence.0 { 64 } else { 0 }
     }
 }
 

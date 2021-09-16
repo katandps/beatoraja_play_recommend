@@ -57,8 +57,8 @@ async fn play_data_upload<C: SaveScoreData + AccountByGoogleId>(
     let mut score_db = NamedTempFile::new()?;
     let mut scorelog_db = NamedTempFile::new()?;
     let map = form_into_map(form).await?;
-    score_db.write(map.get("score").ok_or(HandleError::FormIsIncomplete)?)?;
-    scorelog_db.write(map.get("scorelog").ok_or(HandleError::FormIsIncomplete)?)?;
+    score_db.write_all(map.get("score").ok_or(HandleError::FormIsIncomplete)?)?;
+    scorelog_db.write_all(map.get("scorelog").ok_or(HandleError::FormIsIncomplete)?)?;
     let sqlite_client = SqliteClient::for_score(
         score_db.path().to_str().unwrap(),
         scorelog_db.path().to_str().unwrap(),
@@ -85,7 +85,7 @@ async fn song_data_upload<C: SaveSongData + AllSongData>(
 ) -> Result<(), HandleError> {
     let mut songdata_db = NamedTempFile::new().unwrap();
     let map = form_into_map(form).await?;
-    songdata_db.write(map.get("songdata").ok_or(HandleError::FormIsIncomplete)?)?;
+    songdata_db.write_all(map.get("songdata").ok_or(HandleError::FormIsIncomplete)?)?;
     let sqlite_client = SqliteClient::for_song(songdata_db.path().to_str().unwrap());
 
     client.save_song(&sqlite_client.song_data()?)?;

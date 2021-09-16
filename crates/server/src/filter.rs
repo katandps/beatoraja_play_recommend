@@ -39,7 +39,7 @@ pub fn receive_session_key() -> impl Filter<Extract = (String,), Error = Rejecti
 pub fn account_id_query(
     db_pool: &MySqlPool,
 ) -> impl Filter<Extract = (Account,), Error = Rejection> + Clone {
-    with_db(&db_pool)
+    with_db(db_pool)
         .and(warp::query::<HashMap<String, String>>())
         .and_then(get_account_by_query)
 }
@@ -53,10 +53,10 @@ async fn get_account_by_query<C: AccountByUserId>(
         .ok_or(HandleError::AccountIsNotSelected)?;
     let user_id = user_id
         .parse::<i32>()
-        .map_err(|e| HandleError::AccountSelectionIsInvalid(e))?;
+        .map_err(HandleError::AccountSelectionIsInvalid)?;
     let account = repos
         .user(user_id)
-        .map_err(|e| HandleError::AccountIsNotFound(e))?;
+        .map_err(HandleError::AccountIsNotFound)?;
     Ok(account)
 }
 

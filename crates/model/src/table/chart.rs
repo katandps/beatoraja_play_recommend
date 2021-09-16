@@ -40,7 +40,7 @@ impl Chart {
         Title::new(self.title.clone())
     }
     pub fn artist(&self) -> Artist {
-        Artist::new(self.artist.clone().unwrap_or("".to_string()))
+        Artist::new(self.artist.clone().unwrap_or_else(|| "".to_string()))
     }
     pub fn level(&self) -> Level {
         Level::make(self.level.clone())

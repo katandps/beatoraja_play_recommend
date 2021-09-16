@@ -22,16 +22,16 @@ pub fn save_user_id(user_id: GoogleId) -> Result<String> {
     Ok(key)
 }
 
-pub fn remove_session(key: &String) -> Result<(), HandleError> {
+pub fn remove_session(key: &str) -> Result<(), HandleError> {
     let mut redis_connection = get_client()?;
     let _ = redis_connection.del(key)?;
     Ok(())
 }
 
-pub fn get_user_id(key: &String) -> Result<GoogleId, HandleError> {
+pub fn get_user_id(key: &str) -> Result<GoogleId, HandleError> {
     let mut redis_connection = get_client()?;
     Ok(GoogleId::new(
-        redis_connection.get(key).map_err(|e| SessionError(e))?,
+        redis_connection.get(key).map_err(SessionError)?,
     ))
 }
 

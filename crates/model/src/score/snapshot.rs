@@ -28,7 +28,7 @@ impl SnapShot {
     }
 
     pub fn score(&self) -> ExScore {
-        self.score.clone()
+        self.score
     }
     pub fn clear_type(&self) -> &ClearType {
         &self.clear_type

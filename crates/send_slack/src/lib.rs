@@ -26,14 +26,14 @@ pub fn send(channel: String, title: String, content: String) -> anyhow::Result<S
         .send()?;
     let _ = fs::remove_file("buf.txt");
     match res.text() {
-        Err(e) => Ok(String::from(format!("アップロード失敗:{:?}", e))),
+        Err(e) => Ok(format!("アップロード失敗:{:?}", e)),
         Ok(result) => {
             let v: Value = serde_json::from_str(result.as_str()).unwrap();
 
             match v["ok"].as_bool() {
-                Some(true) => Ok(String::from(format!("アップロード完了"))),
-                Some(false) => Ok(String::from(format!("アップロード失敗:{}", v["error"]))),
-                None => Ok(String::from(format!("アップロード失敗:{}", v["error"]))),
+                Some(true) => Ok("アップロード完了".to_string()),
+                Some(false) => Ok(format!("アップロード失敗:{}", v["error"])),
+                None => Ok(format!("アップロード失敗:{}", v["error"])),
             }
         }
     }
@@ -66,9 +66,9 @@ pub async fn send_async(content: String) -> anyhow::Result<String> {
     let v: Value = serde_json::from_str(res.as_str()).unwrap();
 
     match v["ok"].as_bool() {
-        Some(true) => Ok(String::from(format!("アップロード完了"))),
-        Some(false) => Ok(String::from(format!("アップロード失敗:{}", v["error"]))),
-        None => Ok(String::from(format!("アップロード失敗:{}", v["error"]))),
+        Some(true) => Ok("アップロード完了".to_string()),
+        Some(false) => Ok(format!("アップロード失敗:{}", v["error"])),
+        None => Ok(format!("アップロード失敗:{}", v["error"])),
     }
 }
 

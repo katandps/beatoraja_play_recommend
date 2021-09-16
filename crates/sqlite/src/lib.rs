@@ -33,7 +33,7 @@ impl SqliteClient {
     }
 
     fn establish_connection(url: &str) -> SqliteResult<SqliteConnection> {
-        let connection = SqliteConnection::establish(&url)?;
+        let connection = SqliteConnection::establish(url)?;
         Ok(connection)
     }
 
@@ -87,7 +87,7 @@ impl SqliteClient {
 
         Ok(record
             .iter()
-            .fold(SongsBuilder::new(), |mut builder, row| {
+            .fold(SongsBuilder::default(), |mut builder, row| {
                 builder.push(
                     HashMd5::from_str(&row.md5).unwrap(),
                     HashSha256::from_str(&row.sha256).unwrap(),

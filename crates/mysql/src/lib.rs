@@ -92,7 +92,7 @@ impl MySQLClient {
         let saved = models::ScoreSnap::by_user_id(&self.connection, user_id)?;
         Ok(saved
             .into_iter()
-            .map(|record| ((record.get_score_id(), record.date.clone()), record))
+            .map(|record| ((record.get_score_id(), record.date), record))
             .collect::<HashMap<_, _>>())
     }
 }
@@ -108,7 +108,7 @@ impl HealthCheck for MySQLClient {
 
 impl RegisterUser for MySQLClient {
     fn register(&self, profile: &GoogleProfile) -> Result<()> {
-        let user = User::by_google_profile(&self.connection, &profile);
+        let user = User::by_google_profile(&self.connection, profile);
         match user {
             Ok(_) => Ok(()),
             Err(_) => {
@@ -141,8 +141,8 @@ impl RenameAccount for MySQLClient {
         let user = User::by_account(&self.connection, account)?;
         diesel::insert_into(schema::rename_logs::table)
             .values(models::RenameUser {
-                user_id: user.id.clone(),
-                old_name: user.name.clone(),
+                user_id: user.id,
+                old_name: user.name,
                 new_name: account.user_name(),
                 date: Utc::now().naive_utc(),
             })
@@ -201,7 +201,7 @@ impl AllSongData for MySQLClient {
 
         Ok(record
             .iter()
-            .fold(SongsBuilder::new(), |mut builder, row| {
+            .fold(SongsBuilder::default(), |mut builder, row| {
                 builder.push(
                     HashMd5::from_str(hash.get(&row.sha256).unwrap()).unwrap(),
                     HashSha256::from_str(&row.sha256).unwrap(),
@@ -218,7 +218,7 @@ impl AllSongData for MySQLClient {
 
 impl SaveScoreData for MySQLClient {
     fn save_score(&self, account: &Account, score: &Scores) -> Result<()> {
-        let user = User::by_account(&self.connection, &account)?;
+        let user = User::by_account(&self.connection, account)?;
         let user_id = user.id;
         let saved_song = self.saved_song(user_id)?;
         let saved_snap = self.saved_snap(user_id)?;
@@ -233,7 +233,7 @@ impl SaveScoreData for MySQLClient {
         let mut snaps_for_insert = Vec::new();
 
         for (song_id, score) in score.get_map() {
-            match saved_song.get(&song_id) {
+            match saved_song.get(song_id) {
                 Some(saved) => {
                     if UpdatedAt::from_naive_datetime(saved.date) < score.updated_at {
                         songs_for_update
@@ -375,12 +375,12 @@ impl ScoresByAccount for MySQLClient {
                 .into_iter()
                 .filter_map(|row| {
                     let sha256 = row.sha256.parse();
-                    if sha256.is_err() {
-                        None
-                    } else {
-                        let score_id = ScoreId::new(sha256.unwrap(), PlayMode::from(row.mode));
+                    if let Ok(sha256) = sha256 {
+                        let score_id = ScoreId::new(sha256, PlayMode::from(row.mode));
                         let log = score_log.get(&score_id).cloned().unwrap_or_default();
                         Some((score_id, row.to_score().with_log(log)))
+                    } else {
+                        None
                     }
                 })
                 .collect::<HashMap<ScoreId, Score>>(),
@@ -395,10 +395,10 @@ impl ScoresBySha256 for MySQLClient {
         Ok(RankedScore::create_by_map(
             record
                 .into_iter()
-                .filter_map(|row| {
+                .map(|row| {
                     let user_id = UserId::new(row.user_id);
                     let log = score_log.get(&user_id).cloned().unwrap_or_default();
-                    Some((user_id, row.to_score().with_log(log)))
+                    (user_id, row.to_score().with_log(log))
                 })
                 .collect::<HashMap<UserId, Score>>(),
         ))

@@ -8,13 +8,13 @@ pub struct UpdatedAt(DateTime<Local>);
 
 impl Default for UpdatedAt {
     fn default() -> UpdatedAt {
-        UpdatedAt(DateTime::from(Local.timestamp(0, 0)))
+        UpdatedAt(Local.timestamp(0, 0))
     }
 }
 
 impl UpdatedAt {
     pub fn from_timestamp(timestamp: i64) -> UpdatedAt {
-        UpdatedAt(DateTime::from(Local.timestamp(timestamp, 0)))
+        UpdatedAt(Local.timestamp(timestamp, 0))
     }
     pub fn from_str(str: &str) -> UpdatedAt {
         match DateTime::parse_from_rfc3339(format!("{}T00:00:00+09:00", str).as_str()) {

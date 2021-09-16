@@ -55,8 +55,8 @@ impl Account {
         self.registered_date.to_naive_date_time()
     }
 
-    pub fn set_name(&mut self, new_name: &String) {
-        self.name = UserName::new(new_name.clone());
+    pub fn set_name(&mut self, new_name: &str) {
+        self.name = UserName::new(new_name.to_string());
     }
 
     pub fn set_visibility(&mut self, new_visibility: bool) {

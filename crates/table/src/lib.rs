@@ -37,21 +37,19 @@ async fn make_table(url: String) -> Result<Table, TableParseError> {
     Ok(Table::make(header.name, header.symbol, levels))
 }
 
-async fn get_header_url(url: &String) -> Result<Url, TableParseError> {
-    let res = reqwest::get(url)
-        .await
-        .map_err(|e| FailedToAccessTableURL(e))?;
-    let body = res.text().await.map_err(|e| FailedToGetTableURL(e))?;
+async fn get_header_url(url: &str) -> Result<Url, TableParseError> {
+    let res = reqwest::get(url).await.map_err(FailedToAccessTableURL)?;
+    let body = res.text().await.map_err(FailedToGetTableURL)?;
 
     let selector =
         Selector::parse(r#"meta[name="bmstable"]"#).map_err(|e| NotFoundCSS(anyhow!("{:?}", e)))?;
     let document = Html::parse_document(&body);
-    let mut header_url = Url::parse(&url).map_err(|e| InvalidURL(e))?;
+    let mut header_url = Url::parse(url).map_err(InvalidURL)?;
     for element in document.select(&selector) {
         let header_url_fragment = element.value().attr("content").ok_or(NotFoundHeaderURL)?;
         header_url = header_url
             .join(header_url_fragment)
-            .map_err(|e| InvalidHeaderURL(e))?;
+            .map_err(InvalidHeaderURL)?;
     }
     Ok(header_url)
 }
@@ -59,29 +57,28 @@ async fn get_header_url(url: &String) -> Result<Url, TableParseError> {
 async fn get_header(url: &Url) -> Result<Header, TableParseError> {
     let header_text: String = reqwest::get(&url.to_string())
         .await
-        .map_err(|e| FailedToAccessHeaderURL(e))?
+        .map_err(FailedToAccessHeaderURL)?
         .text()
         .await
-        .map_err(|e| FailedToAccessHeaderURL(e))?;
-    serde_json::from_str(header_text.trim_start_matches('\u{feff}'))
-        .map_err(|e| FailedToParseHeader(e))
+        .map_err(FailedToAccessHeaderURL)?;
+    serde_json::from_str(header_text.trim_start_matches('\u{feff}')).map_err(FailedToParseHeader)
 }
 
 fn make_data_url(header_url: &Url, header: &Header) -> Result<Url, TableParseError> {
     header_url
         .join(header.data_url.as_ref())
-        .map_err(|e| InvalidDataURL(e))
+        .map_err(InvalidDataURL)
 }
 
 async fn get_charts(url: &Url) -> Result<Vec<Chart>, TableParseError> {
     let data_text = reqwest::get(&url.to_string())
         .await
-        .map_err(|e| FailedToAccessDataURL(e))?
+        .map_err(FailedToAccessDataURL)?
         .text()
         .await
-        .map_err(|e| FailedToGetDataURL(e))?;
+        .map_err(FailedToGetDataURL)?;
     let data_text = data_text.trim_start_matches('\u{feff}');
-    Ok(serde_json::from_str(data_text).map_err(|e| FailedToParseData(e))?)
+    Ok(serde_json::from_str(data_text).map_err(FailedToParseData)?)
 }
 
 fn make_levels(header: &Header, charts: Vec<Chart>) -> TableLevels {
@@ -123,7 +120,6 @@ pub enum TableParseError {
     FailedToParseData(serde_json::Error),
 }
 
-use serde;
 use serde::Deserialize;
 use serde_json::Value;
 
@@ -173,19 +169,19 @@ pub struct Chart {
     comment: Option<String>,
 }
 
-impl Into<model::Chart> for Chart {
-    fn into(self) -> model::Chart {
+impl From<Chart> for model::Chart {
+    fn from(chart: Chart) -> Self {
         model::Chart::new(
-            self.title,
-            self.artist,
-            self.md5,
-            match self.level {
+            chart.title,
+            chart.artist,
+            chart.md5,
+            match chart.level {
                 Value::String(s) => s,
                 p => p.to_string(),
             },
-            self.url,
-            self.url_diff,
-            self.comment,
+            chart.url,
+            chart.url_diff,
+            chart.comment,
         )
     }
 }

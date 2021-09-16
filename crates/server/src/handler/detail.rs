@@ -29,11 +29,11 @@ pub fn detail_route(
 
 async fn parse_detail_query(query: HashMap<String, String>) -> Result<DetailQuery, Rejection> {
     let date = query
-        .get("date".into())
+        .get("date")
         .map(UpdatedAt::from_string)
         .map(|u| &u - Duration::days(-1))
         .unwrap_or_default();
-    let play_mode = if let Some(mode) = query.get("mode".into()) {
+    let play_mode = if let Some(mode) = query.get("mode") {
         match mode.parse::<i32>() {
             Ok(mode) => PlayMode::from(mode),
             Err(_) => PlayMode::default(),
@@ -68,7 +68,7 @@ async fn detail_handler<C: ScoresByAccount>(
         GetScores,
         repos
             .score(&account)
-            .unwrap_or(Scores::create_by_map(HashMap::new()))
+            .unwrap_or_else(|_| Scores::create_by_map(HashMap::new()))
     );
     let response = log_duration!(
         MakeResponse,

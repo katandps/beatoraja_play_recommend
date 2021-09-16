@@ -33,10 +33,9 @@ impl Scores {
                 .into_iter()
                 .filter_map(|chart| {
                     let song = songs.song(chart);
-                    match self.get(&song.song_id()).map(|s| s.make_detail(date)) {
-                        Some(score) => Some((chart.md5(), score)),
-                        None => None,
-                    }
+                    self.get(&song.song_id())
+                        .map(|s| s.make_detail(date))
+                        .map(|score| (chart.md5(), score))
                 })
                 .collect(),
         }

@@ -9,7 +9,7 @@ pub struct Songs {
 
 impl Songs {
     pub fn song(&self, chart: &Chart) -> Song {
-        let sha256 = self.get_sha256(&chart.md5());
+        let sha256 = self.get_sha256(chart.md5());
         match sha256 {
             Some(sha256) => self.songs.get(&sha256).cloned().unwrap(),
             None => Song::make_from_chart(chart),
@@ -21,7 +21,7 @@ impl Songs {
     }
 
     fn song_a(&self, chart: &Chart) -> Option<&Song> {
-        match self.get_sha256(&chart.md5()) {
+        match self.get_sha256(chart.md5()) {
             Some(sha256) => self.songs.get(&sha256),
             None => None,
         }
@@ -35,7 +35,7 @@ impl Songs {
         self.converter.get_sha256(md5)
     }
 
-    pub fn get_list(&self, chart: &Vec<&Chart>) -> Vec<SongFormat> {
+    pub fn get_list(&self, chart: &[&Chart]) -> Vec<SongFormat> {
         chart
             .iter()
             .filter_map(|c| self.song_a(c))
@@ -80,15 +80,17 @@ pub struct SongsBuilder {
     sha256_to_md5: HashMap<HashSha256, HashMd5>,
 }
 
-impl SongsBuilder {
-    pub fn new() -> SongsBuilder {
+impl Default for SongsBuilder {
+    fn default() -> Self {
         SongsBuilder {
             songs: HashMap::new(),
             md5_to_sha256: HashMap::new(),
             sha256_to_md5: HashMap::new(),
         }
     }
+}
 
+impl SongsBuilder {
     pub fn push(
         &mut self,
         md5: HashMd5,

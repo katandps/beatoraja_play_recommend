@@ -19,11 +19,11 @@ impl Converter {
     }
 
     pub fn get_md5(&self, sha256: &HashSha256) -> Option<HashMd5> {
-        self.sha256_to_md5.get(&sha256).cloned()
+        self.sha256_to_md5.get(sha256).cloned()
     }
 
     pub fn get_sha256(&self, md5: &HashMd5) -> Option<HashSha256> {
-        self.md5_to_sha256.get(&md5).cloned()
+        self.md5_to_sha256.get(md5).cloned()
     }
 }
 

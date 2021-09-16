@@ -73,18 +73,18 @@ impl Table {
 #[derive(Debug, Clone)]
 pub struct TableName(String);
 
-impl Into<String> for TableName {
-    fn into(self) -> String {
-        self.0
+impl From<TableName> for String {
+    fn from(name: TableName) -> Self {
+        name.0
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct TableSymbol(String);
 
-impl Into<String> for TableSymbol {
-    fn into(self) -> String {
-        self.0
+impl From<TableSymbol> for String {
+    fn from(symbol: TableSymbol) -> Self {
+        symbol.0
     }
 }
 
@@ -158,7 +158,7 @@ impl From<&Table> for TableFormat {
         for level in &t.levels.v {
             for chart in &level.charts.charts {
                 map.entry(level.get_label(t))
-                    .or_insert(Vec::new())
+                    .or_insert_with(Vec::new)
                     .push(chart.md5().to_string())
             }
         }
@@ -175,15 +175,10 @@ pub struct TablesFormat(Vec<TableFormat>);
 
 impl From<Tables> for TablesFormat {
     fn from(t: Tables) -> TablesFormat {
-        let indexes =
-            t.v.iter()
-                .map(|(&table_index, _t)| table_index)
-                .sorted()
-                .collect::<Vec<_>>();
+        let indexes = t.v.iter().map(|(&table_index, _t)| table_index).sorted();
 
         TablesFormat(
             indexes
-                .into_iter()
                 .map(|i| TableFormat::from(t.get(i).unwrap()))
                 .collect(),
         )

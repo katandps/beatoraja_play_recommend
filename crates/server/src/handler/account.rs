@@ -8,7 +8,7 @@ use warp::{Filter, Rejection, Reply};
 pub fn account_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("account"))
-        .and(account_by_session(&db_pool))
+        .and(account_by_session(db_pool))
         .and_then(account_handler)
         .boxed()
 }

@@ -7,12 +7,15 @@ pub struct Charts {
     pub(super) charts: Vec<Chart>,
 }
 
+impl Default for Charts {
+    fn default() -> Self {
+        Self { charts: Vec::new() }
+    }
+}
+
 impl Charts {
     pub fn make(charts: Vec<Chart>) -> Self {
         Charts { charts }
-    }
-    pub fn new() -> Self {
-        Charts { charts: Vec::new() }
     }
     pub fn level_specified(&self, level: &Level) -> Self {
         Charts::make(
@@ -35,14 +38,14 @@ impl Charts {
     }
 
     pub fn get_charts(&self) -> Vec<&Chart> {
-        self.charts.iter().map(|c| c).collect()
+        self.charts.iter().collect()
     }
 
-    pub fn make_levels(&self, order: &Vec<String>) -> TableLevels {
+    pub fn make_levels(&self, order: &[String]) -> TableLevels {
         let mut m = HashMap::new();
         for chart in &self.charts {
             m.entry(chart.level().to_string())
-                .or_insert(Vec::new())
+                .or_insert_with(Vec::new)
                 .push(chart.clone());
         }
         let a: Vec<Chart> = Vec::new();
@@ -51,7 +54,7 @@ impl Charts {
             .map(|l| {
                 TableLevel::make(
                     l.clone(),
-                    Charts::make(m.get(l).cloned().unwrap_or(a.clone())),
+                    Charts::make(m.get(l).cloned().unwrap_or_else(|| a.clone())),
                 )
             })
             .collect();
@@ -63,13 +66,7 @@ impl Charts {
             .iter()
             .map(|c| {
                 let song = songs.song(c);
-                (
-                    scores
-                        .get(&song.song_id())
-                        .cloned()
-                        .unwrap_or(Score::default()),
-                    c,
-                )
+                (scores.get(&song.song_id()).cloned().unwrap_or_default(), c)
             })
             .sorted_by(|a, b| a.0.updated_at.cmp(&b.0.updated_at))
             .map(|(_s, c)| c)

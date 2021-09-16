@@ -15,14 +15,14 @@ pub struct User {
     pub registered_date: NaiveDateTime,
 }
 
-impl Into<Account> for User {
-    fn into(self) -> Account {
+impl From<User> for Account {
+    fn from(user: User) -> Self {
         Account::new(
-            UserId::new(self.id),
-            GoogleId::new(self.google_id),
-            GmailAddress::new(self.gmail_address),
-            UserName::new(self.name),
-            RegisteredDate::new(self.registered_date),
+            UserId::new(user.id),
+            GoogleId::new(user.google_id),
+            GmailAddress::new(user.gmail_address),
+            UserName::new(user.name),
+            RegisteredDate::new(user.registered_date),
             Visibility::new(false),
         )
     }

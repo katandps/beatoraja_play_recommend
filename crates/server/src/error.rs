@@ -80,9 +80,12 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
             },
             e.to_string(),
         )
-    } else if let Some(_) = err.find::<warp::filters::body::BodyDeserializeError>() {
+    } else if err
+        .find::<warp::filters::body::BodyDeserializeError>()
+        .is_some()
+    {
         (StatusCode::BAD_REQUEST, "Invalid Body".into())
-    } else if let Some(_) = err.find::<warp::reject::MethodNotAllowed>() {
+    } else if err.find::<warp::reject::MethodNotAllowed>().is_some() {
         (StatusCode::UNAUTHORIZED, "Method Not Allowed".into())
     } else {
         log::error!("unhandled error: {:?}", err);
@@ -93,9 +96,7 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
     };
 
     log::error!("{} {}", code, message);
-    let json = warp::reply::json(&ErrorResponse {
-        error: message.into(),
-    });
+    let json = warp::reply::json(&ErrorResponse { error: message });
     Ok(warp::reply::with_status(json, code))
 }
 
