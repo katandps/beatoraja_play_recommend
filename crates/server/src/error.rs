@@ -108,12 +108,6 @@ impl HandleError {
 
 impl warp::reject::Reject for HandleError {}
 
-impl From<HandleError> for Rejection {
-    fn from(e: HandleError) -> Self {
-        warp::reject::custom(e)
-    }
-}
-
 impl From<anyhow::Error> for HandleError {
     fn from(e: anyhow::Error) -> Self {
         OtherError(e)

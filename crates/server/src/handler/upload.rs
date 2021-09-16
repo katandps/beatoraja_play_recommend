@@ -44,56 +44,48 @@ async fn play_data_upload_handler<C: SaveScoreData + AccountByGoogleId>(
     repository: C,
     form: FormData,
     account: Account,
-) -> std::result::Result<impl Reply, Rejection> {
-    play_data_upload(repository, form, account).await?;
-    Ok(StatusCode::OK)
-}
-
-async fn play_data_upload<C: SaveScoreData + AccountByGoogleId>(
-    repository: C,
-    form: FormData,
-    account: Account,
-) -> Result<(), HandleError> {
-    let mut score_db = NamedTempFile::new()?;
-    let mut scorelog_db = NamedTempFile::new()?;
+) -> Result<impl Reply, Rejection> {
+    let mut score_db = NamedTempFile::new().map_err(HandleError::from)?;
+    let mut scorelog_db = NamedTempFile::new().map_err(HandleError::from)?;
     let map = form_into_map(form).await?;
-    score_db.write_all(map.get("score").ok_or(HandleError::FormIsIncomplete)?)?;
-    scorelog_db.write_all(map.get("scorelog").ok_or(HandleError::FormIsIncomplete)?)?;
+    score_db
+        .write_all(map.get("score").ok_or(HandleError::FormIsIncomplete)?)
+        .map_err(HandleError::from)?;
+    scorelog_db
+        .write_all(map.get("scorelog").ok_or(HandleError::FormIsIncomplete)?)
+        .map_err(HandleError::from)?;
     let sqlite_client = SqliteClient::for_score(
         score_db.path().to_str().unwrap(),
         scorelog_db.path().to_str().unwrap(),
     );
 
-    let scores = sqlite_client.score()?;
-    repository.save_score(&account, &scores)?;
-    Ok(())
+    let scores = sqlite_client.score().map_err(HandleError::from)?;
+    repository
+        .save_score(&account, &scores)
+        .map_err(HandleError::from)?;
+    Ok(StatusCode::OK)
 }
 
 async fn upload_song_data_handler<C: SaveSongData + AllSongData>(
-    mysql_client: C,
-    song_data: SongData,
-    form: FormData,
-) -> std::result::Result<String, Rejection> {
-    song_data_upload(mysql_client, song_data, form).await?;
-    Ok("SongData Is Updated.".into())
-}
-
-async fn song_data_upload<C: SaveSongData + AllSongData>(
     client: C,
     song_data: SongData,
     form: FormData,
-) -> Result<(), HandleError> {
+) -> Result<String, Rejection> {
     let mut songdata_db = NamedTempFile::new().unwrap();
     let map = form_into_map(form).await?;
-    songdata_db.write_all(map.get("songdata").ok_or(HandleError::FormIsIncomplete)?)?;
+    songdata_db
+        .write_all(map.get("songdata").ok_or(HandleError::FormIsIncomplete)?)
+        .map_err(HandleError::from)?;
     let sqlite_client = SqliteClient::for_song(songdata_db.path().to_str().unwrap());
 
-    client.save_song(&sqlite_client.song_data()?)?;
+    client
+        .save_song(&sqlite_client.song_data().map_err(HandleError::from)?)
+        .map_err(HandleError::from)?;
 
     let song_db = Arc::clone(&song_data);
     let songs = client.song_data().unwrap();
     song_db.lock().await.update(songs);
-    Ok(())
+    Ok("SongData Is Updated.".into())
 }
 
 async fn form_into_map(form: FormData) -> Result<HashMap<String, Vec<u8>>, HandleError> {
