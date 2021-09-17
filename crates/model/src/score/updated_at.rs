@@ -1,7 +1,9 @@
 use crate::*;
-use chrono::{DateTime, Duration, Local, NaiveDateTime, TimeZone};
+use anyhow::Result;
+use chrono::{DateTime, Duration, Local, NaiveDateTime, ParseError, TimeZone};
 use std::fmt;
 use std::ops::Sub;
+use std::str::FromStr;
 
 #[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct UpdatedAt(DateTime<Local>);
@@ -16,21 +18,12 @@ impl UpdatedAt {
     pub fn from_timestamp(timestamp: i64) -> UpdatedAt {
         UpdatedAt(Local.timestamp(timestamp, 0))
     }
-    pub fn from_str(str: &str) -> UpdatedAt {
-        match DateTime::parse_from_rfc3339(format!("{}T00:00:00+09:00", str).as_str()) {
-            Ok(d) => UpdatedAt(DateTime::from(d)),
-            _ => Self::now(),
-        }
-    }
-    pub fn from_string(str: &String) -> UpdatedAt {
-        Self::from_str(str)
-    }
 
     pub fn now() -> UpdatedAt {
         UpdatedAt(Local::now())
     }
     fn day_start(self) -> UpdatedAt {
-        Self::from_str(format!("{}", self.0.format("%Y-%m-%d")).as_str())
+        Self::from_str(format!("{}", self.0.format("%Y-%m-%d")).as_str()).expect("bugged")
     }
 
     pub fn is_future(&self) -> bool {
@@ -43,6 +36,15 @@ impl UpdatedAt {
 
     pub fn from_naive_datetime(time: NaiveDateTime) -> Self {
         Self::from_timestamp((time - Duration::hours(9)).timestamp())
+    }
+}
+
+impl FromStr for UpdatedAt {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let date = DateTime::parse_from_rfc3339(format!("{}T00:00:00+09:00", s).as_str())?;
+        Ok(UpdatedAt(DateTime::from(date)))
     }
 }
 
@@ -71,7 +73,7 @@ mod test {
     pub fn test() {
         assert_eq!(
             "1992-11-20 00:00:00",
-            UpdatedAt::from_str("1992-11-20").to_string()
+            UpdatedAt::from_str("1992-11-20").unwrap().to_string()
         );
     }
 
@@ -79,7 +81,7 @@ mod test {
     pub fn test_sub() {
         assert_eq!(
             "1992-11-20 00:00:00",
-            (&UpdatedAt::from_str("1992-11-21") - Duration::days(1)).to_string()
+            (&UpdatedAt::from_str("1992-11-21").unwrap() - Duration::days(1)).to_string()
         )
     }
 

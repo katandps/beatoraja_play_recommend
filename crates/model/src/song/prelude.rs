@@ -2,7 +2,7 @@ pub use crate::song::{
     artist::Artist,
     hash::{HashMd5, HashSha256},
     hash_converter::Converter,
-    include_features::*,
+    include_features::IncludeFeatures,
     level::{Level, Levels},
     song::Song,
     song_with_snap::SongWithSnap,

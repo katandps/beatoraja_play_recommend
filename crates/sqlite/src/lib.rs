@@ -71,10 +71,20 @@ impl SqliteClient {
                 PlayCount::new(row.clear),
                 PlayTime::new(row.playtime),
                 UpdatedAt::from_timestamp(row.date as i64),
-                TotalJudge::new(Judge::new(
-                    row.epg, row.lpg, row.egr, row.lgr, row.egd, row.lgd, row.ebd, row.lbd,
-                    row.epr, row.lpr, row.ems, row.lms,
-                )),
+                TotalJudge::new(Judge {
+                    early_pgreat: row.epg,
+                    late_pgreat: row.lpg,
+                    early_great: row.egr,
+                    late_great: row.lgr,
+                    early_good: row.egd,
+                    late_good: row.lgd,
+                    early_bad: row.ebd,
+                    late_bad: row.lbd,
+                    early_poor: row.epr,
+                    late_poor: row.lpr,
+                    early_miss: row.ems,
+                    late_miss: row.lms,
+                }),
             );
             log.push(pl);
         }
@@ -116,10 +126,20 @@ impl SqliteClient {
                         Score::new(
                             ClearType::from_integer(row.clear),
                             UpdatedAt::from_timestamp(row.date as i64),
-                            Judge::new(
-                                row.epg, row.lpg, row.egr, row.lgr, row.egd, row.lgd, row.ebd,
-                                row.lbd, row.epr, row.lpr, row.ems, row.lms,
-                            ),
+                            Judge {
+                                early_pgreat: row.epg,
+                                late_pgreat: row.lpg,
+                                early_great: row.egr,
+                                late_great: row.lgr,
+                                early_good: row.egd,
+                                late_good: row.lgd,
+                                early_bad: row.ebd,
+                                late_bad: row.lbd,
+                                early_poor: row.epr,
+                                late_poor: row.lpr,
+                                early_miss: row.ems,
+                                late_miss: row.lms,
+                            },
                             MaxCombo::from_combo(row.combo),
                             PlayCount::new(row.playcount),
                             ClearCount::new(row.clearcount),

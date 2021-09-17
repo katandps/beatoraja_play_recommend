@@ -73,8 +73,8 @@ mod test {
             let snap = snapshots
                 .param_snap::<ClearTypeSnap>(&UpdatedAt::from_timestamp(timestamp))
                 .unwrap_or_default();
-            assert_eq!(current, snap.current);
-            assert_eq!(before, snap.before);
+            assert_eq!(current.to_integer(), snap.current);
+            assert_eq!(before.to_integer(), snap.before);
         }
 
         //10日目 failed

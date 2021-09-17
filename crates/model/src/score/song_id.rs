@@ -32,7 +32,7 @@ impl From<i32> for PlayMode {
     fn from(mode: i32) -> Self {
         let lm = match FromPrimitive::from_i32(mode % 10) {
             Some(lm) => lm,
-            None => LnMode::LongNote,
+            None => LnMode::Long,
         };
 
         PlayMode(lm)
@@ -41,13 +41,13 @@ impl From<i32> for PlayMode {
 
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug, Serialize, Deserialize, FromPrimitive)]
 pub enum LnMode {
-    LongNote = 0,
-    ChargeNote = 1,
-    HellChargeNote = 2,
+    Long = 0,
+    Charge = 1,
+    HellCharge = 2,
 }
 
 impl Default for LnMode {
     fn default() -> LnMode {
-        LnMode::LongNote
+        LnMode::Long
     }
 }

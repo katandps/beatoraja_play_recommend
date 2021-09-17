@@ -24,9 +24,12 @@ pub fn ranking_route(db_pool: &MySqlPool, song_data: &SongData) -> BoxedFilter<(
 async fn parse_ranking_query(query: HashMap<String, String>) -> Result<RankingQuery, Rejection> {
     let date = query
         .get("date")
-        .map(UpdatedAt::from_string)
-        .map(|u| &u - Duration::days(-1))
-        .unwrap_or_else(UpdatedAt::now);
+        .map(|u| {
+            UpdatedAt::from_str(u)
+                .map(|u| &u - Duration::days(-1))
+                .unwrap_or_else(|_| UpdatedAt::default())
+        })
+        .unwrap_or_default();
     let play_mode = if let Some(mode) = query.get("mode") {
         match mode.parse::<i32>() {
             Ok(mode) => PlayMode::from(mode),

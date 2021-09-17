@@ -66,7 +66,7 @@ mod test {
     fn test() {
         for i in 0..128 {
             let i_f = IncludeFeatures::from(i);
-            assert_eq!(i, i_f.into());
+            assert_eq!(i, i32::from(i_f));
         }
     }
 }

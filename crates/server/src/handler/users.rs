@@ -1,7 +1,7 @@
 use crate::error::HandleError;
 use crate::filter::with_db;
 use mysql::MySqlPool;
-use repository::{PublishedUsers, VisibleAccount};
+use repository::PublishedUsers;
 use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
@@ -15,11 +15,6 @@ pub fn users_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
 }
 
 async fn users_handler<C: PublishedUsers>(repos: C) -> std::result::Result<impl Reply, Rejection> {
-    let users = fetch_users(repos)?;
+    let users = repos.fetch_users().map_err(HandleError::from)?;
     Ok(serde_json::to_string(&users).unwrap())
-}
-
-fn fetch_users<C: PublishedUsers>(repos: C) -> Result<Vec<VisibleAccount>, HandleError> {
-    let users = repos.fetch_users()?;
-    Ok(users)
 }

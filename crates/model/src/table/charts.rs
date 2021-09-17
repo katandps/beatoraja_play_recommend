@@ -27,14 +27,12 @@ impl Charts {
         )
     }
     pub fn get_levels(&self) -> Vec<Level> {
-        let mut vec = self
-            .charts
+        self.charts
             .iter()
             .map(Chart::level)
             .unique()
-            .collect::<Vec<Level>>();
-        vec.sort_by(Level::cmp);
-        vec
+            .sorted()
+            .collect()
     }
 
     pub fn get_charts(&self) -> Vec<&Chart> {

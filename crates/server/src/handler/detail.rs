@@ -7,6 +7,7 @@ use model::*;
 use mysql::MySqlPool;
 use repository::ScoresByAccount;
 use std::collections::HashMap;
+use std::str::FromStr;
 use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
@@ -30,8 +31,11 @@ pub fn detail_route(
 async fn parse_detail_query(query: HashMap<String, String>) -> Result<DetailQuery, Rejection> {
     let date = query
         .get("date")
-        .map(UpdatedAt::from_string)
-        .map(|u| &u - Duration::days(-1))
+        .map(|u| {
+            UpdatedAt::from_str(u)
+                .map(|u| &u - Duration::days(-1))
+                .unwrap_or_else(|_| UpdatedAt::default())
+        })
         .unwrap_or_default();
     let play_mode = if let Some(mode) = query.get("mode") {
         match mode.parse::<i32>() {
