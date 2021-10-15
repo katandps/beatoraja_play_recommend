@@ -12,6 +12,7 @@ services:
       - ~/.aws/:/root/.aws/ro
     env_file:
       - .env
+    restart: always
     depends_on:
       - mysql
       - session-redis
