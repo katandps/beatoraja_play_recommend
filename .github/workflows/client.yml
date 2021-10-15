@@ -28,7 +28,7 @@ jobs:
     - name: install wasm-pack
       run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
-    - run: cargo test --verbose
+    - run: cargo test
     - run: cd crates/client && wasm-pack build --release --target nodejs
 
     - uses: actions/setup-node@v1
