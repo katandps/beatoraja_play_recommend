@@ -126,6 +126,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 
 [[package]]
+name = "beatoraja_play_recommend"
+version = "0.1.0"
+dependencies = [
+ "model",
+ "reqwest-wasm",
+ "serde",
+ "serde_json",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "bigint"
 version = "4.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -223,17 +234,6 @@ dependencies = [
  "serde",
  "time",
  "winapi",
-]
-
-[[package]]
-name = "client"
-version = "0.1.0"
-dependencies = [
- "model",
- "reqwest-wasm",
- "serde",
- "serde_json",
- "wasm-bindgen",
 ]
 
 [[package]]
