@@ -1,5 +1,5 @@
 use crate::error::HandleError::*;
-use serde_derive::Serialize;
+use serde::Serialize;
 use std::convert::Infallible;
 use std::num::ParseIntError;
 use thiserror::Error;
