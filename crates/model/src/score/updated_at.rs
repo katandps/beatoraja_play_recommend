@@ -1,26 +1,26 @@
 use crate::*;
 use anyhow::Result;
-use chrono::{DateTime, Duration, Local, NaiveDateTime, ParseError, TimeZone};
+use chrono::{DateTime, Duration, NaiveDateTime, ParseError, TimeZone, Utc};
 use std::fmt;
 use std::ops::Sub;
 use std::str::FromStr;
 
 #[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Debug, Serialize, Deserialize)]
-pub struct UpdatedAt(DateTime<Local>);
+pub struct UpdatedAt(DateTime<Utc>);
 
 impl Default for UpdatedAt {
     fn default() -> UpdatedAt {
-        UpdatedAt(Local.timestamp(0, 0))
+        UpdatedAt(Utc.timestamp(0, 0))
     }
 }
 
 impl UpdatedAt {
     pub fn from_timestamp(timestamp: i64) -> UpdatedAt {
-        UpdatedAt(Local.timestamp(timestamp, 0))
+        UpdatedAt(Utc.timestamp(timestamp, 0))
     }
 
     pub fn now() -> UpdatedAt {
-        UpdatedAt(Local::now())
+        UpdatedAt(Utc::now())
     }
     fn day_start(self) -> UpdatedAt {
         Self::from_str(format!("{}", self.0.format("%Y-%m-%d")).as_str()).expect("bugged")
@@ -35,7 +35,7 @@ impl UpdatedAt {
     }
 
     pub fn from_naive_datetime(time: NaiveDateTime) -> Self {
-        Self::from_timestamp((time - Duration::hours(9)).timestamp())
+        Self::from_timestamp((time).timestamp())
     }
 }
 
@@ -43,7 +43,7 @@ impl FromStr for UpdatedAt {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let date = DateTime::parse_from_rfc3339(format!("{}T00:00:00+09:00", s).as_str())?;
+        let date = DateTime::parse_from_rfc3339(format!("{}T00:00:00+00:00", s).as_str())?;
         Ok(UpdatedAt(DateTime::from(date)))
     }
 }
