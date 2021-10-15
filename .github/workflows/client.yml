@@ -36,7 +36,7 @@ jobs:
         node-version: 14.x
         registry-url: 'https://npm.pkg.github.com'
         scope: "@katandps"
-    - run: wasm-pack publish
+    - run: npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
    
