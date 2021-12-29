@@ -39,7 +39,6 @@ pub fn config() -> Cfg {
 
 lazy_static! {
     pub static ref CONFIG: Cfg = {
-        dbg!(&envy::from_env::<Cfg>());
         match envy::from_env::<Cfg>() {
             Ok(val) => val,
             Err(err) => {

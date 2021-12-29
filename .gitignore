@@ -3,3 +3,4 @@
 /files
 /db/data
 .env*
+/letsencrypt
