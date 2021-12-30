@@ -1,4 +1,5 @@
 mod hashes;
+mod player_stats;
 mod score_snaps;
 mod scores;
 mod songs;
@@ -6,6 +7,7 @@ mod user_statues;
 mod users;
 
 pub use hashes::*;
+pub use player_stats::*;
 pub use score_snaps::*;
 pub use scores::*;
 pub use songs::*;

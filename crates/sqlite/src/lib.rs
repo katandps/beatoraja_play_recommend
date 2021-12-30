@@ -59,14 +59,14 @@ impl SqliteClient {
         }))
     }
 
-    pub fn player(&self) -> SqliteResult<PlayerStates> {
+    pub fn player(&self) -> SqliteResult<PlayerStats> {
         use schema::player::player::dsl::*;
         let connection = Self::establish_connection(&self.score_db_url)?;
         let records: Vec<schema::player::Player> = player.load(&connection)?;
 
         let mut log = Vec::new();
         for row in records {
-            let pl = PlayerState::new(
+            let pl = PlayerStat::new(
                 PlayCount::new(row.playcount),
                 PlayCount::new(row.clear),
                 PlayTime::new(row.playtime),
@@ -88,7 +88,7 @@ impl SqliteClient {
             );
             log.push(pl);
         }
-        Ok(PlayerStates::new(log))
+        Ok(PlayerStats::new(log))
     }
 
     pub fn song_data(&self) -> Result<Songs, SqliteError> {

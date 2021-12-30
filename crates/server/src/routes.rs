@@ -1,4 +1,33 @@
-use crate::handler::*;
+mod account;
+mod change_name;
+mod change_visibility;
+mod custom_table;
+mod detail;
+mod health;
+mod logout;
+mod oauth_redirect;
+mod ranking;
+mod songs;
+mod stats;
+mod tables;
+mod upload;
+mod users;
+
+use account::account_route;
+use change_name::change_name;
+use change_visibility::change_visibility_route;
+use custom_table::*;
+use detail::detail_route;
+use health::health_route;
+use logout::logout;
+use oauth_redirect::oauth_redirect_route;
+use ranking::ranking_route;
+use songs::songs_route;
+use stats::stats_route;
+use tables::tables_route;
+use upload::{play_data_upload_route, song_data_upload_route};
+use users::users_route;
+
 use crate::SongData;
 use model::Tables;
 use mysql::MySqlPool;
@@ -17,6 +46,7 @@ pub fn api_routes(
         .or(change_visibility_route(db_pool))
         .or(logout())
         .or(tables_route(t))
+        .or(stats_route(db_pool))
         .or(songs_route(t, song_data))
         .or(ranking_route(db_pool, song_data))
         .or(detail_route(db_pool, t, song_data))

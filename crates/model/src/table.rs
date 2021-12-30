@@ -7,6 +7,7 @@ pub use prelude::*;
 use crate::*;
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct TableSource {
     v: HashMap<usize, String>,
 }

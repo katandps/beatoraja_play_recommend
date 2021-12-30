@@ -6,7 +6,9 @@ use futures::TryStreamExt;
 use http::StatusCode;
 use model::*;
 use mysql::MySqlPool;
-use repository::{AccountByGoogleId, AllSongData, SaveScoreData, SaveSongData};
+use repository::{
+    AccountByGoogleId, AllSongData, SavePlayerStateData, SaveScoreData, SaveSongData,
+};
 use sqlite::SqliteClient;
 use std::collections::HashMap;
 use std::io::Write;
@@ -40,7 +42,7 @@ pub fn song_data_upload_route(
         .boxed()
 }
 
-async fn play_data_upload_handler<C: SaveScoreData + AccountByGoogleId>(
+async fn play_data_upload_handler<C: SaveScoreData + SavePlayerStateData + AccountByGoogleId>(
     repository: C,
     form: FormData,
     account: Account,
@@ -62,6 +64,10 @@ async fn play_data_upload_handler<C: SaveScoreData + AccountByGoogleId>(
     let scores = sqlite_client.score().map_err(HandleError::from)?;
     repository
         .save_score(&account, &scores)
+        .map_err(HandleError::from)?;
+    let player_states = sqlite_client.player().map_err(HandleError::from)?;
+    repository
+        .save_player_states(&account, &player_states)
         .map_err(HandleError::from)?;
     Ok(StatusCode::OK)
 }

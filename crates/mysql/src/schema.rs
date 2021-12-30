@@ -15,6 +15,29 @@ table! {
 }
 
 table! {
+    player_stats (id) {
+        id -> Integer,
+        user_id -> Integer,
+        date -> Datetime,
+        playcount -> Integer,
+        clear -> Integer,
+        epg -> Integer,
+        lpg -> Integer,
+        egr -> Integer,
+        lgr -> Integer,
+        egd -> Integer,
+        lgd -> Integer,
+        ebd -> Integer,
+        lbd -> Integer,
+        epr -> Integer,
+        lpr -> Integer,
+        ems -> Integer,
+        lms -> Integer,
+        playtime -> Integer,
+    }
+}
+
+table! {
     rename_logs (id) {
         id -> Integer,
         user_id -> Integer,
@@ -98,6 +121,7 @@ table! {
 }
 
 joinable!(admins -> users (user_id));
+joinable!(player_stats -> users (user_id));
 joinable!(score_snaps -> hashes (sha256));
 joinable!(score_snaps -> users (user_id));
 joinable!(scores -> hashes (sha256));
@@ -108,6 +132,7 @@ joinable!(user_statuses -> users (user_id));
 allow_tables_to_appear_in_same_query!(
     admins,
     hashes,
+    player_stats,
     rename_logs,
     scores,
     score_snaps,

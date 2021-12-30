@@ -124,6 +124,7 @@ use serde::Deserialize;
 use serde_json::Value;
 
 #[derive(Deserialize, Debug)]
+#[allow(dead_code)]
 pub struct Header {
     pub data_url: String,
     pub name: String,
@@ -136,6 +137,7 @@ pub struct Header {
 }
 
 #[derive(Deserialize, Debug)]
+#[allow(dead_code)]
 pub struct Grade {
     name: Option<String>,
     style: Option<String>,
@@ -143,6 +145,7 @@ pub struct Grade {
 }
 
 #[derive(Deserialize, Debug)]
+#[allow(dead_code)]
 pub struct Course {
     name: Option<String>,
     constraint: Option<Vec<String>>,
@@ -152,6 +155,7 @@ pub struct Course {
 }
 
 #[derive(Deserialize, Debug)]
+#[allow(dead_code)]
 pub struct Trophy {
     name: Option<String>,
     missrate: Option<f32>,
@@ -159,6 +163,7 @@ pub struct Trophy {
 }
 
 #[derive(Deserialize, Debug)]
+#[allow(dead_code)]
 pub struct Chart {
     title: String,
     artist: Option<String>,

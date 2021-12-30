@@ -4,7 +4,10 @@ mod models;
 mod schema;
 
 pub use crate::error::Error;
-use crate::models::{CanGetHash, Hash, ScoreSnapForUpdate, User, UserStatus, UserStatusForInsert};
+use crate::models::{
+    CanGetHash, Hash, PlayerStatForUpdate, ScoreSnapForUpdate, User, UserStatus,
+    UserStatusForInsert,
+};
 use anyhow::anyhow;
 use anyhow::Result;
 use chrono::{NaiveDateTime, Utc};
@@ -362,6 +365,49 @@ impl SaveSongData for MySQLClient {
                 .execute(&self.connection)?;
         }
         Ok(())
+    }
+}
+
+impl SavePlayerStateData for MySQLClient {
+    fn save_player_states(&self, account: &Account, stats: &PlayerStats) -> Result<()> {
+        let user = User::by_account(&self.connection, account)?;
+        let records: Vec<_> = stats
+            .log
+            .iter()
+            .map(|stat| PlayerStatForUpdate {
+                user_id: user.id,
+                date: stat.date.naive_datetime(),
+                playcount: stat.play_count.0,
+                clear: stat.clear_count.0,
+                epg: stat.total_judge.judge().early_pgreat,
+                lpg: stat.total_judge.judge().late_pgreat,
+                egr: stat.total_judge.judge().early_great,
+                lgr: stat.total_judge.judge().late_great,
+                egd: stat.total_judge.judge().early_good,
+                lgd: stat.total_judge.judge().late_good,
+                ebd: stat.total_judge.judge().early_bad,
+                lbd: stat.total_judge.judge().late_bad,
+                epr: stat.total_judge.judge().early_poor,
+                lpr: stat.total_judge.judge().late_poor,
+                ems: stat.total_judge.judge().early_miss,
+                lms: stat.total_judge.judge().late_miss,
+                playtime: stat.play_time.0,
+            })
+            .collect();
+        diesel::insert_into(schema::player_stats::table)
+            .values(records)
+            .execute(&self.connection)?;
+        Ok(())
+    }
+}
+
+impl StatsByAccount for MySQLClient {
+    fn stats(&self, account: &Account) -> Result<PlayerStats> {
+        let user = User::by_account(&self.connection, account)?;
+        let record = models::PlayerStat::by_user_id(&self.connection, user.id)?;
+        Ok(PlayerStats::new(
+            record.into_iter().map(|row| row.to_stat()).collect(),
+        ))
     }
 }
 

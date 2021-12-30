@@ -1,7 +1,6 @@
 mod config;
 mod error;
 mod filter;
-mod handler;
 mod routes;
 pub mod session;
 

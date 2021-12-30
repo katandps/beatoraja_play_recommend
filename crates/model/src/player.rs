@@ -2,28 +2,28 @@ use crate::{Judge, PlayCount, UpdatedAt};
 use serde::Serialize;
 use std::cmp::Ordering;
 
-#[derive(Debug)]
-pub struct PlayerStates {
-    log: Vec<PlayerState>,
+#[derive(Debug, Serialize)]
+pub struct PlayerStats {
+    pub log: Vec<PlayerStat>,
 }
 
-impl PlayerStates {
-    pub fn new(log: Vec<PlayerState>) -> PlayerStates {
-        PlayerStates { log }
+impl PlayerStats {
+    pub fn new(log: Vec<PlayerStat>) -> PlayerStats {
+        PlayerStats { log }
     }
 
-    pub fn last(&self) -> Option<&PlayerState> {
+    pub fn last(&self) -> Option<&PlayerStat> {
         self.log.iter().last()
     }
 
-    pub fn diff(&self) -> Vec<PlayerStateDiff> {
+    pub fn diff(&self) -> Vec<PlayerStatDiff> {
         let mut log = self.log.clone();
-        log.sort_by(PlayerState::cmp_by_date);
+        log.sort_by(PlayerStat::cmp_by_date);
         let mut ret = Vec::new();
         for i in 1..log.len() {
             let before = log[i - 1].clone();
             let after = log[i].clone();
-            ret.push(PlayerStateDiff::new(
+            ret.push(PlayerStatDiff::new(
                 before.date,
                 after.date,
                 after.play_count - before.play_count,
@@ -36,24 +36,24 @@ impl PlayerStates {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct PlayerState {
-    play_count: PlayCount,
-    clear_count: PlayCount,
-    play_time: PlayTime,
-    date: UpdatedAt,
-    total_judge: TotalJudge,
+#[derive(Debug, Clone, Serialize)]
+pub struct PlayerStat {
+    pub play_count: PlayCount,
+    pub clear_count: PlayCount,
+    pub play_time: PlayTime,
+    pub date: UpdatedAt,
+    pub total_judge: TotalJudge,
 }
 
-impl PlayerState {
+impl PlayerStat {
     pub fn new(
         play_count: PlayCount,
         clear_count: PlayCount,
         play_time: PlayTime,
         date: UpdatedAt,
         total_judge: TotalJudge,
-    ) -> PlayerState {
-        PlayerState {
+    ) -> PlayerStat {
+        PlayerStat {
             play_count,
             clear_count,
             play_time,
@@ -62,13 +62,13 @@ impl PlayerState {
         }
     }
 
-    pub fn cmp_by_date(&self, other: &PlayerState) -> Ordering {
+    pub fn cmp_by_date(&self, other: &PlayerStat) -> Ordering {
         self.date.cmp(&other.date)
     }
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct PlayerStateDiff {
+pub struct PlayerStatDiff {
     before_date: UpdatedAt,
     after_date: UpdatedAt,
     play_count: PlayCount,
@@ -77,7 +77,7 @@ pub struct PlayerStateDiff {
     total_judge: TotalJudge,
 }
 
-impl PlayerStateDiff {
+impl PlayerStatDiff {
     pub fn new(
         before_date: UpdatedAt,
         after_date: UpdatedAt,
@@ -85,8 +85,8 @@ impl PlayerStateDiff {
         clear_count: PlayCount,
         play_time: PlayTime,
         total_judge: TotalJudge,
-    ) -> PlayerStateDiff {
-        PlayerStateDiff {
+    ) -> PlayerStatDiff {
+        PlayerStatDiff {
             before_date,
             after_date,
             play_count,
@@ -99,7 +99,7 @@ impl PlayerStateDiff {
 
 /// PlayTime(seconds)
 #[derive(Debug, Clone, Serialize)]
-pub struct PlayTime(i32);
+pub struct PlayTime(pub i32);
 
 impl PlayTime {
     pub fn new(seconds: i32) -> PlayTime {
@@ -120,6 +120,10 @@ pub struct TotalJudge(Judge);
 impl TotalJudge {
     pub fn new(judge: Judge) -> TotalJudge {
         TotalJudge(judge)
+    }
+
+    pub fn judge(&self) -> &Judge {
+        &self.0
     }
 }
 
