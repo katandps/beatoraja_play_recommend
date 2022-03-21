@@ -29,14 +29,14 @@ use upload::{play_data_upload_route, song_data_upload_route};
 use users::users_route;
 
 use crate::SongData;
-use model::Tables;
+use crate::TableData;
 use mysql::MySqlPool;
 use warp::filters::BoxedFilter;
 use warp::{Filter, Reply};
 
 pub fn api_routes(
     db_pool: &MySqlPool,
-    t: &Tables,
+    t: &TableData,
     song_data: &SongData,
 ) -> BoxedFilter<(impl Reply,)> {
     health_route(db_pool)
@@ -61,7 +61,7 @@ pub fn api_routes(
 
 pub fn table_routes(
     db_pool: &MySqlPool,
-    tables: &Tables,
+    tables: &TableData,
     song_data: &SongData,
 ) -> BoxedFilter<(impl Reply,)> {
     custom_table_header(tables)

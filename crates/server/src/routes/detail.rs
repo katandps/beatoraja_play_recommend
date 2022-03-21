@@ -1,6 +1,6 @@
 use crate::filter::DetailQuery;
 use crate::filter::{account_id_query, with_db, with_song_data, with_table};
-use crate::SongData;
+use crate::{SongData, TableData};
 use chrono::Duration;
 use model::Account;
 use model::*;
@@ -14,7 +14,7 @@ use warp::{Filter, Rejection, Reply};
 
 pub fn detail_route(
     db_pool: &MySqlPool,
-    tables: &Tables,
+    tables: &TableData,
     song_data: &SongData,
 ) -> BoxedFilter<(impl Reply,)> {
     warp::get()
@@ -62,11 +62,12 @@ macro_rules! log_duration {
 /// user_idをQueryParameterより取得する
 async fn detail_handler<C: ScoresByAccount>(
     repos: C,
-    tables: Tables,
+    tables: TableData,
     query: DetailQuery,
     account: Account,
     song_data: SongData,
 ) -> Result<impl Reply, Rejection> {
+    let tables = tables.lock().await;
     let songs = log_duration!(GetSongs, song_data.lock().await);
     let scores = log_duration!(
         GetScores,

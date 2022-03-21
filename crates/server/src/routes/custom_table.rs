@@ -1,7 +1,7 @@
 use crate::error::HandleError;
 use crate::filter::*;
 use crate::SongData;
-use model::Tables;
+use crate::TableData;
 use model::*;
 use mysql::MySqlPool;
 use repository::{AccountByUserId, ScoresByAccount};
@@ -30,7 +30,7 @@ async fn table_handler(_user_id: i32, _table_index: usize) -> Result<impl Reply,
     Ok(warp::reply::html(body))
 }
 
-pub fn custom_table_header(tables: &Tables) -> BoxedFilter<(impl Reply,)> {
+pub fn custom_table_header(tables: &TableData) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path!("recommend_table" / i32 / usize / "header.json"))
         .and(with_table(tables))
@@ -41,8 +41,9 @@ pub fn custom_table_header(tables: &Tables) -> BoxedFilter<(impl Reply,)> {
 async fn header_handler(
     _user_id: i32,
     table_index: usize,
-    tables: Tables,
+    tables: TableData,
 ) -> Result<impl Reply, Rejection> {
+    let tables = tables.lock().await;
     let table = tables.get(table_index).unwrap();
     let header =
         &CustomTableHeader::from(table).set_name(format!("おすすめ譜面表: {}", table.title()));
@@ -51,7 +52,7 @@ async fn header_handler(
 
 pub fn custom_table_body(
     db_pool: &MySqlPool,
-    tables: &Tables,
+    tables: &TableData,
     song_data: &SongData,
 ) -> BoxedFilter<(impl Reply,)> {
     warp::get()
@@ -66,10 +67,11 @@ pub fn custom_table_body(
 async fn body_handler<C: AccountByUserId + ScoresByAccount>(
     user_id: i32,
     table_index: usize,
-    tables: Tables,
+    tables: TableData,
     repos: C,
     song_data: SongData,
 ) -> Result<impl Reply, Rejection> {
+    let tables = tables.lock().await;
     Ok(body(user_id, repos, tables.get(table_index).unwrap(), song_data).await?)
 }
 

@@ -12,26 +12,28 @@ use warp::Filter;
 #[macro_use]
 extern crate lazy_static;
 
+use model::Tables;
 use repository::AllSongData;
 use std::ops::Deref;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
 pub type SongData = Arc<Mutex<SongDB>>;
+pub type TableData = Arc<Mutex<Tables>>;
 
 #[tokio::main]
 async fn main() {
     env_logger::init();
     let db_pool = mysql::get_db_pool();
-    let new_tables = table::from_web().await;
 
     let client = MySQLClient::new(db_pool.get().unwrap());
     let song_data = Arc::new(Mutex::new(SongDB {
         song: client.song_data().unwrap(),
     }));
+    let tables = Arc::new(Mutex::new(table::from_web().await));
 
-    let table_route = routes::table_routes(&db_pool, &new_tables, &song_data);
-    let route = routes::api_routes(&db_pool, &new_tables, &song_data)
+    let table_route = routes::table_routes(&db_pool, &tables, &song_data);
+    let route = routes::api_routes(&db_pool, &tables, &song_data)
         .or(table_route)
         .recover(error::handle_rejection);
 

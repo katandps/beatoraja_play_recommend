@@ -180,8 +180,8 @@ impl From<&Table> for TableFormat {
 #[derive(Serialize)]
 pub struct TablesFormat(Vec<TableFormat>);
 
-impl From<Tables> for TablesFormat {
-    fn from(t: Tables) -> TablesFormat {
+impl TablesFormat {
+    pub fn format(t: &Tables) -> TablesFormat {
         let indexes = t.v.iter().map(|(&table_index, _t)| table_index).sorted();
 
         TablesFormat(
