@@ -16,6 +16,7 @@ use model::Tables;
 use repository::AllSongData;
 use std::ops::Deref;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::Mutex;
 
 pub type SongData = Arc<Mutex<SongDB>>;
@@ -45,7 +46,18 @@ async fn main() {
         .bind_ephemeral(([0, 0, 0, 0], 4431));
 
     log::info!("Starting Listen with {:?} and {:?}", http_addr, https_addr);
-    futures::future::join(http_warp, https_warp).await;
+    futures::future::join3(http_warp, https_warp, table_update(&tables)).await;
+}
+
+async fn table_update(tables: &TableData) {
+    loop {
+        tokio::time::sleep(Duration::from_secs(3600)).await;
+        {
+            log::info!("Starting to update difficulty tables.");
+            let mut tables = tables.lock().await;
+            *tables = table::from_web().await;
+        }
+    }
 }
 
 pub struct SongDB {
