@@ -371,9 +371,17 @@ impl SaveSongData for MySQLClient {
 impl SavePlayerStateData for MySQLClient {
     fn save_player_states(&self, account: &Account, stats: &PlayerStats) -> Result<()> {
         let user = User::by_account(&self.connection, account)?;
+        let saved_logs = self
+            .stats(account)?
+            .log
+            .into_iter()
+            .map(|stat| stat.date)
+            .collect::<HashSet<_>>();
+
         let records: Vec<_> = stats
             .log
             .iter()
+            .filter(|stat| !saved_logs.contains(&stat.date))
             .map(|stat| PlayerStatForUpdate {
                 user_id: user.id,
                 date: stat.date.naive_datetime(),

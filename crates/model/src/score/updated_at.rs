@@ -5,7 +5,7 @@ use std::fmt;
 use std::ops::Sub;
 use std::str::FromStr;
 
-#[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Debug, Serialize, Deserialize, Hash)]
 pub struct UpdatedAt(DateTime<Utc>);
 
 impl Default for UpdatedAt {
