@@ -4,6 +4,8 @@ env:
   secrets-manager:
     DOCKERHUB_USER: arn:aws:secretsmanager:ap-northeast-1:847110695266:secret:DockerHub-SaAUAX:username
     DOCKERHUB_PASS: arn:aws:secretsmanager:ap-northeast-1:847110695266:secret:DockerHub-SaAUAX:password
+  variables:
+    DOCKER_BUILDKIT: "1"
 
 phases:
   install:
@@ -33,3 +35,4 @@ phases:
 cache:
   paths:
     - $HOME/.cargo/**/*
+    - ./target/**/*
