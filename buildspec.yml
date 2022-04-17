@@ -35,4 +35,3 @@ phases:
 cache:
   paths:
     - $HOME/.cargo/**/*
-    - ./target/**/*
