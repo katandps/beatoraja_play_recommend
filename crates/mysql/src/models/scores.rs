@@ -88,29 +88,31 @@ impl Score {
     }
 
     pub fn to_score(&self) -> model::Score {
-        model::Score::new(
-            ClearType::from_integer(self.clear),
-            UpdatedAt::from_timestamp(self.date.timestamp()),
-            Judge {
-                early_pgreat: self.epg,
-                late_pgreat: self.lpg,
-                early_great: self.egr,
-                late_great: self.lgr,
-                early_good: self.egd,
-                late_good: self.lgd,
-                early_bad: self.ebd,
-                late_bad: self.lbd,
-                early_poor: self.epr,
-                late_poor: self.lpr,
-                early_miss: self.ems,
-                late_miss: self.lms,
-            },
-            MaxCombo::from_combo(self.combo),
-            PlayCount::new(self.play_count),
-            ClearCount::new(self.clear_count),
-            MinBP::from_bp(self.min_bp),
-            SnapShots::default(),
-        )
+        let judge = Judge {
+            early_pgreat: self.epg,
+            late_pgreat: self.lpg,
+            early_great: self.egr,
+            late_great: self.lgr,
+            early_good: self.egd,
+            late_good: self.lgd,
+            early_bad: self.ebd,
+            late_bad: self.lbd,
+            early_poor: self.epr,
+            late_poor: self.lpr,
+            early_miss: self.ems,
+            late_miss: self.lms,
+        };
+        model::Score {
+            clear: ClearType::from_integer(self.clear),
+            updated_at: UpdatedAt::from_timestamp(self.date.timestamp()),
+            score: judge.ex_score(),
+            judge,
+            max_combo: MaxCombo::from_combo(self.combo),
+            play_count: PlayCount::new(self.play_count),
+            clear_count: ClearCount::new(self.clear_count),
+            min_bp: MinBP::from_bp(self.min_bp),
+            log: SnapShots::default(),
+        }
     }
 
     pub fn get_score_id(&self) -> model::ScoreId {

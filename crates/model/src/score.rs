@@ -32,30 +32,6 @@ pub struct Score {
 }
 
 impl Score {
-    pub fn new(
-        clear: ClearType,
-        updated_at: UpdatedAt,
-        judge: Judge,
-        max_combo: MaxCombo,
-        play_count: PlayCount,
-        clear_count: ClearCount,
-        min_bp: MinBP,
-        log: SnapShots,
-    ) -> Score {
-        let score = judge.ex_score();
-        Score {
-            clear,
-            updated_at,
-            judge,
-            score,
-            max_combo,
-            play_count,
-            min_bp,
-            log,
-            clear_count,
-        }
-    }
-
     pub fn with_log(self, log: SnapShots) -> Self {
         Score { log, ..self }
     }

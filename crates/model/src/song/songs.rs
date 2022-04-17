@@ -74,20 +74,11 @@ impl From<&Song> for SongFormat {
     }
 }
 
+#[derive(Default)]
 pub struct SongsBuilder {
     songs: HashMap<HashSha256, Song>,
     md5_to_sha256: HashMap<HashMd5, HashSha256>,
     sha256_to_md5: HashMap<HashSha256, HashMd5>,
-}
-
-impl Default for SongsBuilder {
-    fn default() -> Self {
-        SongsBuilder {
-            songs: HashMap::new(),
-            md5_to_sha256: HashMap::new(),
-            sha256_to_md5: HashMap::new(),
-        }
-    }
 }
 
 impl SongsBuilder {

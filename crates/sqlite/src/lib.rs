@@ -121,32 +121,33 @@ impl SqliteClient {
                 .map(|row| {
                     let song_id =
                         ScoreId::new(row.sha256.parse().unwrap(), PlayMode::from(row.mode));
-                    (
-                        song_id.clone(),
-                        Score::new(
-                            ClearType::from_integer(row.clear),
-                            UpdatedAt::from_timestamp(row.date as i64),
-                            Judge {
-                                early_pgreat: row.epg,
-                                late_pgreat: row.lpg,
-                                early_great: row.egr,
-                                late_great: row.lgr,
-                                early_good: row.egd,
-                                late_good: row.lgd,
-                                early_bad: row.ebd,
-                                late_bad: row.lbd,
-                                early_poor: row.epr,
-                                late_poor: row.lpr,
-                                early_miss: row.ems,
-                                late_miss: row.lms,
-                            },
-                            MaxCombo::from_combo(row.combo),
-                            PlayCount::new(row.playcount),
-                            ClearCount::new(row.clearcount),
-                            MinBP::from_bp(row.minbp),
-                            score_log.get(&song_id).cloned().unwrap_or_default(),
-                        ),
-                    )
+                    (song_id.clone(), {
+                        let judge = Judge {
+                            early_pgreat: row.epg,
+                            late_pgreat: row.lpg,
+                            early_great: row.egr,
+                            late_great: row.lgr,
+                            early_good: row.egd,
+                            late_good: row.lgd,
+                            early_bad: row.ebd,
+                            late_bad: row.lbd,
+                            early_poor: row.epr,
+                            late_poor: row.lpr,
+                            early_miss: row.ems,
+                            late_miss: row.lms,
+                        };
+                        Score {
+                            clear: ClearType::from_integer(row.clear),
+                            updated_at: UpdatedAt::from_timestamp(row.date as i64),
+                            score: judge.ex_score(),
+                            judge,
+                            max_combo: MaxCombo::from_combo(row.combo),
+                            play_count: PlayCount::new(row.playcount),
+                            clear_count: ClearCount::new(row.clearcount),
+                            min_bp: MinBP::from_bp(row.minbp),
+                            log: score_log.get(&song_id).cloned().unwrap_or_default(),
+                        }
+                    })
                 })
                 .collect::<HashMap<ScoreId, Score>>(),
         ))

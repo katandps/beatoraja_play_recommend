@@ -2,15 +2,9 @@ use crate::*;
 use itertools::Itertools;
 use std::collections::HashMap;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, Default)]
 pub struct Charts {
     pub(super) charts: Vec<Chart>,
-}
-
-impl Default for Charts {
-    fn default() -> Self {
-        Self { charts: Vec::new() }
-    }
 }
 
 impl Charts {

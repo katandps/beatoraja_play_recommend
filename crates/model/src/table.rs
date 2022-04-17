@@ -28,11 +28,7 @@ impl Tables {
     }
 
     pub fn get_charts(&self) -> Vec<&Chart> {
-        self.v
-            .iter()
-            .map(|(_i, t)| t.get_charts())
-            .flatten()
-            .collect()
+        self.v.iter().flat_map(|(_i, t)| t.get_charts()).collect()
     }
 
     pub fn get(&self, index: usize) -> Option<&Table> {
@@ -106,7 +102,7 @@ impl TableLevels {
     }
 
     pub fn get_charts(&self) -> Vec<&Chart> {
-        self.v.iter().map(|l| l.get_charts()).flatten().collect()
+        self.v.iter().flat_map(|l| l.get_charts()).collect()
     }
 
     pub fn get_list(&self) -> Vec<String> {
@@ -116,8 +112,7 @@ impl TableLevels {
     pub fn filter_score(&self, scores: &Scores, songs: &Songs) -> Vec<&Chart> {
         self.v
             .iter()
-            .map(|l| l.pick_old_score_chart(scores, songs))
-            .flatten()
+            .flat_map(|l| l.pick_old_score_chart(scores, songs))
             .collect()
     }
 }
