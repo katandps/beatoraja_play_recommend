@@ -285,21 +285,21 @@ impl SaveScoreData for MySQLClient {
         }
 
         for v in div(songs_for_update, &hashes) {
-            println!("Update {} scores.", v.len());
+            log::info!("Update {} scores.", v.len());
             let _result = diesel::replace_into(schema::scores::table)
                 .values(v)
                 .execute(&self.connection);
         }
 
         for v in div(songs_for_insert, &hashes) {
-            println!("Insert {} scores.", v.len());
+            log::info!("Insert {} scores.", v.len());
             diesel::insert_into(schema::scores::table)
                 .values(v)
                 .execute(&self.connection)?;
         }
 
         for v in div(snaps_for_insert, &hashes) {
-            println!("Insert {} score_snaps", v.len());
+            log::info!("Insert {} score_snaps", v.len());
             diesel::insert_into(schema::score_snaps::table)
                 .values(v)
                 .execute(&self.connection)?;

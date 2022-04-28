@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 model = {path = "../model"}
+log = "0.4.16"
 
 # JSONのパース
 serde = {version = "1.0", features= ["derive"]}

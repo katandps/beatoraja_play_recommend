@@ -42,7 +42,7 @@ lazy_static! {
         match envy::from_env::<Cfg>() {
             Ok(val) => val,
             Err(err) => {
-                println!("{}", err);
+                log::error!("{}", err);
                 std::process::exit(1)
             }
         }

@@ -31,8 +31,11 @@ async fn main() {
     let song_data = Arc::new(Mutex::new(SongDB {
         song: client.song_data().unwrap(),
     }));
-    let tables = Arc::new(Mutex::new(table::from_web().await));
-
+    let tables = Arc::new(Mutex::new(Tables::default()));
+    {
+        let mut tables = tables.lock().await;
+        table::from_web(&mut tables).await;
+    }
     let table_route = routes::table_routes(&db_pool, &tables, &song_data);
     let route = routes::api_routes(&db_pool, &tables, &song_data)
         .or(table_route)
@@ -55,7 +58,7 @@ async fn table_update(tables: &TableData) {
         {
             log::info!("Starting to update difficulty tables.");
             let mut tables = tables.lock().await;
-            *tables = table::from_web().await;
+            table::from_web(&mut tables).await;
         }
     }
 }

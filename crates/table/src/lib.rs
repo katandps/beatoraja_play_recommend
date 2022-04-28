@@ -9,23 +9,20 @@ use thiserror::Error;
 use url::Url;
 use TableParseError::*;
 
-pub async fn from_web() -> Tables {
-    let tables = futures::stream::iter(config().table_urls)
+pub async fn from_web(table: &mut Tables) {
+    futures::stream::iter(config().table_urls)
         .then(make_table)
-        .collect::<Vec<_>>()
-        .await;
-    Tables::make(
-        tables
-            .into_iter()
-            .filter_map(|t| match t {
-                Ok(t) => Some(t),
+        .enumerate()
+        .for_each(|(i, t)| {
+            match t {
+                Ok(t) => table.update(i, t),
                 Err(e) => {
-                    eprintln!("{:?}", e);
-                    None
+                    log::error!("{:?}", e)
                 }
-            })
-            .collect(),
-    )
+            };
+            futures::future::ready(())
+        })
+        .await;
 }
 
 async fn make_table(url: String) -> Result<Table, TableParseError> {

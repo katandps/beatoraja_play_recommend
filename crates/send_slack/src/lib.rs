@@ -77,11 +77,11 @@ mod tests {
     use super::*;
     #[test]
     fn it_works() {
-        println! {"{}",send("テスト用".into(),"タイトル".into(), "内容内容内容".into()).unwrap()};
+        log::info! {"{}",send("テスト用".into(),"タイトル".into(), "内容内容内容".into()).unwrap()};
     }
 
     #[tokio::test]
     async fn async_fn_works() {
-        println!("{}", send_async("ほげほげ".into()).await.unwrap());
+        log::info!("{}", send_async("ほげほげ".into()).await.unwrap());
     }
 }

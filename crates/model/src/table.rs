@@ -15,16 +15,14 @@ pub struct TableSource {
 #[derive(Debug, Clone)]
 pub struct TableId(i64);
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Tables {
     v: HashMap<usize, Table>,
 }
 
 impl Tables {
-    pub fn make(v: Vec<Table>) -> Self {
-        Self {
-            v: (0..).zip(v).collect(),
-        }
+    pub fn update(&mut self, i: usize, t: Table) {
+        self.v.insert(i, t);
     }
 
     pub fn get_charts(&self) -> Vec<&Chart> {
