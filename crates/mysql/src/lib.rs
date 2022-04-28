@@ -407,6 +407,7 @@ impl SavePlayerStateData for MySQLClient {
                 playtime: stat.play_time.0,
             })
             .collect();
+        log::info!("Save stat for {} days", inserts.len());
         diesel::replace_into(schema::player_stats::table)
             .values(inserts)
             .execute(&self.connection)?;
