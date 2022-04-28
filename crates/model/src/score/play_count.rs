@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Clone, Debug, Deserialize, Serialize, Default)]
+#[derive(Clone, Debug, Deserialize, Serialize, Default, Eq, PartialEq, Ord, PartialOrd)]
 pub struct PlayCount(pub i32);
 
 impl PlayCount {

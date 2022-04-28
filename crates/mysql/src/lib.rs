@@ -375,13 +375,18 @@ impl SavePlayerStateData for MySQLClient {
             .stats(account)?
             .log
             .into_iter()
-            .map(|stat| stat.date)
-            .collect::<HashSet<_>>();
+            .map(|stat| (stat.date.clone(), stat.play_count))
+            .collect::<HashMap<_, _>>();
 
-        let records: Vec<_> = stats
+        let inserts: Vec<_> = stats
             .log
             .iter()
-            .filter(|stat| !saved_logs.contains(&stat.date))
+            .filter(|stat| {
+                saved_logs
+                    .get(&stat.date)
+                    .map(|d| d > &stat.play_count)
+                    .unwrap_or(false)
+            })
             .map(|stat| PlayerStatForUpdate {
                 user_id: user.id,
                 date: stat.date.naive_datetime(),
@@ -402,8 +407,8 @@ impl SavePlayerStateData for MySQLClient {
                 playtime: stat.play_time.0,
             })
             .collect();
-        diesel::insert_into(schema::player_stats::table)
-            .values(records)
+        diesel::replace_into(schema::player_stats::table)
+            .values(inserts)
             .execute(&self.connection)?;
         Ok(())
     }
