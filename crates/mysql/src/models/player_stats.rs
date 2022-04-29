@@ -4,7 +4,8 @@ use crate::MySqlPooledConnection;
 use chrono::NaiveDateTime;
 use model::{Judge, PlayCount, PlayTime, TotalJudge, UpdatedAt};
 
-#[derive(Debug, Clone, Queryable)]
+#[derive(Debug, Clone, Queryable, Insertable)]
+#[table_name = "player_stats"]
 pub struct PlayerStat {
     pub id: i32,
     pub user_id: i32,
@@ -62,6 +63,29 @@ impl PlayerStat {
 #[derive(Debug, Clone, Insertable)]
 #[table_name = "player_stats"]
 pub struct PlayerStatForUpdate {
+    pub user_id: i32,
+    pub date: NaiveDateTime,
+    pub playcount: i32,
+    pub clear: i32,
+    pub epg: i32,
+    pub lpg: i32,
+    pub egr: i32,
+    pub lgr: i32,
+    pub egd: i32,
+    pub lgd: i32,
+    pub ebd: i32,
+    pub lbd: i32,
+    pub epr: i32,
+    pub lpr: i32,
+    pub ems: i32,
+    pub lms: i32,
+    pub playtime: i32,
+}
+
+#[derive(Debug, Clone, Insertable)]
+#[table_name = "player_stats"]
+pub struct PlayerStatForInsert {
+    pub id: i32,
     pub user_id: i32,
     pub date: NaiveDateTime,
     pub playcount: i32,

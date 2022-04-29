@@ -371,45 +371,48 @@ impl SaveSongData for MySQLClient {
 impl SavePlayerStateData for MySQLClient {
     fn save_player_states(&self, account: &Account, stats: &PlayerStats) -> Result<()> {
         let user = User::by_account(&self.connection, account)?;
-        let saved_logs = self
-            .stats(account)?
-            .log
+
+        let saved = models::PlayerStat::by_user_id(&self.connection, user.id)?
             .into_iter()
-            .map(|stat| (stat.date.clone(), stat.play_count))
+            .map(|s| (s.date.clone(), s))
             .collect::<HashMap<_, _>>();
 
-        let inserts: Vec<_> = stats
-            .log
-            .iter()
-            .filter(|stat| {
-                saved_logs
-                    .get(&stat.date)
-                    .map(|d| d > &stat.play_count)
-                    .unwrap_or(false)
-            })
-            .map(|stat| PlayerStatForUpdate {
-                user_id: user.id,
-                date: stat.date.naive_datetime(),
-                playcount: stat.play_count.0,
-                clear: stat.clear_count.0,
-                epg: stat.total_judge.judge().early_pgreat,
-                lpg: stat.total_judge.judge().late_pgreat,
-                egr: stat.total_judge.judge().early_great,
-                lgr: stat.total_judge.judge().late_great,
-                egd: stat.total_judge.judge().early_good,
-                lgd: stat.total_judge.judge().late_good,
-                ebd: stat.total_judge.judge().early_bad,
-                lbd: stat.total_judge.judge().late_bad,
-                epr: stat.total_judge.judge().early_poor,
-                lpr: stat.total_judge.judge().late_poor,
-                ems: stat.total_judge.judge().early_miss,
-                lms: stat.total_judge.judge().late_miss,
-                playtime: stat.play_time.0,
-            })
-            .collect();
+        let mut inserts = Vec::new();
+        let mut updates = Vec::new();
+        for stat in stats.log.iter() {
+            if let Some(saved) = saved.get(&stat.date.naive_datetime()) {
+                if saved.playcount > stat.play_count.0 {
+                    updates.push(saved.clone());
+                }
+            } else {
+                inserts.push(PlayerStatForUpdate {
+                    user_id: user.id,
+                    date: stat.date.naive_datetime(),
+                    playcount: stat.play_count.0,
+                    clear: stat.clear_count.0,
+                    epg: stat.total_judge.judge().early_pgreat,
+                    lpg: stat.total_judge.judge().late_pgreat,
+                    egr: stat.total_judge.judge().early_great,
+                    lgr: stat.total_judge.judge().late_great,
+                    egd: stat.total_judge.judge().early_good,
+                    lgd: stat.total_judge.judge().late_good,
+                    ebd: stat.total_judge.judge().early_bad,
+                    lbd: stat.total_judge.judge().late_bad,
+                    epr: stat.total_judge.judge().early_poor,
+                    lpr: stat.total_judge.judge().late_poor,
+                    ems: stat.total_judge.judge().early_miss,
+                    lms: stat.total_judge.judge().late_miss,
+                    playtime: stat.play_time.0,
+                })
+            }
+        }
         log::info!("Save stat for {} days", inserts.len());
-        diesel::replace_into(schema::player_stats::table)
+        diesel::insert_into(schema::player_stats::table)
             .values(inserts)
+            .execute(&self.connection)?;
+        log::info!("Update stat on {} days", updates.len());
+        diesel::replace_into(schema::player_stats::table)
+            .values(updates)
             .execute(&self.connection)?;
         Ok(())
     }
