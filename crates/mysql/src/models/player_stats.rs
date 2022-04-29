@@ -62,7 +62,7 @@ impl PlayerStat {
 
 #[derive(Debug, Clone, Insertable)]
 #[table_name = "player_stats"]
-pub struct PlayerStatForUpdate {
+pub struct PlayerStatForInsert {
     pub user_id: i32,
     pub date: NaiveDateTime,
     pub playcount: i32,
@@ -84,7 +84,7 @@ pub struct PlayerStatForUpdate {
 
 #[derive(Debug, Clone, Insertable)]
 #[table_name = "player_stats"]
-pub struct PlayerStatForInsert {
+pub struct PlayerStatForUpdate {
     pub id: i32,
     pub user_id: i32,
     pub date: NaiveDateTime,

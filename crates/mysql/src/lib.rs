@@ -4,8 +4,9 @@ mod models;
 mod schema;
 
 pub use crate::error::Error;
+use crate::models::PlayerStatForUpdate;
 use crate::models::{
-    CanGetHash, Hash, PlayerStatForUpdate, ScoreSnapForUpdate, User, UserStatus,
+    CanGetHash, Hash, PlayerStatForInsert, ScoreSnapForUpdate, User, UserStatus,
     UserStatusForInsert,
 };
 use anyhow::anyhow;
@@ -382,10 +383,29 @@ impl SavePlayerStateData for MySQLClient {
         for stat in stats.log.iter() {
             if let Some(saved) = saved.get(&stat.date.naive_datetime()) {
                 if saved.playcount < stat.play_count.0 {
-                    updates.push(saved.clone());
+                    updates.push(PlayerStatForUpdate {
+                        id: saved.id,
+                        user_id: user.id,
+                        date: stat.date.naive_datetime(),
+                        playcount: stat.play_count.0,
+                        clear: stat.clear_count.0,
+                        epg: stat.total_judge.judge().early_pgreat,
+                        lpg: stat.total_judge.judge().late_pgreat,
+                        egr: stat.total_judge.judge().early_great,
+                        lgr: stat.total_judge.judge().late_great,
+                        egd: stat.total_judge.judge().early_good,
+                        lgd: stat.total_judge.judge().late_good,
+                        ebd: stat.total_judge.judge().early_bad,
+                        lbd: stat.total_judge.judge().late_bad,
+                        epr: stat.total_judge.judge().early_poor,
+                        lpr: stat.total_judge.judge().late_poor,
+                        ems: stat.total_judge.judge().early_miss,
+                        lms: stat.total_judge.judge().late_miss,
+                        playtime: stat.play_time.0,
+                    });
                 }
             } else {
-                inserts.push(PlayerStatForUpdate {
+                inserts.push(PlayerStatForInsert {
                     user_id: user.id,
                     date: stat.date.naive_datetime(),
                     playcount: stat.play_count.0,
@@ -410,7 +430,7 @@ impl SavePlayerStateData for MySQLClient {
         diesel::insert_into(schema::player_stats::table)
             .values(inserts)
             .execute(&self.connection)?;
-        log::info!("Update stat on {} days: {:?}", updates.len(), &updates);
+        log::info!("Update stat on {} days", updates.len());
         diesel::replace_into(schema::player_stats::table)
             .values(updates)
             .execute(&self.connection)?;
