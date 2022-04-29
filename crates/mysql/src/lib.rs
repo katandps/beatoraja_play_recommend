@@ -381,7 +381,7 @@ impl SavePlayerStateData for MySQLClient {
         let mut updates = Vec::new();
         for stat in stats.log.iter() {
             if let Some(saved) = saved.get(&stat.date.naive_datetime()) {
-                if saved.playcount > stat.play_count.0 {
+                if saved.playcount < stat.play_count.0 {
                     updates.push(saved.clone());
                 }
             } else {
