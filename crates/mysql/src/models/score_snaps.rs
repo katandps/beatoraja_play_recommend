@@ -1,4 +1,4 @@
-use crate::models::{CanGetHash, DieselResult};
+use crate::models::{CanGetHash, DieselResult, User};
 use crate::schema::*;
 use crate::MySqlPooledConnection;
 use chrono::NaiveDateTime;
@@ -28,12 +28,9 @@ impl ScoreSnap {
         score_snaps.filter(user_id.eq(query_id)).load(connection)
     }
 
-    pub fn delete_by_user_id(
-        connection: &MySqlPooledConnection,
-        query_id: i32,
-    ) -> DieselResult<usize> {
+    pub fn delete_by_user(connection: &MySqlPooledConnection, user: &User) -> DieselResult<usize> {
         use crate::schema::score_snaps::dsl::*;
-        diesel::delete(score_snaps.filter(user_id.eq(query_id))).execute(connection)
+        diesel::delete(score_snaps.filter(user_id.eq(user.id))).execute(connection)
     }
 
     pub fn by_sha256(

@@ -26,6 +26,11 @@ impl UserStatus {
         use crate::schema::user_statuses::dsl::*;
         user_statuses.filter(user_id.eq(user.id)).first(connection)
     }
+
+    pub fn delete_by_user(connection: &MySqlPooledConnection, user: &User) -> DieselResult<usize> {
+        use crate::schema::user_statuses::dsl::*;
+        diesel::delete(user_statuses.filter(user_id.eq(user.id))).execute(connection)
+    }
 }
 
 #[derive(Debug, Clone, Insertable)]

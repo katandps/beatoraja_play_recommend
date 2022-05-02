@@ -59,3 +59,7 @@ pub trait SaveScoreData {
 pub trait SavePlayerStateData {
     fn save_player_states(&self, account: &Account, states: &PlayerStats) -> Result<()>;
 }
+
+pub trait ResetScore {
+    fn reset_score(&self, account: &Account) -> Result<()>;
+}

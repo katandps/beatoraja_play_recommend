@@ -1,4 +1,4 @@
-use crate::models::DieselResult;
+use crate::models::{DieselResult, User};
 use crate::schema::*;
 use crate::MySqlPooledConnection;
 use chrono::NaiveDateTime;
@@ -57,6 +57,11 @@ impl PlayerStat {
                 late_miss: self.lms,
             }),
         }
+    }
+
+    pub fn delete_by_user(connection: &MySqlPooledConnection, user: &User) -> DieselResult<usize> {
+        use crate::schema::player_stats::dsl::*;
+        diesel::delete(player_stats.filter(user_id.eq(user.id))).execute(connection)
     }
 }
 

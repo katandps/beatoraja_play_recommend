@@ -7,6 +7,7 @@ mod health;
 mod logout;
 mod oauth_redirect;
 mod ranking;
+mod reset;
 mod songs;
 mod stats;
 mod tables;
@@ -22,6 +23,7 @@ use health::health_route;
 use logout::logout;
 use oauth_redirect::oauth_redirect_route;
 use ranking::ranking_route;
+use reset::reset_route;
 use songs::songs_route;
 use stats::stats_route;
 use tables::tables_route;
@@ -52,6 +54,7 @@ pub fn api_routes(
         .or(detail_route(db_pool, t, song_data))
         .or(play_data_upload_route(db_pool))
         .or(song_data_upload_route(db_pool, song_data))
+        .or(reset_route(db_pool))
         .or(oauth_redirect_route(db_pool))
         .with(cors_header())
         .with(warp::compression::gzip())

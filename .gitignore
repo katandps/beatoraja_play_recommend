@@ -4,3 +4,4 @@
 /db/data
 .env*
 /letsencrypt
+/.VSCodeCounter

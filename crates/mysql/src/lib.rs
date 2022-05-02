@@ -501,3 +501,18 @@ impl PublishedUsers for MySQLClient {
         Ok(res)
     }
 }
+
+impl ResetScore for MySQLClient {
+    fn reset_score(&self, account: &Account) -> Result<()> {
+        let user = User::by_account(&self.connection, account)?;
+        models::Score::delete_by_user(&self.connection, &user)?;
+        models::ScoreSnap::delete_by_user(&self.connection, &user)?;
+        models::UserStatus::delete_by_user(&self.connection, &user)?;
+        models::PlayerStat::delete_by_user(&self.connection, &user)?;
+        log::info!(
+            "Score data is removed: account id = {}",
+            account.user_id.get()
+        );
+        Ok(())
+    }
+}
