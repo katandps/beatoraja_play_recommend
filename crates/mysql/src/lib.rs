@@ -375,7 +375,7 @@ impl SavePlayerStateData for MySQLClient {
 
         let saved = models::PlayerStat::by_user_id(&self.connection, user.id)?
             .into_iter()
-            .map(|s| (s.date.clone(), s))
+            .map(|s| (s.date, s))
             .collect::<HashMap<_, _>>();
 
         let mut inserts = Vec::new();
@@ -494,7 +494,7 @@ impl PublishedUsers for MySQLClient {
         let mut res = Vec::new();
         for (_status, user) in list {
             res.push(VisibleAccount {
-                id: user.id,
+                id: UserId::new(user.id),
                 name: user.name,
             })
         }

@@ -1,15 +1,10 @@
 use anyhow::Result;
-use model::{Account, GoogleId, HashSha256, PlayerStats, RankedScore, Scores, Songs};
-use serde::Serialize;
+use model::{
+    Account, GoogleId, HashSha256, PlayerStats, RankedScore, Scores, Songs, VisibleAccount,
+};
 
 pub trait PublishedUsers {
     fn fetch_users(&self) -> Result<Vec<VisibleAccount>>;
-}
-
-#[derive(Serialize)]
-pub struct VisibleAccount {
-    pub id: i32,
-    pub name: String,
 }
 
 pub trait HealthCheck {

@@ -14,26 +14,24 @@ impl RankedScore {
         songs: &Songs,
         date: &UpdatedAt,
         sha256: &HashSha256,
+        users: &[VisibleAccount],
     ) -> Option<RankingResponse> {
-        match songs.song_by_sha256(sha256) {
-            Some(song) => {
-                let score = self
-                    .0
-                    .iter()
-                    .map(|(user_id, score)| (user_id.clone(), score.make_detail(date)))
-                    .collect();
-                Some(RankingResponse {
-                    song: song.into(),
-                    score,
+        songs.song_by_sha256(sha256).map(|song| RankingResponse {
+            song: song.into(),
+            score: users
+                .iter()
+                .filter_map(|va| {
+                    self.0
+                        .get(&va.id)
+                        .map(|score| (va.id, (va.name.clone(), score.make_detail(date))))
                 })
-            }
-            None => None,
-        }
+                .collect(),
+        })
     }
 }
 
 #[derive(Debug, Clone, Serialize, Default)]
 pub struct RankingResponse {
     song: SongFormat,
-    score: HashMap<UserId, ScoreDetail>,
+    score: HashMap<UserId, (String, ScoreDetail)>,
 }

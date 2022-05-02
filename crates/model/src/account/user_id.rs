@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-#[derive(Clone, Debug, Serialize, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Serialize, Eq, PartialEq, Hash)]
 pub struct UserId(i32);
 
 impl UserId {

@@ -1,10 +1,11 @@
+use crate::error::HandleError;
 use crate::filter::RankingQuery;
 use crate::filter::{with_db, with_song_data};
 use crate::SongData;
 use chrono::Duration;
 use model::*;
 use mysql::MySqlPool;
-use repository::ScoresBySha256;
+use repository::{PublishedUsers, ScoresBySha256};
 use std::collections::HashMap;
 use std::str::FromStr;
 use warp::filters::BoxedFilter;
@@ -51,14 +52,15 @@ async fn parse_ranking_query(query: HashMap<String, String>) -> Result<RankingQu
 
 /// 詳細表示ハンドラ
 /// user_idをQueryParameterより取得する
-async fn ranking_handler<C: ScoresBySha256>(
+async fn ranking_handler<C: ScoresBySha256 + PublishedUsers>(
     repos: C,
     query: RankingQuery,
     song_data: SongData,
 ) -> Result<impl Reply, Rejection> {
     let songs = song_data.lock().await;
     let scores = repos.score(&query.sha256).unwrap();
-    let response = scores.for_response(&songs.song, &query.date, &query.sha256);
+    let users = repos.fetch_users().map_err(HandleError::from)?;
+    let response = scores.for_response(&songs.song, &query.date, &query.sha256, &users);
     match response {
         Some(res) => Ok(serde_json::to_string(&res).unwrap()),
         None => Ok(serde_json::to_string(&RankingResponse::default()).unwrap()),
