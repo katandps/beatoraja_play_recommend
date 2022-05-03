@@ -17,7 +17,7 @@ pub async fn from_web(table: &mut Tables) {
             match t {
                 Ok(t) => table.update(i, t),
                 Err(e) => {
-                    log::error!("{:?}", e)
+                    log::error!("Failed:{} {:?}", config().table_urls[i], e)
                 }
             };
             futures::future::ready(())
