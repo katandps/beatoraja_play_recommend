@@ -4,6 +4,8 @@ use anyhow::anyhow;
 use config::config;
 use futures::stream::StreamExt;
 use model::*;
+use reqwest::header::{HeaderValue, USER_AGENT};
+use reqwest::Client;
 use scraper::{Html, Selector};
 use thiserror::Error;
 use url::Url;
@@ -35,24 +37,34 @@ async fn make_table(url: String) -> Result<Table, TableParseError> {
 }
 
 async fn get_header_url(url: &str) -> Result<Url, TableParseError> {
-    let res = reqwest::get(url).await.map_err(FailedToAccessTableURL)?;
+    let res = Client::default()
+        .get(url)
+        .header(USER_AGENT, HeaderValue::from_static(""))
+        .send()
+        .await
+        .map_err(FailedToAccessTableURL)?;
     let body = res.text().await.map_err(FailedToGetTableURL)?;
 
-    let selector =
-        Selector::parse(r#"meta[name="bmstable"]"#).map_err(|e| NotFoundCSS(anyhow!("{:?}", e)))?;
+    let selector = Selector::parse(r#"meta[name="bmstable"]"#).expect("Selector is invalid.");
     let document = Html::parse_document(&body);
-    let mut header_url = Url::parse(url).map_err(InvalidURL)?;
-    for element in document.select(&selector) {
+    if let Some(element) = document.select(&selector).next() {
+        let mut header_url = Url::parse(url).map_err(InvalidURL)?;
+
         let header_url_fragment = element.value().attr("content").ok_or(NotFoundHeaderURL)?;
         header_url = header_url
             .join(header_url_fragment)
             .map_err(InvalidHeaderURL)?;
+        Ok(header_url)
+    } else {
+        Err(NotFoundCSS(anyhow!("Not Found 'bmstable' meta selector")))
     }
-    Ok(header_url)
 }
 
 async fn get_header(url: &Url) -> Result<Header, TableParseError> {
-    let header_text: String = reqwest::get(&url.to_string())
+    let header_text: String = Client::default()
+        .get(&url.to_string())
+        .header(USER_AGENT, HeaderValue::from_static(""))
+        .send()
         .await
         .map_err(FailedToAccessHeaderURL)?
         .text()
@@ -68,7 +80,10 @@ fn make_data_url(header_url: &Url, header: &Header) -> Result<Url, TableParseErr
 }
 
 async fn get_charts(url: &Url) -> Result<Vec<Chart>, TableParseError> {
-    let data_text = reqwest::get(&url.to_string())
+    let data_text = Client::default()
+        .get(&url.to_string())
+        .header(USER_AGENT, HeaderValue::from_static(""))
+        .send()
         .await
         .map_err(FailedToAccessDataURL)?
         .text()
