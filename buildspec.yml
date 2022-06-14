@@ -15,6 +15,7 @@ phases:
       - curl https://sh.rustup.rs -sSf > install.sh
       - sh install.sh -y
       - . $HOME/.cargo/env
+      - apk add --no-cached musl-dev
   pre_build:
     commands:
       - echo Logging in to Docker Hub...
