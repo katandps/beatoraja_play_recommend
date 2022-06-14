@@ -18,7 +18,7 @@ pub use prelude::*;
 
 use crate::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize)]
 pub struct Score {
     pub clear: ClearType,
     pub updated_at: UpdatedAt,

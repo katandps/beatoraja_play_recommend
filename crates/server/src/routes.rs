@@ -51,6 +51,7 @@ pub fn api_routes(
         .or(songs::route(t, song_data))
         .or(ranking::route(db_pool, song_data))
         .or(detail::route(db_pool, t, song_data))
+        .or(song_log::route(db_pool))
         .or(play_data_upload_route(db_pool))
         .or(song_data_upload_route(db_pool, song_data))
         .or(reset::route(db_pool))

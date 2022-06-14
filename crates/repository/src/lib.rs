@@ -1,6 +1,7 @@
 use anyhow::Result;
 use model::{
-    Account, GoogleId, HashSha256, PlayerStats, RankedScore, Scores, Songs, VisibleAccount,
+    Account, GoogleId, HashSha256, PlayerStats, RankedScore, Score, ScoreId, Scores, Songs,
+    VisibleAccount,
 };
 
 pub trait PublishedUsers {
@@ -25,6 +26,10 @@ pub trait ScoresByAccount {
 
 pub trait ScoresBySha256 {
     fn score(&self, hash: &HashSha256) -> Result<RankedScore>;
+}
+
+pub trait ScoreByAccountAndSha256 {
+    fn score_with_log(&self, account: &Account, score_id: &ScoreId) -> Result<Score>;
 }
 
 pub trait StatsByAccount {

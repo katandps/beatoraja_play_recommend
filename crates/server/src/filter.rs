@@ -3,6 +3,7 @@ use crate::{SongData, TableData};
 use model::*;
 use mysql::{MySQLClient, MySqlPool};
 use repository::AccountByUserId;
+use serde::Deserialize;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::sync::Arc;
@@ -92,13 +93,24 @@ async fn get_changed_visibility_query(body: HashMap<String, String>) -> Result<b
     Ok(changed_visibility == &"true".to_string())
 }
 
+#[derive(Deserialize)]
 pub struct DetailQuery {
     pub date: UpdatedAt,
+    #[serde(default)]
     pub play_mode: PlayMode,
 }
 
+#[derive(Deserialize)]
 pub struct RankingQuery {
     pub date: UpdatedAt,
+    #[serde(default)]
+    pub play_mode: PlayMode,
+    pub sha256: HashSha256,
+}
+
+#[derive(Deserialize)]
+pub struct SongLogQuery {
+    #[serde(default)]
     pub play_mode: PlayMode,
     pub sha256: HashSha256,
 }

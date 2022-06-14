@@ -57,6 +57,20 @@ impl Score {
         scores.filter(sha256.eq(query_hash)).load(connection)
     }
 
+    pub fn by_user_id_and_score_id(
+        connection: &MySqlPooledConnection,
+        query_id: i32,
+        query_hash: &str,
+        query_mode: i32,
+    ) -> DieselResult<Vec<Self>> {
+        use crate::schema::scores::dsl::*;
+        scores
+            .filter(user_id.eq(query_id))
+            .filter(sha256.eq(query_hash))
+            .filter(mode.eq(query_mode))
+            .load(connection)
+    }
+
     pub fn from_score(saved: &Self, score: &model::Score, user_id: i32, song_id: &ScoreId) -> Self {
         Self {
             id: saved.id,

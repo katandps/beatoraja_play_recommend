@@ -28,6 +28,20 @@ impl ScoreSnap {
         score_snaps.filter(user_id.eq(query_id)).load(connection)
     }
 
+    pub fn by_user_id_and_score_id(
+        connection: &MySqlPooledConnection,
+        query_id: i32,
+        query_hash: &str,
+        query_mode: i32,
+    ) -> DieselResult<Vec<ScoreSnap>> {
+        use crate::schema::score_snaps::dsl::*;
+        score_snaps
+            .filter(user_id.eq(query_id))
+            .filter(sha256.eq(query_hash))
+            .filter(mode.eq(query_mode))
+            .load(connection)
+    }
+
     pub fn delete_by_user(connection: &MySqlPooledConnection, user: &User) -> DieselResult<usize> {
         use crate::schema::score_snaps::dsl::*;
         diesel::delete(score_snaps.filter(user_id.eq(user.id))).execute(connection)

@@ -18,13 +18,13 @@ pub fn route(
     song_data: &SongData,
 ) -> BoxedFilter<(impl Reply,)> {
     warp::get()
-        .and(path("detail"))
+        .and(path("song_log"))
         .and(with_db(db_pool))
         .and(with_table(tables))
         .and(warp::query::<HashMap<String, String>>().and_then(parse_detail_query))
         .and(account_id_query(db_pool))
         .and(with_song_data(song_data))
-        .and_then(detail_handler)
+        .and_then(handler)
         .boxed()
 }
 
@@ -60,7 +60,7 @@ macro_rules! log_duration {
 
 /// 詳細表示ハンドラ
 /// user_idをQueryParameterより取得する
-async fn detail_handler<C: ScoresByAccount>(
+async fn handler<C: ScoresByAccount>(
     repos: C,
     tables: TableData,
     query: DetailQuery,

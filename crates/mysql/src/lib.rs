@@ -457,8 +457,7 @@ impl ScoresByAccount for MySQLClient {
             record
                 .into_iter()
                 .filter_map(|row| {
-                    let sha256 = row.sha256.parse();
-                    if let Ok(sha256) = sha256 {
+                    if let Ok(sha256) = row.sha256.parse() {
                         let score_id = ScoreId::new(sha256, PlayMode::from(row.mode));
                         let log = score_log.get(&score_id).cloned().unwrap_or_default();
                         Some((score_id, row.to_score().with_log(log)))
@@ -468,6 +467,40 @@ impl ScoresByAccount for MySQLClient {
                 })
                 .collect::<HashMap<ScoreId, Score>>(),
         ))
+    }
+}
+
+impl ScoreByAccountAndSha256 for MySQLClient {
+    fn score_with_log(&self, account: &Account, score_id: &ScoreId) -> Result<Score> {
+        let user = User::by_account(&self.connection, account)?;
+        let record = models::Score::by_user_id_and_score_id(
+            &self.connection,
+            user.id,
+            &score_id.sha256().to_string(),
+            score_id.mode().to_int(),
+        )?;
+        let score = record.get(0).unwrap().to_score();
+        let snaps = {
+            let records = models::ScoreSnap::by_user_id_and_score_id(
+                &self.connection,
+                user.id,
+                &score_id.sha256().to_string(),
+                score_id.mode().to_int(),
+            )?;
+            let mut snapshots = SnapShots::default();
+            for row in records {
+                let snap = SnapShot::from_data(
+                    row.clear,
+                    row.score,
+                    row.combo,
+                    row.min_bp,
+                    row.date.timestamp(),
+                );
+                snapshots.add(snap);
+            }
+            snapshots
+        };
+        Ok(score.with_log(snaps))
     }
 }
 
