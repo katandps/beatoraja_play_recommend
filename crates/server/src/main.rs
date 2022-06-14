@@ -7,7 +7,6 @@ pub mod session;
 use config::config;
 use model::Songs;
 use mysql::MySQLClient;
-use warp::Filter;
 
 #[macro_use]
 extern crate lazy_static;
@@ -36,13 +35,10 @@ async fn main() {
         let mut tables = tables.lock().await;
         table::from_web(&mut tables).await;
     }
-    let table_route = routes::table_routes(&db_pool, &tables, &song_data);
-    let route = routes::api_routes(&db_pool, &tables, &song_data)
-        .or(table_route)
-        .recover(error::handle_rejection);
+    let route = routes::routes(&db_pool, &tables, &song_data);
 
     let (http_addr, http_warp) = warp::serve(route.clone()).bind_ephemeral(([0, 0, 0, 0], 8000));
-    let (https_addr, https_warp) = warp::serve(route.clone())
+    let (https_addr, https_warp) = warp::serve(route)
         .tls()
         .cert_path(config().tls_cert_path)
         .key_path(config().tls_key_path)

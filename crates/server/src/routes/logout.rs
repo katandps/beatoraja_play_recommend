@@ -4,7 +4,7 @@ use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
 
-pub fn logout() -> BoxedFilter<(impl Reply,)> {
+pub fn route() -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("logout"))
         .and(receive_session_key())

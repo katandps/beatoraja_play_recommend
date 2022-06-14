@@ -4,7 +4,7 @@ use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
 
-pub fn songs_route(tables: &TableData, songs: &SongData) -> BoxedFilter<(impl Reply,)> {
+pub fn route(tables: &TableData, songs: &SongData) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("songs"))
         .and(with_table(tables))

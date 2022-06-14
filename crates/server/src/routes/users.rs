@@ -6,7 +6,7 @@ use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
 
-pub fn users_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
+pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("users"))
         .and(with_db(db_pool))

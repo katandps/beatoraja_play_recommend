@@ -12,7 +12,7 @@ use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
 
-pub fn detail_route(
+pub fn route(
     db_pool: &MySqlPool,
     tables: &TableData,
     song_data: &SongData,

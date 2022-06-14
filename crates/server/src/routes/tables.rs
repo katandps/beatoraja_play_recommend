@@ -5,7 +5,7 @@ use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
 
-pub fn tables_route(tables: &TableData) -> BoxedFilter<(impl Reply,)> {
+pub fn route(tables: &TableData) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("tables"))
         .and(with_table(tables))

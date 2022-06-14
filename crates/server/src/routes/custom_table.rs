@@ -9,7 +9,7 @@ use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
 
-pub fn custom_table_route() -> BoxedFilter<(impl Reply,)> {
+pub fn table_route() -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path!("recommend_table" / i32 / usize / "table.html"))
         .and_then(table_handler)
@@ -30,7 +30,7 @@ async fn table_handler(_user_id: i32, _table_index: usize) -> Result<impl Reply,
     Ok(warp::reply::html(body))
 }
 
-pub fn custom_table_header(tables: &TableData) -> BoxedFilter<(impl Reply,)> {
+pub fn header_route(tables: &TableData) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path!("recommend_table" / i32 / usize / "header.json"))
         .and(with_table(tables))
@@ -50,7 +50,7 @@ async fn header_handler(
     Ok(serde_json::to_string(&header).unwrap())
 }
 
-pub fn custom_table_body(
+pub fn body_route(
     db_pool: &MySqlPool,
     tables: &TableData,
     song_data: &SongData,

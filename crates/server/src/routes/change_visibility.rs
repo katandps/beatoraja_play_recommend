@@ -7,7 +7,7 @@ use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
 
-pub fn change_visibility_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
+pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::post()
         .and(path("user"))
         .and(path("visibility"))

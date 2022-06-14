@@ -5,7 +5,7 @@ use repository::{AccountByUserId, StatsByAccount};
 use warp::filters::BoxedFilter;
 use warp::*;
 
-pub fn stats_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
+pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path!("stats" / i32))
         .and(with_db(db_pool))

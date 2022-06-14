@@ -12,7 +12,7 @@ use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
 
-pub fn ranking_route(db_pool: &MySqlPool, song_data: &SongData) -> BoxedFilter<(impl Reply,)> {
+pub fn route(db_pool: &MySqlPool, song_data: &SongData) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("ranking"))
         .and(with_db(db_pool))

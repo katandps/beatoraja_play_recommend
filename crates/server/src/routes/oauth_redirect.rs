@@ -11,7 +11,7 @@ use warp::http::Uri;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
 
-pub fn oauth_redirect_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
+pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("oauth"))
         .and(with_db(db_pool))
