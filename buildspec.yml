@@ -11,11 +11,6 @@ phases:
   install:
     runtime-versions:
       docker: 19
-    commands:
-      - curl https://sh.rustup.rs -sSf > install.sh
-      - sh install.sh -y
-      - . $HOME/.cargo/env
-      - apt install gcc-multilib
   pre_build:
     commands:
       - echo Logging in to Docker Hub...
@@ -24,7 +19,6 @@ phases:
       - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
   build:
     commands:
-      - cargo build --release
       - echo "docker build ./ -t $TARGET_IMAGE_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION"
       - docker build ./ -t $TARGET_IMAGE_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
       - docker build ./ -t $TARGET_IMAGE_NAME:latest
@@ -32,7 +26,3 @@ phases:
     commands:
       - docker push $TARGET_IMAGE_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
       - docker push $TARGET_IMAGE_NAME:latest
-
-cache:
-  paths:
-    - $HOME/.cargo/**/*

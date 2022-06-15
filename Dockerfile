@@ -1,15 +1,16 @@
-FROM ubuntu:18.04
+FROM rust:1.61.0 as build
 WORKDIR /app
+COPY Cargo.toml Cargo.toml
+COPY crates crates
+RUN cargo build --release
 
+FROM debian as deploy
 RUN apt-get update -y \
   && apt update -y \
   && apt upgrade openssl -y \
   && apt-get upgrade -y \
   && apt-get install -y sqlite3 \
-  && apt-get install -y libmysqlclient-dev \
+  && apt-get install -y default-libmysqlclient-dev \
   && apt-get install -y ca-certificates
-
-COPY ./target/release/server /app
-EXPOSE 80
-
-ENTRYPOINT /app/server
+COPY --from=build /app/target/release/server /usr/local/bin/server
+ENTRYPOINT /usr/local/bin/server
