@@ -18,7 +18,7 @@ pub fn route(
     song_data: &SongData,
 ) -> BoxedFilter<(impl Reply,)> {
     warp::get()
-        .and(path("song_log"))
+        .and(path("detail"))
         .and(with_db(db_pool))
         .and(with_table(tables))
         .and(warp::query::<HashMap<String, String>>().and_then(parse_detail_query))
