@@ -1,3 +1,5 @@
+pub use diesel::prelude::*;
+
 table! {
     admins (id) {
         id -> Integer,
