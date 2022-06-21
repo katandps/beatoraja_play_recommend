@@ -14,6 +14,7 @@ use anyhow::Result;
 use chrono::{NaiveDateTime, Utc};
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, PooledConnection};
+use diesel::result::Error::NotFound;
 use diesel::MysqlConnection;
 use model::*;
 use oauth_google::{GoogleProfile, RegisterUser};
@@ -479,7 +480,7 @@ impl ScoreByAccountAndSha256 for MySQLClient {
             &score_id.sha256().to_string(),
             score_id.mode().to_int(),
         )?;
-        let score = record.get(0).unwrap().to_score();
+        let score = record.get(0).ok_or(NotFound)?.to_score();
         let snaps = {
             let records = models::ScoreSnap::by_user_id_and_score_id(
                 &self.connection,
