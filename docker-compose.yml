@@ -50,13 +50,13 @@ services:
     ports:
       - "6379:6379"
 
-  builder:
+  diesel:
     build: ./docker/builder/
     container_name: builder
-    ports:
-      - "8080:80"
     volumes:
       - ./:/app
     working_dir: /app
     depends_on:
       - mysql
+    profiles:
+      - builder
