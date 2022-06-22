@@ -58,5 +58,3 @@ services:
     working_dir: /app
     depends_on:
       - mysql
-    profiles:
-      - builder
