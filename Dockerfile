@@ -1,10 +1,11 @@
-FROM rust:1.61.0 as build
+FROM rust:1.65.0 as build
 WORKDIR /app
 COPY Cargo.toml Cargo.toml
 COPY crates crates
 RUN cargo build --release
+RUN strip /app/target/release/server
 
-FROM debian as deploy
+FROM debian:stable-slim as deploy
 RUN apt-get update -y \
   && apt update -y \
   && apt upgrade openssl -y \
