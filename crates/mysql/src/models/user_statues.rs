@@ -13,7 +13,7 @@ pub struct UserStatus {
 
 impl UserStatus {
     pub fn visible_with_account(
-        connection: &MySqlPooledConnection,
+        connection: &mut MySqlPooledConnection,
     ) -> DieselResult<Vec<(UserStatus, User)>> {
         use crate::schema::user_statuses::dsl::*;
         user_statuses
@@ -22,19 +22,25 @@ impl UserStatus {
             .load(connection)
     }
 
-    pub fn by_user(connection: &MySqlPooledConnection, user: &User) -> DieselResult<UserStatus> {
+    pub fn by_user(
+        connection: &mut MySqlPooledConnection,
+        user: &User,
+    ) -> DieselResult<UserStatus> {
         use crate::schema::user_statuses::dsl::*;
         user_statuses.filter(user_id.eq(user.id)).first(connection)
     }
 
-    pub fn delete_by_user(connection: &MySqlPooledConnection, user: &User) -> DieselResult<usize> {
+    pub fn delete_by_user(
+        connection: &mut MySqlPooledConnection,
+        user: &User,
+    ) -> DieselResult<usize> {
         use crate::schema::user_statuses::dsl::*;
         diesel::delete(user_statuses.filter(user_id.eq(user.id))).execute(connection)
     }
 }
 
 #[derive(Debug, Clone, Insertable)]
-#[table_name = "user_statuses"]
+#[diesel(table_name = user_statuses)]
 pub struct UserStatusForInsert {
     pub user_id: i32,
     pub visible: bool,

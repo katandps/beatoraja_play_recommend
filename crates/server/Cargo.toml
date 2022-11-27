@@ -31,7 +31,7 @@ rand_chacha = "0.3.0"
 bigint = "4.4.3"
 base64 = "0.13.0"
 
-diesel = { version = "1.4.8", features = ["mysql", "r2d2"] }
+diesel = { version = "2.0.2", features = ["mysql", "r2d2"] }
 chrono = "0.4.19"
 redis = "0.21.5"
 

@@ -9,7 +9,7 @@ use model::{
 use std::str::FromStr;
 
 #[derive(Debug, Clone, Queryable, Insertable)]
-#[table_name = "scores"]
+#[diesel(table_name = scores)]
 pub struct Score {
     pub id: i32,
     pub user_id: i32,
@@ -37,20 +37,23 @@ pub struct Score {
 
 impl Score {
     pub fn by_user_id(
-        connection: &MySqlPooledConnection,
+        connection: &mut MySqlPooledConnection,
         query_id: i32,
     ) -> DieselResult<Vec<Self>> {
         use crate::schema::scores::dsl::*;
         scores.filter(user_id.eq(query_id)).load(connection)
     }
 
-    pub fn delete_by_user(connection: &MySqlPooledConnection, user: &User) -> DieselResult<usize> {
+    pub fn delete_by_user(
+        connection: &mut MySqlPooledConnection,
+        user: &User,
+    ) -> DieselResult<usize> {
         use crate::schema::scores::dsl::*;
         diesel::delete(scores.filter(user_id.eq(user.id))).execute(connection)
     }
 
     pub fn by_sha256(
-        connection: &MySqlPooledConnection,
+        connection: &mut MySqlPooledConnection,
         query_hash: &str,
     ) -> DieselResult<Vec<Self>> {
         use crate::schema::scores::dsl::*;
@@ -58,7 +61,7 @@ impl Score {
     }
 
     pub fn by_user_id_and_score_id(
-        connection: &MySqlPooledConnection,
+        connection: &mut MySqlPooledConnection,
         query_id: i32,
         query_hash: &str,
         query_mode: i32,
@@ -141,7 +144,7 @@ impl CanGetHash for Score {
 }
 
 #[derive(Debug, Clone, Insertable)]
-#[table_name = "scores"]
+#[diesel(table_name = scores)]
 pub struct RegisteredScore {
     pub user_id: i32,
     pub sha256: String,

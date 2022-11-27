@@ -18,7 +18,7 @@ pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
 }
 
 async fn reset_handler<C: ResetScore>(
-    repository: C,
+    mut repository: C,
     account: Account,
 ) -> Result<impl Reply, Rejection> {
     repository

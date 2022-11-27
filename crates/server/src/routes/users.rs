@@ -14,7 +14,9 @@ pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
         .boxed()
 }
 
-async fn users_handler<C: PublishedUsers>(repos: C) -> std::result::Result<impl Reply, Rejection> {
+async fn users_handler<C: PublishedUsers>(
+    mut repos: C,
+) -> std::result::Result<impl Reply, Rejection> {
     let users = repos.fetch_users().map_err(HandleError::from)?;
     Ok(serde_json::to_string(&users).unwrap())
 }

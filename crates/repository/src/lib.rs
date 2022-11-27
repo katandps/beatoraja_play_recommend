@@ -5,61 +5,61 @@ use model::{
 };
 
 pub trait PublishedUsers {
-    fn fetch_users(&self) -> Result<Vec<VisibleAccount>>;
+    fn fetch_users(&mut self) -> Result<Vec<VisibleAccount>>;
 }
 
 pub trait HealthCheck {
-    fn health(&self) -> Result<()>;
+    fn health(&mut self) -> Result<()>;
 }
 
 pub trait AccountByUserId {
-    fn user(&self, user_id: i32) -> Result<Account>;
+    fn user(&mut self, user_id: i32) -> Result<Account>;
 }
 
 pub trait AccountByGoogleId {
-    fn user(&self, google_id: &GoogleId) -> Result<Account>;
+    fn user(&mut self, google_id: &GoogleId) -> Result<Account>;
 }
 
 pub trait ScoresByAccount {
-    fn score(&self, account: &Account) -> Result<Scores>;
+    fn score(&mut self, account: &Account) -> Result<Scores>;
 }
 
 pub trait ScoresBySha256 {
-    fn score(&self, hash: &HashSha256) -> Result<RankedScore>;
+    fn score(&mut self, hash: &HashSha256) -> Result<RankedScore>;
 }
 
 pub trait ScoreByAccountAndSha256 {
-    fn score_with_log(&self, account: &Account, score_id: &ScoreId) -> Result<Score>;
+    fn score_with_log(&mut self, account: &Account, score_id: &ScoreId) -> Result<Score>;
 }
 
 pub trait StatsByAccount {
-    fn stats(&self, account: &Account) -> Result<PlayerStats>;
+    fn stats(&mut self, account: &Account) -> Result<PlayerStats>;
 }
 
 pub trait RenameAccount {
-    fn rename(&self, account: &Account) -> Result<()>;
+    fn rename(&mut self, account: &Account) -> Result<()>;
 }
 
 pub trait ChangeAccountVisibility {
-    fn change_visibility(&self, account: &Account) -> Result<()>;
+    fn change_visibility(&mut self, account: &Account) -> Result<()>;
 }
 
 pub trait AllSongData {
-    fn song_data(&self) -> Result<Songs>;
+    fn song_data(&mut self) -> Result<Songs>;
 }
 
 pub trait SaveSongData {
-    fn save_song(&self, songs: &Songs) -> Result<()>;
+    fn save_song(&mut self, songs: &Songs) -> Result<()>;
 }
 
 pub trait SaveScoreData {
-    fn save_score(&self, account: &Account, score: &Scores) -> Result<()>;
+    fn save_score(&mut self, account: &Account, score: &Scores) -> Result<()>;
 }
 
 pub trait SavePlayerStateData {
-    fn save_player_states(&self, account: &Account, states: &PlayerStats) -> Result<()>;
+    fn save_player_states(&mut self, account: &Account, states: &PlayerStats) -> Result<()>;
 }
 
 pub trait ResetScore {
-    fn reset_score(&self, account: &Account) -> Result<()>;
+    fn reset_score(&mut self, account: &Account) -> Result<()>;
 }

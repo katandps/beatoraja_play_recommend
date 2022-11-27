@@ -6,7 +6,7 @@ use model::{HashSha256, PlayMode, ScoreId};
 use std::str::FromStr;
 
 #[derive(Debug, Clone, Queryable, Insertable)]
-#[table_name = "score_snaps"]
+#[diesel(table_name = score_snaps)]
 pub struct ScoreSnap {
     pub id: i32,
     pub user_id: i32,
@@ -21,7 +21,7 @@ pub struct ScoreSnap {
 
 impl ScoreSnap {
     pub fn by_user_id(
-        connection: &MySqlPooledConnection,
+        connection: &mut MySqlPooledConnection,
         query_id: i32,
     ) -> DieselResult<Vec<ScoreSnap>> {
         use crate::schema::score_snaps::dsl::*;
@@ -29,7 +29,7 @@ impl ScoreSnap {
     }
 
     pub fn by_user_id_and_score_id(
-        connection: &MySqlPooledConnection,
+        connection: &mut MySqlPooledConnection,
         query_id: i32,
         query_hash: &str,
         query_mode: i32,
@@ -42,13 +42,16 @@ impl ScoreSnap {
             .load(connection)
     }
 
-    pub fn delete_by_user(connection: &MySqlPooledConnection, user: &User) -> DieselResult<usize> {
+    pub fn delete_by_user(
+        connection: &mut MySqlPooledConnection,
+        user: &User,
+    ) -> DieselResult<usize> {
         use crate::schema::score_snaps::dsl::*;
         diesel::delete(score_snaps.filter(user_id.eq(user.id))).execute(connection)
     }
 
     pub fn by_sha256(
-        connection: &MySqlPooledConnection,
+        connection: &mut MySqlPooledConnection,
         query_hash: &str,
     ) -> DieselResult<Vec<ScoreSnap>> {
         use crate::schema::score_snaps::dsl::*;
@@ -64,7 +67,7 @@ impl ScoreSnap {
 }
 
 #[derive(Debug, Clone, Insertable)]
-#[table_name = "score_snaps"]
+#[diesel(table_name = score_snaps)]
 pub struct ScoreSnapForUpdate {
     pub user_id: i32,
     pub sha256: String,

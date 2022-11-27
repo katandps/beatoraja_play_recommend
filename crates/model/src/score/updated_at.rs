@@ -10,13 +10,13 @@ pub struct UpdatedAt(DateTime<Utc>);
 
 impl Default for UpdatedAt {
     fn default() -> UpdatedAt {
-        UpdatedAt(Utc.timestamp(0, 0))
+        UpdatedAt(Utc.timestamp_opt(0, 0).unwrap())
     }
 }
 
 impl UpdatedAt {
     pub fn from_timestamp(timestamp: i64) -> UpdatedAt {
-        UpdatedAt(Utc.timestamp(timestamp, 0))
+        UpdatedAt(Utc.timestamp_opt(timestamp, 0).unwrap())
     }
 
     pub fn now() -> UpdatedAt {

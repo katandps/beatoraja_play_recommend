@@ -9,7 +9,6 @@ use crate::models::{
     CanGetHash, Hash, PlayerStatForInsert, ScoreSnapForUpdate, User, UserStatus,
     UserStatusForInsert,
 };
-use anyhow::anyhow;
 use anyhow::Result;
 use chrono::{NaiveDateTime, Utc};
 use diesel::prelude::*;
@@ -23,8 +22,6 @@ use repository::*;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
-#[macro_use]
-extern crate diesel;
 #[macro_use]
 extern crate lazy_static;
 
@@ -44,8 +41,8 @@ impl MySQLClient {
         Self { connection }
     }
 
-    fn score_log(&self, account: &Account) -> Result<HashMap<ScoreId, SnapShots>, Error> {
-        let records = models::ScoreSnap::by_user_id(&self.connection, account.user_id().get())?;
+    fn score_log(&mut self, account: &Account) -> Result<HashMap<ScoreId, SnapShots>, Error> {
+        let records = models::ScoreSnap::by_user_id(&mut self.connection, account.user_id().get())?;
         let mut map: HashMap<ScoreId, SnapShots> = HashMap::new();
         for row in records {
             let song_id = ScoreId::new(row.sha256.parse().unwrap(), PlayMode::from(row.mode));
@@ -62,10 +59,10 @@ impl MySQLClient {
     }
 
     fn score_log_by_sha256(
-        &self,
+        &mut self,
         sha256: &HashSha256,
     ) -> Result<HashMap<UserId, SnapShots>, Error> {
-        let records = models::ScoreSnap::by_sha256(&self.connection, &sha256.to_string())?;
+        let records = models::ScoreSnap::by_sha256(&mut self.connection, &sha256.to_string())?;
         let mut map: HashMap<UserId, SnapShots> = HashMap::new();
         for row in records {
             let user_id = UserId::new(row.user_id);
@@ -81,8 +78,8 @@ impl MySQLClient {
         Ok(map)
     }
 
-    fn saved_song(&self, user_id: i32) -> Result<HashMap<ScoreId, models::Score>> {
-        let saved = models::Score::by_user_id(&self.connection, user_id)?;
+    fn saved_song(&mut self, user_id: i32) -> Result<HashMap<ScoreId, models::Score>> {
+        let saved = models::Score::by_user_id(&mut self.connection, user_id)?;
         let map = saved
             .into_iter()
             .map(|record| (record.get_score_id(), record))
@@ -91,10 +88,10 @@ impl MySQLClient {
     }
 
     fn saved_snap(
-        &self,
+        &mut self,
         user_id: i32,
     ) -> Result<HashMap<(ScoreId, NaiveDateTime), models::ScoreSnap>> {
-        let saved = models::ScoreSnap::by_user_id(&self.connection, user_id)?;
+        let saved = models::ScoreSnap::by_user_id(&mut self.connection, user_id)?;
         Ok(saved
             .into_iter()
             .map(|record| ((record.get_score_id(), record.date), record))
@@ -103,17 +100,18 @@ impl MySQLClient {
 }
 
 impl HealthCheck for MySQLClient {
-    fn health(&self) -> Result<()> {
-        match &self.connection.execute("SELECT 1") {
-            Ok(_) => Ok(()),
-            Err(_) => Err(anyhow!("HealthCheckError")),
-        }
+    fn health(&mut self) -> Result<()> {
+        todo!();
+        // match &self.connection.("SELECT 1") {
+        //     Ok(_) => Ok(()),
+        //     Err(_) => Err(anyhow!("HealthCheckError")),
+        // }
     }
 }
 
 impl RegisterUser for MySQLClient {
-    fn register(&self, profile: &GoogleProfile) -> Result<()> {
-        let user = User::by_google_profile(&self.connection, profile);
+    fn register(&mut self, profile: &GoogleProfile) -> Result<()> {
+        let user = User::by_google_profile(&mut self.connection, profile);
         match user {
             Ok(_) => Ok(()),
             Err(_) => {
@@ -121,7 +119,7 @@ impl RegisterUser for MySQLClient {
                 log::info!("Insert new user: {}", profile.email);
                 diesel::insert_into(users)
                     .values(models::RegisteringUser::from_profile(profile))
-                    .execute(&self.connection)?;
+                    .execute(&mut self.connection)?;
                 Ok(())
             }
         }
@@ -129,21 +127,21 @@ impl RegisterUser for MySQLClient {
 }
 
 impl AccountByUserId for MySQLClient {
-    fn user(&self, id: i32) -> Result<Account> {
-        Ok(User::by_user_id(&self.connection, id)?.into())
+    fn user(&mut self, id: i32) -> Result<Account> {
+        Ok(User::by_user_id(&mut self.connection, id)?.into())
     }
 }
 
 impl AccountByGoogleId for MySQLClient {
-    fn user(&self, google_id: &GoogleId) -> Result<Account> {
-        Ok(User::by_google_id(&self.connection, google_id.to_string())?.into())
+    fn user(&mut self, google_id: &GoogleId) -> Result<Account> {
+        Ok(User::by_google_id(&mut self.connection, google_id.to_string())?.into())
     }
 }
 
 impl RenameAccount for MySQLClient {
-    fn rename(&self, account: &Account) -> Result<()> {
+    fn rename(&mut self, account: &Account) -> Result<()> {
         log::info!("Update user name to {}.", account.user_name());
-        let user = User::by_account(&self.connection, account)?;
+        let user = User::by_account(&mut self.connection, account)?;
         diesel::insert_into(schema::rename_logs::table)
             .values(models::RenameUser {
                 user_id: user.id,
@@ -151,33 +149,33 @@ impl RenameAccount for MySQLClient {
                 new_name: account.user_name(),
                 date: Utc::now().naive_utc(),
             })
-            .execute(&self.connection)?;
+            .execute(&mut self.connection)?;
 
         diesel::update(
             schema::users::table.filter(schema::users::gmail_address.eq(account.email())),
         )
         .set(schema::users::name.eq(account.user_name()))
-        .execute(&self.connection)?;
+        .execute(&mut self.connection)?;
 
         Ok(())
     }
 }
 
 impl ChangeAccountVisibility for MySQLClient {
-    fn change_visibility(&self, account: &Account) -> Result<()> {
+    fn change_visibility(&mut self, account: &Account) -> Result<()> {
         log::info!(
             "Update visibility to {}. : {}",
             account.visibility,
             account.user_id().get()
         );
-        let user = User::by_account(&self.connection, account)?;
-        let user_status = UserStatus::by_user(&self.connection, &user);
+        let user = User::by_account(&mut self.connection, account)?;
+        let user_status = UserStatus::by_user(&mut self.connection, &user);
         match user_status {
             Ok(status) => {
                 use crate::schema::user_statuses::dsl::*;
                 diesel::update(user_statuses.filter(id.eq(status.id)))
                     .set(visible.eq(account.visibility()))
-                    .execute(&self.connection)?;
+                    .execute(&mut self.connection)?;
             }
             Err(_) => {
                 use crate::schema::user_statuses::dsl::*;
@@ -188,7 +186,7 @@ impl ChangeAccountVisibility for MySQLClient {
                 };
                 diesel::insert_into(user_statuses)
                     .values(new)
-                    .execute(&self.connection)?;
+                    .execute(&mut self.connection)?;
             }
         }
         Ok(())
@@ -196,9 +194,9 @@ impl ChangeAccountVisibility for MySQLClient {
 }
 
 impl AllSongData for MySQLClient {
-    fn song_data(&self) -> Result<Songs> {
-        let record = models::Song::all(&self.connection)?;
-        let hash = Hash::all(&self.connection)?;
+    fn song_data(&mut self) -> Result<Songs> {
+        let record = models::Song::all(&mut self.connection)?;
+        let hash = Hash::all(&mut self.connection)?;
         let hash = hash
             .iter()
             .map(|hash| (&hash.sha256, &hash.md5))
@@ -222,13 +220,13 @@ impl AllSongData for MySQLClient {
 }
 
 impl SaveScoreData for MySQLClient {
-    fn save_score(&self, account: &Account, score: &Scores) -> Result<()> {
-        let user = User::by_account(&self.connection, account)?;
+    fn save_score(&mut self, account: &Account, score: &Scores) -> Result<()> {
+        let user = User::by_account(&mut self.connection, account)?;
         let user_id = user.id;
         let saved_song = self.saved_song(user_id)?;
         let saved_snap = self.saved_snap(user_id)?;
 
-        let hashes = Hash::all(&self.connection)?
+        let hashes = Hash::all(&mut self.connection)?
             .iter()
             .map(|h| h.sha256.clone())
             .collect::<HashSet<_>>();
@@ -290,21 +288,21 @@ impl SaveScoreData for MySQLClient {
             log::info!("Update {} scores.", v.len());
             let _result = diesel::replace_into(schema::scores::table)
                 .values(v)
-                .execute(&self.connection);
+                .execute(&mut self.connection);
         }
 
         for v in div(songs_for_insert, &hashes) {
             log::info!("Insert {} scores.", v.len());
             diesel::insert_into(schema::scores::table)
                 .values(v)
-                .execute(&self.connection)?;
+                .execute(&mut self.connection)?;
         }
 
         for v in div(snaps_for_insert, &hashes) {
             log::info!("Insert {} score_snaps", v.len());
             diesel::insert_into(schema::score_snaps::table)
                 .values(v)
-                .execute(&self.connection)?;
+                .execute(&mut self.connection)?;
         }
 
         Ok(())
@@ -312,8 +310,8 @@ impl SaveScoreData for MySQLClient {
 }
 
 impl SaveSongData for MySQLClient {
-    fn save_song(&self, songs: &Songs) -> Result<()> {
-        let exist_hashes = Hash::all(&self.connection)?;
+    fn save_song(&mut self, songs: &Songs) -> Result<()> {
+        let exist_hashes = Hash::all(&mut self.connection)?;
         let mut hashmap = songs.converter.sha256_to_md5.clone();
         for row in exist_hashes {
             let _ = HashSha256::from_str(&row.sha256).map(|hash| hashmap.remove(&hash));
@@ -339,10 +337,10 @@ impl SaveSongData for MySQLClient {
             log::info!("Insert {} hashes.", records.len());
             diesel::insert_into(schema::hashes::table)
                 .values(records)
-                .execute(&self.connection)?;
+                .execute(&mut self.connection)?;
         }
 
-        let exist_songs = models::Song::all(&self.connection)?;
+        let exist_songs = models::Song::all(&mut self.connection)?;
         let mut songs = songs.songs.clone();
         for row in exist_songs {
             let _ = HashSha256::from_str(&row.sha256).map(|hash| songs.remove(&hash));
@@ -364,17 +362,17 @@ impl SaveSongData for MySQLClient {
             log::info!("Insert {} songs.", records.len());
             diesel::insert_into(schema::songs::table)
                 .values(records)
-                .execute(&self.connection)?;
+                .execute(&mut self.connection)?;
         }
         Ok(())
     }
 }
 
 impl SavePlayerStateData for MySQLClient {
-    fn save_player_states(&self, account: &Account, stats: &PlayerStats) -> Result<()> {
-        let user = User::by_account(&self.connection, account)?;
+    fn save_player_states(&mut self, account: &Account, stats: &PlayerStats) -> Result<()> {
+        let user = User::by_account(&mut self.connection, account)?;
 
-        let saved = models::PlayerStat::by_user_id(&self.connection, user.id)?
+        let saved = models::PlayerStat::by_user_id(&mut self.connection, user.id)?
             .into_iter()
             .map(|s| (s.date, s))
             .collect::<HashMap<_, _>>();
@@ -430,19 +428,19 @@ impl SavePlayerStateData for MySQLClient {
         log::info!("Save stat for {} days", inserts.len());
         diesel::insert_into(schema::player_stats::table)
             .values(inserts)
-            .execute(&self.connection)?;
+            .execute(&mut self.connection)?;
         log::info!("Update stat on {} days", updates.len());
         diesel::replace_into(schema::player_stats::table)
             .values(updates)
-            .execute(&self.connection)?;
+            .execute(&mut self.connection)?;
         Ok(())
     }
 }
 
 impl StatsByAccount for MySQLClient {
-    fn stats(&self, account: &Account) -> Result<PlayerStats> {
-        let user = User::by_account(&self.connection, account)?;
-        let record = models::PlayerStat::by_user_id(&self.connection, user.id)?;
+    fn stats(&mut self, account: &Account) -> Result<PlayerStats> {
+        let user = User::by_account(&mut self.connection, account)?;
+        let record = models::PlayerStat::by_user_id(&mut self.connection, user.id)?;
         Ok(PlayerStats::new(
             record.into_iter().map(|row| row.to_stat()).collect(),
         ))
@@ -450,9 +448,9 @@ impl StatsByAccount for MySQLClient {
 }
 
 impl ScoresByAccount for MySQLClient {
-    fn score(&self, account: &Account) -> Result<Scores> {
-        let user = User::by_account(&self.connection, account)?;
-        let record = models::Score::by_user_id(&self.connection, user.id)?;
+    fn score(&mut self, account: &Account) -> Result<Scores> {
+        let user = User::by_account(&mut self.connection, account)?;
+        let record = models::Score::by_user_id(&mut self.connection, user.id)?;
         let score_log = self.score_log(account)?;
         Ok(Scores::create_by_map(
             record
@@ -472,10 +470,10 @@ impl ScoresByAccount for MySQLClient {
 }
 
 impl ScoreByAccountAndSha256 for MySQLClient {
-    fn score_with_log(&self, account: &Account, score_id: &ScoreId) -> Result<Score> {
-        let user = User::by_account(&self.connection, account)?;
+    fn score_with_log(&mut self, account: &Account, score_id: &ScoreId) -> Result<Score> {
+        let user = User::by_account(&mut self.connection, account)?;
         let record = models::Score::by_user_id_and_score_id(
-            &self.connection,
+            &mut self.connection,
             user.id,
             &score_id.sha256().to_string(),
             score_id.mode().to_int(),
@@ -483,7 +481,7 @@ impl ScoreByAccountAndSha256 for MySQLClient {
         let score = record.get(0).ok_or(NotFound)?.to_score();
         let snaps = {
             let records = models::ScoreSnap::by_user_id_and_score_id(
-                &self.connection,
+                &mut self.connection,
                 user.id,
                 &score_id.sha256().to_string(),
                 score_id.mode().to_int(),
@@ -506,8 +504,8 @@ impl ScoreByAccountAndSha256 for MySQLClient {
 }
 
 impl ScoresBySha256 for MySQLClient {
-    fn score(&self, hash: &HashSha256) -> Result<RankedScore> {
-        let record = models::Score::by_sha256(&self.connection, &hash.to_string())?;
+    fn score(&mut self, hash: &HashSha256) -> Result<RankedScore> {
+        let record = models::Score::by_sha256(&mut self.connection, &hash.to_string())?;
         let score_log = self.score_log_by_sha256(hash)?;
         Ok(RankedScore::create_by_map(
             record
@@ -523,8 +521,8 @@ impl ScoresBySha256 for MySQLClient {
 }
 
 impl PublishedUsers for MySQLClient {
-    fn fetch_users(&self) -> Result<Vec<VisibleAccount>> {
-        let list = UserStatus::visible_with_account(&self.connection)?;
+    fn fetch_users(&mut self) -> Result<Vec<VisibleAccount>> {
+        let list = UserStatus::visible_with_account(&mut self.connection)?;
         let mut res = Vec::new();
         for (_status, user) in list {
             res.push(VisibleAccount {
@@ -537,12 +535,12 @@ impl PublishedUsers for MySQLClient {
 }
 
 impl ResetScore for MySQLClient {
-    fn reset_score(&self, account: &Account) -> Result<()> {
-        let user = User::by_account(&self.connection, account)?;
-        models::Score::delete_by_user(&self.connection, &user)?;
-        models::ScoreSnap::delete_by_user(&self.connection, &user)?;
-        models::UserStatus::delete_by_user(&self.connection, &user)?;
-        models::PlayerStat::delete_by_user(&self.connection, &user)?;
+    fn reset_score(&mut self, account: &Account) -> Result<()> {
+        let user = User::by_account(&mut self.connection, account)?;
+        models::Score::delete_by_user(&mut self.connection, &user)?;
+        models::ScoreSnap::delete_by_user(&mut self.connection, &user)?;
+        models::UserStatus::delete_by_user(&mut self.connection, &user)?;
+        models::PlayerStat::delete_by_user(&mut self.connection, &user)?;
         log::info!(
             "Score data is removed: account id = {}",
             account.user_id.get()

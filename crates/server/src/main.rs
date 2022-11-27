@@ -26,7 +26,7 @@ async fn main() {
     env_logger::init();
     let db_pool = mysql::get_db_pool();
 
-    let client = MySQLClient::new(db_pool.get().unwrap());
+    let mut client = MySQLClient::new(db_pool.get().unwrap());
     let song_data = Arc::new(Mutex::new(SongDB {
         song: client.song_data().unwrap(),
     }));

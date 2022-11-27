@@ -29,7 +29,10 @@ impl From<User> for Account {
 }
 
 impl User {
-    pub fn by_account(connection: &MySqlPooledConnection, account: &Account) -> DieselResult<Self> {
+    pub fn by_account(
+        connection: &mut MySqlPooledConnection,
+        account: &Account,
+    ) -> DieselResult<Self> {
         use crate::schema::users::dsl::*;
         users
             .filter(gmail_address.eq(account.email()))
@@ -37,7 +40,7 @@ impl User {
     }
 
     pub fn by_google_profile(
-        connection: &MySqlPooledConnection,
+        connection: &mut MySqlPooledConnection,
         profile: &GoogleProfile,
     ) -> DieselResult<Self> {
         use crate::schema::users::dsl::*;
@@ -47,7 +50,7 @@ impl User {
     }
 
     pub fn by_google_id(
-        connection: &MySqlPooledConnection,
+        connection: &mut MySqlPooledConnection,
         google_id_string: String,
     ) -> DieselResult<Self> {
         use crate::schema::users::dsl::*;
@@ -56,14 +59,14 @@ impl User {
             .first(connection)
     }
 
-    pub fn by_user_id(connection: &MySqlPooledConnection, user_id: i32) -> DieselResult<Self> {
+    pub fn by_user_id(connection: &mut MySqlPooledConnection, user_id: i32) -> DieselResult<Self> {
         use crate::schema::users::dsl::*;
         users.filter(id.eq(user_id)).first(connection)
     }
 }
 
 #[derive(Debug, Clone, Insertable)]
-#[table_name = "users"]
+#[diesel(table_name = users)]
 pub struct RegisteringUser {
     pub google_id: String,
     pub gmail_address: String,
@@ -83,7 +86,7 @@ impl RegisteringUser {
 }
 
 #[derive(Debug, Clone, Insertable)]
-#[table_name = "rename_logs"]
+#[diesel(table_name = rename_logs)]
 pub struct RenameUser {
     pub user_id: i32,
     pub old_name: String,

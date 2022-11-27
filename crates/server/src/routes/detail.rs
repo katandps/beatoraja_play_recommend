@@ -61,7 +61,7 @@ macro_rules! log_duration {
 /// 詳細表示ハンドラ
 /// user_idをQueryParameterより取得する
 async fn handler<C: ScoresByAccount>(
-    repos: C,
+    mut repos: C,
     tables: TableData,
     query: DetailQuery,
     account: Account,

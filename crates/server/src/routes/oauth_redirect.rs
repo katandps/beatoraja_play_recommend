@@ -21,7 +21,7 @@ pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
 }
 
 async fn oauth_handler<C: RegisterUser + AccountByGoogleId>(
-    repos: C,
+    mut repos: C,
     profile: GoogleProfile,
 ) -> Result<impl Reply, Rejection> {
     repos.register(&profile).map_err(HandleError::OtherError)?;

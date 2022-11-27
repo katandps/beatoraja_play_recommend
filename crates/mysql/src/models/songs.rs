@@ -3,7 +3,7 @@ use crate::schema::*;
 use crate::MySqlPooledConnection;
 
 #[derive(Debug, Clone, Queryable, Insertable)]
-#[table_name = "songs"]
+#[diesel(table_name = songs)]
 pub struct Song {
     pub sha256: String,
     pub title: String,
@@ -29,7 +29,7 @@ impl Song {
         }
     }
 
-    pub fn all(connection: &MySqlPooledConnection) -> DieselResult<Vec<Self>> {
+    pub fn all(connection: &mut MySqlPooledConnection) -> DieselResult<Vec<Self>> {
         use crate::schema::songs::dsl::*;
         songs.load(connection)
     }

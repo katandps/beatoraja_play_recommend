@@ -15,7 +15,7 @@ pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
 
 async fn stats_handler<C: AccountByUserId + StatsByAccount>(
     user_id: i32,
-    repos: C,
+    mut repos: C,
 ) -> Result<impl Reply, Rejection> {
     let account = repos.user(user_id).map_err(HandleError::from)?;
     let stats = repos.stats(&account).map_err(HandleError::from)?;

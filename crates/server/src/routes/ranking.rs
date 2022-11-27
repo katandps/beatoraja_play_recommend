@@ -53,7 +53,7 @@ async fn parse_ranking_query(query: HashMap<String, String>) -> Result<RankingQu
 /// 詳細表示ハンドラ
 /// user_idをQueryParameterより取得する
 async fn ranking_handler<C: ScoresBySha256 + PublishedUsers>(
-    repos: C,
+    mut repos: C,
     query: RankingQuery,
     song_data: SongData,
 ) -> Result<impl Reply, Rejection> {

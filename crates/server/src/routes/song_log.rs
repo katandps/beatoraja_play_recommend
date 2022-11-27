@@ -17,7 +17,7 @@ pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
 }
 
 async fn handler<C: ScoreByAccountAndSha256>(
-    repos: C,
+    mut repos: C,
     account: Account,
     query: SongLogQuery,
 ) -> Result<impl Reply, Rejection> {

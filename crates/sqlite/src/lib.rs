@@ -39,8 +39,8 @@ impl SqliteClient {
 
     fn score_log(&self) -> Result<HashMap<ScoreId, SnapShots>, SqliteError> {
         use schema::score_log::scorelog::dsl::*;
-        let connection = Self::establish_connection(&self.scorelog_db_url)?;
-        let record: Vec<schema::score_log::ScoreLog> = scorelog.load(&connection)?;
+        let mut connection = Self::establish_connection(&self.scorelog_db_url)?;
+        let record: Vec<schema::score_log::ScoreLog> = scorelog.load(&mut connection)?;
 
         Ok(record.into_iter().fold(HashMap::new(), |mut map, row| {
             map.entry(ScoreId::new(
@@ -61,8 +61,8 @@ impl SqliteClient {
 
     pub fn player(&self) -> SqliteResult<PlayerStats> {
         use schema::player::player::dsl::*;
-        let connection = Self::establish_connection(&self.score_db_url)?;
-        let records: Vec<schema::player::Player> = player.load(&connection)?;
+        let mut connection = Self::establish_connection(&self.score_db_url)?;
+        let records: Vec<schema::player::Player> = player.load(&mut connection)?;
 
         let mut log = Vec::new();
         for row in records {
@@ -92,8 +92,8 @@ impl SqliteClient {
     }
 
     pub fn song_data(&self) -> Result<Songs, SqliteError> {
-        let connection = Self::establish_connection(&self.song_db_url)?;
-        let record: Vec<schema::song::Song> = schema::song::song::table.load(&connection)?;
+        let mut connection = Self::establish_connection(&self.song_db_url)?;
+        let record: Vec<schema::song::Song> = schema::song::song::table.load(&mut connection)?;
 
         Ok(record
             .iter()
@@ -112,8 +112,9 @@ impl SqliteClient {
     }
 
     pub fn score(&self) -> SqliteResult<Scores> {
-        let connection = Self::establish_connection(&self.score_db_url)?;
-        let record: Vec<schema::score::Score> = schema::score::score::table.load(&connection)?;
+        let mut connection = Self::establish_connection(&self.score_db_url)?;
+        let record: Vec<schema::score::Score> =
+            schema::score::score::table.load(&mut connection)?;
         let score_log = self.score_log()?;
         Ok(Scores::create_by_map(
             record

@@ -48,7 +48,7 @@ pub fn account_id_query(
 }
 
 async fn get_account_by_query<C: AccountByUserId>(
-    repos: C,
+    mut repos: C,
     query: HashMap<String, String>,
 ) -> Result<Account, Rejection> {
     let user_id = query

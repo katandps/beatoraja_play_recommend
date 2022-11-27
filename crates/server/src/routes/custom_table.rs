@@ -77,7 +77,7 @@ async fn body_handler<C: AccountByUserId + ScoresByAccount>(
 
 async fn body<C: AccountByUserId + ScoresByAccount>(
     user_id: i32,
-    repos: C,
+    mut repos: C,
     table: &Table,
     song_data: SongData,
 ) -> Result<impl Reply, HandleError> {

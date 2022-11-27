@@ -5,7 +5,7 @@ use chrono::NaiveDateTime;
 use model::{Judge, PlayCount, PlayTime, TotalJudge, UpdatedAt};
 
 #[derive(Debug, Clone, Queryable, Insertable)]
-#[table_name = "player_stats"]
+#[diesel(table_name = player_stats)]
 pub struct PlayerStat {
     pub id: i32,
     pub user_id: i32,
@@ -29,7 +29,7 @@ pub struct PlayerStat {
 
 impl PlayerStat {
     pub fn by_user_id(
-        connection: &MySqlPooledConnection,
+        connection: &mut MySqlPooledConnection,
         query_id: i32,
     ) -> DieselResult<Vec<PlayerStat>> {
         use crate::schema::player_stats::dsl::*;
@@ -59,14 +59,17 @@ impl PlayerStat {
         }
     }
 
-    pub fn delete_by_user(connection: &MySqlPooledConnection, user: &User) -> DieselResult<usize> {
+    pub fn delete_by_user(
+        connection: &mut MySqlPooledConnection,
+        user: &User,
+    ) -> DieselResult<usize> {
         use crate::schema::player_stats::dsl::*;
         diesel::delete(player_stats.filter(user_id.eq(user.id))).execute(connection)
     }
 }
 
 #[derive(Debug, Clone, Insertable)]
-#[table_name = "player_stats"]
+#[diesel(table_name = player_stats)]
 pub struct PlayerStatForInsert {
     pub user_id: i32,
     pub date: NaiveDateTime,
@@ -88,7 +91,7 @@ pub struct PlayerStatForInsert {
 }
 
 #[derive(Debug, Clone, Insertable)]
-#[table_name = "player_stats"]
+#[diesel(table_name = player_stats)]
 pub struct PlayerStatForUpdate {
     pub id: i32,
     pub user_id: i32,

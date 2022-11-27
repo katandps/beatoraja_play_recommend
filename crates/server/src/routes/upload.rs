@@ -43,7 +43,7 @@ pub fn song_data_upload_route(
 }
 
 async fn play_data_upload_handler<C: SaveScoreData + SavePlayerStateData + AccountByGoogleId>(
-    repository: C,
+    mut repository: C,
     form: FormData,
     account: Account,
 ) -> Result<impl Reply, Rejection> {
@@ -73,7 +73,7 @@ async fn play_data_upload_handler<C: SaveScoreData + SavePlayerStateData + Accou
 }
 
 async fn upload_song_data_handler<C: SaveSongData + AllSongData>(
-    client: C,
+    mut client: C,
     song_data: SongData,
     form: FormData,
 ) -> Result<String, Rejection> {
