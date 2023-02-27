@@ -10,7 +10,15 @@ impl Title {
     }
 
     pub fn new(title: String) -> Title {
-        Title(title)
+        let c = title.chars().collect::<Vec<_>>();
+        if c.len() > 255 {
+            Title(format!(
+                "{}...",
+                c.into_iter().take(250).collect::<String>()
+            ))
+        } else {
+            Title(title)
+        }
     }
 }
 
