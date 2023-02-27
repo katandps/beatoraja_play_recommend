@@ -76,7 +76,7 @@ async fn upload_song_data_handler<C: SaveSongData + AllSongData>(
     mut client: C,
     song_data: SongData,
     form: FormData,
-) -> Result<String, Rejection> {
+) -> Result<impl Reply, Rejection> {
     let mut songdata_db = NamedTempFile::new().unwrap();
     let map = form_into_map(form).await?;
     songdata_db
@@ -91,7 +91,7 @@ async fn upload_song_data_handler<C: SaveSongData + AllSongData>(
     let song_db = Arc::clone(&song_data);
     let songs = client.song_data().unwrap();
     song_db.lock().await.update(songs);
-    Ok("SongData Is Updated.".into())
+    Ok("SongData Is Updated.")
 }
 
 async fn form_into_map(form: FormData) -> Result<HashMap<String, Vec<u8>>, HandleError> {
