@@ -20,7 +20,7 @@ lazy_static = "1.4.0"
 url = "2.1.1"
 
 #エラー処理
-anyhow = "1.0"
+anyhow = "1.0.75"
 thiserror = "1.0.23"
 
 #HTMLパーサ

@@ -20,5 +20,5 @@ lazy_static = "1.4.0"
 envy = "0.4.2"
 
 #エラー処理
-anyhow = "1.0.57"
+anyhow = "1.0.75"
 thiserror = "1.0.31"
