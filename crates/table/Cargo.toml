@@ -29,6 +29,6 @@ cssparser = "0.29.3"
 selectors = "0.23.0"
 
 # HTTPリクエスト/非同期処理
-reqwest = {version = "0.11.4", features = ["json"]}
+reqwest = {version = "0.11.20", features = ["json"]}
 tokio = { version = "1", features = ["macros"]}
 futures = "0.3.15"

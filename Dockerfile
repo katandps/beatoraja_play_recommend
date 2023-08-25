@@ -1,4 +1,4 @@
-FROM rust:1.65.0 as build
+FROM rust:1.72.0 as build
 WORKDIR /app
 COPY Cargo.toml Cargo.toml
 COPY crates crates
