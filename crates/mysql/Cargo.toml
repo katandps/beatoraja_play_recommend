@@ -17,7 +17,7 @@ log = "0.4.16"
 anyhow = "1.0.75"
 thiserror = "1.0.31"
 
-chrono = "0.4.19"
+chrono = "0.4.26"
 envy = "0.4.2"
 lazy_static = "1.4.0"
 
