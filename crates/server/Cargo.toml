@@ -28,7 +28,6 @@ http = "0.2.2"
 
 rand = "0.8.0"
 rand_chacha = "0.3.0"
-bigint = "4.4.3"
 base64 = "0.13.0"
 
 diesel = { version = "2.0.2", features = ["mysql", "r2d2"] }
