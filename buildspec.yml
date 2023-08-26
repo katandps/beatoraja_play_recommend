@@ -13,7 +13,7 @@ phases:
       - echo Logging in to Docker Hub...
       - echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
       - echo Logging in to Amazon ECR...
-      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - aws ecr get-login-password | docker login --username AWS --password-stdin https://847110695266.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
   build:
     commands:
       - echo "docker build ./ -t $TARGET_IMAGE_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION"
