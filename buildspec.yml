@@ -8,9 +8,6 @@ env:
     DOCKER_BUILDKIT: "1"
 
 phases:
-  install:
-    runtime-versions:
-      docker: 19
   pre_build:
     commands:
       - echo Logging in to Docker Hub...
