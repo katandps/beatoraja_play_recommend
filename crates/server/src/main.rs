@@ -6,12 +6,8 @@ pub mod session;
 
 use config::config;
 use model::Songs;
-use mysql::MySQLClient;
-
-#[macro_use]
-extern crate lazy_static;
-
 use model::Tables;
+use mysql::MySQLClient;
 use repository::AllSongData;
 use std::ops::Deref;
 use std::sync::Arc;
@@ -40,8 +36,8 @@ async fn main() {
     let (http_addr, http_warp) = warp::serve(route.clone()).bind_ephemeral(([0, 0, 0, 0], 8000));
     let (https_addr, https_warp) = warp::serve(route)
         .tls()
-        .cert_path(config().tls_cert_path)
-        .key_path(config().tls_key_path)
+        .cert_path(config().tls_cert_path.clone())
+        .key_path(config().tls_key_path.clone())
         .bind_ephemeral(([0, 0, 0, 0], 4431));
 
     log::info!("Starting Listen with {:?} and {:?}", http_addr, https_addr);

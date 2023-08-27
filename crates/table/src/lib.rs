@@ -12,7 +12,7 @@ use url::Url;
 use TableParseError::*;
 
 pub async fn from_web(table: &mut Tables) {
-    futures::stream::iter(config().table_urls)
+    futures::stream::iter(config().table_urls.clone())
         .then(make_table)
         .enumerate()
         .for_each(|(i, t)| {

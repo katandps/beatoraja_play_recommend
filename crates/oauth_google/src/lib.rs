@@ -1,9 +1,6 @@
 mod config;
 mod error;
 
-#[macro_use]
-extern crate lazy_static;
-
 use anyhow::Result;
 use config::config;
 pub use error::Error;
@@ -39,9 +36,9 @@ fn make_google_profile(payload: &Map<String, Value>) -> Result<GoogleProfile, Er
 
 fn make_token_request_body(code: String) -> HashMap<&'static str, String> {
     let mut body = HashMap::new();
-    body.insert("client_id", config().google_oauth_client_id);
-    body.insert("client_secret", config().google_oauth_client_secret);
-    body.insert("redirect_uri", config().google_oauth_redirect_uri);
+    body.insert("client_id", config().google_oauth_client_id.clone());
+    body.insert("client_secret", config().google_oauth_client_secret.clone());
+    body.insert("redirect_uri", config().google_oauth_redirect_uri.clone());
     body.insert("code", code);
     body.insert("grant_type", "authorization_code".to_string());
     body

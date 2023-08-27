@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use std::sync::OnceLock;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Cfg {
@@ -33,18 +34,7 @@ fn google_oauth_redirect_uri() -> String {
     "https://localhost:4431/oauth".into()
 }
 
-pub fn config() -> Cfg {
-    (*self::CONFIG).clone()
-}
-
-lazy_static! {
-    pub static ref CONFIG: Cfg = {
-        match envy::from_env::<Cfg>() {
-            Ok(val) => val,
-            Err(err) => {
-                log::error!("{}", err);
-                std::process::exit(1)
-            }
-        }
-    };
+pub fn config() -> &'static Cfg {
+    static INSTANCE: OnceLock<Cfg> = OnceLock::new();
+    INSTANCE.get_or_init(|| envy::from_env::<Cfg>().unwrap())
 }

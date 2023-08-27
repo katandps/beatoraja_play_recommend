@@ -1,8 +1,5 @@
 mod config;
 
-#[macro_use]
-extern crate lazy_static;
-
 use serde_json::Value;
 use std::fs;
 use std::io::Write;
@@ -18,7 +15,7 @@ pub fn send(channel: String, title: String, content: String) -> anyhow::Result<S
         .post("https://slack.com/api/files.upload")
         .multipart(form)
         .query(&[
-            ("token", config::config().slack_bot_token),
+            ("token", config::config().slack_bot_token.clone()),
             ("title", title),
             ("channels", channel),
             ("pretty", "1".into()),
@@ -44,8 +41,8 @@ pub async fn send_async(content: String) -> anyhow::Result<String> {
     use reqwest::Client;
 
     let (channel, title) = (
-        config::config().slack_channel,
-        config::config().slack_file_name,
+        config::config().slack_channel.clone(),
+        config::config().slack_file_name.clone(),
     );
     let fp = Part::text(content).file_name("buf.txt");
 
@@ -54,7 +51,7 @@ pub async fn send_async(content: String) -> anyhow::Result<String> {
         .post("https://slack.com/api/files.upload")
         .multipart(form)
         .query(&[
-            ("token", config::config().slack_bot_token),
+            ("token", config::config().slack_bot_token.clone()),
             ("title", title),
             ("channels", channel),
             ("pretty", "1".into()),

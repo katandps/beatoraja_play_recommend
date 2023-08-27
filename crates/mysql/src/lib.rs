@@ -22,14 +22,11 @@ use repository::*;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
-#[macro_use]
-extern crate lazy_static;
-
 pub type MySqlPool = Pool<ConnectionManager<MysqlConnection>>;
 pub type MySqlPooledConnection = PooledConnection<ConnectionManager<MysqlConnection>>;
 
 pub fn get_db_pool() -> MySqlPool {
-    Pool::builder().build_unchecked(ConnectionManager::new(config::config().mysql_url))
+    Pool::builder().build_unchecked(ConnectionManager::new(&config::config().mysql_url))
 }
 
 pub struct MySQLClient {

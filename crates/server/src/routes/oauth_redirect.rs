@@ -35,7 +35,7 @@ async fn oauth_handler<C: RegisterUser + AccountByGoogleId>(
         config().client_domain
     );
 
-    let uri = Uri::from_maybe_shared(config().client_url).unwrap();
+    let uri = Uri::from_maybe_shared(config().client_url.clone()).unwrap();
     let redirect = warp::redirect(uri);
     Ok(warp::reply::with_header(
         redirect,

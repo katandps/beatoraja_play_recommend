@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use std::sync::OnceLock;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Cfg {
@@ -34,10 +35,7 @@ fn tls_key_path() -> String {
     "./files/key.rsa".into()
 }
 
-pub fn config() -> Cfg {
-    (*self::CONFIG).clone()
-}
-
-lazy_static! {
-    pub static ref CONFIG: Cfg = envy::from_env::<Cfg>().unwrap();
+pub fn config() -> &'static Cfg {
+    static INSTANCE: OnceLock<Cfg> = OnceLock::new();
+    INSTANCE.get_or_init(|| envy::from_env::<Cfg>().unwrap())
 }
