@@ -1,7 +1,7 @@
 use crate::error::HandleError;
 use crate::filter::*;
 use crate::SongData;
-use bytes::BufMut;
+use bytes::Buf;
 use futures::TryStreamExt;
 use http::StatusCode;
 use model::*;
@@ -14,7 +14,7 @@ use std::collections::HashMap;
 use std::io::Write;
 use std::sync::Arc;
 use tempfile::NamedTempFile;
-use warp::filters::multipart::{FormData, Part};
+use warp::filters::multipart::FormData;
 use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
@@ -47,8 +47,10 @@ async fn play_data_upload_handler<C: SaveScoreData + SavePlayerStateData + Accou
     form: FormData,
     account: Account,
 ) -> Result<impl Reply, Rejection> {
+    log::info!("start to upload");
     let mut score_db = NamedTempFile::new().map_err(HandleError::from)?;
     let mut scorelog_db = NamedTempFile::new().map_err(HandleError::from)?;
+    log::info!("ready named temp file to save");
     let map = form_into_map(form).await?;
     score_db
         .write_all(map.get("score").ok_or(HandleError::FormIsIncomplete)?)
@@ -56,6 +58,7 @@ async fn play_data_upload_handler<C: SaveScoreData + SavePlayerStateData + Accou
     scorelog_db
         .write_all(map.get("scorelog").ok_or(HandleError::FormIsIncomplete)?)
         .map_err(HandleError::from)?;
+    log::info!("saved uploading file");
     let sqlite_client = SqliteClient::for_score(
         score_db.path().to_str().unwrap(),
         scorelog_db.path().to_str().unwrap(),
@@ -95,18 +98,17 @@ async fn upload_song_data_handler<C: SaveSongData + AllSongData>(
 }
 
 async fn form_into_map(form: FormData) -> Result<HashMap<String, Vec<u8>>, HandleError> {
-    let mut res = HashMap::new();
-    let parts: Vec<Part> = form.try_collect().await?;
-    for part in parts {
-        res.insert(
-            part.name().to_string(),
-            part.stream()
-                .try_fold(Vec::new(), |mut vec, data| {
-                    vec.put(data);
-                    async move { Ok(vec) }
-                })
-                .await?,
-        );
-    }
+    let res = form
+        .and_then(|mut part| async move {
+            let name = part.name().to_string();
+            log::info!("{name}");
+            let mut data: Vec<u8> = Vec::new();
+            while let Some(content) = part.data().await {
+                data.extend_from_slice(content.unwrap().chunk());
+            }
+            Ok((name, data))
+        })
+        .try_collect()
+        .await?;
     Ok(res)
 }
