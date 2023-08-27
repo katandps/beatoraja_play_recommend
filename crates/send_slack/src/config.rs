@@ -3,24 +3,12 @@ use std::sync::OnceLock;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Cfg {
-    #[serde(default = "slack_bot_token")]
+    #[serde(default)]
     pub slack_bot_token: String,
-    #[serde(default = "slack_channel")]
+    #[serde(default)]
     pub slack_channel: String,
-    #[serde(default = "slack_file_name")]
+    #[serde(default)]
     pub slack_file_name: String,
-}
-
-fn slack_bot_token() -> String {
-    "".into()
-}
-
-fn slack_channel() -> String {
-    "".into()
-}
-
-fn slack_file_name() -> String {
-    "".into()
 }
 
 pub fn config() -> &'static Cfg {
