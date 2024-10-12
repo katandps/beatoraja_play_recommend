@@ -114,6 +114,21 @@ impl TableLevels {
             .collect()
     }
 }
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(untagged)]
+pub enum LevelVariant {
+    Str(String),
+    Number(i64),
+}
+
+impl ToString for LevelVariant {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Str(s) => s.clone(),
+            Self::Number(i) => i.to_string(),
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct TableLevel {

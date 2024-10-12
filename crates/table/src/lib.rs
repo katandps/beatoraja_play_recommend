@@ -97,7 +97,11 @@ fn make_levels(header: &Header, charts: Vec<Chart>) -> TableLevels {
     let charts = Charts::make(charts.into_iter().map(|c| c.into()).collect());
     let order = match &header.level_order {
         Some(s) => s.clone(),
-        None => charts.get_levels().iter().map(Level::to_string).collect(),
+        None => charts
+            .get_levels()
+            .iter()
+            .map(|level| LevelVariant::Str(level.to_string()))
+            .collect(),
     };
     charts.make_levels(&order)
 }
@@ -143,7 +147,7 @@ pub struct Header {
     pub symbol: String,
     grade: Option<Vec<Grade>>,
     course: Option<Vec<Vec<Course>>>,
-    pub level_order: Option<Vec<String>>,
+    pub level_order: Option<Vec<LevelVariant>>,
     tag: Option<String>,
     update: Option<i64>,
 }

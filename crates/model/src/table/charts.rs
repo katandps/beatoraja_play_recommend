@@ -33,7 +33,7 @@ impl Charts {
         self.charts.iter().collect()
     }
 
-    pub fn make_levels(&self, order: &[String]) -> TableLevels {
+    pub fn make_levels(&self, order: &[LevelVariant]) -> TableLevels {
         let mut m = HashMap::new();
         for chart in &self.charts {
             m.entry(chart.level().to_string())
@@ -43,10 +43,11 @@ impl Charts {
         let a: Vec<Chart> = Vec::new();
         let v = order
             .iter()
-            .map(|l| {
+            .map(|label| {
+                let l = label.to_string();
                 TableLevel::make(
                     l.clone(),
-                    Charts::make(m.get(l).cloned().unwrap_or_else(|| a.clone())),
+                    Charts::make(m.get(&l).cloned().unwrap_or_else(|| a.clone())),
                 )
             })
             .collect();
