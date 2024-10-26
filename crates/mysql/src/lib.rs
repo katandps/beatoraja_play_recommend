@@ -48,7 +48,7 @@ impl MySQLClient {
                 row.score,
                 row.combo,
                 row.min_bp,
-                row.date.timestamp(),
+                row.date.and_utc().timestamp(),
             );
             map.entry(song_id).or_default().add(snap);
         }
@@ -68,7 +68,7 @@ impl MySQLClient {
                 row.score,
                 row.combo,
                 row.min_bp,
-                row.date.timestamp(),
+                row.date.and_utc().timestamp(),
             );
             map.entry(user_id).or_default().add(snap);
         }
@@ -490,7 +490,7 @@ impl ScoreByAccountAndSha256 for MySQLClient {
                     row.score,
                     row.combo,
                     row.min_bp,
-                    row.date.timestamp(),
+                    row.date.and_utc().timestamp(),
                 );
                 snapshots.add(snap);
             }

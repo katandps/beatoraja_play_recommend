@@ -41,7 +41,7 @@ impl PlayerStat {
             play_count: PlayCount::new(self.playcount),
             clear_count: PlayCount::new(self.clear),
             play_time: PlayTime::new(self.playtime),
-            date: UpdatedAt::from_timestamp(self.date.timestamp()),
+            date: UpdatedAt::from_timestamp(self.date.and_utc().timestamp()),
             total_judge: TotalJudge::new(Judge {
                 early_pgreat: self.epg,
                 late_pgreat: self.lpg,

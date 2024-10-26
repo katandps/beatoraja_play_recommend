@@ -118,7 +118,7 @@ impl Score {
         };
         model::Score {
             clear: ClearType::from_integer(self.clear),
-            updated_at: UpdatedAt::from_timestamp(self.date.timestamp()),
+            updated_at: UpdatedAt::from_timestamp(self.date.and_utc().timestamp()),
             score: judge.ex_score(),
             judge,
             max_combo: MaxCombo::from_combo(self.combo),
