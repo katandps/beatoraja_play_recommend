@@ -24,9 +24,13 @@ async fn oauth_handler<C: RegisterUser + AccountByGoogleId>(
     mut repos: C,
     profile: GoogleProfile,
 ) -> Result<impl Reply, Rejection> {
-    repos.register(&profile).map_err(HandleError::OtherError)?;
+    repos
+        .register(&profile)
+        .await
+        .map_err(HandleError::OtherError)?;
     let account = repos
         .user(&GoogleId::new(profile.user_id))
+        .await
         .map_err(HandleError::OtherError)?;
     let key = crate::session::save_user_id(account.google_id).map_err(HandleError::OtherError)?;
     let header = format!(

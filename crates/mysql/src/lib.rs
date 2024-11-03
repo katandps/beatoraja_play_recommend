@@ -97,7 +97,7 @@ impl MySQLClient {
 }
 
 impl HealthCheck for MySQLClient {
-    fn health(&mut self) -> Result<()> {
+    async fn health(&mut self) -> Result<()> {
         todo!();
         // match &self.connection.("SELECT 1") {
         //     Ok(_) => Ok(()),
@@ -107,7 +107,7 @@ impl HealthCheck for MySQLClient {
 }
 
 impl RegisterUser for MySQLClient {
-    fn register(&mut self, profile: &GoogleProfile) -> Result<()> {
+    async fn register(&mut self, profile: &GoogleProfile) -> Result<()> {
         let user = User::by_google_profile(&mut self.connection, profile);
         match user {
             Ok(_) => Ok(()),
@@ -124,19 +124,19 @@ impl RegisterUser for MySQLClient {
 }
 
 impl AccountByUserId for MySQLClient {
-    fn user(&mut self, id: i32) -> Result<Account> {
+    async fn user(&mut self, id: i32) -> Result<Account> {
         Ok(User::by_user_id(&mut self.connection, id)?.into())
     }
 }
 
 impl AccountByGoogleId for MySQLClient {
-    fn user(&mut self, google_id: &GoogleId) -> Result<Account> {
+    async fn user(&mut self, google_id: &GoogleId) -> Result<Account> {
         Ok(User::by_google_id(&mut self.connection, google_id.to_string())?.into())
     }
 }
 
 impl RenameAccount for MySQLClient {
-    fn rename(&mut self, account: &Account) -> Result<()> {
+    async fn rename(&mut self, account: &Account) -> Result<()> {
         log::info!("Update user name to {}.", account.user_name());
         let user = User::by_account(&mut self.connection, account)?;
         diesel::insert_into(schema::rename_logs::table)
@@ -159,7 +159,7 @@ impl RenameAccount for MySQLClient {
 }
 
 impl ChangeAccountVisibility for MySQLClient {
-    fn change_visibility(&mut self, account: &Account) -> Result<()> {
+    async fn change_visibility(&mut self, account: &Account) -> Result<()> {
         log::info!(
             "Update visibility to {}. : {}",
             account.visibility,
@@ -191,7 +191,7 @@ impl ChangeAccountVisibility for MySQLClient {
 }
 
 impl AllSongData for MySQLClient {
-    fn song_data(&mut self) -> Result<Songs> {
+    async fn song_data(&mut self) -> Result<Songs> {
         let record = models::Song::all(&mut self.connection)?;
         let hash = Hash::all(&mut self.connection)?;
         let hash = hash
@@ -217,7 +217,7 @@ impl AllSongData for MySQLClient {
 }
 
 impl SaveScoreData for MySQLClient {
-    fn save_score(&mut self, account: &Account, score: &Scores) -> Result<()> {
+    async fn save_score(&mut self, account: &Account, score: &Scores) -> Result<()> {
         let user = User::by_account(&mut self.connection, account)?;
         let user_id = user.id;
         let saved_song = self.saved_song(user_id)?;
@@ -307,7 +307,7 @@ impl SaveScoreData for MySQLClient {
 }
 
 impl SaveSongData for MySQLClient {
-    fn save_song(&mut self, songs: &Songs) -> Result<()> {
+    async fn save_song(&mut self, songs: &Songs) -> Result<()> {
         let exist_hashes = Hash::all(&mut self.connection)?;
         let mut hashmap = songs.converter.sha256_to_md5.clone();
         for row in exist_hashes {
@@ -366,7 +366,7 @@ impl SaveSongData for MySQLClient {
 }
 
 impl SavePlayerStateData for MySQLClient {
-    fn save_player_states(&mut self, account: &Account, stats: &PlayerStats) -> Result<()> {
+    async fn save_player_states(&mut self, account: &Account, stats: &PlayerStats) -> Result<()> {
         let user = User::by_account(&mut self.connection, account)?;
 
         let saved = models::PlayerStat::by_user_id(&mut self.connection, user.id)?
@@ -435,7 +435,7 @@ impl SavePlayerStateData for MySQLClient {
 }
 
 impl StatsByAccount for MySQLClient {
-    fn stats(&mut self, account: &Account) -> Result<PlayerStats> {
+    async fn stats(&mut self, account: &Account) -> Result<PlayerStats> {
         let user = User::by_account(&mut self.connection, account)?;
         let record = models::PlayerStat::by_user_id(&mut self.connection, user.id)?;
         Ok(PlayerStats::new(
@@ -445,7 +445,7 @@ impl StatsByAccount for MySQLClient {
 }
 
 impl ScoresByAccount for MySQLClient {
-    fn score(&mut self, account: &Account) -> Result<Scores> {
+    async fn score(&mut self, account: &Account) -> Result<Scores> {
         let user = User::by_account(&mut self.connection, account)?;
         let record = models::Score::by_user_id(&mut self.connection, user.id)?;
         let score_log = self.score_log(account)?;
@@ -467,7 +467,7 @@ impl ScoresByAccount for MySQLClient {
 }
 
 impl ScoreByAccountAndSha256 for MySQLClient {
-    fn score_with_log(&mut self, account: &Account, score_id: &ScoreId) -> Result<Score> {
+    async fn score_with_log(&mut self, account: &Account, score_id: &ScoreId) -> Result<Score> {
         let user = User::by_account(&mut self.connection, account)?;
         let record = models::Score::by_user_id_and_score_id(
             &mut self.connection,
@@ -501,7 +501,7 @@ impl ScoreByAccountAndSha256 for MySQLClient {
 }
 
 impl ScoresBySha256 for MySQLClient {
-    fn score(&mut self, hash: &HashSha256) -> Result<RankedScore> {
+    async fn score(&mut self, hash: &HashSha256) -> Result<RankedScore> {
         let record = models::Score::by_sha256(&mut self.connection, &hash.to_string())?;
         let score_log = self.score_log_by_sha256(hash)?;
         Ok(RankedScore::create_by_map(
@@ -518,7 +518,7 @@ impl ScoresBySha256 for MySQLClient {
 }
 
 impl PublishedUsers for MySQLClient {
-    fn fetch_users(&mut self) -> Result<Vec<VisibleAccount>> {
+    async fn fetch_users(&mut self) -> Result<Vec<VisibleAccount>> {
         let list = UserStatus::visible_with_account(&mut self.connection)?;
         let mut res = Vec::new();
         for (_status, user) in list {
@@ -532,7 +532,7 @@ impl PublishedUsers for MySQLClient {
 }
 
 impl ResetScore for MySQLClient {
-    fn reset_score(&mut self, account: &Account) -> Result<()> {
+    async fn reset_score(&mut self, account: &Account) -> Result<()> {
         let user = User::by_account(&mut self.connection, account)?;
         models::Score::delete_by_user(&mut self.connection, &user)?;
         models::ScoreSnap::delete_by_user(&mut self.connection, &user)?;

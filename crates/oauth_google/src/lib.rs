@@ -96,5 +96,8 @@ pub struct GoogleProfile {
 }
 
 pub trait RegisterUser {
-    fn register(&mut self, profile: &GoogleProfile) -> Result<()>;
+    fn register(
+        &mut self,
+        profile: &GoogleProfile,
+    ) -> impl std::future::Future<Output = Result<()>> + Send;
 }

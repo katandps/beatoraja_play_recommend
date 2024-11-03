@@ -59,6 +59,7 @@ async fn get_account_by_query<C: AccountByUserId>(
         .map_err(HandleError::AccountSelectionIsInvalid)?;
     let account = repos
         .user(user_id)
+        .await
         .map_err(HandleError::AccountIsNotFound)?;
     Ok(account)
 }

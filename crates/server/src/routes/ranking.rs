@@ -58,8 +58,8 @@ async fn ranking_handler<C: ScoresBySha256 + PublishedUsers>(
     song_data: SongData,
 ) -> Result<impl Reply, Rejection> {
     let songs = song_data.lock().await;
-    let scores = repos.score(&query.sha256).unwrap();
-    let users = repos.fetch_users().map_err(HandleError::from)?;
+    let scores = repos.score(&query.sha256).await.unwrap();
+    let users = repos.fetch_users().await.map_err(HandleError::from)?;
     let response = scores.for_response(&songs.song, &query.date, &query.sha256, &users);
     match response {
         Some(res) => Ok(serde_json::to_string(&res).unwrap()),

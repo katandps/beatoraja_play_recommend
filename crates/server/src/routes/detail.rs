@@ -73,6 +73,7 @@ async fn handler<C: ScoresByAccount>(
         GetScores,
         repos
             .score(&account)
+            .await
             .unwrap_or_else(|_| Scores::create_by_map(HashMap::new()))
     );
     let response = log_duration!(

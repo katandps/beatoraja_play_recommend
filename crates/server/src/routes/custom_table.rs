@@ -81,8 +81,8 @@ async fn body<C: AccountByUserId + ScoresByAccount>(
     table: &Table,
     song_data: SongData,
 ) -> Result<impl Reply, HandleError> {
-    let account = repos.user(user_id)?;
-    let score = repos.score(&account)?;
+    let account = repos.user(user_id).await?;
+    let score = repos.score(&account).await?;
     let songs = song_data.lock().await;
     Ok(serde_json::to_string(&table.filter_score(&score, &songs.song)).unwrap())
 }

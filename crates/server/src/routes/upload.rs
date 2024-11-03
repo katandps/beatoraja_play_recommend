@@ -67,10 +67,12 @@ async fn play_data_upload_handler<C: SaveScoreData + SavePlayerStateData + Accou
     let scores = sqlite_client.score().map_err(HandleError::from)?;
     repository
         .save_score(&account, &scores)
+        .await
         .map_err(HandleError::from)?;
     let player_states = sqlite_client.player().map_err(HandleError::from)?;
     repository
         .save_player_states(&account, &player_states)
+        .await
         .map_err(HandleError::from)?;
     Ok(StatusCode::OK)
 }
@@ -89,10 +91,11 @@ async fn upload_song_data_handler<C: SaveSongData + AllSongData>(
 
     client
         .save_song(&sqlite_client.song_data().map_err(HandleError::from)?)
+        .await
         .map_err(HandleError::from)?;
 
     let song_db = Arc::clone(&song_data);
-    let songs = client.song_data().unwrap();
+    let songs = client.song_data().await.unwrap();
     song_db.lock().await.update(songs);
     Ok("SongData Is Updated.")
 }

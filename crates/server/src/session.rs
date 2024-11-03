@@ -35,11 +35,11 @@ pub fn get_user_id(key: &str) -> Result<GoogleId, HandleError> {
     ))
 }
 
-pub fn get_account<C: AccountByGoogleId>(
+pub async fn get_account<C: AccountByGoogleId>(
     mut repos: C,
     user_id: GoogleId,
 ) -> Result<Account, HandleError> {
-    Ok(repos.user(&user_id)?)
+    Ok(repos.user(&user_id).await?)
 }
 
 pub async fn get_account_by_session<C: AccountByGoogleId>(
@@ -47,7 +47,7 @@ pub async fn get_account_by_session<C: AccountByGoogleId>(
     key: String,
 ) -> Result<Account, Rejection> {
     let user_id = get_user_id(&key)?;
-    Ok(get_account(repos, user_id)?)
+    Ok(get_account(repos, user_id).await?)
 }
 
 fn generate_session_key() -> String {

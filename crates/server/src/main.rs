@@ -24,7 +24,7 @@ async fn main() {
 
     let mut client = MySQLClient::new(db_pool.get().unwrap());
     let song_data = Arc::new(Mutex::new(SongDB {
-        song: client.song_data().unwrap(),
+        song: client.song_data().await.unwrap(),
     }));
     let tables = Arc::new(Mutex::new(Tables::default()));
     {

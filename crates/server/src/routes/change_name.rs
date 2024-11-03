@@ -24,10 +24,13 @@ async fn change_name_handler<C: RenameAccount>(
     changed_name: String,
 ) -> Result<impl Reply, Rejection> {
     account.set_name(&changed_name);
-    rename_account(repos, &account)?;
+    rename_account(repos, &account).await?;
     Ok(serde_json::to_string(&account).unwrap())
 }
 
-fn rename_account<C: RenameAccount>(mut repos: C, account: &Account) -> Result<(), HandleError> {
-    Ok(repos.rename(account)?)
+async fn rename_account<C: RenameAccount>(
+    mut repos: C,
+    account: &Account,
+) -> Result<(), HandleError> {
+    Ok(repos.rename(account).await?)
 }

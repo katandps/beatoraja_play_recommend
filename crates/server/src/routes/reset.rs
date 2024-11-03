@@ -23,6 +23,7 @@ async fn reset_handler<C: ResetScore>(
 ) -> Result<impl Reply, Rejection> {
     repository
         .reset_score(&account)
+        .await
         .map_err(HandleError::from)?;
     Ok(StatusCode::OK)
 }
