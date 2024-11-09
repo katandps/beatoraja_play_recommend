@@ -30,12 +30,10 @@ impl Scores {
             user_name: account.user_name(),
             score: tables
                 .get_charts()
-                .into_iter()
                 .filter_map(|chart| {
                     let song = songs.song(chart);
                     self.get(&song.song_id())
-                        .map(|s| s.make_detail(date))
-                        .map(|score| (chart.md5(), score))
+                        .map(|s| (chart.md5(), s.make_detail(date)))
                 })
                 .collect(),
         }

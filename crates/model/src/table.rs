@@ -25,8 +25,8 @@ impl Tables {
         self.v.insert(i, t);
     }
 
-    pub fn get_charts(&self) -> Vec<&Chart> {
-        self.v.iter().flat_map(|(_i, t)| t.get_charts()).collect()
+    pub fn get_charts(&self) -> impl Iterator<Item = &Chart> {
+        self.v.iter().flat_map(|(_i, t)| t.get_charts())
     }
 
     pub fn get(&self, index: usize) -> Option<&Table> {
