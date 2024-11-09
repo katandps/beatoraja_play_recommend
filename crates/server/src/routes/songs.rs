@@ -19,5 +19,5 @@ async fn songs_handler(
 ) -> std::result::Result<impl Reply, Rejection> {
     let tables = tables.lock().await;
     let songs = song_data.lock().await;
-    Ok(serde_json::to_string(&songs.song.get_list(&tables.get_charts())).unwrap())
+    Ok(serde_json::to_string(&songs.song.get_list(tables.get_charts())).unwrap())
 }

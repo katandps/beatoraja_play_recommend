@@ -35,9 +35,8 @@ impl Songs {
         self.converter.get_sha256(md5)
     }
 
-    pub fn get_list(&self, chart: &[&Chart]) -> Vec<SongFormat> {
+    pub fn get_list<'a>(&self, chart: impl Iterator<Item = &'a Chart>) -> Vec<SongFormat> {
         chart
-            .iter()
             .filter_map(|c| self.song_a(c))
             .map(SongFormat::from)
             .collect()
