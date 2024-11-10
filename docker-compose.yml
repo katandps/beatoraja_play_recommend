@@ -3,10 +3,9 @@ services:
     build: ./docker/builder/
     container_name: app
     ports:
-      - "801:8000"
-      - "4431:4431"
+      - "80:8000"
+      - "443:4431"
     volumes:
-      - ./files:/app/files
       # - ~/.aws/:/root/.aws/ro
       - ./:/app
     env_file:
@@ -35,7 +34,7 @@ services:
       #- /etc/group:/etc/group:ro
       #- /etc/passwd:/etc/passwd:ro
     ports:
-      - "33061:3306"
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: user_data
@@ -47,4 +46,4 @@ services:
     container_name: session-redis
     restart: always
     ports:
-      - "6378:6379"
+      - "6379:6379"
