@@ -43,7 +43,7 @@ async fn oauth_handler<C: RegisterUser + AccountByGoogleId>(
     let redirect = warp::redirect(uri);
     Ok(warp::reply::with_header(
         redirect,
-        http::header::SET_COOKIE,
+        warp::http::header::SET_COOKIE,
         header,
     ))
 }

@@ -2,6 +2,7 @@ mod config;
 mod error;
 
 use anyhow::Result;
+use base64::{alphabet, engine, read};
 use config::config;
 pub use error::Error;
 use serde_json::{Map, Value};
@@ -58,6 +59,7 @@ async fn token_request(body: HashMap<&str, String>) -> Result<Map<String, Value>
 }
 
 fn get_payload(obj: &Map<String, Value>) -> Result<Map<String, Value>, Error> {
+    println!("{:?}", obj);
     let token = &obj
         .get(&"id_token".to_string())
         .ok_or_else(|| Error::GoogleResponseIsInvalid("id_token is not found".into()))?
@@ -73,15 +75,12 @@ fn get_payload(obj: &Map<String, Value>) -> Result<Map<String, Value>, Error> {
         .next()
         .ok_or_else(|| Error::GoogleResponseIsInvalid("could not get second segment".into()))?;
 
-    let payload_string = String::from_utf8(
-        base64::decode_config(&encoded_payload, base64::URL_SAFE_NO_PAD).map_err(|_| {
-            Error::GoogleResponseIsInvalid("payload is not encoded in base64 ".into())
-        })?,
-    )
-    .map_err(Error::FromUtf8Error)?;
+    let base64_engine =
+        engine::GeneralPurpose::new(&alphabet::URL_SAFE, engine::general_purpose::NO_PAD);
+    let payload_string = read::DecoderReader::new(encoded_payload.as_bytes(), &base64_engine);
+    // .map_err(|_| Error::GoogleResponseIsInvalid("payload is not encoded in base64".into()))?;
     let payload_json: serde_json::Value =
-        serde_json::from_str::<serde_json::Value>(&payload_string)
-            .map_err(Error::SerdeJsonError)?;
+        serde_json::from_reader(payload_string).map_err(Error::SerdeJsonError)?;
     Ok(payload_json
         .as_object()
         .ok_or_else(|| Error::GoogleResponseIsInvalid("second segment is invalid".into()))?

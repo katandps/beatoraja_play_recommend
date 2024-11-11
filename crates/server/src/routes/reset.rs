@@ -1,10 +1,10 @@
 use crate::error::HandleError;
 use crate::filter::*;
-use http::StatusCode;
 use model::*;
 use mysql::MySqlPool;
 use repository::ResetScore;
 use warp::filters::BoxedFilter;
+use warp::http::StatusCode;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
 
