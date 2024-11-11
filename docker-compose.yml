@@ -3,8 +3,8 @@ services:
     build: ./docker/builder/
     container_name: app
     ports:
-      - "80:8000"
-      - "443:4431"
+      - "8000:8000"
+      - "4431:4431"
     volumes:
       # - ~/.aws/:/root/.aws/ro
       - ./:/app
