@@ -1,6 +1,7 @@
 use crate::models::DieselResult;
 use crate::schema::*;
 use crate::MySqlPooledConnection;
+use diesel::prelude::*;
 
 #[derive(Debug, Clone, Queryable, Insertable)]
 #[diesel(table_name = songs)]

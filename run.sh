@@ -12,5 +12,5 @@ docker-compose up -d
 
 echo "If need, run migration."
 #migrate
-docker-compose run diesel diesel migration run
+docker-compose run app diesel migration run
 

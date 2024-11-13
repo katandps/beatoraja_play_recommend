@@ -1,20 +1,22 @@
-pub use diesel::prelude::*;
+// @generated automatically by Diesel CLI.
 
-table! {
+diesel::table! {
     admins (id) {
         id -> Integer,
         user_id -> Integer,
     }
 }
 
-table! {
+diesel::table! {
     hashes (sha256) {
+        #[max_length = 64]
         sha256 -> Char,
+        #[max_length = 32]
         md5 -> Char,
     }
 }
 
-table! {
+diesel::table! {
     player_stats (id) {
         id -> Integer,
         user_id -> Integer,
@@ -37,20 +39,46 @@ table! {
     }
 }
 
-table! {
+diesel::table! {
     rename_logs (id) {
         id -> Integer,
         user_id -> Integer,
+        #[max_length = 255]
         old_name -> Varchar,
+        #[max_length = 255]
         new_name -> Varchar,
         date -> Datetime,
     }
 }
 
-table! {
+diesel::table! {
+    score_snaps (id) {
+        id -> Integer,
+        user_id -> Integer,
+        #[max_length = 64]
+        sha256 -> Char,
+        mode -> Integer,
+        date -> Datetime,
+        clear -> Integer,
+        score -> Integer,
+        combo -> Integer,
+        min_bp -> Integer,
+    }
+}
+
+diesel::table! {
+    score_upload_logs (id) {
+        id -> Integer,
+        user_id -> Integer,
+        date -> Datetime,
+    }
+}
+
+diesel::table! {
     scores (id) {
         id -> Integer,
         user_id -> Integer,
+        #[max_length = 64]
         sha256 -> Char,
         mode -> Integer,
         clear -> Integer,
@@ -74,26 +102,17 @@ table! {
     }
 }
 
-table! {
-    score_snaps (id) {
-        id -> Integer,
-        user_id -> Integer,
-        sha256 -> Char,
-        mode -> Integer,
-        date -> Datetime,
-        clear -> Integer,
-        score -> Integer,
-        combo -> Integer,
-        min_bp -> Integer,
-    }
-}
-
-table! {
+diesel::table! {
     songs (sha256) {
+        #[max_length = 64]
         sha256 -> Char,
+        #[max_length = 255]
         title -> Varchar,
+        #[max_length = 255]
         subtitle -> Varchar,
+        #[max_length = 255]
         artist -> Varchar,
+        #[max_length = 255]
         sub_artist -> Varchar,
         notes -> Integer,
         length -> Integer,
@@ -101,17 +120,7 @@ table! {
     }
 }
 
-table! {
-    users (id) {
-        id -> Integer,
-        google_id -> Varchar,
-        gmail_address -> Varchar,
-        name -> Varchar,
-        registered_date -> Datetime,
-    }
-}
-
-table! {
+diesel::table! {
     user_statuses (id) {
         id -> Integer,
         user_id -> Integer,
@@ -120,23 +129,37 @@ table! {
     }
 }
 
-joinable!(admins -> users (user_id));
-joinable!(player_stats -> users (user_id));
-joinable!(score_snaps -> hashes (sha256));
-joinable!(score_snaps -> users (user_id));
-joinable!(scores -> hashes (sha256));
-joinable!(scores -> users (user_id));
-joinable!(songs -> hashes (sha256));
-joinable!(user_statuses -> users (user_id));
+diesel::table! {
+    users (id) {
+        id -> Integer,
+        #[max_length = 64]
+        google_id -> Varchar,
+        #[max_length = 255]
+        gmail_address -> Varchar,
+        #[max_length = 255]
+        name -> Varchar,
+        registered_date -> Datetime,
+    }
+}
 
-allow_tables_to_appear_in_same_query!(
+diesel::joinable!(admins -> users (user_id));
+diesel::joinable!(player_stats -> users (user_id));
+diesel::joinable!(score_snaps -> hashes (sha256));
+diesel::joinable!(score_snaps -> users (user_id));
+diesel::joinable!(scores -> hashes (sha256));
+diesel::joinable!(scores -> users (user_id));
+diesel::joinable!(songs -> hashes (sha256));
+diesel::joinable!(user_statuses -> users (user_id));
+
+diesel::allow_tables_to_appear_in_same_query!(
     admins,
     hashes,
     player_stats,
     rename_logs,
-    scores,
     score_snaps,
+    score_upload_logs,
+    scores,
     songs,
-    users,
     user_statuses,
+    users,
 );

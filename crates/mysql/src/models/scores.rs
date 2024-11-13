@@ -2,6 +2,7 @@ use crate::models::{DieselResult, User};
 use crate::schema::*;
 use crate::MySqlPooledConnection;
 use chrono::NaiveDateTime;
+use diesel::prelude::*;
 use model::{
     ClearCount, ClearType, HashSha256, Judge, MaxCombo, MinBP, PlayCount, PlayMode, ScoreId,
     SnapShots, UpdatedAt,

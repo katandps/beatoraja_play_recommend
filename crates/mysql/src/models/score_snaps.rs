@@ -2,6 +2,7 @@ use crate::models::{CanGetHash, DieselResult, User};
 use crate::schema::*;
 use crate::MySqlPooledConnection;
 use chrono::NaiveDateTime;
+use diesel::prelude::*;
 use model::{HashSha256, PlayMode, ScoreId};
 use std::str::FromStr;
 

@@ -2,7 +2,7 @@ use crate::models::DieselResult;
 use crate::schema::*;
 use crate::MySqlPooledConnection;
 use chrono::{NaiveDateTime, Utc};
-use diesel::Identifiable;
+use diesel::prelude::*;
 use model::*;
 use oauth_google::GoogleProfile;
 

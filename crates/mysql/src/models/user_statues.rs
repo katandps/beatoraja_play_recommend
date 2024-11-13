@@ -2,6 +2,7 @@ use crate::models::{DieselResult, User};
 use crate::schema::*;
 use crate::MySqlPooledConnection;
 use chrono::NaiveDateTime;
+use diesel::prelude::*;
 
 #[derive(Debug, Clone, Queryable)]
 pub struct UserStatus {

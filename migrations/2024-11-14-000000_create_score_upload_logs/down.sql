@@ -1,0 +1,1 @@
+drop table score_upload_logs;
