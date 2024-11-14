@@ -2,18 +2,18 @@
 name = "oauth_google"
 version = "0.1.0"
 authors = ["katand <katandps@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-serde = { version = "1.0.137", features = ["derive"] }
-serde_json = "1.0.81"
+serde = { version = "1.0.215", features = ["derive"] }
+serde_json = "1.0.132"
 
 envy = "0.4.2"
 
 reqwest = { version = "0.12.9", features = ["json"] }
 base64 = "0.22.1"
-anyhow = "1.0.75"
+anyhow = "1.0.93"
 thiserror = "2.0.2"
-log = "0.4.16"
+log = "0.4.22"

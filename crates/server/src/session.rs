@@ -22,9 +22,9 @@ pub fn save_user_id(user_id: GoogleId) -> Result<String> {
     Ok(key)
 }
 
-pub fn remove_session(key: &str) -> Result<(), HandleError> {
+pub fn remove_session(key: &str) -> Result<()> {
     let mut redis_connection = get_client()?;
-    let _ = redis_connection.del(key)?;
+    redis_connection.del(key)?;
     Ok(())
 }
 

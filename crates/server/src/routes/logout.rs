@@ -1,3 +1,4 @@
+use crate::error::HandleError;
 use crate::filter::receive_session_key;
 use warp::filters::BoxedFilter;
 use warp::http::StatusCode;
@@ -13,6 +14,6 @@ pub fn route() -> BoxedFilter<(impl Reply,)> {
 }
 
 async fn logout_handler(session_key: String) -> Result<impl Reply, Rejection> {
-    crate::session::remove_session(&session_key)?;
+    crate::session::remove_session(&session_key).map_err(|e| HandleError::OtherError(e))?;
     Ok(StatusCode::OK)
 }

@@ -9,3 +9,4 @@ members = [
     "crates/oauth_google",
     "crates/repository",
 ]
+resolver = "2"

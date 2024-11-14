@@ -2,7 +2,7 @@
 name = "mysql"
 version = "0.1.0"
 authors = ["katand <katandps@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -10,14 +10,14 @@ edition = "2018"
 diesel = { version = "2.2.4", features = ["mysql", "chrono", "r2d2"] }
 diesel-async = "0.5.1"
 r2d2 = "0.8.10"
-serde = { version = "1.0.137", features = ["derive"] }
-log = "0.4.16"
+serde = { version = "1.0.215", features = ["derive"] }
+log = "0.4.22"
 
 #エラー処理
-anyhow = "1.0.75"
-thiserror = "1.0.31"
+anyhow = "1.0.93"
+thiserror = "2.0.3"
 
-chrono = "0.4.26"
+chrono = "0.4.38"
 envy = "0.4.2"
 
 model = { path = "../model" }
