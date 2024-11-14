@@ -8,6 +8,8 @@ services:
     volumes:
       # - ~/.aws/:/root/.aws/ro
       - ./:/app
+    environment:
+      - CARGO_BUILD_TARGET_DIR=/tmp/target
     env_file:
       - .env
     restart: always
