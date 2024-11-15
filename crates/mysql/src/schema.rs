@@ -146,6 +146,7 @@ diesel::joinable!(admins -> users (user_id));
 diesel::joinable!(player_stats -> users (user_id));
 diesel::joinable!(score_snaps -> hashes (sha256));
 diesel::joinable!(score_snaps -> users (user_id));
+diesel::joinable!(score_upload_logs -> users (user_id));
 diesel::joinable!(scores -> hashes (sha256));
 diesel::joinable!(scores -> users (user_id));
 diesel::joinable!(songs -> hashes (sha256));
