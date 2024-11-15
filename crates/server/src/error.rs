@@ -100,12 +100,6 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
     Ok(warp::reply::with_status(json, code))
 }
 
-impl HandleError {
-    pub fn rejection(self) -> Rejection {
-        warp::reject::custom(self)
-    }
-}
-
 impl warp::reject::Reject for HandleError {}
 
 impl From<anyhow::Error> for HandleError {
