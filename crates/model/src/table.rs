@@ -1,8 +1,7 @@
 mod chart;
 mod charts;
-mod prelude;
 
-pub use prelude::*;
+pub use {chart::Chart, charts::Charts};
 
 use crate::*;
 
