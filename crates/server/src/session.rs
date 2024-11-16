@@ -24,7 +24,7 @@ pub fn save_user_id(user_id: GoogleId) -> Result<String> {
 
 pub fn remove_session(key: &str) -> Result<()> {
     let mut redis_connection = get_client()?;
-    redis_connection.del(key)?;
+    let _: () = redis_connection.del(key)?;
     Ok(())
 }
 
