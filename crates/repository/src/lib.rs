@@ -1,8 +1,8 @@
 #![allow(async_fn_in_trait)]
 use anyhow::Result;
 use model::{
-    Account, GoogleId, HashSha256, PlayerStats, RankedScore, Score, ScoreId, Scores, Songs,
-    VisibleAccount,
+    Account, GoogleId, HashSha256, PlayerStats, RankedScore, Score, ScoreId, ScoreUpload, Scores,
+    Songs, VisibleAccount,
 };
 
 pub trait PublishedUsers {
@@ -47,6 +47,10 @@ pub trait ChangeAccountVisibility {
 
 pub trait AllSongData {
     async fn song_data(&mut self) -> Result<Songs>;
+}
+
+pub trait RegisterUpload {
+    async fn register(&mut self) -> Result<ScoreUpload>;
 }
 
 pub trait SaveSongData {
