@@ -17,7 +17,7 @@ impl ScoreUpload {
 }
 
 #[derive(Clone, Debug, Serialize)]
-pub struct UploadId(usize);
+pub struct UploadId(pub i32);
 
 #[derive(Clone, Debug, Serialize)]
-pub struct UploadAt(NaiveDateTime);
+pub struct UploadAt(pub NaiveDateTime);

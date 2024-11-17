@@ -453,13 +453,14 @@ impl ScoresByAccount for MySQLClient {
             record
                 .into_iter()
                 .filter_map(|row| {
-                    if let Ok(sha256) = row.sha256.parse() {
-                        let score_id = ScoreId::new(sha256, PlayMode::from(row.mode));
-                        let log = score_log.get(&score_id).cloned().unwrap_or_default();
-                        Some((score_id, row.to_score().with_log(log)))
-                    } else {
-                        None
-                    }
+                    row.sha256
+                        .parse()
+                        .map(|sha256| {
+                            let score_id = ScoreId::new(sha256, PlayMode::from(row.mode));
+                            let log = score_log.get(&score_id).cloned().unwrap_or_default();
+                            (score_id, row.to_score().with_log(log))
+                        })
+                        .ok()
                 })
                 .collect::<HashMap<ScoreId, Score>>(),
         ))
@@ -543,5 +544,48 @@ impl ResetScore for MySQLClient {
             account.user_id.get()
         );
         Ok(())
+    }
+}
+
+impl RegisterUpload for MySQLClient {
+    async fn register(
+        &mut self,
+        user_id: UserId,
+        upload_at: UploadAt,
+    ) -> Result<model::ScoreUpload> {
+        let record = models::ScoreUpload::by_user_id_and_date(
+            &mut self.connection,
+            user_id.get(),
+            &upload_at.0,
+        );
+        match record {
+            Ok(record) => {
+                log::info!(
+                    "already registered score: {}: {}",
+                    user_id.get(),
+                    upload_at.0
+                );
+                Ok(model::ScoreUpload::new(
+                    UploadId(record.id),
+                    UploadAt(record.date),
+                ))
+            }
+            Err(_) => {
+                use crate::schema::score_upload_logs;
+                log::info!("register new scores: {}: {}", user_id.get(), upload_at.0);
+                diesel::insert_into(score_upload_logs::table)
+                    .values(models::RegisteringScoreLog::new(user_id, upload_at.clone()))
+                    .execute(&mut self.connection)?;
+                let record = models::ScoreUpload::by_user_id_and_date(
+                    &mut self.connection,
+                    user_id.get(),
+                    &upload_at.0,
+                )?;
+                Ok(model::ScoreUpload::new(
+                    UploadId(record.id),
+                    UploadAt(record.date),
+                ))
+            }
+        }
     }
 }

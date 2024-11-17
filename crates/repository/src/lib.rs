@@ -2,7 +2,7 @@
 use anyhow::Result;
 use model::{
     Account, GoogleId, HashSha256, PlayerStats, RankedScore, Score, ScoreId, ScoreUpload, Scores,
-    Songs, VisibleAccount,
+    Songs, UploadAt, UserId, VisibleAccount,
 };
 
 pub trait PublishedUsers {
@@ -50,7 +50,7 @@ pub trait AllSongData {
 }
 
 pub trait RegisterUpload {
-    async fn register(&mut self) -> Result<ScoreUpload>;
+    async fn register(&mut self, user_id: UserId, upload_at: UploadAt) -> Result<ScoreUpload>;
 }
 
 pub trait SaveSongData {
