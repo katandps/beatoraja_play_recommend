@@ -31,7 +31,7 @@ impl UpdatedAt {
     }
 
     pub fn naive_datetime(&self) -> NaiveDateTime {
-        self.0.naive_local()
+        self.0.naive_utc()
     }
 
     pub fn from_naive_datetime(time: NaiveDateTime) -> Self {

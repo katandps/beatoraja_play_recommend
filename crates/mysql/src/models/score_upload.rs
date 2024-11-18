@@ -37,7 +37,7 @@ impl RegisteringScoreLog {
     pub fn new(user_id: UserId, upload_at: UploadAt) -> RegisteringScoreLog {
         RegisteringScoreLog {
             user_id: user_id.get(),
-            date: upload_at.0,
+            date: upload_at.0.naive_utc(),
         }
     }
 }

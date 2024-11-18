@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use serde::Serialize;
 
 #[derive(Clone, Debug, Serialize)]
@@ -20,4 +20,4 @@ impl ScoreUpload {
 pub struct UploadId(pub i32);
 
 #[derive(Clone, Debug, Serialize)]
-pub struct UploadAt(pub NaiveDateTime);
+pub struct UploadAt(pub DateTime<Utc>);

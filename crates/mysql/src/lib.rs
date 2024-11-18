@@ -217,7 +217,12 @@ impl AllSongData for MySQLClient {
 }
 
 impl SaveScoreData for MySQLClient {
-    async fn save_score(&mut self, account: &Account, score: &Scores) -> Result<()> {
+    async fn save_score(
+        &mut self,
+        account: &Account,
+        score: &Scores,
+        upload: ScoreUpload,
+    ) -> Result<()> {
         let user = User::by_account(&mut self.connection, account)?;
         let user_id = user.id;
         let saved_song = self.saved_song(user_id)?;
@@ -366,7 +371,12 @@ impl SaveSongData for MySQLClient {
 }
 
 impl SavePlayerStateData for MySQLClient {
-    async fn save_player_states(&mut self, account: &Account, stats: &PlayerStats) -> Result<()> {
+    async fn save_player_states(
+        &mut self,
+        account: &Account,
+        stats: &PlayerStats,
+        upload: ScoreUpload,
+    ) -> Result<()> {
         let user = User::by_account(&mut self.connection, account)?;
 
         let saved = models::PlayerStat::by_user_id(&mut self.connection, user.id)?
@@ -548,7 +558,7 @@ impl ResetScore for MySQLClient {
 }
 
 impl RegisterUpload for MySQLClient {
-    async fn register(
+    async fn register_upload(
         &mut self,
         user_id: UserId,
         upload_at: UploadAt,
@@ -556,7 +566,7 @@ impl RegisterUpload for MySQLClient {
         let record = models::ScoreUpload::by_user_id_and_date(
             &mut self.connection,
             user_id.get(),
-            &upload_at.0,
+            &upload_at.0.naive_utc(),
         );
         match record {
             Ok(record) => {
@@ -567,7 +577,7 @@ impl RegisterUpload for MySQLClient {
                 );
                 Ok(model::ScoreUpload::new(
                     UploadId(record.id),
-                    UploadAt(record.date),
+                    UploadAt(record.date.and_utc()),
                 ))
             }
             Err(_) => {
@@ -579,11 +589,11 @@ impl RegisterUpload for MySQLClient {
                 let record = models::ScoreUpload::by_user_id_and_date(
                     &mut self.connection,
                     user_id.get(),
-                    &upload_at.0,
+                    &upload_at.0.naive_utc(),
                 )?;
                 Ok(model::ScoreUpload::new(
                     UploadId(record.id),
-                    UploadAt(record.date),
+                    UploadAt(record.date.and_utc()),
                 ))
             }
         }
