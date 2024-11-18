@@ -1,0 +1,1 @@
+alter table scores column score_upload_log_id;

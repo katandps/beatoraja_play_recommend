@@ -63,6 +63,7 @@ diesel::table! {
         score -> Integer,
         combo -> Integer,
         min_bp -> Integer,
+        score_upload_log_id -> Nullable<Integer>,
     }
 }
 
@@ -99,6 +100,7 @@ diesel::table! {
         play_count -> Integer,
         clear_count -> Integer,
         date -> Datetime,
+        score_upload_log_id -> Nullable<Integer>,
     }
 }
 
