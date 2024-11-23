@@ -477,7 +477,7 @@ impl ScoresByAccount for MySQLClient {
                         .parse()
                         .map(|sha256| {
                             let score_id = ScoreId::new(sha256, PlayMode::from(row.mode));
-                            let log = score_log.get(&score_id).cloned().unwrap_or_default();
+                            let log = score_log.remove(&score_id).unwrap_or_default();
                             (score_id, row.to_score().with_log(log))
                         })
                         .ok()
@@ -530,7 +530,7 @@ impl ScoresBySha256 for MySQLClient {
                 .into_iter()
                 .map(|row| {
                     let user_id = UserId::new(row.user_id);
-                    let log = score_log.get(&user_id).cloned().unwrap_or_default();
+                    let log = score_log.remove(&user_id).unwrap_or_default();
                     (user_id, row.to_score().with_log(log))
                 })
                 .collect::<HashMap<UserId, Score>>(),
