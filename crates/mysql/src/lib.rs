@@ -468,7 +468,7 @@ impl ScoresByAccount for MySQLClient {
     async fn score(&mut self, account: &Account) -> Result<Scores> {
         let user = User::by_account(&mut self.connection, account)?;
         let record = models::Score::by_user_id(&mut self.connection, user.id)?;
-        let score_log = self.score_log(account)?;
+        let mut score_log = self.score_log(account)?;
         Ok(Scores::create_by_map(
             record
                 .into_iter()
@@ -524,7 +524,7 @@ impl ScoreByAccountAndSha256 for MySQLClient {
 impl ScoresBySha256 for MySQLClient {
     async fn score(&mut self, hash: &HashSha256) -> Result<RankedScore> {
         let record = models::Score::by_sha256(&mut self.connection, &hash.to_string())?;
-        let score_log = self.score_log_by_sha256(hash)?;
+        let mut score_log = self.score_log_by_sha256(hash)?;
         Ok(RankedScore::create_by_map(
             record
                 .into_iter()
