@@ -5,7 +5,7 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use model::{
     ClearCount, ClearType, HashSha256, Judge, MaxCombo, MinBP, PlayCount, PlayMode, ScoreId,
-    SnapShots, UpdatedAt,
+    SnapShots, UpdatedAt, UploadId,
 };
 use std::str::FromStr;
 
@@ -34,6 +34,7 @@ pub struct Score {
     pub play_count: i32,
     pub clear_count: i32,
     pub date: NaiveDateTime,
+    pub score_upload_log_id: Option<i32>,
 }
 
 impl Score {
@@ -75,7 +76,13 @@ impl Score {
             .load(connection)
     }
 
-    pub fn from_score(saved: &Self, score: &model::Score, user_id: i32, song_id: &ScoreId) -> Self {
+    pub fn from_score(
+        saved: &Self,
+        score: &model::Score,
+        user_id: i32,
+        song_id: &ScoreId,
+        score_upload_log_id: &UploadId,
+    ) -> Self {
         Self {
             id: saved.id,
             user_id,
@@ -98,6 +105,7 @@ impl Score {
             min_bp: score.min_bp.0,
             play_count: score.play_count.0,
             clear_count: 0,
+            score_upload_log_id: Some(score_upload_log_id.0),
             date: score.updated_at.naive_datetime(),
         }
     }
@@ -168,10 +176,16 @@ pub struct RegisteredScore {
     pub play_count: i32,
     pub clear_count: i32,
     pub date: NaiveDateTime,
+    pub score_upload_log_id: Option<i32>,
 }
 
 impl RegisteredScore {
-    pub fn from_score(user_id: i32, score: &model::Score, song_id: &ScoreId) -> Self {
+    pub fn from_score(
+        user_id: i32,
+        score: &model::Score,
+        song_id: &ScoreId,
+        upload_id: &UploadId,
+    ) -> Self {
         RegisteredScore {
             user_id,
             sha256: song_id.sha256().to_string(),
@@ -194,6 +208,7 @@ impl RegisteredScore {
             play_count: score.play_count.0,
             clear_count: 0,
             date: score.updated_at.naive_datetime(),
+            score_upload_log_id: Some(upload_id.0),
         }
     }
 }

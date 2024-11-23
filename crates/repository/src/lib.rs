@@ -50,7 +50,11 @@ pub trait AllSongData {
 }
 
 pub trait RegisterUpload {
-    async fn register(&mut self, user_id: UserId, upload_at: UploadAt) -> Result<ScoreUpload>;
+    async fn register_upload(
+        &mut self,
+        user_id: UserId,
+        upload_at: UploadAt,
+    ) -> Result<ScoreUpload>;
 }
 
 pub trait SaveSongData {
@@ -58,11 +62,21 @@ pub trait SaveSongData {
 }
 
 pub trait SaveScoreData {
-    async fn save_score(&mut self, account: &Account, score: &Scores) -> Result<()>;
+    async fn save_score(
+        &mut self,
+        account: &Account,
+        score: &Scores,
+        upload: &ScoreUpload,
+    ) -> Result<()>;
 }
 
 pub trait SavePlayerStateData {
-    async fn save_player_states(&mut self, account: &Account, states: &PlayerStats) -> Result<()>;
+    async fn save_player_states(
+        &mut self,
+        account: &Account,
+        states: &PlayerStats,
+        upload: &ScoreUpload,
+    ) -> Result<()>;
 }
 
 pub trait ResetScore {

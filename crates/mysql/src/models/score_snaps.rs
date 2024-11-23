@@ -18,6 +18,7 @@ pub struct ScoreSnap {
     pub score: i32,
     pub combo: i32,
     pub min_bp: i32,
+    pub score_upload_log_id: Option<i32>,
 }
 
 impl ScoreSnap {
@@ -78,6 +79,7 @@ pub struct ScoreSnapForUpdate {
     pub score: i32,
     pub combo: i32,
     pub min_bp: i32,
+    pub score_upload_log_id: Option<i32>,
 }
 
 impl CanGetHash for ScoreSnapForUpdate {

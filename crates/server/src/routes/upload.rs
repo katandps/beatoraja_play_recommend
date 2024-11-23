@@ -2,11 +2,13 @@ use crate::error::HandleError;
 use crate::filter::*;
 use crate::SongData;
 use bytes::Buf;
+use chrono::Utc;
 use futures::TryStreamExt;
 use model::*;
 use mysql::MySqlPool;
 use repository::{
-    AccountByGoogleId, AllSongData, SavePlayerStateData, SaveScoreData, SaveSongData,
+    AccountByGoogleId, AllSongData, RegisterUpload, SavePlayerStateData, SaveScoreData,
+    SaveSongData,
 };
 use sqlite::SqliteClient;
 use std::collections::HashMap;
@@ -42,7 +44,9 @@ pub fn song_data_upload_route(
         .boxed()
 }
 
-async fn play_data_upload_handler<C: SaveScoreData + SavePlayerStateData + AccountByGoogleId>(
+async fn play_data_upload_handler<
+    C: SaveScoreData + SavePlayerStateData + AccountByGoogleId + RegisterUpload,
+>(
     mut repository: C,
     form: FormData,
     account: Account,
@@ -63,15 +67,18 @@ async fn play_data_upload_handler<C: SaveScoreData + SavePlayerStateData + Accou
         score_db.path().to_str().unwrap(),
         scorelog_db.path().to_str().unwrap(),
     );
-
-    let scores = sqlite_client.score().map_err(HandleError::from)?;
-    repository
-        .save_score(&account, &scores)
+    let upload = repository
+        .register_upload(account.user_id, UploadAt(Utc::now()))
         .await
         .map_err(HandleError::from)?;
+    let scores = sqlite_client.score().map_err(HandleError::from)?;
     let player_states = sqlite_client.player().map_err(HandleError::from)?;
     repository
-        .save_player_states(&account, &player_states)
+        .save_score(&account, &scores, &upload)
+        .await
+        .map_err(HandleError::from)?;
+    repository
+        .save_player_states(&account, &player_states, &upload)
         .await
         .map_err(HandleError::from)?;
     Ok(StatusCode::OK)

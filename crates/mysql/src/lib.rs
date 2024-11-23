@@ -221,7 +221,7 @@ impl SaveScoreData for MySQLClient {
         &mut self,
         account: &Account,
         score: &Scores,
-        upload: ScoreUpload,
+        upload: &ScoreUpload,
     ) -> Result<()> {
         let user = User::by_account(&mut self.connection, account)?;
         let user_id = user.id;
@@ -241,12 +241,21 @@ impl SaveScoreData for MySQLClient {
             match saved_song.get(song_id) {
                 Some(saved) => {
                     if UpdatedAt::from_naive_datetime(saved.date) < score.updated_at {
-                        songs_for_update
-                            .push(models::Score::from_score(saved, score, user_id, song_id))
+                        songs_for_update.push(models::Score::from_score(
+                            saved,
+                            score,
+                            user_id,
+                            song_id,
+                            &upload.upload_id,
+                        ))
                     }
                 }
-                None => songs_for_insert
-                    .push(models::RegisteredScore::from_score(user_id, score, song_id)),
+                None => songs_for_insert.push(models::RegisteredScore::from_score(
+                    user_id,
+                    score,
+                    song_id,
+                    &upload.upload_id,
+                )),
             };
             for snapshot in &score.log.0 {
                 match saved_snap.get(&(song_id.clone(), snapshot.updated_at.naive_datetime())) {
@@ -260,6 +269,7 @@ impl SaveScoreData for MySQLClient {
                         score: snapshot.score.ex_score(),
                         combo: snapshot.max_combo.0,
                         min_bp: snapshot.min_bp.0,
+                        score_upload_log_id: Some(upload.upload_id.0),
                     }),
                 }
             }
@@ -375,7 +385,7 @@ impl SavePlayerStateData for MySQLClient {
         &mut self,
         account: &Account,
         stats: &PlayerStats,
-        upload: ScoreUpload,
+        upload: &ScoreUpload,
     ) -> Result<()> {
         let user = User::by_account(&mut self.connection, account)?;
 
