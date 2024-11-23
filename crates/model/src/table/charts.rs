@@ -57,9 +57,12 @@ impl Charts {
     pub fn pick_old_score_chart(&self, scores: &Scores, songs: &Songs) -> Vec<&Chart> {
         self.charts
             .iter()
-            .map(|c| {
-                let song = songs.song(c);
-                (scores.get(&song.song_id()).cloned().unwrap_or_default(), c)
+            .map(|chart| {
+                let score_id = songs
+                    .song(chart)
+                    .map(|song| song.song_id())
+                    .unwrap_or_else(|| ScoreId::default());
+                (scores.get(&score_id).cloned().unwrap_or_default(), chart)
             })
             .sorted_by(|a, b| a.0.updated_at.cmp(&b.0.updated_at))
             .map(|(_s, c)| c)

@@ -18,12 +18,12 @@ impl Converter {
         }
     }
 
-    pub fn get_md5(&self, sha256: &HashSha256) -> Option<HashMd5> {
-        self.sha256_to_md5.get(sha256).cloned()
+    pub fn get_md5(&self, sha256: &HashSha256) -> Option<&HashMd5> {
+        self.sha256_to_md5.get(sha256)
     }
 
-    pub fn get_sha256(&self, md5: &HashMd5) -> Option<HashSha256> {
-        self.md5_to_sha256.get(md5).cloned()
+    pub fn get_sha256(&self, md5: &HashMd5) -> Option<&HashSha256> {
+        self.md5_to_sha256.get(md5)
     }
 }
 
@@ -49,8 +49,8 @@ mod test {
 
         let obj = Builder::build(builder);
 
-        assert_eq!(obj.get_md5(&s1), Some(m1.clone()));
-        assert_eq!(obj.get_sha256(&m1), Some(s1.clone()));
+        assert_eq!(obj.get_md5(&s1), Some(&m1));
+        assert_eq!(obj.get_sha256(&m1), Some(&s1));
 
         assert_eq!(obj.get_md5(&s3), None);
         assert_eq!(obj.get_sha256(&m3), None);

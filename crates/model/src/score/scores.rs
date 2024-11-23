@@ -31,9 +31,12 @@ impl Scores {
             score: tables
                 .get_charts()
                 .filter_map(|chart| {
-                    let song = songs.song(chart);
-                    self.get(&song.song_id())
-                        .map(|s| (chart.md5(), s.make_detail(date)))
+                    let score_id = songs
+                        .song(chart)
+                        .map(|song| song.song_id())
+                        .unwrap_or_else(|| ScoreId::default());
+                    self.get(&score_id)
+                        .map(|score| (chart.md5(), score.make_detail(date)))
                 })
                 .collect(),
         }

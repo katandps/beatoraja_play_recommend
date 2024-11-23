@@ -2,7 +2,7 @@ use crate::*;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 
-#[derive(PartialEq, Eq, Hash, Clone, Debug, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ScoreId(HashSha256, PlayMode);
 
 impl ScoreId {
