@@ -7,10 +7,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-serde = { version = "1.0.215", features = ["derive"] }
-
 anyhow = "1.0.93"
-thiserror = "2.0.3"
 
 model = { path = "../model" }
-oauth_google = { path = "../oauth_google" }

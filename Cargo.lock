@@ -1378,8 +1378,6 @@ dependencies = [
  "num-derive",
  "num-traits",
  "serde",
- "serde_json",
- "thiserror 2.0.3",
 ]
 
 [[package]]
@@ -1848,9 +1846,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "model",
- "oauth_google",
- "serde",
- "thiserror 2.0.3",
 ]
 
 [[package]]
@@ -2098,7 +2093,6 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
- "thiserror 2.0.3",
  "tokio",
 ]
 
@@ -2151,10 +2145,8 @@ name = "server"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "base64 0.22.1",
  "bytes",
  "chrono",
- "diesel",
  "env_logger",
  "envy",
  "futures",
@@ -2162,12 +2154,10 @@ dependencies = [
  "model",
  "mysql",
  "oauth_google",
- "r2d2",
  "rand",
  "rand_chacha",
  "redis",
  "repository",
- "reqwest",
  "serde",
  "serde_json",
  "sqlite",
@@ -2260,7 +2250,6 @@ checksum = "6980e8d7511241f8acf4aebddbb1ff938df5eebe98691418c4468d0b72a96a67"
 name = "sqlite"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "diesel",
  "model",
  "thiserror 2.0.3",
@@ -2367,18 +2356,15 @@ name = "table"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "cssparser",
  "envy",
  "futures",
  "log",
  "model",
  "reqwest",
  "scraper",
- "selectors",
  "serde",
  "serde_json",
  "thiserror 2.0.3",
- "tokio",
  "url",
 ]
 
