@@ -53,7 +53,7 @@ impl Table {
         self.title.clone().into()
     }
 
-    pub fn get_charts(&self) -> Vec<&Chart> {
+    pub fn get_charts(&self) -> impl Iterator<Item = &Chart> {
         self.levels.get_charts()
     }
 
@@ -61,7 +61,7 @@ impl Table {
         self.symbol.0.clone()
     }
 
-    pub fn get_level_list(&self) -> Vec<String> {
+    pub fn get_level_list(&self) -> impl Iterator<Item = &str> {
         self.levels.get_list()
     }
 
@@ -98,15 +98,15 @@ impl TableLevels {
         Self { v }
     }
 
-    pub fn get_charts(&self) -> Vec<&Chart> {
-        self.v.iter().flat_map(|l| l.get_charts()).collect()
+    pub fn get_charts(&self) -> impl Iterator<Item = &Chart> {
+        self.v.iter().flat_map(|l| l.get_charts())
     }
 
-    pub fn get_list(&self) -> Vec<String> {
-        self.v.iter().map(|l| l.label.clone()).collect()
+    pub fn get_list(&self) -> impl Iterator<Item = &str> {
+        self.v.iter().map(|l| l.label.as_str())
     }
 
-    pub fn filter_score(&self, scores: &Scores, songs: &Songs) -> Vec<&Chart> {
+    pub fn filter_score<'a>(&'a self, scores: &Scores, songs: &Songs) -> Vec<&Chart> {
         self.v
             .iter()
             .flat_map(|l| l.pick_old_score_chart(scores, songs))
@@ -148,7 +148,11 @@ impl TableLevel {
         format!("{}{}", t.symbol(), self.label)
     }
 
-    pub fn pick_old_score_chart(&self, scores: &Scores, songs: &Songs) -> Vec<&Chart> {
+    pub fn pick_old_score_chart<'a>(
+        &'a self,
+        scores: &Scores,
+        songs: &Songs,
+    ) -> impl Iterator<Item = &'a Chart> {
         self.charts.pick_old_score_chart(scores, songs)
     }
 }
@@ -224,7 +228,7 @@ impl From<&Table> for CustomTableHeader {
             name: t.title.clone().into(),
             data_url: "score.json".to_string(),
             symbol: t.symbol.clone().into(),
-            level_order: t.get_level_list(),
+            level_order: t.get_level_list().map(|s| s.to_string()).collect(),
         }
     }
 }

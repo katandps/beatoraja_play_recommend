@@ -54,7 +54,11 @@ impl Charts {
         TableLevels::make(v)
     }
 
-    pub fn pick_old_score_chart(&self, scores: &Scores, songs: &Songs) -> Vec<&Chart> {
+    pub fn pick_old_score_chart<'a>(
+        &'a self,
+        scores: &Scores,
+        songs: &Songs,
+    ) -> impl Iterator<Item = &'a Chart> {
         self.charts
             .iter()
             .map(|chart| {
@@ -67,6 +71,5 @@ impl Charts {
             .sorted_by(|a, b| a.0.updated_at.cmp(&b.0.updated_at))
             .map(|(_s, c)| c)
             .take(3)
-            .collect()
     }
 }
