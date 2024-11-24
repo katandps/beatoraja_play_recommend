@@ -19,7 +19,7 @@ impl Scores {
     }
 
     pub fn table_scores<'a>(
-        &self,
+        mut self,
         tables: &'a Tables,
         songs: &'a Songs,
         date: &'a UpdatedAt,
@@ -35,7 +35,8 @@ impl Scores {
                         .song(chart)
                         .map(|song| song.song_id())
                         .unwrap_or_else(|| ScoreId::default());
-                    self.get(&score_id)
+                    self.0
+                        .remove(&score_id)
                         .map(|score| (chart.md5(), score.make_detail(date)))
                 })
                 .collect(),
