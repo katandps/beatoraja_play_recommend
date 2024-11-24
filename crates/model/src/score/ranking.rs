@@ -10,7 +10,7 @@ impl RankedScore {
     }
 
     pub fn for_response(
-        &self,
+        mut self,
         songs: &Songs,
         date: &UpdatedAt,
         sha256: &HashSha256,
@@ -22,7 +22,7 @@ impl RankedScore {
                 .iter()
                 .filter_map(|va| {
                     self.0
-                        .get(&va.id)
+                        .remove(&va.id)
                         .map(|score| (va.id, (va.name.clone(), score.make_detail(date))))
                 })
                 .collect(),

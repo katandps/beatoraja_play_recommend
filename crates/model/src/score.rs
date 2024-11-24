@@ -58,7 +58,7 @@ impl Score {
         self.log.param_snap::<T>(date)
     }
 
-    pub fn make_detail(&self, date: &UpdatedAt) -> ScoreDetail {
+    pub fn make_detail(self, date: &UpdatedAt) -> ScoreDetail {
         match self.snap(date) {
             Some(snap) => ScoreDetail {
                 clear_type: self.param_snap(date),
