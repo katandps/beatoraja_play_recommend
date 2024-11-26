@@ -19,7 +19,7 @@ impl UserStatus {
         use crate::schema::user_statuses::dsl::*;
         user_statuses
             .filter(visible.eq(true))
-            .inner_join(crate::schema::users::table)
+            .inner_join(users::table)
             .load(connection)
     }
 

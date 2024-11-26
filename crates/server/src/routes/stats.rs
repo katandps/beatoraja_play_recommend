@@ -6,7 +6,7 @@ use warp::filters::BoxedFilter;
 use warp::*;
 
 pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
-    warp::get()
+    get()
         .and(path!("stats" / i32))
         .and(with_db(db_pool))
         .and_then(stats_handler)

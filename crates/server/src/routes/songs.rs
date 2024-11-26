@@ -13,10 +13,7 @@ pub fn route(tables: &TableData, songs: &SongData) -> BoxedFilter<(impl Reply,)>
         .boxed()
 }
 
-async fn songs_handler(
-    tables: TableData,
-    song_data: SongData,
-) -> std::result::Result<impl Reply, Rejection> {
+async fn songs_handler(tables: TableData, song_data: SongData) -> Result<impl Reply, Rejection> {
     let tables = tables.lock().await;
     let songs = song_data.lock().await;
     Ok(serde_json::to_string(&songs.song.get_list(tables.get_charts())).unwrap())

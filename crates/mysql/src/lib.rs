@@ -330,7 +330,7 @@ impl SaveSongData for MySQLClient {
         }
         let new_hashes = hashmap
             .iter()
-            .map(|(sha256, md5)| models::Hash {
+            .map(|(sha256, md5)| Hash {
                 sha256: sha256.to_string(),
                 md5: md5.to_string(),
             })
@@ -557,7 +557,7 @@ impl ResetScore for MySQLClient {
         let user = User::by_account(&mut self.connection, account)?;
         models::Score::delete_by_user(&mut self.connection, &user)?;
         models::ScoreSnap::delete_by_user(&mut self.connection, &user)?;
-        models::UserStatus::delete_by_user(&mut self.connection, &user)?;
+        UserStatus::delete_by_user(&mut self.connection, &user)?;
         models::PlayerStat::delete_by_user(&mut self.connection, &user)?;
         log::info!(
             "Score data is removed: account id = {}",
@@ -572,7 +572,7 @@ impl RegisterUpload for MySQLClient {
         &mut self,
         user_id: UserId,
         upload_at: UploadAt,
-    ) -> Result<model::ScoreUpload> {
+    ) -> Result<ScoreUpload> {
         let record = models::ScoreUpload::by_user_id_and_date(
             &mut self.connection,
             user_id.get(),
@@ -585,7 +585,7 @@ impl RegisterUpload for MySQLClient {
                     user_id.get(),
                     upload_at.0
                 );
-                Ok(model::ScoreUpload::new(
+                Ok(ScoreUpload::new(
                     UploadId(record.id),
                     UploadAt(record.date.and_utc()),
                 ))
@@ -601,7 +601,7 @@ impl RegisterUpload for MySQLClient {
                     user_id.get(),
                     &upload_at.0.naive_utc(),
                 )?;
-                Ok(model::ScoreUpload::new(
+                Ok(ScoreUpload::new(
                     UploadId(record.id),
                     UploadAt(record.date.and_utc()),
                 ))

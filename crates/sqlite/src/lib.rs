@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate diesel;
 mod schema;
 
 use diesel::prelude::*;
@@ -5,9 +7,6 @@ use model::*;
 use std::collections::HashMap;
 use std::str::FromStr;
 use thiserror::Error;
-
-#[macro_use]
-extern crate diesel;
 
 pub struct SqliteClient {
     scorelog_db_url: String,
@@ -160,12 +159,12 @@ pub type SqliteResult<T> = Result<T, SqliteError>;
 #[derive(Debug, Error)]
 pub enum SqliteError {
     #[error("ConnectionError {0:?}")]
-    ConnectionError(diesel::ConnectionError),
+    ConnectionError(ConnectionError),
     #[error("DieselResultError {0:?}")]
     DieselResultError(diesel::result::Error),
 }
 
-impl From<diesel::ConnectionError> for SqliteError {
+impl From<ConnectionError> for SqliteError {
     fn from(e: ConnectionError) -> Self {
         SqliteError::ConnectionError(e)
     }

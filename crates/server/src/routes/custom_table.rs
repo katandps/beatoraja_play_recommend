@@ -84,5 +84,7 @@ async fn body<C: AccountByUserId + ScoresByAccount>(
     let account = repos.user(user_id).await?;
     let score = repos.score(&account).await?;
     let songs = song_data.lock().await;
-    Ok(serde_json::to_string(&table.filter_score(&score, &songs.song)).unwrap())
+    Ok(serde_json::to_string(
+        &table.filter_score(&score, &songs.song),
+    )?)
 }

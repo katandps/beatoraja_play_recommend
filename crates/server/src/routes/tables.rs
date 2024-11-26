@@ -13,7 +13,7 @@ pub fn route(tables: &TableData) -> BoxedFilter<(impl Reply,)> {
         .boxed()
 }
 
-async fn table_handler(tables: TableData) -> std::result::Result<impl Reply, Rejection> {
+async fn table_handler(tables: TableData) -> Result<impl Reply, Rejection> {
     let tables = tables.lock().await;
     Ok(serde_json::to_string(&TablesFormat::format(&tables)).unwrap())
 }

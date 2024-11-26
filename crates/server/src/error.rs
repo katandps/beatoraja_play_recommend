@@ -60,7 +60,7 @@ struct ErrorResponse {
     error: String,
 }
 
-pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply, Infallible> {
+pub async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
     let (code, message): (StatusCode, String) = if err.is_not_found() {
         (StatusCode::NOT_FOUND, "Not Found".into())
     } else if let Some(e) = err.find::<HandleError>() {

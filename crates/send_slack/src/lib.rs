@@ -8,9 +8,9 @@ pub fn send(channel: String, title: String, content: String) -> anyhow::Result<S
     use reqwest::blocking::multipart::Form;
     use reqwest::blocking::Client;
 
-    let mut f = fs::File::create("buf.txt").unwrap();
-    f.write_all(content.as_bytes()).unwrap();
-    let form = Form::new().file("file", "buf.txt").unwrap();
+    let mut f = fs::File::create("buf.txt")?;
+    f.write_all(content.as_bytes())?;
+    let form = Form::new().file("file", "buf.txt")?;
     let res = Client::new()
         .post("https://slack.com/api/files.upload")
         .multipart(form)
@@ -25,7 +25,7 @@ pub fn send(channel: String, title: String, content: String) -> anyhow::Result<S
     match res.text() {
         Err(e) => Ok(format!("アップロード失敗:{:?}", e)),
         Ok(result) => {
-            let v: Value = serde_json::from_str(result.as_str()).unwrap();
+            let v: Value = serde_json::from_str(result.as_str())?;
 
             match v["ok"].as_bool() {
                 Some(true) => Ok("アップロード完了".to_string()),
@@ -60,7 +60,7 @@ pub async fn send_async(content: String) -> anyhow::Result<String> {
         .await?
         .text()
         .await?;
-    let v: Value = serde_json::from_str(res.as_str()).unwrap();
+    let v: Value = serde_json::from_str(res.as_str())?;
 
     match v["ok"].as_bool() {
         Some(true) => Ok("アップロード完了".to_string()),
@@ -74,7 +74,7 @@ mod tests {
     use super::*;
     #[test]
     fn it_works() {
-        log::info! {"{}",send("テスト用".into(),"タイトル".into(), "内容内容内容".into()).unwrap()};
+        log::info! {"{}",send("テスト用".into(),"タイトル".into(), "内容内容内容".into()).unwrap()}
     }
 
     #[tokio::test]

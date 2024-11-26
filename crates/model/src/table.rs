@@ -120,12 +120,13 @@ pub enum LevelVariant {
     Number(i64),
 }
 
-impl ToString for LevelVariant {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for LevelVariant {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             Self::Str(s) => s.clone(),
             Self::Number(i) => i.to_string(),
-        }
+        };
+        write!(f, "{}", str)
     }
 }
 
@@ -162,6 +163,7 @@ use itertools::Itertools;
 /// name: 難易度表名
 /// levels: HashMap<レベル名, 曲のHashMd5>
 use std::collections::HashMap;
+use std::fmt::Display;
 
 #[derive(Serialize)]
 pub struct TableFormat {

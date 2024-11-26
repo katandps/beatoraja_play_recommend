@@ -60,7 +60,7 @@ impl ScoreSnap {
         score_snaps.filter(sha256.eq(query_hash)).load(connection)
     }
 
-    pub fn get_score_id(&self) -> model::ScoreId {
+    pub fn get_score_id(&self) -> ScoreId {
         ScoreId::new(
             HashSha256::from_str(&self.sha256).unwrap(),
             PlayMode::from(self.mode),

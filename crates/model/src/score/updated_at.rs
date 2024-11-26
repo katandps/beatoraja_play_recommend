@@ -35,7 +35,7 @@ impl UpdatedAt {
     }
 
     pub fn from_naive_datetime(time: NaiveDateTime) -> Self {
-        Self::from_timestamp((time).and_utc().timestamp())
+        Self::from_timestamp(time.and_utc().timestamp())
     }
 }
 

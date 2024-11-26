@@ -14,9 +14,7 @@ pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
         .boxed()
 }
 
-async fn health_handler<C: HealthCheck>(
-    mut client: C,
-) -> std::result::Result<impl Reply, Rejection> {
+async fn health_handler<C: HealthCheck>(mut client: C) -> Result<impl Reply, Rejection> {
     match client.health().await {
         Ok(_) => Ok(StatusCode::OK),
         Err(_) => Ok(StatusCode::INTERNAL_SERVER_ERROR),

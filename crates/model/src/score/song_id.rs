@@ -30,10 +30,7 @@ impl PlayMode {
 
 impl From<i32> for PlayMode {
     fn from(mode: i32) -> Self {
-        let lm = match FromPrimitive::from_i32(mode % 10) {
-            Some(lm) => lm,
-            None => LnMode::Long,
-        };
+        let lm = FromPrimitive::from_i32(mode % 10).unwrap_or_else(|| LnMode::Long);
 
         PlayMode(lm)
     }

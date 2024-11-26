@@ -54,7 +54,7 @@ async fn token_request(body: HashMap<&str, String>) -> Result<Map<String, Value>
         .map_err(Error::ReqwestError)?;
     let body = res.text().await.map_err(Error::ReqwestError)?;
 
-    let json: serde_json::Value = serde_json::from_str(&body).map_err(Error::SerdeJsonError)?;
+    let json: Value = serde_json::from_str(&body).map_err(Error::SerdeJsonError)?;
     Ok(json.as_object().unwrap().clone())
 }
 
@@ -79,7 +79,7 @@ fn get_payload(obj: &Map<String, Value>) -> Result<Map<String, Value>, Error> {
         engine::GeneralPurpose::new(&alphabet::URL_SAFE, engine::general_purpose::NO_PAD);
     let payload_string = read::DecoderReader::new(encoded_payload.as_bytes(), &base64_engine);
     // .map_err(|_| Error::GoogleResponseIsInvalid("payload is not encoded in base64".into()))?;
-    let payload_json: serde_json::Value =
+    let payload_json: Value =
         serde_json::from_reader(payload_string).map_err(Error::SerdeJsonError)?;
     Ok(payload_json
         .as_object()
