@@ -44,25 +44,16 @@ async fn main() {
         .bind_ephemeral(([0, 0, 0, 0], 4431));
 
     log::info!("Starting Listen with {:?} and {:?}", http_addr, https_addr);
-    futures::future::join3(
-        http_warp,
-        https_warp,
-        table_update(&tables, &song_data, &db_pool),
-    )
-    .await;
+    futures::future::join3(http_warp, https_warp, table_update(&tables)).await;
 }
 
-async fn table_update(tables: &TableData, song_data: &SongData, db_pool: &MySqlPool) {
-    let mut client = MySQLClient::new(db_pool.get().unwrap());
+async fn table_update(tables: &TableData) {
     loop {
         tokio::time::sleep(Duration::from_secs(3600)).await;
         {
             log::info!("Starting to update difficulty tables.");
             let mut tables = tables.lock().await;
             table::from_web(&mut tables).await;
-            let songs = client.song_data(&tables).await.unwrap();
-            let song_db = Arc::clone(&song_data);
-            song_db.lock().await.update(songs);
         }
     }
 }
