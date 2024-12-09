@@ -19,6 +19,8 @@ thiserror = "2.0.3"
 chrono = "0.4.38"
 envy = "0.4.2"
 
+itertools = "0.13.0"
+
 model = { path = "../model" }
 repository = { path = "../repository" }
 oauth_google = { path = "../oauth_google" }

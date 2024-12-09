@@ -53,7 +53,7 @@ pub fn api_routes(
         .or(detail::route(db_pool, t, song_data))
         .or(song_log::route(db_pool))
         .or(play_data_upload_route(db_pool))
-        .or(song_data_upload_route(db_pool, song_data))
+        .or(song_data_upload_route(db_pool, song_data, t))
         .or(reset::route(db_pool))
         .or(oauth_redirect::route(db_pool))
         .with(cors_header())

@@ -216,6 +216,37 @@ impl AllSongData for MySQLClient {
     }
 }
 
+impl SongDataForTables for MySQLClient {
+    async fn song_data(&mut self, tables: &Tables) -> Result<Songs> {
+        let hash = Hash::all(&mut self.connection)?;
+        let record = models::Song::by_hashes(
+            &mut self.connection,
+            &hash
+                .iter()
+                .map(|hash| hash.sha256.as_str())
+                .collect::<Vec<_>>(),
+        )?;
+        let hash = hash
+            .iter()
+            .map(|hash| (&hash.sha256, &hash.md5))
+            .collect::<HashMap<&String, &String>>();
+        Ok(record
+            .iter()
+            .fold(SongsBuilder::default(), |mut builder, row| {
+                builder.push(
+                    HashMd5::from_str(hash.get(&row.sha256).unwrap()).unwrap(),
+                    HashSha256::from_str(&row.sha256).unwrap(),
+                    Title::from_title_and_subtitle(&row.title, &row.subtitle),
+                    Artist::new(row.artist.clone()),
+                    row.notes,
+                    IncludeFeatures::from(row.features),
+                );
+                builder
+            })
+            .build())
+    }
+}
+
 impl SaveScoreData for MySQLClient {
     async fn save_score(
         &mut self,

@@ -1,14 +1,14 @@
 use crate::error::HandleError;
 use crate::filter::*;
-use crate::SongData;
+use crate::{SongData, TableData};
 use bytes::Buf;
 use chrono::Utc;
 use futures::TryStreamExt;
 use model::*;
 use mysql::MySqlPool;
 use repository::{
-    AccountByGoogleId, AllSongData, RegisterUpload, SavePlayerStateData, SaveScoreData,
-    SaveSongData,
+    AccountByGoogleId, RegisterUpload, SavePlayerStateData, SaveScoreData, SaveSongData,
+    SongDataForTables,
 };
 use sqlite::SqliteClient;
 use std::collections::HashMap;
@@ -34,10 +34,12 @@ pub fn play_data_upload_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)>
 pub fn song_data_upload_route(
     db_pool: &MySqlPool,
     song_data: &SongData,
+    tables: &TableData,
 ) -> BoxedFilter<(impl Reply,)> {
     warp::post()
         .and(path!("upload" / "song_data"))
         .and(with_db(db_pool))
+        .and(with_table(tables))
         .and(with_song_data(song_data))
         .and(receive_sqlite_file())
         .and_then(upload_song_data_handler)
@@ -84,8 +86,9 @@ async fn play_data_upload_handler<
     Ok(StatusCode::OK)
 }
 
-async fn upload_song_data_handler<C: SaveSongData + AllSongData>(
+async fn upload_song_data_handler<C: SaveSongData + SongDataForTables>(
     mut client: C,
+    table_data: TableData,
     song_data: SongData,
     form: FormData,
 ) -> Result<impl Reply, Rejection> {
@@ -101,8 +104,10 @@ async fn upload_song_data_handler<C: SaveSongData + AllSongData>(
         .await
         .map_err(HandleError::from)?;
 
+    let tables = Arc::clone(&table_data);
+    let v = tables.lock().await;
+    let songs = client.song_data(&v).await.map_err(HandleError::from)?;
     let song_db = Arc::clone(&song_data);
-    let songs = client.song_data().await.unwrap();
     song_db.lock().await.update(songs);
     Ok("SongData Is Updated.")
 }

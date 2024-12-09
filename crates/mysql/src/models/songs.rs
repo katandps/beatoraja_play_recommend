@@ -2,6 +2,7 @@ use crate::models::DieselResult;
 use crate::schema::*;
 use crate::MySqlPooledConnection;
 use diesel::prelude::*;
+use itertools::Itertools;
 
 #[derive(Debug, Clone, Queryable, Insertable)]
 #[diesel(table_name = songs)]
@@ -33,5 +34,25 @@ impl Song {
     pub fn all(connection: &mut MySqlPooledConnection) -> DieselResult<Vec<Self>> {
         use crate::schema::songs::dsl::*;
         songs.load(connection)
+    }
+
+    pub fn by_hashes(
+        connection: &mut MySqlPooledConnection,
+        sha256list: &[&str],
+    ) -> DieselResult<Vec<Self>> {
+        use crate::schema::songs::dsl::*;
+        let result = sha256list
+            .into_iter()
+            .chunks(1000)
+            .into_iter()
+            .map(|chunk| {
+                let hash_list = chunk.cloned().collect::<Vec<_>>();
+                songs.filter(sha256.eq_any(hash_list)).load(connection)
+            })
+            .collect();
+        Self::unroll(result)
+    }
+    fn unroll(items: Vec<DieselResult<Vec<Self>>>) -> DieselResult<Vec<Self>> {
+        items.into_iter().process_results(|i| i.flatten().collect())
     }
 }

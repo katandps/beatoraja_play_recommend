@@ -123,6 +123,29 @@ diesel::table! {
 }
 
 diesel::table! {
+    upload_log_stats (id) {
+        id -> Integer,
+        upload_log_id -> Integer,
+        user_id -> Integer,
+        playcount -> Integer,
+        clear -> Integer,
+        epg -> Integer,
+        lpg -> Integer,
+        egr -> Integer,
+        lgr -> Integer,
+        egd -> Integer,
+        lgd -> Integer,
+        ebd -> Integer,
+        lbd -> Integer,
+        epr -> Integer,
+        lpr -> Integer,
+        ems -> Integer,
+        lms -> Integer,
+        playtime -> Integer,
+    }
+}
+
+diesel::table! {
     user_statuses (id) {
         id -> Integer,
         user_id -> Integer,
@@ -152,6 +175,8 @@ diesel::joinable!(score_upload_logs -> users (user_id));
 diesel::joinable!(scores -> hashes (sha256));
 diesel::joinable!(scores -> users (user_id));
 diesel::joinable!(songs -> hashes (sha256));
+diesel::joinable!(upload_log_stats -> score_upload_logs (upload_log_id));
+diesel::joinable!(upload_log_stats -> users (user_id));
 diesel::joinable!(user_statuses -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
@@ -163,6 +188,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     score_upload_logs,
     scores,
     songs,
+    upload_log_stats,
     user_statuses,
     users,
 );
