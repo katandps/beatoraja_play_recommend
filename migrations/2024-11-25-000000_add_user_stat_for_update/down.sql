@@ -1,1 +1,0 @@
-drop table upload_log_stats;
