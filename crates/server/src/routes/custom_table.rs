@@ -1,9 +1,9 @@
 use crate::error::HandleError;
 use crate::filter::*;
-use crate::SongData;
 use crate::TableData;
 use model::*;
 use mysql::MySqlPool;
+use repository::SongDataForTables;
 use repository::{AccountByUserId, ScoresByAccount};
 use warp::filters::BoxedFilter;
 use warp::path;
@@ -50,41 +50,26 @@ async fn header_handler(
     Ok(serde_json::to_string(&header).unwrap())
 }
 
-pub fn body_route(
-    db_pool: &MySqlPool,
-    tables: &TableData,
-    song_data: &SongData,
-) -> BoxedFilter<(impl Reply,)> {
+pub fn body_route(db_pool: &MySqlPool, tables: &TableData) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path!("recommend_table" / i32 / usize / "score.json"))
         .and(with_table(tables))
         .and(with_db(db_pool))
-        .and(with_song_data(song_data))
         .and_then(body_handler)
         .boxed()
 }
 
-async fn body_handler<C: AccountByUserId + ScoresByAccount>(
+async fn body_handler<C: AccountByUserId + ScoresByAccount + SongDataForTables>(
     user_id: i32,
     table_index: usize,
     tables: TableData,
-    repos: C,
-    song_data: SongData,
-) -> Result<impl Reply, Rejection> {
-    let tables = tables.lock().await;
-    Ok(body(user_id, repos, tables.get(table_index).unwrap(), song_data).await?)
-}
-
-async fn body<C: AccountByUserId + ScoresByAccount>(
-    user_id: i32,
     mut repos: C,
-    table: &Table,
-    song_data: SongData,
-) -> Result<impl Reply, HandleError> {
-    let account = repos.user(user_id).await?;
-    let score = repos.score(&account).await?;
-    let songs = song_data.lock().await;
-    Ok(serde_json::to_string(
-        &table.filter_score(&score, &songs.song),
-    )?)
+) -> Result<impl Reply, Rejection> {
+    let tables: tokio::sync::MutexGuard<'_, Tables> = tables.lock().await;
+    let songs = repos.song_data(&tables).await.map_err(HandleError::from)?;
+
+    let account = repos.user(user_id).await.map_err(HandleError::from)?;
+    let score = repos.score(&account).await.map_err(HandleError::from)?;
+    let table = tables.get(table_index).unwrap();
+    Ok(serde_json::to_string(&table.filter_score(&score, &songs)).map_err(HandleError::from)?)
 }

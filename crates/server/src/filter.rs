@@ -1,5 +1,5 @@
 use crate::error::HandleError;
-use crate::{SongData, TableData};
+use crate::TableData;
 use model::*;
 use mysql::{MySQLClient, MySqlPool};
 use repository::AccountByUserId;
@@ -22,13 +22,6 @@ pub fn with_table(
 ) -> impl Filter<Extract = (TableData,), Error = Infallible> + Clone {
     let tables = Arc::clone(tables);
     warp::any().map(move || tables.clone())
-}
-
-pub fn with_song_data(
-    song_data: &SongData,
-) -> impl Filter<Extract = (SongData,), Error = Infallible> + Clone {
-    let song_data = Arc::clone(song_data);
-    warp::any().map(move || song_data.clone())
 }
 
 pub fn receive_sqlite_file() -> impl Filter<Extract = (FormData,), Error = Rejection> + Clone {

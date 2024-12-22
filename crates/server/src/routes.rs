@@ -17,29 +17,20 @@ mod users;
 
 use upload::{play_data_upload_route, song_data_upload_route};
 
-use crate::SongData;
 use crate::TableData;
 use mysql::MySqlPool;
 use warp::filters::cors::Builder;
 use warp::filters::BoxedFilter;
 use warp::{Filter, Reply};
 
-pub fn routes(
-    db_pool: &MySqlPool,
-    tables: &TableData,
-    song_data: &SongData,
-) -> BoxedFilter<(impl Reply,)> {
-    api_routes(&db_pool, &tables, &song_data)
-        .or(table_routes(&db_pool, &tables, &song_data))
+pub fn routes(db_pool: &MySqlPool, tables: &TableData) -> BoxedFilter<(impl Reply,)> {
+    api_routes(&db_pool, &tables)
+        .or(table_routes(&db_pool, &tables))
         .recover(crate::error::handle_rejection)
         .boxed()
 }
 
-pub fn api_routes(
-    db_pool: &MySqlPool,
-    t: &TableData,
-    song_data: &SongData,
-) -> BoxedFilter<(impl Reply,)> {
+pub fn api_routes(db_pool: &MySqlPool, t: &TableData) -> BoxedFilter<(impl Reply,)> {
     health::route(db_pool)
         .or(account::route(db_pool))
         .or(users::route(db_pool))
@@ -48,12 +39,12 @@ pub fn api_routes(
         .or(logout::route())
         .or(tables::route(t))
         .or(stats::route(db_pool))
-        .or(songs::route(t, song_data))
-        .or(ranking::route(db_pool, song_data))
-        .or(detail::route(db_pool, t, song_data))
+        .or(songs::route(db_pool, t))
+        .or(ranking::route(db_pool, t))
+        .or(detail::route(db_pool, t))
         .or(song_log::route(db_pool))
         .or(play_data_upload_route(db_pool))
-        .or(song_data_upload_route(db_pool, song_data, t))
+        .or(song_data_upload_route(db_pool))
         .or(reset::route(db_pool))
         .or(oauth_redirect::route(db_pool))
         .with(cors_header())
@@ -62,13 +53,9 @@ pub fn api_routes(
         .boxed()
 }
 
-pub fn table_routes(
-    db_pool: &MySqlPool,
-    tables: &TableData,
-    song_data: &SongData,
-) -> BoxedFilter<(impl Reply,)> {
+pub fn table_routes(db_pool: &MySqlPool, tables: &TableData) -> BoxedFilter<(impl Reply,)> {
     custom_table::header_route(tables)
-        .or(custom_table::body_route(db_pool, tables, song_data))
+        .or(custom_table::body_route(db_pool, tables))
         .or(custom_table::table_route())
         .with(cors_header())
         .with(warp::log("table_access"))

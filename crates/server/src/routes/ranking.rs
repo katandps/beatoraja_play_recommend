@@ -1,23 +1,22 @@
 use crate::error::HandleError;
-use crate::filter::RankingQuery;
-use crate::filter::{with_db, with_song_data};
-use crate::SongData;
+use crate::filter::{with_db, with_table, RankingQuery};
+use crate::TableData;
 use chrono::Duration;
 use model::*;
 use mysql::MySqlPool;
-use repository::{PublishedUsers, ScoresBySha256};
+use repository::{PublishedUsers, ScoresBySha256, SongDataForTables};
 use std::collections::HashMap;
 use std::str::FromStr;
 use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
 
-pub fn route(db_pool: &MySqlPool, song_data: &SongData) -> BoxedFilter<(impl Reply,)> {
+pub fn route(db_pool: &MySqlPool, tables: &TableData) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("ranking"))
         .and(with_db(db_pool))
+        .and(with_table(tables))
         .and(warp::query::<HashMap<String, String>>().and_then(parse_ranking_query))
-        .and(with_song_data(song_data))
         .and_then(ranking_handler)
         .boxed()
 }
@@ -52,15 +51,19 @@ async fn parse_ranking_query(query: HashMap<String, String>) -> Result<RankingQu
 
 /// 詳細表示ハンドラ
 /// user_idをQueryParameterより取得する
-async fn ranking_handler<C: ScoresBySha256 + PublishedUsers>(
+async fn ranking_handler<C: ScoresBySha256 + PublishedUsers + SongDataForTables>(
     mut repos: C,
+    tables: TableData,
     query: RankingQuery,
-    song_data: SongData,
 ) -> Result<impl Reply, Rejection> {
-    let songs = song_data.lock().await;
-    let scores = repos.score(&query.sha256).await.unwrap();
+    let tables = tables.lock().await;
+    let songs = repos.song_data(&tables).await.map_err(HandleError::from)?;
+    let scores = repos
+        .score(&query.sha256)
+        .await
+        .map_err(HandleError::from)?;
     let users = repos.fetch_users().await.map_err(HandleError::from)?;
-    let response = scores.for_response(&songs.song, &query.date, &query.sha256, &users);
+    let response = scores.for_response(&songs, &query.date, &query.sha256, &users);
     match response {
         Some(res) => Ok(serde_json::to_string(&res).unwrap()),
         None => Ok(serde_json::to_string(&RankingResponse::default()).unwrap()),
