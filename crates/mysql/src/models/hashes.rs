@@ -15,4 +15,12 @@ impl Hash {
         use crate::schema::hashes::dsl::*;
         hashes.load(connection)
     }
+
+    pub fn for_tables(
+        md5list: &[&str],
+        connection: &mut MySqlPooledConnection,
+    ) -> DieselResult<Vec<Self>> {
+        use crate::schema::hashes::dsl::*;
+        hashes.filter(md5.eq_any(md5list)).load(connection)
+    }
 }

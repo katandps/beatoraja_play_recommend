@@ -6,6 +6,12 @@ use std::string::ParseError;
 #[derive(PartialEq, Eq, Hash, Clone, Debug, Deserialize, Serialize, Default)]
 pub struct HashMd5(String);
 
+impl HashMd5 {
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
 #[derive(PartialEq, Eq, Hash, Clone, Debug, Deserialize, Serialize, Default)]
 pub struct HashSha256(String);
 

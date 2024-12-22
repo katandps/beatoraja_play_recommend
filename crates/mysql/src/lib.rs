@@ -214,7 +214,13 @@ impl AllSongData for MySQLClient {
 
 impl SongDataForTables for MySQLClient {
     async fn song_data(&mut self, tables: &Tables) -> Result<Songs> {
-        let hash = Hash::all(&mut self.connection)?;
+        let hash = Hash::for_tables(
+            &tables
+                .get_charts()
+                .map(|c| c.md5().as_str())
+                .collect::<Vec<_>>(),
+            &mut self.connection,
+        )?;
         let record = models::Song::by_hashes(
             &mut self.connection,
             &hash
