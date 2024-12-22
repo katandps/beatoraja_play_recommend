@@ -63,6 +63,11 @@ impl User {
         use crate::schema::users::dsl::*;
         users.filter(id.eq(user_id)).first(connection)
     }
+
+    pub fn count_users(connection: &mut MySqlPooledConnection) -> DieselResult<i64> {
+        use crate::schema::users::dsl::*;
+        users.count().first(connection)
+    }
 }
 
 #[derive(Debug, Clone, Insertable)]

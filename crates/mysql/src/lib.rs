@@ -98,11 +98,7 @@ impl MySQLClient {
 
 impl HealthCheck for MySQLClient {
     async fn health(&mut self) -> Result<()> {
-        todo!();
-        // match &self.connection.("SELECT 1") {
-        //     Ok(_) => Ok(()),
-        //     Err(_) => Err(anyhow!("HealthCheckError")),
-        // }
+        Ok(User::count_users(&mut self.connection).map(|_| ())?)
     }
 }
 
