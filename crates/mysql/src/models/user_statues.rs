@@ -5,6 +5,7 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 
 #[derive(Debug, Clone, Queryable)]
+#[allow(unused)]
 pub struct UserStatus {
     pub id: i32,
     pub user_id: i32,

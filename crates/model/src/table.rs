@@ -12,6 +12,7 @@ pub struct TableSource {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct TableId(i64);
 
 #[derive(Debug, Clone, Default)]
@@ -106,7 +107,7 @@ impl TableLevels {
         self.v.iter().map(|l| l.label.as_str())
     }
 
-    pub fn filter_score<'a>(&'a self, scores: &Scores, songs: &Songs) -> Vec<&Chart> {
+    pub fn filter_score<'a>(&'a self, scores: &Scores, songs: &Songs) -> Vec<&'a Chart> {
         self.v
             .iter()
             .flat_map(|l| l.pick_old_score_chart(scores, songs))

@@ -16,6 +16,7 @@ table! {
 }
 
 #[derive(Queryable)]
+#[allow(dead_code)]
 pub struct Song {
     pub md5: String,
     pub sha256: String,

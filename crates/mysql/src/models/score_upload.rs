@@ -6,6 +6,7 @@ use model::{UploadAt, UserId};
 
 #[derive(Debug, Clone, Queryable)]
 #[diesel(table_name = score_upload_logs)]
+#[allow(unused)]
 pub struct ScoreUpload {
     pub id: i32,
     pub user_id: i32,

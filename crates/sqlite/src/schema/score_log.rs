@@ -15,6 +15,7 @@ table! {
 }
 
 #[derive(Queryable)]
+#[allow(dead_code)]
 pub struct ScoreLog {
     pub sha256: String,
     pub mode: i32,
