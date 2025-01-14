@@ -52,6 +52,15 @@ diesel::table! {
 }
 
 diesel::table! {
+    revoked_sessions (id) {
+        id -> Integer,
+        session_key -> Text,
+        user_id -> Integer,
+        revoked_at -> Datetime,
+    }
+}
+
+diesel::table! {
     score_snaps (id) {
         id -> Integer,
         user_id -> Integer,
@@ -169,6 +178,7 @@ diesel::table! {
 
 diesel::joinable!(admins -> users (user_id));
 diesel::joinable!(player_stats -> users (user_id));
+diesel::joinable!(revoked_sessions -> users (user_id));
 diesel::joinable!(score_snaps -> hashes (sha256));
 diesel::joinable!(score_snaps -> users (user_id));
 diesel::joinable!(score_upload_logs -> users (user_id));
@@ -184,6 +194,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     hashes,
     player_stats,
     rename_logs,
+    revoked_sessions,
     score_snaps,
     score_upload_logs,
     scores,

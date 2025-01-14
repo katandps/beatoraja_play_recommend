@@ -19,6 +19,7 @@ use model::*;
 use oauth_google::{GoogleProfile, RegisterUser};
 use r2d2::Pool;
 use repository::*;
+use schema::revoked_sessions;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
@@ -414,6 +415,7 @@ impl SaveSongData for MySQLClient {
 }
 
 impl SavePlayerStateData for MySQLClient {
+    #[allow(unused)]
     async fn save_player_states(
         &mut self,
         account: &Account,
@@ -529,7 +531,7 @@ impl ScoreByAccountAndSha256 for MySQLClient {
             &score_id.sha256().to_string(),
             score_id.mode().to_int(),
         )?;
-        let score = record.get(0).ok_or(NotFound)?.to_score();
+        let score = record.first().ok_or(NotFound)?.to_score();
         let snaps = {
             let records = models::ScoreSnap::by_user_id_and_score_id(
                 &mut self.connection,
@@ -640,5 +642,23 @@ impl RegisterUpload for MySQLClient {
                 ))
             }
         }
+    }
+}
+
+impl RevokeSession for MySQLClient {
+    async fn is_revoked(&mut self, session_key: &SessionKey, user_id: UserId) -> Result<bool> {
+        let revokes = models::RevokedSession::revoked(
+            &mut self.connection,
+            session_key.as_str(),
+            user_id.get(),
+        )?;
+        Ok(!revokes.is_empty())
+    }
+    async fn revoke(&mut self, session_key: &SessionKey, user_id: UserId) -> Result<()> {
+        let record = models::SessionRevoke::new(session_key, user_id);
+        diesel::insert_into(revoked_sessions::table)
+            .values(record)
+            .execute(&mut self.connection)?;
+        Ok(())
     }
 }

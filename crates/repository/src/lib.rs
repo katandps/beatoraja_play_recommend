@@ -2,7 +2,7 @@
 use anyhow::Result;
 use model::{
     Account, GoogleId, HashSha256, PlayerStats, RankedScore, Score, ScoreId, ScoreUpload, Scores,
-    Songs, Tables, UploadAt, UserId, VisibleAccount,
+    SessionKey, Songs, Tables, UploadAt, UserId, VisibleAccount,
 };
 
 pub trait PublishedUsers {
@@ -85,4 +85,10 @@ pub trait SavePlayerStateData {
 
 pub trait ResetScore {
     async fn reset_score(&mut self, account: &Account) -> Result<()>;
+}
+
+pub trait RevokeSession {
+    async fn revoke(&mut self, session_key: &SessionKey, user_id: UserId) -> Result<()>;
+
+    async fn is_revoked(&mut self, session_key: &SessionKey, user_id: UserId) -> Result<bool>;
 }

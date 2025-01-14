@@ -1,5 +1,6 @@
 mod hashes;
 mod player_stats;
+mod revoked_sessions;
 mod score_snaps;
 mod score_upload;
 mod scores;
@@ -9,6 +10,7 @@ mod users;
 
 pub use hashes::*;
 pub use player_stats::*;
+pub use revoked_sessions::*;
 pub use score_snaps::*;
 pub use score_upload::*;
 pub use scores::*;
