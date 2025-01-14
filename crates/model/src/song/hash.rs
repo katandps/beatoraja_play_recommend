@@ -10,6 +10,10 @@ impl HashMd5 {
     pub fn as_str(&self) -> &str {
         &self.0
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug, Deserialize, Serialize, Default)]

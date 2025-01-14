@@ -178,6 +178,9 @@ impl From<&Table> for TableFormat {
         let mut map = HashMap::new();
         for level in &t.levels.v {
             for chart in &level.charts.charts {
+                if chart.md5().is_empty() {
+                    continue;
+                }
                 map.entry(level.get_label(t))
                     .or_insert_with(Vec::new)
                     .push(chart.md5().to_string())
