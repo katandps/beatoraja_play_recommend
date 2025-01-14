@@ -62,7 +62,7 @@ async fn get_header_url(url: &str) -> Result<Url, TableParseError> {
 
 async fn get_header(url: &Url) -> Result<Header, TableParseError> {
     let header_text: String = Client::default()
-        .get(&url.to_string())
+        .get(url.to_string())
         .header(USER_AGENT, HeaderValue::from_static(""))
         .send()
         .await
@@ -81,7 +81,7 @@ fn make_data_url(header_url: &Url, header: &Header) -> Result<Url, TableParseErr
 
 async fn get_charts(url: &Url) -> Result<Vec<Chart>, TableParseError> {
     let data_text = Client::default()
-        .get(&url.to_string())
+        .get(url.to_string())
         .header(USER_AGENT, HeaderValue::from_static(""))
         .send()
         .await
@@ -90,7 +90,7 @@ async fn get_charts(url: &Url) -> Result<Vec<Chart>, TableParseError> {
         .await
         .map_err(FailedToGetDataURL)?;
     let data_text = data_text.trim_start_matches('\u{feff}');
-    Ok(serde_json::from_str(data_text).map_err(FailedToParseData)?)
+    serde_json::from_str(data_text).map_err(FailedToParseData)
 }
 
 fn make_levels(header: &Header, charts: Vec<Chart>) -> TableLevels {

@@ -50,7 +50,7 @@ async fn oauth_handler<C: RegisterUser + AccountByGoogleId>(
 
 async fn verify(query: HashMap<String, String>) -> Result<GoogleProfile, Rejection> {
     let code = query
-        .get(&"code".to_string())
+        .get("code")
         .cloned()
         .ok_or(HandleError::AuthorizationCodeIsNotFound)?;
     let profile = oauth_google::verify(code)

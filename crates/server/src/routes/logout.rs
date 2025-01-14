@@ -14,6 +14,6 @@ pub fn route() -> BoxedFilter<(impl Reply,)> {
 }
 
 async fn logout_handler(session_key: String) -> Result<impl Reply, Rejection> {
-    crate::session::remove_session(&session_key).map_err(|e| HandleError::OtherError(e))?;
+    crate::session::remove_session(&session_key).map_err(HandleError::OtherError)?;
     Ok(StatusCode::OK)
 }

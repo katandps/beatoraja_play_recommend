@@ -19,7 +19,7 @@ impl Songs {
 
     fn song_a(&self, chart: &Chart) -> Option<&Song> {
         match self.get_sha256(chart.md5()) {
-            Some(sha256) => self.songs.get(&sha256),
+            Some(sha256) => self.songs.get(sha256),
             None => None,
         }
     }

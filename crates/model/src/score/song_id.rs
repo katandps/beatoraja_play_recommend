@@ -30,21 +30,18 @@ impl PlayMode {
 
 impl From<i32> for PlayMode {
     fn from(mode: i32) -> Self {
-        let lm = FromPrimitive::from_i32(mode % 10).unwrap_or_else(|| LnMode::Long);
+        let lm = FromPrimitive::from_i32(mode % 10).unwrap_or(LnMode::Long);
 
         PlayMode(lm)
     }
 }
 
-#[derive(Eq, PartialEq, Hash, Copy, Clone, Debug, Serialize, Deserialize, FromPrimitive)]
+#[derive(
+    Eq, PartialEq, Hash, Copy, Clone, Debug, Default, Serialize, Deserialize, FromPrimitive,
+)]
 pub enum LnMode {
+    #[default]
     Long = 0,
     Charge = 1,
     HellCharge = 2,
-}
-
-impl Default for LnMode {
-    fn default() -> LnMode {
-        LnMode::Long
-    }
 }

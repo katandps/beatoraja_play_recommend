@@ -88,8 +88,8 @@ mod test {
     #[test]
     pub fn test_future() {
         let date = UpdatedAt::day_start(UpdatedAt::now());
-        assert_eq!(true, date.is_future());
-        assert_eq!(false, (&date - Duration::days(1)).is_future());
+        assert!(date.is_future());
+        assert!(!(&date - Duration::days(1)).is_future());
     }
 
     #[test]

@@ -65,7 +65,7 @@ impl Charts {
                 let score_id = songs
                     .song(chart)
                     .map(|song| song.song_id())
-                    .unwrap_or_else(|| ScoreId::default());
+                    .unwrap_or_default();
                 (scores.get(&score_id).cloned().unwrap_or_default(), chart)
             })
             .sorted_by(|a, b| a.0.updated_at.cmp(&b.0.updated_at))

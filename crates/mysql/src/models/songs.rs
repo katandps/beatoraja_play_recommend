@@ -42,7 +42,7 @@ impl Song {
     ) -> DieselResult<Vec<Self>> {
         use crate::schema::songs::dsl::*;
         let result = sha256list
-            .into_iter()
+            .iter()
             .chunks(1000)
             .into_iter()
             .map(|chunk| {

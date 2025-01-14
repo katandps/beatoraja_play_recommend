@@ -45,7 +45,7 @@ async fn get_account_by_query<C: AccountByUserId>(
     query: HashMap<String, String>,
 ) -> Result<Account, Rejection> {
     let user_id = query
-        .get(&"user_id".to_string())
+        .get("user_id")
         .ok_or(HandleError::AccountIsNotSelected)?;
     let user_id = user_id
         .parse::<i32>()
@@ -75,14 +75,14 @@ pub fn changed_visibility_by_query() -> impl Filter<Extract = (bool,), Error = R
 
 async fn get_changed_name_query(body: HashMap<String, String>) -> Result<String, Rejection> {
     let changed_name = body
-        .get(&"changed_name".to_string())
+        .get("changed_name")
         .ok_or(HandleError::ChangedNameNotFound)?;
     Ok(changed_name.clone())
 }
 
 async fn get_changed_visibility_query(body: HashMap<String, String>) -> Result<bool, Rejection> {
     let changed_visibility = body
-        .get(&"visibility".to_string())
+        .get("visibility")
         .ok_or(HandleError::ChangedVisibilityNotFound)?;
     Ok(changed_visibility == &"true".to_string())
 }

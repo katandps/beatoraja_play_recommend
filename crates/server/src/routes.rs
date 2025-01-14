@@ -24,8 +24,8 @@ use warp::filters::BoxedFilter;
 use warp::{Filter, Reply};
 
 pub fn routes(db_pool: &MySqlPool, tables: &TableData) -> BoxedFilter<(impl Reply,)> {
-    api_routes(&db_pool, &tables)
-        .or(table_routes(&db_pool, &tables))
+    api_routes(db_pool, tables)
+        .or(table_routes(db_pool, tables))
         .recover(crate::error::handle_rejection)
         .boxed()
 }
