@@ -5,18 +5,18 @@ mod routes;
 pub mod session;
 
 use config::config;
-use model::Tables;
+use model::TablesInfo;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::Mutex;
 
-pub type TableData = Arc<Mutex<Tables>>;
+pub type TableData = Arc<Mutex<TablesInfo>>;
 
 #[tokio::main]
 async fn main() {
     env_logger::init();
     let db_pool = mysql::get_db_pool();
-    let tables = Arc::new(Mutex::new(Tables::default()));
+    let tables = Arc::new(Mutex::new(TablesInfo::default()));
     {
         let mut tables = tables.lock().await;
         table::from_web(&mut tables).await;

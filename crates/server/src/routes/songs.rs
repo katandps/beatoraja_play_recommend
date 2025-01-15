@@ -20,7 +20,10 @@ async fn songs_handler<C: SongDataForTables>(
     mut repos: C,
     tables: TableData,
 ) -> Result<impl Reply, Rejection> {
-    let tables = tables.lock().await;
-    let songs = repos.song_data(&tables).await.map_err(HandleError::from)?;
-    Ok(serde_json::to_string(&songs.get_list(tables.get_charts())).unwrap())
+    let tables_info = tables.lock().await;
+    let songs = repos
+        .song_data(&tables_info.tables)
+        .await
+        .map_err(HandleError::from)?;
+    Ok(serde_json::to_string(&songs.get_list(tables_info.tables.get_charts())).unwrap())
 }

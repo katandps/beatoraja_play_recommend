@@ -24,6 +24,10 @@ pub fn with_table(
     warp::any().map(move || tables.clone())
 }
 
+pub fn with_tag() -> impl Filter<Extract = (Option<String>,), Error = Rejection> + Clone {
+    warp::header::optional::<String>("If-None-Match")
+}
+
 pub fn receive_sqlite_file() -> impl Filter<Extract = (FormData,), Error = Rejection> + Clone {
     warp::multipart::form().max_length(100 * 1024 * 1024)
 }

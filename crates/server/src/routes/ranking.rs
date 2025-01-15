@@ -56,8 +56,11 @@ async fn ranking_handler<C: ScoresBySha256 + PublishedUsers + SongDataForTables>
     tables: TableData,
     query: RankingQuery,
 ) -> Result<impl Reply, Rejection> {
-    let tables = tables.lock().await;
-    let songs = repos.song_data(&tables).await.map_err(HandleError::from)?;
+    let tables_info = tables.lock().await;
+    let songs = repos
+        .song_data(&tables_info.tables)
+        .await
+        .map_err(HandleError::from)?;
     let scores = repos
         .score(&query.sha256)
         .await

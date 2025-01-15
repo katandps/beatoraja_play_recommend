@@ -16,6 +16,25 @@ pub struct TableSource {
 pub struct TableId(i64);
 
 #[derive(Debug, Clone, Default)]
+pub struct TablesInfo {
+    pub tables: Tables,
+    pub tag: Option<String>,
+}
+
+impl TablesInfo {
+    pub fn update_tag(&mut self, new_tag: String) {
+        self.tag = Some(new_tag)
+    }
+
+    pub fn get_tag(&self) -> &str {
+        match &self.tag {
+            Some(tag) => tag.as_str(),
+            _ => "",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default)]
 pub struct Tables {
     v: HashMap<usize, Table>,
 }
@@ -34,7 +53,7 @@ impl Tables {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Table {
     title: TableName,
     symbol: TableSymbol,
@@ -71,7 +90,7 @@ impl Table {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TableName(String);
 
 impl From<TableName> for String {
@@ -80,7 +99,7 @@ impl From<TableName> for String {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TableSymbol(String);
 
 impl From<TableSymbol> for String {
@@ -89,7 +108,7 @@ impl From<TableSymbol> for String {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TableLevels {
     v: Vec<TableLevel>,
 }
@@ -131,7 +150,7 @@ impl Display for LevelVariant {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TableLevel {
     label: String,
     charts: Charts,

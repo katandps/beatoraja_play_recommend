@@ -4,6 +4,7 @@ use anyhow::anyhow;
 use config::config;
 use futures::stream::StreamExt;
 use model::*;
+use rand::distributions::{Alphanumeric, DistString};
 use reqwest::header::{HeaderValue, USER_AGENT};
 use reqwest::Client;
 use scraper::{Html, Selector};
@@ -11,13 +12,18 @@ use thiserror::Error;
 use url::Url;
 use TableParseError::*;
 
-pub async fn from_web(table: &mut Tables) {
+pub async fn from_web(tables_info: &mut TablesInfo) {
     futures::stream::iter(config().table_urls.clone())
         .then(make_table)
         .enumerate()
         .for_each(|(i, t)| {
             match t {
-                Ok(t) => table.update(i, t),
+                Ok(t) => {
+                    tables_info.tables.update(i, t);
+                    let mut rng = rand::thread_rng();
+                    let random_code = Alphanumeric.sample_string(&mut rng, 24);
+                    tables_info.update_tag(random_code);
+                }
                 Err(e) => {
                     log::error!("Failed:{} {:?}", config().table_urls[i], e)
                 }

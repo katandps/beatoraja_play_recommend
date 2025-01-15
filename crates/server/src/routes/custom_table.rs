@@ -43,8 +43,8 @@ async fn header_handler(
     table_index: usize,
     tables: TableData,
 ) -> Result<impl Reply, Rejection> {
-    let tables = tables.lock().await;
-    let table = tables.get(table_index).unwrap();
+    let tables_info = tables.lock().await;
+    let table = tables_info.tables.get(table_index).unwrap();
     let header =
         &CustomTableHeader::from(table).set_name(format!("おすすめ譜面表: {}", table.title()));
     Ok(serde_json::to_string(&header).unwrap())
@@ -65,11 +65,14 @@ async fn body_handler<C: AccountByUserId + ScoresByAccount + SongDataForTables>(
     tables: TableData,
     mut repos: C,
 ) -> Result<impl Reply, Rejection> {
-    let tables: tokio::sync::MutexGuard<'_, Tables> = tables.lock().await;
-    let songs = repos.song_data(&tables).await.map_err(HandleError::from)?;
+    let tables_info: tokio::sync::MutexGuard<'_, TablesInfo> = tables.lock().await;
+    let songs = repos
+        .song_data(&tables_info.tables)
+        .await
+        .map_err(HandleError::from)?;
 
     let account = repos.user(user_id).await.map_err(HandleError::from)?;
     let score = repos.score(&account).await.map_err(HandleError::from)?;
-    let table = tables.get(table_index).unwrap();
+    let table = tables_info.tables.get(table_index).unwrap();
     Ok(serde_json::to_string(&table.filter_score(&score, &songs)).map_err(HandleError::from)?)
 }

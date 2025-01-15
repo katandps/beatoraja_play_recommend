@@ -9,6 +9,7 @@ edition = "2021"
 [dependencies]
 model = { path = "../model" }
 log = "0.4.22"
+rand = { version = "0.8.5" }
 
 # JSONのパース
 serde = { version = "1.0.215", features = ["derive"] }
@@ -23,7 +24,7 @@ anyhow = "1.0.93"
 thiserror = "2.0.3"
 
 #HTMLパーサ
-scraper = "0.21.0"
+scraper = "0.22.0"
 
 # HTTPリクエスト/非同期処理
 reqwest = { version = "0.12.9", features = ["json"] }

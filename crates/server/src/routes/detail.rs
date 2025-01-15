@@ -63,7 +63,10 @@ async fn handler<C: ScoresByAccount + SongDataForTables>(
     account: Account,
 ) -> Result<impl Reply, Rejection> {
     let tables = tables.lock().await;
-    let songs = repos.song_data(&tables).await.map_err(HandleError::from)?;
+    let songs = repos
+        .song_data(&tables.tables)
+        .await
+        .map_err(HandleError::from)?;
     let scores = log_duration!(
         GetScores,
         repos
@@ -73,7 +76,7 @@ async fn handler<C: ScoresByAccount + SongDataForTables>(
     );
     let response = log_duration!(
         MakeResponse,
-        scores.table_scores(&tables, &songs, &query.date, &account)
+        scores.table_scores(&tables.tables, &songs, &query.date, &account)
     );
     log_duration!(Serialize, Ok(serde_json::to_string(&response).unwrap()))
 }
