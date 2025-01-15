@@ -1,4 +1,4 @@
-FROM rust:1.82.0
+FROM rust:1.84.0
 
 RUN cargo install diesel_cli --no-default-features --features mysql
 ENV CARGO_BUILD_TARGET_DIR=/tmp/target
