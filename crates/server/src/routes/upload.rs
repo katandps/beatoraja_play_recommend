@@ -1,16 +1,20 @@
+use crate::cache_tags::SongsTag;
 use crate::error::HandleError;
 use crate::filter::*;
 use bytes::Buf;
 use chrono::Utc;
+use futures::lock::Mutex;
 use futures::TryStreamExt;
 use model::*;
 use mysql::MySqlPool;
+use rand::distributions::{Alphanumeric, DistString};
 use repository::{
     AccountByGoogleId, RegisterUpload, SavePlayerStateData, SaveScoreData, SaveSongData,
 };
 use sqlite::SqliteClient;
 use std::collections::HashMap;
 use std::io::Write;
+use std::sync::Arc;
 use tempfile::NamedTempFile;
 use warp::filters::multipart::FormData;
 use warp::filters::BoxedFilter;
@@ -28,10 +32,14 @@ pub fn play_data_upload_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)>
         .boxed()
 }
 
-pub fn song_data_upload_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
+pub fn song_data_upload_route(
+    db_pool: &MySqlPool,
+    songs_tag: &Arc<Mutex<SongsTag>>,
+) -> BoxedFilter<(impl Reply,)> {
     warp::post()
         .and(path!("upload" / "song_data"))
         .and(with_db(db_pool))
+        .and(with_songs_tag(&songs_tag))
         .and(receive_sqlite_file())
         .and_then(upload_song_data_handler)
         .boxed()
@@ -79,6 +87,7 @@ async fn play_data_upload_handler<
 
 async fn upload_song_data_handler<C: SaveSongData>(
     mut client: C,
+    songs_tag: Arc<Mutex<SongsTag>>,
     form: FormData,
 ) -> Result<impl Reply, Rejection> {
     let mut songdata_db = NamedTempFile::new().unwrap();
@@ -92,6 +101,15 @@ async fn upload_song_data_handler<C: SaveSongData>(
         .save_song(&sqlite_client.song_data().map_err(HandleError::from)?)
         .await
         .map_err(HandleError::from)?;
+    let mut songs_tag: futures::lock::MutexGuard<'_, SongsTag> = songs_tag.lock().await;
+
+    let mut rng = rand::thread_rng();
+    let random_code = Alphanumeric.sample_string(&mut rng, 24);
+    *songs_tag = SongsTag {
+        tag: random_code,
+        table_tag: songs_tag.table_tag.clone(),
+    };
+
     Ok("SongData Is Updated.")
 }
 

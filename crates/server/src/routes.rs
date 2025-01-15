@@ -15,8 +15,12 @@ mod tables;
 mod upload;
 mod users;
 
+use std::sync::Arc;
+
+use futures::lock::Mutex;
 use upload::{play_data_upload_route, song_data_upload_route};
 
+use crate::cache_tags::SongsTag;
 use crate::TableData;
 use mysql::MySqlPool;
 use warp::filters::cors::Builder;
@@ -24,13 +28,19 @@ use warp::filters::BoxedFilter;
 use warp::{Filter, Reply};
 
 pub fn routes(db_pool: &MySqlPool, tables: &TableData) -> BoxedFilter<(impl Reply,)> {
-    api_routes(db_pool, tables)
+    let songs_tag = Arc::new(Mutex::new(SongsTag::default()));
+
+    api_routes(db_pool, tables, &songs_tag)
         .or(table_routes(db_pool, tables))
         .recover(crate::error::handle_rejection)
         .boxed()
 }
 
-pub fn api_routes(db_pool: &MySqlPool, t: &TableData) -> BoxedFilter<(impl Reply,)> {
+pub fn api_routes(
+    db_pool: &MySqlPool,
+    t: &TableData,
+    songs_tag: &Arc<Mutex<SongsTag>>,
+) -> BoxedFilter<(impl Reply,)> {
     health::route(db_pool)
         .or(account::route(db_pool))
         .or(users::route(db_pool))
@@ -39,12 +49,12 @@ pub fn api_routes(db_pool: &MySqlPool, t: &TableData) -> BoxedFilter<(impl Reply
         .or(logout::route())
         .or(tables::route(t))
         .or(stats::route(db_pool))
-        .or(songs::route(db_pool, t))
+        .or(songs::route(db_pool, t, songs_tag))
         .or(ranking::route(db_pool, t))
         .or(detail::route(db_pool, t))
         .or(song_log::route(db_pool))
         .or(play_data_upload_route(db_pool))
-        .or(song_data_upload_route(db_pool))
+        .or(song_data_upload_route(db_pool, songs_tag))
         .or(reset::route(db_pool))
         .or(oauth_redirect::route(db_pool))
         .with(cors_header())
