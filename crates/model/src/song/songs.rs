@@ -10,18 +10,11 @@ pub struct Songs {
 impl Songs {
     pub fn song(&self, chart: &Chart) -> Option<&Song> {
         let sha256 = self.get_sha256(chart.md5());
-        sha256.map(|hash| self.songs.get(hash).unwrap())
+        sha256.map(|hash| self.songs.get(hash)).flatten()
     }
 
     pub fn song_by_sha256(&self, sha256: &HashSha256) -> Option<&Song> {
         self.songs.get(sha256)
-    }
-
-    fn song_a(&self, chart: &Chart) -> Option<&Song> {
-        match self.get_sha256(chart.md5()) {
-            Some(sha256) => self.songs.get(sha256),
-            None => None,
-        }
     }
 
     pub fn get_md5(&self, sha256: &HashSha256) -> Option<&HashMd5> {
@@ -34,7 +27,7 @@ impl Songs {
 
     pub fn get_list<'a>(&self, chart: impl Iterator<Item = &'a Chart>) -> Vec<SongFormat> {
         chart
-            .filter_map(|c| self.song_a(c))
+            .filter_map(|c| self.song(c))
             .map(SongFormat::from)
             .collect()
     }
