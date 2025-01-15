@@ -2,8 +2,9 @@ use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::fmt;
 
-#[derive(Deserialize, Serialize, Clone, Copy, Debug, Hash, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Clone, Copy, Debug, Hash, Eq, PartialEq, Default)]
 pub enum ClearType {
+    #[default]
     NoPlay,
     Failed,
     AssistEasy,
@@ -16,12 +17,6 @@ pub enum ClearType {
     Perfect,
     Max,
     Unknown,
-}
-
-impl Default for ClearType {
-    fn default() -> ClearType {
-        ClearType::NoPlay
-    }
 }
 
 impl ClearType {
@@ -81,7 +76,7 @@ impl fmt::Display for ClearType {
 
 impl PartialOrd for ClearType {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.to_integer().partial_cmp(&other.to_integer())
+        Some(self.cmp(other))
     }
 }
 

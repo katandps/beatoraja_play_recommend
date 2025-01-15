@@ -10,7 +10,7 @@ pub struct Songs {
 impl Songs {
     pub fn song(&self, chart: &Chart) -> Option<&Song> {
         let sha256 = self.get_sha256(chart.md5());
-        sha256.map(|hash| self.songs.get(hash)).flatten()
+        sha256.and_then(|hash| self.songs.get(hash))
     }
 
     pub fn song_by_sha256(&self, sha256: &HashSha256) -> Option<&Song> {

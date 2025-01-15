@@ -34,7 +34,7 @@ impl Scores {
                     let score_id = songs
                         .song(chart)
                         .map(|song| song.song_id())
-                        .unwrap_or_else(|| ScoreId::default());
+                        .unwrap_or_default();
                     self.0
                         .remove(&score_id)
                         .map(|score| (chart.md5(), score.make_detail(date)))

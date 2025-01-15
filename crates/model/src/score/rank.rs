@@ -1,8 +1,9 @@
 use crate::*;
 use std::fmt;
 
-#[derive(Deserialize, Serialize, Clone, Copy, Debug, Hash, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Clone, Copy, Debug, Hash, Eq, PartialEq, Default)]
 pub enum ClearRank {
+    #[default]
     F,
     E,
     D,
@@ -12,12 +13,6 @@ pub enum ClearRank {
     AA,
     AAA,
     Unknown,
-}
-
-impl Default for ClearRank {
-    fn default() -> ClearRank {
-        ClearRank::F
-    }
 }
 
 impl ClearRank {

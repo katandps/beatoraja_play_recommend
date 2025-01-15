@@ -64,9 +64,7 @@ fn get_payload(obj: &Map<String, Value>) -> Result<Map<String, Value>, Error> {
         .get(&"id_token".to_string())
         .ok_or_else(|| Error::GoogleResponseIsInvalid("id_token is not found".into()))?
         .to_string()
-        .replace('\"', "")
-        .replace(',', "");
-
+        .replace(['\"', ','], "");
     let mut segments = token.split('.');
     let _encoded_header = segments
         .next()

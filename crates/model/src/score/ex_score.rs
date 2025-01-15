@@ -23,7 +23,7 @@ impl fmt::Display for ExScore {
 
 impl PartialOrd for ExScore {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.ex_score().partial_cmp(&other.ex_score())
+        Some(self.cmp(other))
     }
 }
 

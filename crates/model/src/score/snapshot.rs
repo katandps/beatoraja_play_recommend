@@ -45,7 +45,7 @@ impl Eq for SnapShot {}
 
 impl PartialOrd for SnapShot {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.updated_at.partial_cmp(&other.updated_at)
+        Some(self.cmp(other))
     }
 }
 

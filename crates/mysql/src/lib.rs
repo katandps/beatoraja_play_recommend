@@ -392,8 +392,8 @@ impl SaveSongData for MySQLClient {
             let _ = HashSha256::from_str(&row.sha256).map(|hash| songs.remove(&hash));
         }
         let new_songs = songs
-            .iter()
-            .map(|(_, song)| models::Song::from_song(song))
+            .values()
+            .map(models::Song::from_song)
             .collect::<Vec<_>>();
         let mut index = 0;
         loop {
