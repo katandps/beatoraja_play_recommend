@@ -27,7 +27,7 @@ rand = "0.8.0"
 rand_chacha = "0.3.0"
 
 chrono = "0.4.26"
-redis = "0.27.5"
+redis = "0.28.1"
 
 anyhow = "1.0.75"
 thiserror = "2.0.2"
