@@ -39,7 +39,7 @@ pub fn song_data_upload_route(
     warp::post()
         .and(path!("upload" / "song_data"))
         .and(with_db(db_pool))
-        .and(with_songs_tag(&songs_tag))
+        .and(with_songs_tag(songs_tag))
         .and(receive_sqlite_file())
         .and_then(upload_song_data_handler)
         .boxed()
