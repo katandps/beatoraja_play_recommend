@@ -36,7 +36,7 @@ impl Hash {
             Ok(for_tables_cache().try_read().unwrap().clone())
         } else {
             let mut cache = for_tables_cache().try_write().unwrap();
-            let result = hashes.filter(md5.eq_any(md5list)).load(connection)?;
+            let result = hashes.filter(md5.eq_any(md5list)).load(connection).unwrap();
             *cache = result.clone();
             let mut cached = for_tables_is_cached().try_lock().unwrap();
             *cached = AtomicBool::new(true);
