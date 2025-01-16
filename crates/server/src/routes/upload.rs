@@ -7,7 +7,6 @@ use futures::lock::Mutex;
 use futures::TryStreamExt;
 use model::*;
 use mysql::MySqlPool;
-use rand::distributions::{Alphanumeric, DistString};
 use repository::{
     AccountByGoogleId, RegisterUpload, SavePlayerStateData, SaveScoreData, SaveSongData,
 };
@@ -102,13 +101,7 @@ async fn upload_song_data_handler<C: SaveSongData>(
         .await
         .map_err(HandleError::from)?;
     let mut songs_tag: futures::lock::MutexGuard<'_, SongsTag> = songs_tag.lock().await;
-
-    let mut rng = rand::thread_rng();
-    let random_code = Alphanumeric.sample_string(&mut rng, 24);
-    *songs_tag = SongsTag {
-        tag: random_code,
-        table_tag: songs_tag.table_tag.clone(),
-    };
+    *songs_tag = SongsTag::new();
 
     Ok("SongData Is Updated.")
 }

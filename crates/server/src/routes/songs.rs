@@ -6,7 +6,6 @@ use crate::filter::{with_db, with_songs_tag, with_table, with_tag};
 use crate::TableData;
 use futures::lock::Mutex;
 use mysql::MySqlPool;
-use rand::distributions::{Alphanumeric, DistString};
 use repository::SongDataForTables;
 use warp::filters::BoxedFilter;
 use warp::http;
@@ -34,10 +33,10 @@ async fn songs_handler<C: SongDataForTables>(
     saved_tag: Arc<Mutex<SongsTag>>,
     tag: Option<String>,
 ) -> Result<impl Reply, Rejection> {
-    let mut saved_tag: futures::lock::MutexGuard<'_, SongsTag> = saved_tag.lock().await;
+    let saved_tag: futures::lock::MutexGuard<'_, SongsTag> = saved_tag.lock().await;
     let tables_info = tables.lock().await;
 
-    if saved_tag.is_saved(&tag, &tables_info.tag) {
+    if saved_tag.is_saved(&tag) {
         // 変更がない場合、ステータスコードだけを返す
         log::info!("songs_handler ETag matched: {:?}", tag);
         Ok(http::Response::builder()
@@ -51,13 +50,6 @@ async fn songs_handler<C: SongDataForTables>(
             .song_data(&tables_info.tables)
             .await
             .map_err(HandleError::from)?;
-        let mut rng = rand::thread_rng();
-        let random_code = Alphanumeric.sample_string(&mut rng, 24);
-        let new_tag = SongsTag {
-            tag: random_code,
-            table_tag: tables_info.tag.clone(),
-        };
-        *saved_tag = new_tag;
 
         log::info!("songs_handler ETag unmatched: {:?}", tag);
         // テーブル情報をJSONとして返す

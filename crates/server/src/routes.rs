@@ -28,7 +28,7 @@ use warp::filters::BoxedFilter;
 use warp::{Filter, Reply};
 
 pub fn routes(db_pool: &MySqlPool, tables: &TableData) -> BoxedFilter<(impl Reply,)> {
-    let songs_tag = Arc::new(Mutex::new(SongsTag::default()));
+    let songs_tag = Arc::new(Mutex::new(SongsTag::new()));
 
     api_routes(db_pool, tables, &songs_tag)
         .or(table_routes(db_pool, tables))
