@@ -8,5 +8,6 @@ members = [
     "crates/server",
     "crates/oauth_google",
     "crates/repository",
+    "crates/session",
 ]
 resolver = "2"
