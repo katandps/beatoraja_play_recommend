@@ -47,7 +47,7 @@ pub enum HandleError {
 
     #[error("OAuthGoogleError: {0:?}")]
     OAuthGoogleError(oauth_google::Error),
-    #[error("OtherError: {0}")]
+    #[error("OtherError: {0:?}")]
     OtherError(anyhow::Error),
     #[error("RedisError: {0:?}")]
     RedisError(redis::RedisError),
