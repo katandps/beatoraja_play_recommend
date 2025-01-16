@@ -11,3 +11,6 @@ members = [
     "crates/session",
 ]
 resolver = "2"
+
+[profile.release]
+debug = 1
