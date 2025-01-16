@@ -369,23 +369,7 @@ impl SaveSongData for MySQLClient {
                 md5: md5.to_string(),
             })
             .collect::<Vec<_>>();
-
-        let mut index = 0;
-        loop {
-            let mut records = Vec::new();
-            while index < new_hashes.len() && records.len() < 1000 {
-                records.push(new_hashes[index].clone());
-                index += 1;
-            }
-            if records.is_empty() {
-                break;
-            }
-            log::info!("Insert {} hashes.", records.len());
-            diesel::insert_into(schema::hashes::table)
-                .values(records)
-                .execute(&mut self.connection)?;
-        }
-
+        Hash::insert_new_hashes(new_hashes, &mut self.connection)?;
         let exist_songs = models::Song::all(&mut self.connection)?;
         let mut songs = songs.songs.clone();
         for row in exist_songs {
