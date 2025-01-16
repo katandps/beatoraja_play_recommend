@@ -59,7 +59,6 @@ async fn token_request(body: HashMap<&str, String>) -> Result<Map<String, Value>
 }
 
 fn get_payload(obj: &Map<String, Value>) -> Result<Map<String, Value>, Error> {
-    println!("{:?}", obj);
     let token = &obj
         .get(&"id_token".to_string())
         .ok_or_else(|| Error::GoogleResponseIsInvalid("id_token is not found".into()))?
