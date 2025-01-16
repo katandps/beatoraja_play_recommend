@@ -28,7 +28,7 @@ impl Hash {
         connection: &mut MySqlPooledConnection,
     ) -> DieselResult<Vec<Self>> {
         use crate::schema::hashes::dsl::*;
-        let cached = for_tables_refreshed()
+        let cached = for_tables_is_cached()
             .try_lock()
             .map(|cached| cached.load(Ordering::Relaxed))
             .unwrap_or_default();
@@ -38,7 +38,7 @@ impl Hash {
             let mut cache = for_tables_cache().try_write().unwrap();
             let result = hashes.filter(md5.eq_any(md5list)).load(connection)?;
             *cache = result.clone();
-            let mut cached = for_tables_refreshed().try_lock().unwrap();
+            let mut cached = for_tables_is_cached().try_lock().unwrap();
             *cached = AtomicBool::new(true);
             Ok(result)
         }
@@ -52,8 +52,8 @@ impl Hash {
         if new_hashes.is_empty() {
             return Ok(());
         }
-        let mut cached = for_tables_refreshed().try_lock().unwrap();
-        *cached = AtomicBool::new(true);
+        let mut cached = for_tables_is_cached().try_lock().unwrap();
+        *cached = AtomicBool::new(false);
         let mut index = 0;
         loop {
             let mut records = Vec::new();
@@ -72,7 +72,7 @@ impl Hash {
         Ok(())
     }
 }
-fn for_tables_refreshed() -> &'static Arc<Mutex<AtomicBool>> {
+fn for_tables_is_cached() -> &'static Arc<Mutex<AtomicBool>> {
     static INSTANCE: OnceLock<Arc<Mutex<AtomicBool>>> = OnceLock::new();
     INSTANCE.get_or_init(Arc::default)
 }
