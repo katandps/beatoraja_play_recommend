@@ -257,12 +257,13 @@ impl SaveScoreData for MySQLClient {
         score: &Scores,
         upload: &ScoreUpload,
     ) -> Result<()> {
-        let user = User::by_account(&mut self.connection, account)?;
+        let user = User::by_account(&mut self.connection, account).unwrap();
         let user_id = user.id;
-        let saved_song = self.saved_song(user_id)?;
-        let saved_snap = self.saved_snap(user_id)?;
+        let saved_song = self.saved_song(user_id).unwrap();
+        let saved_snap = self.saved_snap(user_id).unwrap();
 
-        let hashes = Hash::all(&mut self.connection)?
+        let hashes = Hash::all(&mut self.connection)
+            .unwrap()
             .iter()
             .map(|h| h.sha256.clone())
             .collect::<HashSet<_>>();
@@ -332,23 +333,26 @@ impl SaveScoreData for MySQLClient {
 
         for v in div(songs_for_update, &hashes) {
             log::info!("Update {} scores.", v.len());
-            let _result = diesel::replace_into(schema::scores::table)
+            diesel::replace_into(schema::scores::table)
                 .values(v)
-                .execute(&mut self.connection);
+                .execute(&mut self.connection)
+                .unwrap();
         }
 
         for v in div(songs_for_insert, &hashes) {
             log::info!("Insert {} scores.", v.len());
             diesel::insert_into(schema::scores::table)
                 .values(v)
-                .execute(&mut self.connection)?;
+                .execute(&mut self.connection)
+                .unwrap();
         }
 
         for v in div(snaps_for_insert, &hashes) {
             log::info!("Insert {} score_snaps", v.len());
             diesel::insert_into(schema::score_snaps::table)
                 .values(v)
-                .execute(&mut self.connection)?;
+                .execute(&mut self.connection)
+                .unwrap();
         }
 
         Ok(())
