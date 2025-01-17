@@ -1,7 +1,10 @@
 mod config;
 
-use anyhow::anyhow;
-use config::config;
+use std::fs::create_dir_all;
+use std::path::{Path, PathBuf};
+
+use anyhow::{anyhow, Context};
+use config::{config, TableSetting};
 use futures::stream::StreamExt;
 use model::*;
 use rand::distributions::{Alphanumeric, DistString};
@@ -13,7 +16,7 @@ use url::Url;
 use TableParseError::*;
 
 pub async fn from_web(tables_info: &mut TablesInfo) {
-    futures::stream::iter(config().table_urls.clone())
+    futures::stream::iter(config().tables.clone())
         .then(make_table)
         .enumerate()
         .for_each(|(i, t)| {
@@ -25,7 +28,7 @@ pub async fn from_web(tables_info: &mut TablesInfo) {
                     tables_info.update_tag(random_code);
                 }
                 Err(e) => {
-                    log::error!("Failed:{} {:?}", config().table_urls[i], e)
+                    log::error!("Failed:{} {:?}", config().tables[i].title, e)
                 }
             };
             futures::future::ready(())
@@ -33,13 +36,72 @@ pub async fn from_web(tables_info: &mut TablesInfo) {
         .await;
 }
 
-async fn make_table(url: String) -> Result<Table, TableParseError> {
-    let header_url = get_header_url(&url).await?;
+pub async fn from_with_cache(tables_info: &mut TablesInfo) {
+    futures::stream::iter(config().tables.clone())
+        .then(read_table)
+        .enumerate()
+        .for_each(|(i, t)| {
+            match t {
+                Ok(t) => {
+                    tables_info.tables.update(i, t);
+                    let mut rng = rand::thread_rng();
+                    let random_code = Alphanumeric.sample_string(&mut rng, 24);
+                    tables_info.update_tag(random_code);
+                }
+                Err(e) => {
+                    log::error!("Failed:{} {:?}", config().tables[i].title, e)
+                }
+            };
+            futures::future::ready(())
+        })
+        .await;
+}
+
+async fn read_table(setting: TableSetting) -> anyhow::Result<Table> {
+    let cache_path = create_cache_dir(&setting)?;
+    log::info!("cache_path: {:?}", cache_path);
+    if let Ok(table) = read_cache(&cache_path) {
+        Ok(table)
+    } else {
+        let table = fetch(&setting).await?;
+        save_cache(&cache_path, &table)?;
+        Ok(table)
+    }
+}
+
+async fn make_table(setting: TableSetting) -> anyhow::Result<Table> {
+    let cache_path = create_cache_dir(&setting)?;
+    let table = fetch(&setting).await?;
+    save_cache(&cache_path, &table)?;
+    Ok(table)
+}
+
+async fn fetch(setting: &TableSetting) -> anyhow::Result<Table> {
+    let header_url = get_header_url(&setting.url).await?;
     let header = get_header(&header_url).await?;
     let data_url = make_data_url(&header_url, &header)?;
     let charts = get_charts(&data_url).await?;
     let levels = make_levels(&header, charts);
     Ok(Table::make(header.name, header.symbol, levels))
+}
+
+fn create_cache_dir(setting: &TableSetting) -> anyhow::Result<PathBuf> {
+    let mut cache_path = dirs::cache_dir().unwrap_or_else(std::env::temp_dir);
+    cache_path.push("beatoraja_play_recommend");
+    cache_path.push("tables");
+    create_dir_all(&cache_path).with_context(|| "could not create table cache directory")?;
+    cache_path.push(format!("{}.json", setting.id.to_string()));
+    Ok(cache_path)
+}
+
+fn read_cache(cache_path: &Path) -> anyhow::Result<Table> {
+    Ok(serde_json::from_str(&std::fs::read_to_string(cache_path)?)?)
+}
+
+fn save_cache(cache_path: &Path, table: &Table) -> anyhow::Result<()> {
+    let content = serde_json::to_string(table)?;
+    std::fs::write(cache_path, content)?;
+    Ok(())
 }
 
 async fn get_header_url(url: &str) -> Result<Url, TableParseError> {

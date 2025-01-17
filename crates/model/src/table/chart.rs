@@ -4,7 +4,7 @@ use crate::*;
 /// 難易度表上の楽曲データ
 /// 楽曲データベース上に存在するとは限らない
 ///
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Chart {
     title: String,
     artist: Option<String>,

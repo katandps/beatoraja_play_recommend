@@ -20,7 +20,7 @@ async fn main() {
     let tables = Arc::new(Mutex::new(TablesInfo::default()));
     {
         let mut tables = tables.lock().await;
-        table::from_web(&mut tables).await;
+        table::from_with_cache(&mut tables).await;
     }
     let route = routes::routes(&db_pool, &tables);
 

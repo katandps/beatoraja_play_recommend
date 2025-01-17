@@ -5,15 +5,14 @@ pub use {chart::Chart, charts::Charts};
 
 use crate::*;
 
-#[derive(Debug, Clone)]
-#[allow(dead_code)]
-pub struct TableSource {
-    v: HashMap<usize, String>,
-}
-
-#[derive(Debug, Clone)]
-#[allow(dead_code)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct TableId(i64);
+
+impl Display for TableId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 #[derive(Debug, Clone, Default)]
 pub struct TablesInfo {
@@ -53,7 +52,7 @@ impl Tables {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Table {
     title: TableName,
     symbol: TableSymbol,
@@ -90,7 +89,7 @@ impl Table {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TableName(String);
 
 impl From<TableName> for String {
@@ -99,7 +98,7 @@ impl From<TableName> for String {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TableSymbol(String);
 
 impl From<TableSymbol> for String {
@@ -108,7 +107,7 @@ impl From<TableSymbol> for String {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TableLevels {
     v: Vec<TableLevel>,
 }
@@ -150,7 +149,7 @@ impl Display for LevelVariant {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TableLevel {
     label: String,
     charts: Charts,
