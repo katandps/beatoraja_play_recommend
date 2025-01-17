@@ -86,7 +86,13 @@ async fn fetch(setting: &TableSetting) -> anyhow::Result<Table> {
 }
 
 fn create_cache_dir(setting: &TableSetting) -> anyhow::Result<PathBuf> {
-    let mut cache_path = dirs::cache_dir().unwrap_or_else(std::env::temp_dir);
+    let mut cache_path = {
+        if let Ok(path) = std::env::var("CACHE_DIR") {
+            PathBuf::from(path)
+        } else {
+            dirs::cache_dir().unwrap_or_else(std::env::temp_dir)
+        }
+    };
     cache_path.push("beatoraja_play_recommend");
     cache_path.push("tables");
     create_dir_all(&cache_path).with_context(|| "could not create table cache directory")?;
