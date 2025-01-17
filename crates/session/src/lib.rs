@@ -5,16 +5,15 @@ use model::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Claims {
+pub struct Claims {
     user_id: UserId,
     exp: i64,
     admin: bool,
 }
 
-#[allow(unused)]
-fn generate_session_jwt(user_id: UserId) -> Result<String> {
+pub fn generate_session_jwt(user_id: UserId, period: Duration) -> Result<String> {
     let expiration = Utc::now()
-        .checked_add_signed(Duration::days(30))
+        .checked_add_signed(period)
         .expect("invalid timestamp");
     let claims = Claims {
         user_id,
@@ -29,8 +28,7 @@ fn generate_session_jwt(user_id: UserId) -> Result<String> {
     Ok(token)
 }
 
-#[allow(unused)]
-fn verify_session_jwt(jwt: &str) -> Result<Claims> {
+pub fn verify_session_jwt(jwt: &str) -> Result<Claims> {
     let decoded = decode::<Claims>(
         jwt,
         &get_public_key()?,
@@ -62,24 +60,23 @@ mod test {
         std::env::set_var(
             "SESSION_JWT_PUBLIC_KEY",
             r"-----BEGIN PUBLIC KEY-----
-MEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAE0JLtHjBYATwilJVTv4lEfxx28tV2
-7hhUA77sYd1UBJfGAnCpPOOlc9RuhexDUl/W
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWU9bFwe/eMBLiLNOvBeiL1K8So6o
+tnMDyo3PQgZ3QpCvuCMzo13a8ZGSraB5bx3ofZis3O6VDk42rGXNFWd5gA==
 -----END PUBLIC KEY-----
 ",
         );
         std::env::set_var(
             "SESSION_JWT_PRIVATE_KEY",
-            r"-----BEGIN EC PRIVATE KEY-----
-MF8CAQEEGKqdNdt+XWOEROL5eNNo8lL/vgl20yJwp6AKBggqhkjOPQMBAaE0AzIA
-BNCS7R4wWAE8IpSVU7+JRH8cdvLVdu4YVAO+7GHdVASXxgJwqTzjpXPUboXsQ1Jf
-1g==
------END EC PRIVATE KEY-----
+            r"-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgy/NmLbZyP600Ic1S
++ERzBpiUd7VE8K4hynJdnaMKqwShRANCAARZT1sXB794wEuIs068F6IvUrxKjqi2
+cwPKjc9CBndCkK+4IzOjXdrxkZKtoHlvHeh9mKzc7pUOTjasZc0VZ3mA
+-----END PRIVATE KEY-----
 ",
         );
-        let user_id = 1;
-        let jwt = generate_session_jwt(UserId::new(user_id));
-        dbg!(&jwt);
+        let user_id = UserId::new(1);
+        let jwt = generate_session_jwt(user_id, Duration::days(30));
         let claims = verify_session_jwt(&jwt.unwrap());
-        dbg!(&claims);
+        assert_eq!(claims.unwrap().user_id, user_id);
     }
 }
