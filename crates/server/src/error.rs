@@ -26,17 +26,6 @@ pub enum HandleError {
 
     #[error("WarpError: {0:?}")]
     WarpError(warp::Error),
-    #[error("SessionIsNotFound:{0:?}")]
-    SessionError(redis::RedisError),
-
-    #[error("DirectoryCouldNotCreated")]
-    DirectoryCouldNotCreated,
-    #[error("FileIsNotFound")]
-    FileIsNotFound,
-    #[error("FileIsNotDeleted")]
-    FileIsNotDeleted,
-    #[error("SaveIsNotComplete")]
-    SaveIsNotComplete,
     #[error("FormIsIncomplete")]
     FormIsIncomplete,
 
@@ -49,8 +38,6 @@ pub enum HandleError {
     OAuthGoogleError(oauth_google::Error),
     #[error("OtherError: {0:?}")]
     OtherError(anyhow::Error),
-    #[error("RedisError: {0:?}")]
-    RedisError(redis::RedisError),
     #[error("SerdeJsonError: {0:?}")]
     SerdeJsonError(serde_json::Error),
 }
@@ -72,10 +59,6 @@ pub async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> 
                 AccountIsNotSelected => StatusCode::BAD_REQUEST,
                 AccountSelectionIsInvalid(_) => StatusCode::BAD_REQUEST,
                 WarpError(_) => StatusCode::BAD_REQUEST,
-                FileIsNotFound => StatusCode::OK,
-                SaveIsNotComplete => StatusCode::OK,
-                FileIsNotDeleted => StatusCode::OK,
-                SessionError(_) => StatusCode::UNAUTHORIZED,
                 _ => StatusCode::INTERNAL_SERVER_ERROR,
             },
             e.to_string(),
@@ -117,12 +100,6 @@ impl From<std::io::Error> for HandleError {
 impl From<warp::Error> for HandleError {
     fn from(e: warp::Error) -> Self {
         WarpError(e)
-    }
-}
-
-impl From<redis::RedisError> for HandleError {
-    fn from(e: redis::RedisError) -> Self {
-        RedisError(e)
     }
 }
 

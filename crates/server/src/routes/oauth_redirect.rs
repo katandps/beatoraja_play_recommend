@@ -32,9 +32,9 @@ async fn oauth_handler<C: RegisterUser + AccountByGoogleId>(
         .user(&GoogleId::new(profile.user_id))
         .await
         .map_err(HandleError::OtherError)?;
-    let key = crate::session::save_user_id(account.google_id).map_err(HandleError::OtherError)?;
+    let key = crate::session::save_user_id(account.user_id).map_err(HandleError::OtherError)?;
     let header = format!(
-        "session-token={};domain={};max-age=300",
+        "session-token={};domain={};max-age=2592000",
         key,
         config().client_domain
     );

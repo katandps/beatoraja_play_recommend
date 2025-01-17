@@ -6,9 +6,9 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
-    user_id: UserId,
+    pub user_id: UserId,
     exp: i64,
-    admin: bool,
+    pub admin: bool,
 }
 
 pub fn generate_session_jwt(user_id: UserId, period: Duration) -> Result<String> {
@@ -39,14 +39,24 @@ pub fn verify_session_jwt(jwt: &str) -> Result<Claims> {
 
 #[allow(unused)]
 fn get_private_key() -> Result<EncodingKey> {
-    let private_key = std::env::var("SESSION_JWT_PRIVATE_KEY").unwrap();
+    let private_key = if let Ok(key) = std::env::var("SESSION_JWT_PRIVATE_KEY") {
+        key
+    } else {
+        let path: String = std::env::var("SESSION_JWT_PRIVATE_KEY_PATH").unwrap();
+        std::fs::read_to_string(path)?
+    };
     let result = EncodingKey::from_ec_pem(&private_key.into_bytes())?;
     Ok(result)
 }
 
 #[allow(unused)]
 fn get_public_key() -> Result<DecodingKey> {
-    let public_key = std::env::var("SESSION_JWT_PUBLIC_KEY").unwrap();
+    let public_key = if let Ok(key) = std::env::var("SESSION_JWT_PUBLIC_KEY") {
+        key
+    } else {
+        let path: String = std::env::var("SESSION_JWT_PUBLIC_KEY_PATH").unwrap();
+        std::fs::read_to_string(path)?
+    };
     let result = DecodingKey::from_ec_pem(&public_key.into_bytes())?;
     Ok(result)
 }
