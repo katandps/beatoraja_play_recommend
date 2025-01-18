@@ -14,15 +14,14 @@ pub struct ScoreUpload {
 }
 
 impl ScoreUpload {
-    pub fn by_user_id_and_date(
+    pub fn last_by_user_id(
         connection: &mut MySqlPooledConnection,
         query_id: i32,
-        query_date: &NaiveDateTime,
     ) -> DieselResult<Self> {
         use crate::schema::score_upload_logs::dsl::*;
         score_upload_logs
             .filter(user_id.eq(query_id))
-            .filter(date.eq(query_date))
+            .order_by(date)
             .first(connection)
     }
 }

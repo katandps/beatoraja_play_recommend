@@ -10,7 +10,7 @@ use crate::models::{
     UserStatusForInsert,
 };
 use anyhow::Result;
-use chrono::{NaiveDateTime, Utc};
+use chrono::{Duration, NaiveDateTime, Utc};
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, PooledConnection};
 use diesel::result::Error::NotFound;
@@ -596,24 +596,21 @@ impl RegisterUpload for MySQLClient {
         user_id: UserId,
         upload_at: UploadAt,
     ) -> Result<ScoreUpload> {
-        let record = models::ScoreUpload::by_user_id_and_date(
-            &mut self.connection,
-            user_id.get(),
-            &upload_at.0.naive_utc(),
-        );
+        let record = models::ScoreUpload::last_by_user_id(&mut self.connection, user_id.get());
         match record {
-            Ok(record) => {
+            Ok(record) if upload_at.0.naive_utc() - record.date < Duration::minutes(10) => {
                 log::info!(
-                    "already registered score: {}: {}",
+                    "already registered score: {}: {}: {}",
                     user_id.get(),
-                    upload_at.0
+                    upload_at.0,
+                    upload_at.0.naive_utc() - record.date
                 );
                 Ok(ScoreUpload::new(
                     UploadId(record.id),
                     UploadAt(record.date.and_utc()),
                 ))
             }
-            Err(_) => {
+            _ => {
                 use crate::schema::score_upload_logs;
                 log::info!("register new scores: {}: {}", user_id.get(), upload_at.0);
                 let record = self
@@ -623,11 +620,7 @@ impl RegisterUpload for MySQLClient {
                             .values(models::RegisteringScoreLog::new(user_id, upload_at.clone()))
                             .execute(connection)
                             .unwrap();
-                        models::ScoreUpload::by_user_id_and_date(
-                            connection,
-                            user_id.get(),
-                            &upload_at.0.naive_utc(),
-                        )
+                        models::ScoreUpload::last_by_user_id(connection, user_id.get())
                     })
                     .unwrap();
 
