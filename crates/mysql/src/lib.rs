@@ -616,14 +616,21 @@ impl RegisterUpload for MySQLClient {
             Err(_) => {
                 use crate::schema::score_upload_logs;
                 log::info!("register new scores: {}: {}", user_id.get(), upload_at.0);
-                diesel::insert_into(score_upload_logs::table)
-                    .values(models::RegisteringScoreLog::new(user_id, upload_at.clone()))
-                    .execute(&mut self.connection)?;
-                let record = models::ScoreUpload::by_user_id_and_date(
-                    &mut self.connection,
-                    user_id.get(),
-                    &upload_at.0.naive_utc(),
-                )?;
+                let record = self
+                    .connection
+                    .transaction(|connection| {
+                        diesel::insert_into(score_upload_logs::table)
+                            .values(models::RegisteringScoreLog::new(user_id, upload_at.clone()))
+                            .execute(connection)
+                            .unwrap();
+                        models::ScoreUpload::by_user_id_and_date(
+                            connection,
+                            user_id.get(),
+                            &upload_at.0.naive_utc(),
+                        )
+                    })
+                    .unwrap();
+
                 Ok(ScoreUpload::new(
                     UploadId(record.id),
                     UploadAt(record.date.and_utc()),
