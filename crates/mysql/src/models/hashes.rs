@@ -20,7 +20,7 @@ pub struct Hash {
 impl Hash {
     pub fn all(connection: &mut MySqlPooledConnection) -> DieselResult<Vec<Self>> {
         use crate::schema::hashes::dsl::*;
-        hashes.load(connection)
+        hashes.filter(md5.ne("")).load(connection)
     }
 
     pub fn for_tables(
@@ -58,7 +58,9 @@ impl Hash {
         loop {
             let mut records = Vec::new();
             while index < new_hashes.len() && records.len() < 1000 {
-                records.push(new_hashes[index].clone());
+                if !new_hashes[index].md5.is_empty() {
+                    records.push(new_hashes[index].clone());
+                }
                 index += 1;
             }
             if records.is_empty() {
