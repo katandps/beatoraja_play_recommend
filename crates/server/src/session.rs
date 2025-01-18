@@ -4,6 +4,8 @@ use model::*;
 use repository::AccountByUserId;
 use warp::Rejection;
 
+use crate::error::HandleError;
+
 pub const SESSION_KEY: &str = "session-token";
 const EXPIRE_DAYS: i64 = 30;
 
@@ -15,6 +17,9 @@ pub async fn get_account_by_session<C: AccountByUserId>(
     mut repos: C,
     jwt: String,
 ) -> Result<Account, Rejection> {
-    let claims = session::verify_session_jwt(&jwt).unwrap();
-    Ok(repos.user(claims.user_id.get()).await.unwrap())
+    let claims = session::verify_session_jwt(&jwt).map_err(HandleError::from)?;
+    Ok(repos
+        .user(claims.user_id.get())
+        .await
+        .map_err(HandleError::from)?)
 }

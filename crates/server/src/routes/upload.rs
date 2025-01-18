@@ -71,12 +71,16 @@ async fn play_data_upload_handler<
         .register_upload(account.user_id, UploadAt(Utc::now()))
         .await
         .map_err(HandleError::from)?;
+    log::info!("read score file");
     let scores = sqlite_client.score().map_err(HandleError::from)?;
+    log::info!("read player stat");
     let player_states = sqlite_client.player().map_err(HandleError::from)?;
+    log::info!("save score");
     repository
         .save_score(&account, &scores, &upload)
         .await
         .map_err(HandleError::from)?;
+    log::info!("save player stat");
     repository
         .save_player_states(&account, &player_states, &upload)
         .await

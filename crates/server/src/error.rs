@@ -87,6 +87,7 @@ impl warp::reject::Reject for HandleError {}
 
 impl From<anyhow::Error> for HandleError {
     fn from(e: anyhow::Error) -> Self {
+        log::warn!("{:?}", e);
         OtherError(e)
     }
 }
