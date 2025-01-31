@@ -96,7 +96,7 @@ fn create_cache_dir(setting: &TableSetting) -> anyhow::Result<PathBuf> {
     cache_path.push("beatoraja_play_recommend");
     cache_path.push("tables");
     create_dir_all(&cache_path).with_context(|| "could not create table cache directory")?;
-    cache_path.push(format!("{}.json", setting.id.to_string()));
+    cache_path.push(format!("{}.json", setting.id));
     Ok(cache_path)
 }
 
