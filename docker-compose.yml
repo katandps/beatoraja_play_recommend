@@ -15,7 +15,6 @@ services:
     restart: always
     depends_on:
       - mysql
-      - session-redis
     # #開発時はコメントアウト
     # logging:
     #   driver: awslogs
@@ -42,10 +41,3 @@ services:
       MYSQL_DATABASE: user_data
       MYSQL_USER: docker
       MYSQL_PASSWORD: docker
-
-  session-redis:
-    image: redis
-    container_name: session-redis
-    restart: always
-    ports:
-      - "6379:6379"
