@@ -5,6 +5,7 @@ mod score_snaps;
 mod score_upload;
 mod scores;
 mod songs;
+mod upload_stats;
 mod user_statues;
 mod users;
 
@@ -15,6 +16,7 @@ pub use score_snaps::*;
 pub use score_upload::*;
 pub use scores::*;
 pub use songs::*;
+pub use upload_stats::*;
 pub use user_statues::*;
 pub use users::*;
 

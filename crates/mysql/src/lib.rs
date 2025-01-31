@@ -16,6 +16,7 @@ use diesel::r2d2::{ConnectionManager, PooledConnection};
 use diesel::result::Error::NotFound;
 use diesel::MysqlConnection;
 use model::*;
+use models::UploadStatsForInsert;
 use oauth_google::{GoogleProfile, RegisterUser};
 use r2d2::Pool;
 use repository::*;
@@ -403,7 +404,6 @@ impl SaveSongData for MySQLClient {
 }
 
 impl SavePlayerStateData for MySQLClient {
-    #[allow(unused)]
     async fn save_player_states(
         &mut self,
         account: &Account,
@@ -464,6 +464,31 @@ impl SavePlayerStateData for MySQLClient {
                     playtime: stat.play_time.0,
                 })
             }
+        }
+        if let Some(last) = stats.last() {
+            let stat = UploadStatsForInsert {
+                upload_log_id: upload.upload_id.0,
+                user_id: user.id,
+                playcount: last.play_count.0,
+                clear: last.clear_count.0,
+                epg: last.total_judge.judge().early_pgreat,
+                lpg: last.total_judge.judge().late_pgreat,
+                egr: last.total_judge.judge().early_great,
+                lgr: last.total_judge.judge().late_great,
+                egd: last.total_judge.judge().early_good,
+                lgd: last.total_judge.judge().late_good,
+                ebd: last.total_judge.judge().early_bad,
+                lbd: last.total_judge.judge().late_bad,
+                epr: last.total_judge.judge().early_poor,
+                lpr: last.total_judge.judge().late_poor,
+                ems: last.total_judge.judge().early_miss,
+                lms: last.total_judge.judge().late_miss,
+                playtime: last.play_time.0,
+            };
+            log::info!("Insert stat this time");
+            diesel::insert_into(schema::upload_log_stats::table)
+                .values(stat)
+                .execute(&mut self.connection)?;
         }
         log::info!("Save stat for {} days", inserts.len());
         diesel::insert_into(schema::player_stats::table)
