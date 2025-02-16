@@ -486,7 +486,7 @@ impl SavePlayerStateData for MySQLClient {
                 playtime: last.play_time.0,
             };
             log::info!("Insert stat this time");
-            diesel::insert_into(schema::upload_log_stats::table)
+            diesel::replace_into(schema::upload_log_stats::table)
                 .values(stat)
                 .execute(&mut self.connection)?;
         }
