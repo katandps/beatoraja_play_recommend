@@ -1,8 +1,10 @@
 #![allow(async_fn_in_trait)]
+use std::sync::MutexGuard;
+
 use anyhow::Result;
 use model::{
     Account, GoogleId, HashSha256, PlayerStats, RankedScore, Score, ScoreId, ScoreUpload, Scores,
-    SessionKey, Songs, Tables, UploadAt, UserId, VisibleAccount,
+    SessionKey, Songs, Tables, TablesInfo, UploadAt, UserId, VisibleAccount,
 };
 
 pub trait PublishedUsers {
@@ -91,4 +93,8 @@ pub trait RevokeSession {
     async fn revoke(&mut self, session_key: &SessionKey, user_id: UserId) -> Result<()>;
 
     async fn is_revoked(&mut self, session_key: &SessionKey, user_id: UserId) -> Result<bool>;
+}
+
+pub trait GetTables {
+    async fn get(&mut self) -> MutexGuard<'_, TablesInfo>;
 }

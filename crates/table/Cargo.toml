@@ -8,6 +8,8 @@ edition = "2021"
 
 [dependencies]
 model = { path = "../model" }
+repository = { path = "../repository" }
+
 log = "0.4.22"
 rand = { version = "0.8.5" }
 

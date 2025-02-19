@@ -2,18 +2,45 @@ mod config;
 
 use std::fs::create_dir_all;
 use std::path::{Path, PathBuf};
+use std::sync::{Arc, Mutex, MutexGuard};
 
-use anyhow::{anyhow, Context};
+use anyhow::{anyhow, Context, Result};
 use config::{config, TableSetting};
 use futures::stream::StreamExt;
 use model::*;
 use rand::distributions::{Alphanumeric, DistString};
+use repository::GetTables;
 use reqwest::header::{HeaderValue, USER_AGENT};
 use reqwest::Client;
 use scraper::{Html, Selector};
 use thiserror::Error;
 use url::Url;
 use TableParseError::*;
+
+pub struct TableClient {
+    tables: Arc<Mutex<TablesInfo>>,
+}
+
+impl TableClient {
+    pub fn new() -> Self {
+        Self {
+            tables: Arc::new(Mutex::new(TablesInfo::default())),
+        }
+    }
+
+    pub async fn update(&self) -> Result<()> {
+        log::info!("Starting to update difficulty tables.");
+        let mut tables = self.tables.lock().unwrap();
+        from_web(&mut tables).await;
+        Ok(())
+    }
+}
+
+impl GetTables for TableClient {
+    async fn get(&mut self) -> MutexGuard<'_, TablesInfo> {
+        self.tables.lock().unwrap()
+    }
+}
 
 pub async fn from_web(tables_info: &mut TablesInfo) {
     futures::stream::iter(config().tables.clone())
