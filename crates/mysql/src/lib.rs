@@ -364,8 +364,13 @@ impl SaveSongData for MySQLClient {
     async fn save_song(&mut self, songs: &Songs) -> Result<()> {
         let exist_hashes = Hash::all(&mut self.connection)?;
         let mut hashmap = songs.converter.sha256_to_md5.clone();
-        for row in exist_hashes {
-            let _ = HashSha256::from_str(&row.sha256).map(|hash| hashmap.remove(&hash));
+        let mut songs = songs.songs.clone();
+
+        for hash in &exist_hashes {
+            let _ = HashSha256::from_str(&hash.sha256).map(|hash| {
+                hashmap.remove(&hash);
+                songs.remove(&hash);
+            });
         }
         let new_hashes = hashmap
             .iter()
@@ -375,11 +380,6 @@ impl SaveSongData for MySQLClient {
             })
             .collect::<Vec<_>>();
         Hash::insert_new_hashes(new_hashes, &mut self.connection)?;
-        let exist_songs = models::Song::all(&mut self.connection)?;
-        let mut songs = songs.songs.clone();
-        for row in exist_songs {
-            let _ = HashSha256::from_str(&row.sha256).map(|hash| songs.remove(&hash));
-        }
         let new_songs = songs
             .values()
             .map(models::Song::from_song)
