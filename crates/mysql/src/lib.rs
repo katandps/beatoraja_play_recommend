@@ -395,7 +395,7 @@ impl SaveSongData for MySQLClient {
                 break;
             }
             log::info!("Insert {} songs.", records.len());
-            diesel::insert_into(schema::songs::table)
+            diesel::replace_into(schema::songs::table)
                 .values(records)
                 .execute(&mut self.connection)?;
         }
