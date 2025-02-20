@@ -362,33 +362,48 @@ impl SaveScoreData for MySQLClient {
 
 impl SaveSongData for MySQLClient {
     async fn save_song(&mut self, songs: &Songs) -> Result<()> {
-        let exist_hashes = Hash::all(&mut self.connection)?;
-        let mut hashmap = songs.converter.sha256_to_md5.clone();
-        let mut songs = songs.songs.clone();
+        {
+            // insert hashes
 
-        for hash in &exist_hashes {
-            let _ = HashSha256::from_str(&hash.sha256).map(|hash| {
-                hashmap.remove(&hash);
-                songs.remove(&hash);
-            });
+            let saved = Hash::all(&mut self.connection)?;
+            let mut hashmap = songs.converter.sha256_to_md5.clone();
+            for hash in &saved {
+                if &hash.sha256
+                    == "3f6bc73ebabb839ed30266ae555b1fb51f8aac6452da003c6ab4af4a135bbaac"
+                {
+                    log::info!("found Maxi");
+                }
+                let _ = HashSha256::from_str(&hash.sha256).map(|hash| {
+                    hashmap.remove(&hash);
+                });
+            }
+            let new_hashes = hashmap
+                .iter()
+                .map(|(sha256, md5)| Hash {
+                    sha256: sha256.to_string(),
+                    md5: md5.to_string(),
+                })
+                .collect::<Vec<_>>();
+            log::info!("Insert {} hashes", new_hashes.len());
+            Hash::insert_new_hashes(new_hashes, &mut self.connection)?;
         }
-        let new_hashes = hashmap
-            .iter()
-            .map(|(sha256, md5)| Hash {
-                sha256: sha256.to_string(),
-                md5: md5.to_string(),
-            })
-            .collect::<Vec<_>>();
-        Hash::insert_new_hashes(new_hashes, &mut self.connection)?;
-        let new_songs = songs
-            .values()
-            .map(models::Song::from_song)
-            .collect::<Vec<_>>();
-        for records in new_songs.chunks(100) {
-            log::info!("Insert {} songs.", records.len());
-            diesel::replace_into(schema::songs::table)
-                .values(records)
-                .execute(&mut self.connection)?;
+        {
+            // insert songs
+            let saved = models::Song::all(&mut self.connection)?;
+            let mut songs = songs.songs.clone();
+            for song in saved {
+                let _ = HashSha256::from_str(&song.sha256).map(|hash| songs.remove(&hash));
+            }
+            let new_songs = songs
+                .values()
+                .map(models::Song::from_song)
+                .collect::<Vec<_>>();
+            log::info!("Insert {} songs.", new_songs.len());
+            for records in new_songs.chunks(100) {
+                diesel::insert_into(schema::songs::table)
+                    .values(records)
+                    .execute(&mut self.connection)?;
+            }
         }
         Ok(())
     }
