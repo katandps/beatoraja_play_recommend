@@ -20,7 +20,7 @@ pub struct Hash {
 impl Hash {
     pub fn all(connection: &mut MySqlPooledConnection) -> DieselResult<Vec<Self>> {
         use crate::schema::hashes::dsl::*;
-        hashes.filter(md5.ne("")).load(connection)
+        hashes.load(connection)
     }
 
     pub fn for_tables(
@@ -52,20 +52,11 @@ impl Hash {
         if new_hashes.is_empty() {
             return Ok(());
         }
-        let mut cached = for_tables_is_cached().try_lock().unwrap();
-        *cached = AtomicBool::new(false);
-        let mut index = 0;
-        loop {
-            let mut records = Vec::new();
-            while index < new_hashes.len() && records.len() < 1000 {
-                if !new_hashes[index].md5.is_empty() {
-                    records.push(new_hashes[index].clone());
-                }
-                index += 1;
-            }
-            if records.is_empty() {
-                break;
-            }
+        {
+            let mut cached = for_tables_is_cached().try_lock().unwrap();
+            *cached = AtomicBool::new(false);
+        }
+        for records in new_hashes.chunks(1000) {
             log::info!("Insert {} hashes.", records.len());
             diesel::insert_into(schema::hashes::table)
                 .values(records)

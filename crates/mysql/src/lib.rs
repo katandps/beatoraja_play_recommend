@@ -384,16 +384,7 @@ impl SaveSongData for MySQLClient {
             .values()
             .map(models::Song::from_song)
             .collect::<Vec<_>>();
-        let mut index = 0;
-        loop {
-            let mut records = Vec::new();
-            while index < new_songs.len() && records.len() < 100 {
-                records.push(new_songs[index].clone());
-                index += 1;
-            }
-            if records.is_empty() {
-                break;
-            }
+        for records in new_songs.chunks(100) {
             log::info!("Insert {} songs.", records.len());
             diesel::replace_into(schema::songs::table)
                 .values(records)
