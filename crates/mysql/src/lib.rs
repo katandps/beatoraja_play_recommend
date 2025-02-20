@@ -368,11 +368,6 @@ impl SaveSongData for MySQLClient {
             let saved = Hash::all(&mut self.connection)?;
             let mut hashmap = songs.converter.sha256_to_md5.clone();
             for hash in &saved {
-                if &hash.sha256
-                    == "3f6bc73ebabb839ed30266ae555b1fb51f8aac6452da003c6ab4af4a135bbaac"
-                {
-                    log::info!("found Maxi");
-                }
                 let _ = HashSha256::from_str(&hash.sha256).map(|hash| {
                     hashmap.remove(&hash);
                 });
