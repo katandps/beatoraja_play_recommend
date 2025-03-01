@@ -12,3 +12,5 @@ table = { path = "../table" }
 repository = { path = "../repository" }
 
 tokio = { version = "1.18.1", features = ["full"] }
+log = "0.4.26"
+anyhow = "1.0.96"
