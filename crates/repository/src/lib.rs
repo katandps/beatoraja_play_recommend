@@ -96,5 +96,5 @@ pub trait RevokeSession {
 }
 
 pub trait GetTables {
-    async fn get(&mut self) -> MutexGuard<'_, TablesInfo>;
+    fn get(&self) -> MutexGuard<'_, TablesInfo>;
 }

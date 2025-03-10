@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use model::{TablesFormat, TablesInfo};
-use repository::GetTables;
 use tokio::sync::{Mutex, OnceCell};
 
 pub async fn tables() -> &'static Arc<Mutex<TablesInfo>> {
@@ -19,23 +18,22 @@ async fn init() -> Arc<Mutex<TablesInfo>> {
     tables
 }
 
-pub async fn table_handler<T: GetTables, A>(
-    mut tables: T,
+pub async fn table_handler(
+    tables: TablesInfo,
     tag: Option<String>,
 ) -> Result<Response<TablesFormat>> {
-    let tables_info = tables.get().await;
-    if tables_info.tag == tag {
+    if tables.tag == tag {
         // 変更がない場合、ステータスコードだけを返す
         log::info!("table_handler ETag matched: {:?}", tag);
         Ok(Response::Cached {
-            tag: tables_info.get_tag().to_string(),
+            tag: tables.get_tag().to_string(),
         })
     } else {
         log::info!("table_handler ETag unmatched: {:?}", tag);
         // テーブル情報をJSONとして返す
         Ok(Response::Ok {
-            tag: Some(tables_info.get_tag().to_string()),
-            body: TablesFormat::format(&tables_info.tables),
+            tag: Some(tables.get_tag().to_string()),
+            body: TablesFormat::format(&tables.tables),
         })
     }
 }

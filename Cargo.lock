@@ -2164,6 +2164,7 @@ dependencies = [
  "repository",
  "serde",
  "serde_json",
+ "service",
  "session",
  "sqlite",
  "table",

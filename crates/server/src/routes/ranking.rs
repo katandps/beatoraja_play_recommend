@@ -1,17 +1,17 @@
 use crate::error::HandleError;
 use crate::filter::{with_db, with_table, RankingQuery};
-use crate::TableData;
 use chrono::Duration;
 use model::*;
 use mysql::MySqlPool;
 use repository::{PublishedUsers, ScoresBySha256, SongDataForTables};
 use std::collections::HashMap;
 use std::str::FromStr;
+use table::TableClient;
 use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
 
-pub fn route(db_pool: &MySqlPool, tables: &TableData) -> BoxedFilter<(impl Reply,)> {
+pub fn route(db_pool: &MySqlPool, tables: &TableClient) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("ranking"))
         .and(with_db(db_pool))
@@ -53,12 +53,11 @@ async fn parse_ranking_query(query: HashMap<String, String>) -> Result<RankingQu
 /// user_idをQueryParameterより取得する
 async fn ranking_handler<C: ScoresBySha256 + PublishedUsers + SongDataForTables>(
     mut repos: C,
-    tables: TableData,
+    tables: TablesInfo,
     query: RankingQuery,
 ) -> Result<impl Reply, Rejection> {
-    let tables_info = tables.lock().await;
     let songs = repos
-        .song_data(&tables_info.tables)
+        .song_data(&tables.tables)
         .await
         .map_err(HandleError::from)?;
     let scores = repos

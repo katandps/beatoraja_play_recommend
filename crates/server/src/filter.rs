@@ -1,14 +1,14 @@
 use crate::cache_tags::SongsTag;
 use crate::error::HandleError;
-use crate::TableData;
 use futures::lock::Mutex;
 use model::*;
 use mysql::{MySQLClient, MySqlPool};
-use repository::AccountByUserId;
+use repository::{AccountByUserId, GetTables};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::sync::Arc;
+use table::TableClient;
 
 use warp::filters::multipart::FormData;
 use warp::{Filter, Rejection};
@@ -21,9 +21,9 @@ pub fn with_db(
 }
 
 pub fn with_table(
-    tables: &TableData,
-) -> impl Filter<Extract = (TableData,), Error = Infallible> + Clone {
-    let tables = Arc::clone(tables);
+    tables: &TableClient,
+) -> impl Filter<Extract = (TablesInfo,), Error = Infallible> + Clone {
+    let tables = tables.get().clone();
     warp::any().map(move || tables.clone())
 }
 

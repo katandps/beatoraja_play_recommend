@@ -6,22 +6,19 @@ mod routes;
 pub mod session;
 
 use config::config;
-use model::TablesInfo;
-use std::sync::Arc;
+use serde::Serialize;
 use std::time::Duration;
-use tokio::sync::Mutex;
-
-pub type TableData = Arc<Mutex<TablesInfo>>;
+use table::TableClient;
+use warp::http;
+use warp::reply::Reply;
 
 #[tokio::main]
 async fn main() {
     env_logger::init();
     let db_pool = mysql::get_db_pool();
-    let tables = Arc::new(Mutex::new(TablesInfo::default()));
-    {
-        let mut tables = tables.lock().await;
-        table::from_with_cache(&mut tables).await;
-    }
+    let tables = TableClient::new();
+    let _ = tables.init().await;
+
     let route = routes::routes(&db_pool, &tables);
 
     let (http_addr, http_warp) = warp::serve(route.clone()).bind_ephemeral(([0, 0, 0, 0], 8000));
@@ -35,13 +32,35 @@ async fn main() {
     futures::future::join3(http_warp, https_warp, table_update(&tables)).await;
 }
 
-async fn table_update(tables: &TableData) {
+async fn table_update(tables: &TableClient) {
     loop {
         tokio::time::sleep(Duration::from_secs(3600)).await;
-        {
-            log::info!("Starting to update difficulty tables.");
-            let mut tables = tables.lock().await;
-            table::from_web(&mut tables).await;
+        let result = tables.update().await;
+        if result.is_err() {
+            log::warn!("{:?}", result)
+        }
+    }
+}
+
+pub async fn map_response<T: Serialize>(
+    result: anyhow::Result<service::Response<T>>,
+) -> impl Reply {
+    match result {
+        Ok(service::Response::Ok { tag, body }) => {
+            let mut builder = http::Response::builder();
+            if let Some(tag) = tag {
+                builder = builder.header("ETag", tag);
+            }
+            let json = serde_json::to_string(&body).unwrap();
+            builder.body(json).unwrap()
+        }
+        Ok(service::Response::Cached { tag }) => http::Response::builder()
+            .header("ETag", tag)
+            .body("".to_string())
+            .unwrap(),
+        Err(e) => {
+            log::error!("{:?}", e);
+            panic!();
         }
     }
 }

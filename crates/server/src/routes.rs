@@ -18,16 +18,16 @@ mod users;
 use std::sync::Arc;
 
 use futures::lock::Mutex;
+use table::TableClient;
 use upload::{play_data_upload_route, song_data_upload_route};
 
 use crate::cache_tags::SongsTag;
-use crate::TableData;
 use mysql::MySqlPool;
 use warp::filters::cors::Builder;
 use warp::filters::BoxedFilter;
 use warp::{Filter, Reply};
 
-pub fn routes(db_pool: &MySqlPool, tables: &TableData) -> BoxedFilter<(impl Reply,)> {
+pub fn routes(db_pool: &MySqlPool, tables: &TableClient) -> BoxedFilter<(impl Reply,)> {
     let songs_tag = Arc::new(Mutex::new(SongsTag::new()));
 
     api_routes(db_pool, tables, &songs_tag)
@@ -38,7 +38,7 @@ pub fn routes(db_pool: &MySqlPool, tables: &TableData) -> BoxedFilter<(impl Repl
 
 pub fn api_routes(
     db_pool: &MySqlPool,
-    t: &TableData,
+    t: &TableClient,
     songs_tag: &Arc<Mutex<SongsTag>>,
 ) -> BoxedFilter<(impl Reply,)> {
     health::route(db_pool)
@@ -63,7 +63,7 @@ pub fn api_routes(
         .boxed()
 }
 
-pub fn table_routes(db_pool: &MySqlPool, tables: &TableData) -> BoxedFilter<(impl Reply,)> {
+pub fn table_routes(db_pool: &MySqlPool, tables: &TableClient) -> BoxedFilter<(impl Reply,)> {
     custom_table::header_route(tables)
         .or(custom_table::body_route(db_pool, tables))
         .or(custom_table::table_route())

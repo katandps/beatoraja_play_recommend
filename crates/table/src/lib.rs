@@ -34,10 +34,17 @@ impl TableClient {
         from_web(&mut tables).await;
         Ok(())
     }
+
+    pub async fn init(&self) -> Result<()> {
+        log::info!("Starting to load difficulty tables.");
+        let mut tables = self.tables.lock().unwrap();
+        from_with_cache(&mut tables).await;
+        Ok(())
+    }
 }
 
 impl GetTables for TableClient {
-    async fn get(&mut self) -> MutexGuard<'_, TablesInfo> {
+    fn get(&self) -> MutexGuard<'_, TablesInfo> {
         self.tables.lock().unwrap()
     }
 }

@@ -1,7 +1,6 @@
 use crate::error::HandleError;
 use crate::filter::DetailQuery;
 use crate::filter::{account_id_query, with_db, with_table};
-use crate::TableData;
 use chrono::Duration;
 use model::Account;
 use model::*;
@@ -9,11 +8,12 @@ use mysql::MySqlPool;
 use repository::{ScoresByAccount, SongDataForTables};
 use std::collections::HashMap;
 use std::str::FromStr;
+use table::TableClient;
 use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
 
-pub fn route(db_pool: &MySqlPool, tables: &TableData) -> BoxedFilter<(impl Reply,)> {
+pub fn route(db_pool: &MySqlPool, tables: &TableClient) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("detail"))
         .and(with_db(db_pool))
@@ -58,11 +58,10 @@ macro_rules! log_duration {
 /// user_idをQueryParameterより取得する
 async fn handler<C: ScoresByAccount + SongDataForTables>(
     mut repos: C,
-    tables: TableData,
+    tables: TablesInfo,
     query: DetailQuery,
     account: Account,
 ) -> Result<impl Reply, Rejection> {
-    let tables = tables.lock().await;
     let songs = repos
         .song_data(&tables.tables)
         .await

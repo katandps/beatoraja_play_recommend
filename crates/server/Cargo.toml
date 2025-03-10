@@ -38,3 +38,4 @@ mysql = { path = "../mysql" }
 oauth_google = { path = "../oauth_google" }
 repository = { path = "../repository" }
 session = { path = "../session" }
+service = { path = "../service" }
