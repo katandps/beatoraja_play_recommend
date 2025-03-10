@@ -8,7 +8,7 @@ use anyhow::{anyhow, Context, Result};
 use config::{config, TableSetting};
 use futures::stream::StreamExt;
 use model::*;
-use rand::distributions::{Alphanumeric, DistString};
+use rand::distr::{Alphanumeric, SampleString};
 use repository::GetTables;
 use reqwest::header::{HeaderValue, USER_AGENT};
 use reqwest::Client;
@@ -57,7 +57,7 @@ pub async fn from_web(tables_info: &mut TablesInfo) {
             match t {
                 Ok(t) => {
                     tables_info.tables.update(i, t);
-                    let mut rng = rand::thread_rng();
+                    let mut rng: rand::prelude::ThreadRng = rand::rng();
                     let random_code = Alphanumeric.sample_string(&mut rng, 24);
                     tables_info.update_tag(random_code);
                 }
@@ -78,7 +78,7 @@ pub async fn from_with_cache(tables_info: &mut TablesInfo) {
             match t {
                 Ok(t) => {
                     tables_info.tables.update(i, t);
-                    let mut rng = rand::thread_rng();
+                    let mut rng = rand::rng();
                     let random_code = Alphanumeric.sample_string(&mut rng, 24);
                     tables_info.update_tag(random_code);
                 }

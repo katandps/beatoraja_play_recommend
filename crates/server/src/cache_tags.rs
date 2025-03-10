@@ -1,4 +1,4 @@
-use rand::distributions::{Alphanumeric, DistString};
+use rand::distr::{Alphanumeric, SampleString};
 
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct SongsTag {
@@ -6,7 +6,7 @@ pub struct SongsTag {
 }
 impl SongsTag {
     pub fn new() -> Self {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let random_code = Alphanumeric.sample_string(&mut rng, 24);
         Self { tag: random_code }
     }
