@@ -10,7 +10,7 @@ pub fn route(tables: &TableClient) -> BoxedFilter<(impl Reply,)> {
         .and(path("tables"))
         .and(with_table(tables))
         .and(with_tag())
-        .then(service::table_handler)
+        .then(service::tables::get)
         .then(map_response)
         .boxed()
 }
