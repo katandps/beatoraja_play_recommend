@@ -1,10 +1,10 @@
-use crate::cache_tags::SongsTag;
 use crate::error::HandleError;
 use futures::lock::Mutex;
 use model::*;
 use mysql::{MySQLClient, MySqlPool};
 use repository::{AccountByUserId, GetTables};
 use serde::Deserialize;
+use service::songs::SongsTag;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::sync::Arc;

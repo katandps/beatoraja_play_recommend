@@ -47,7 +47,9 @@ pub async fn map_response<T: Serialize>(
 ) -> impl Reply {
     match result {
         Ok(service::Response::Ok { tag, body }) => {
-            let mut builder = http::Response::builder();
+            let mut builder =
+                http::Response::builder().header("Content-type", "application/json; charset=utf-8");
+
             if let Some(tag) = tag {
                 builder = builder.header("ETag", tag);
             }
@@ -55,6 +57,7 @@ pub async fn map_response<T: Serialize>(
             builder.body(json).unwrap()
         }
         Ok(service::Response::Cached { tag }) => http::Response::builder()
+            .header("Content-type", "application/json; charset=utf-8")
             .header("ETag", tag)
             .body("".to_string())
             .unwrap(),

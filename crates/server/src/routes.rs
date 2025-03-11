@@ -21,8 +21,8 @@ use futures::lock::Mutex;
 use table::TableClient;
 use upload::{play_data_upload_route, song_data_upload_route};
 
-use crate::cache_tags::SongsTag;
 use mysql::MySqlPool;
+use service::songs::SongsTag;
 use warp::filters::cors::Builder;
 use warp::filters::BoxedFilter;
 use warp::{Filter, Reply};

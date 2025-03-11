@@ -1,4 +1,3 @@
-use crate::cache_tags::SongsTag;
 use crate::error::HandleError;
 use crate::filter::*;
 use bytes::Buf;
@@ -10,6 +9,7 @@ use mysql::MySqlPool;
 use repository::{
     AccountByGoogleId, RegisterUpload, SavePlayerStateData, SaveScoreData, SaveSongData,
 };
+use service::songs::SongsTag;
 use sqlite::SqliteClient;
 use std::collections::HashMap;
 use std::io::Write;

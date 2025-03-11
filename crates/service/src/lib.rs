@@ -1,3 +1,4 @@
+pub mod songs;
 pub mod tables;
 
 #[derive(Clone, Debug)]
