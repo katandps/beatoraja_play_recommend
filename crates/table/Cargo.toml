@@ -29,7 +29,7 @@ anyhow = "1.0.93"
 thiserror = "2.0.3"
 
 #HTMLパーサ
-scraper = "0.22.0"
+scraper = "0.23.1"
 
 # HTTPリクエスト/非同期処理
 reqwest = { version = "0.12.9", features = ["json"] }
