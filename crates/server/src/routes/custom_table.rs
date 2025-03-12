@@ -1,5 +1,5 @@
 use crate::error::HandleError;
-use crate::{filter::*, map_response};
+use crate::{filter::*, json};
 use model::*;
 use mysql::MySqlPool;
 use repository::SongDataForTables;
@@ -35,7 +35,7 @@ pub fn header_route(tables: &TableClient) -> BoxedFilter<(impl Reply,)> {
         .and(path!("recommend_table" / i32 / usize / "header.json"))
         .and(with_table(tables))
         .then(service::custom_table::header)
-        .then(map_response)
+        .then(json)
         .boxed()
 }
 

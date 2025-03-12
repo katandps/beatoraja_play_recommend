@@ -1,5 +1,5 @@
 use crate::filter::{with_table, with_tag};
-use crate::map_response;
+use crate::json;
 use table::TableClient;
 use warp::filters::BoxedFilter;
 use warp::path;
@@ -11,6 +11,6 @@ pub fn route(tables: &TableClient) -> BoxedFilter<(impl Reply,)> {
         .and(with_table(tables))
         .and(with_tag())
         .then(service::tables::get)
-        .then(map_response)
+        .then(json)
         .boxed()
 }

@@ -42,9 +42,7 @@ async fn table_update(tables: &TableClient) {
     }
 }
 
-pub async fn map_response<T: Serialize>(
-    result: anyhow::Result<service::Response<T>>,
-) -> impl Reply {
+pub async fn json<T: Serialize>(result: anyhow::Result<service::Response<T>>) -> impl Reply {
     match result {
         Ok(service::Response::Ok { tag, body }) => {
             let mut builder =

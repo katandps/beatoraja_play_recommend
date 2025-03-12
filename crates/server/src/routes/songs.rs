@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::filter::{with_db, with_songs_tag, with_table, with_tag};
-use crate::map_response;
+use crate::json;
 use futures::lock::Mutex;
 use mysql::MySqlPool;
 use service::songs::SongsTag;
@@ -22,6 +22,6 @@ pub fn route(
         .and(with_songs_tag(songs_tag))
         .and(with_tag())
         .then(service::songs::list)
-        .then(map_response)
+        .then(json)
         .boxed()
 }
