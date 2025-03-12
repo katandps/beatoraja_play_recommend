@@ -6,10 +6,12 @@ mod routes;
 pub mod session;
 
 use config::config;
+use error::HandleError;
 use serde::Serialize;
 use std::time::Duration;
 use table::TableClient;
 use warp::http;
+use warp::reject::Rejection;
 use warp::reply::Reply;
 
 #[tokio::main]
@@ -64,4 +66,8 @@ pub async fn json<T: Serialize>(result: anyhow::Result<service::Response<T>>) ->
             panic!();
         }
     }
+}
+
+pub async fn query<T>(query: anyhow::Result<T>) -> Result<T, Rejection> {
+    Ok(query.map_err(HandleError::from)?)
 }

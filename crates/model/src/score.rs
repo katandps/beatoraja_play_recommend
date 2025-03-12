@@ -23,7 +23,7 @@ pub use {
     play_count::PlayCount,
     rank::ClearRank,
     ranking::{RankedScore, RankingResponse},
-    scores::Scores,
+    scores::{DetailQuery, DetailResponse, Scores},
     snapshot::SnapShot,
     snapshots::SnapShots,
     song_id::{PlayMode, ScoreId},
