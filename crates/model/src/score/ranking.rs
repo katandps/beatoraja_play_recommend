@@ -1,5 +1,8 @@
+use anyhow::Result;
+use chrono::Duration;
+
 use crate::*;
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 #[derive(Clone)]
 pub struct RankedScore(HashMap<UserId, Score>);
@@ -34,4 +37,42 @@ impl RankedScore {
 pub struct RankingResponse {
     song: SongFormat,
     score: HashMap<UserId, (String, ScoreDetail)>,
+}
+
+#[derive(Deserialize)]
+#[allow(dead_code)]
+pub struct RankingQuery {
+    pub date: UpdatedAt,
+    #[serde(default)]
+    pub play_mode: PlayMode,
+    pub sha256: HashSha256,
+}
+impl RankingQuery {
+    pub async fn parse(query: HashMap<String, String>) -> Result<Self> {
+        let date = query
+            .get("date")
+            .map(|u| {
+                UpdatedAt::from_str(u)
+                    .map(|u| &u - Duration::days(-1))
+                    .unwrap_or_else(|_| UpdatedAt::default())
+            })
+            .unwrap_or_default();
+        let play_mode = if let Some(mode) = query.get("mode") {
+            match mode.parse::<i32>() {
+                Ok(mode) => PlayMode::from(mode),
+                Err(_) => PlayMode::default(),
+            }
+        } else {
+            PlayMode::default()
+        };
+        let sha256 = query
+            .get("sha256")
+            .map(|s| HashSha256::from_str(s).unwrap())
+            .unwrap();
+        Ok(RankingQuery {
+            date,
+            play_mode,
+            sha256,
+        })
+    }
 }

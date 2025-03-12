@@ -102,15 +102,6 @@ async fn get_changed_visibility_query(body: HashMap<String, String>) -> Result<b
 }
 
 #[derive(Deserialize)]
-#[allow(dead_code)]
-pub struct RankingQuery {
-    pub date: UpdatedAt,
-    #[serde(default)]
-    pub play_mode: PlayMode,
-    pub sha256: HashSha256,
-}
-
-#[derive(Deserialize)]
 pub struct SongLogQuery {
     #[serde(default)]
     pub play_mode: PlayMode,

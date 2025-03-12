@@ -22,7 +22,7 @@ pub use {
     min_bp::MinBP,
     play_count::PlayCount,
     rank::ClearRank,
-    ranking::{RankedScore, RankingResponse},
+    ranking::{RankedScore, RankingQuery, RankingResponse},
     scores::{DetailQuery, DetailResponse, Scores},
     snapshot::SnapShot,
     snapshots::SnapShots,

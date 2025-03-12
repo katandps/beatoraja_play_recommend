@@ -2,8 +2,12 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use futures::lock::Mutex;
+use model::RankingQuery;
+use model::RankingResponse;
 use model::SongFormat;
 use model::TablesInfo;
+use repository::PublishedUsers;
+use repository::ScoresBySha256;
 use repository::SongDataForTables;
 
 use crate::Response;
@@ -50,4 +54,19 @@ impl SongsTag {
             None => false,
         }
     }
+}
+
+pub async fn ranking<C: ScoresBySha256 + PublishedUsers + SongDataForTables>(
+    mut repos: C,
+    tables: TablesInfo,
+    query: RankingQuery,
+) -> Result<Response<RankingResponse>> {
+    let songs = repos.song_data(&tables.tables).await?;
+    let scores = repos.score(&query.sha256).await?;
+    let users = repos.fetch_users().await?;
+    let response = scores.for_response(&songs, &query.date, &query.sha256, &users);
+    Ok(Response::Ok {
+        tag: None,
+        body: response.unwrap_or_default(),
+    })
 }
