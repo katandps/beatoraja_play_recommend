@@ -1,6 +1,7 @@
 pub mod custom_table;
 pub mod songs;
 pub mod tables;
+pub mod user;
 
 #[derive(Clone, Debug)]
 pub enum Response<T> {

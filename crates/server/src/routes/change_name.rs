@@ -1,11 +1,9 @@
-use crate::error::HandleError;
 use crate::filter::{account_by_session, changed_name_by_query, with_db};
-use model::Account;
+use crate::json;
 use mysql::MySqlPool;
-use repository::RenameAccount;
 use warp::filters::BoxedFilter;
 use warp::path;
-use warp::{Filter, Rejection, Reply};
+use warp::{Filter, Reply};
 
 pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::post()
@@ -14,23 +12,7 @@ pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
         .and(with_db(db_pool))
         .and(account_by_session(db_pool))
         .and(changed_name_by_query())
-        .and_then(change_name_handler)
+        .then(service::user::change_name)
+        .then(json)
         .boxed()
-}
-
-async fn change_name_handler<C: RenameAccount>(
-    repos: C,
-    mut account: Account,
-    changed_name: String,
-) -> Result<impl Reply, Rejection> {
-    account.set_name(&changed_name);
-    rename_account(repos, &account).await?;
-    Ok(serde_json::to_string(&account).unwrap())
-}
-
-async fn rename_account<C: RenameAccount>(
-    mut repos: C,
-    account: &Account,
-) -> Result<(), HandleError> {
-    Ok(repos.rename(account).await?)
 }
