@@ -1,5 +1,5 @@
 use crate::error::HandleError;
-use crate::filter::*;
+use crate::{filter::*, map_response};
 use model::*;
 use mysql::MySqlPool;
 use repository::SongDataForTables;
@@ -34,19 +34,9 @@ pub fn header_route(tables: &TableClient) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path!("recommend_table" / i32 / usize / "header.json"))
         .and(with_table(tables))
-        .and_then(header_handler)
+        .then(service::custom_table::header)
+        .then(map_response)
         .boxed()
-}
-
-async fn header_handler(
-    _user_id: i32,
-    table_index: usize,
-    tables: TablesInfo,
-) -> Result<impl Reply, Rejection> {
-    let table = tables.tables.get(table_index).unwrap();
-    let header =
-        &CustomTableHeader::from(table).set_name(format!("おすすめ譜面表: {}", table.title()));
-    Ok(serde_json::to_string(&header).unwrap())
 }
 
 pub fn body_route(db_pool: &MySqlPool, tables: &TableClient) -> BoxedFilter<(impl Reply,)> {

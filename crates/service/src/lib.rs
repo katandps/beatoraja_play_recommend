@@ -1,3 +1,4 @@
+pub mod custom_table;
 pub mod songs;
 pub mod tables;
 
