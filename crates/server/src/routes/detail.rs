@@ -12,12 +12,7 @@ pub fn route(db_pool: &MySqlPool, tables: &TableClient) -> BoxedFilter<(impl Rep
         .and(path("detail"))
         .and(with_db(db_pool))
         .and(with_table(tables))
-        .and(
-            warp::query()
-                .then(DetailQuery::parse)
-                .and_then(query)
-                .boxed(),
-        )
+        .and(warp::query().then(DetailQuery::parse).and_then(query))
         .and(account_id_query(db_pool))
         .then(service::scores::list)
         .then(json)
