@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 
 use anyhow::Result;
-use model::{Account, DetailQuery, DetailResponse, Scores, TablesInfo};
-use repository::{ScoresByAccount, SongDataForTables};
+use model::{
+    Account, DetailQuery, DetailResponse, Score, ScoreId, Scores, SongLogQuery, TablesInfo,
+};
+use repository::{ScoreByAccountAndSha256, ScoresByAccount, SongDataForTables};
 
 use crate::Response;
 
@@ -33,5 +35,23 @@ pub async fn list<C: ScoresByAccount + SongDataForTables>(
     Ok(Response::Ok {
         tag: None,
         body: scores.table_scores(&tables.tables, &songs, &query.date, &account),
+    })
+}
+
+pub async fn log<C: ScoreByAccountAndSha256>(
+    mut repos: C,
+    account: Account,
+    query: SongLogQuery,
+) -> Result<Response<Score>> {
+    let score_id = ScoreId::new(query.sha256, query.play_mode);
+    log::info!("account: {:?}, score_id: {:?}", account, score_id);
+    let score_with_log = repos
+        .score_with_log(&account, &score_id)
+        .await
+        .unwrap_or(Score::default());
+    log::debug!("log: {:?}", score_with_log);
+    Ok(Response::Ok {
+        tag: None,
+        body: score_with_log,
     })
 }

@@ -171,3 +171,10 @@ pub trait SnapCmp {
 pub trait ParamSnap: SnapCmp {
     fn make(current: &SnapShot, updated_at: UpdatedAt, before_snap: Option<&SnapShot>) -> Self;
 }
+
+#[derive(Deserialize)]
+pub struct SongLogQuery {
+    #[serde(default)]
+    pub play_mode: PlayMode,
+    pub sha256: HashSha256,
+}

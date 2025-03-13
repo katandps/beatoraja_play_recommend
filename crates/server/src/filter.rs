@@ -3,7 +3,6 @@ use futures::lock::Mutex;
 use model::*;
 use mysql::{MySQLClient, MySqlPool};
 use repository::{AccountByUserId, GetTables};
-use serde::Deserialize;
 use service::songs::SongsTag;
 use std::collections::HashMap;
 use std::convert::Infallible;
@@ -99,11 +98,4 @@ async fn get_changed_visibility_query(body: HashMap<String, String>) -> Result<b
         .get("visibility")
         .ok_or(HandleError::ChangedVisibilityNotFound)?;
     Ok(changed_visibility == &"true".to_string())
-}
-
-#[derive(Deserialize)]
-pub struct SongLogQuery {
-    #[serde(default)]
-    pub play_mode: PlayMode,
-    pub sha256: HashSha256,
 }
