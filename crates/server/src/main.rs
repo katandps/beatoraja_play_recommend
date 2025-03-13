@@ -1,4 +1,3 @@
-pub mod cache_tags;
 mod config;
 mod error;
 mod filter;
