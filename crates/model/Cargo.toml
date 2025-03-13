@@ -11,7 +11,7 @@ serde = { version = "1.0.215", features = ["derive"] }
 
 chrono = { version = "0.4.38", features = ["serde"] }
 
-anyhow = "1.0.93"
+anyhow = "1.0.97"
 
 itertools = "0.14.0"
 num-traits = "0.2.19"
