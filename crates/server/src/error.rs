@@ -26,8 +26,6 @@ pub enum HandleError {
 
     #[error("WarpError: {0:?}")]
     WarpError(warp::Error),
-    #[error("FormIsIncomplete")]
-    FormIsIncomplete,
 
     #[error("ChangedNameNotFound")]
     ChangedNameNotFound,

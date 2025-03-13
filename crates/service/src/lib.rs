@@ -1,5 +1,7 @@
 pub mod custom_table;
+pub mod play_data;
 pub mod scores;
+pub mod song_data;
 pub mod songs;
 pub mod status;
 pub mod tables;

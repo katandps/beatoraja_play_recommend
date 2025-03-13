@@ -1,4 +1,5 @@
 use crate::error::HandleError;
+use bytes::Buf;
 use futures::lock::Mutex;
 use model::*;
 use mysql::{MySQLClient, MySqlPool};
@@ -38,8 +39,28 @@ pub fn with_tag() -> impl Filter<Extract = (Option<String>,), Error = Rejection>
     warp::header::optional::<String>("If-None-Match")
 }
 
-pub fn receive_sqlite_file() -> impl Filter<Extract = (FormData,), Error = Rejection> + Clone {
-    warp::multipart::form().max_length(100 * 1024 * 1024)
+pub fn receive_sqlite_file(
+) -> impl Filter<Extract = (HashMap<String, Vec<u8>>,), Error = Rejection> + Clone {
+    async fn parse(form: FormData) -> HashMap<String, Vec<u8>> {
+        use futures::TryStreamExt;
+        let res = <FormData as TryStreamExt>::and_then(form, |mut part| async move {
+            let name = part.name().to_string();
+            log::info!("{name}");
+            let mut data: Vec<u8> = Vec::new();
+            while let Some(content) = part.data().await {
+                data.extend_from_slice(content.unwrap().chunk());
+            }
+            Ok((name, data))
+        })
+        .try_collect()
+        .await
+        .unwrap();
+        res
+    }
+
+    warp::multipart::form()
+        .max_length(100 * 1024 * 1024)
+        .then(parse)
 }
 
 pub fn with_login() -> impl Filter<Extract = (Claims,), Error = Rejection> + Clone {

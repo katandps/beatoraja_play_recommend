@@ -2221,13 +2221,16 @@ name = "service"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "chrono",
  "futures",
  "log",
  "model",
  "rand 0.9.0",
  "repository",
  "session",
+ "sqlite",
  "table",
+ "tempfile",
  "tokio",
 ]
 
