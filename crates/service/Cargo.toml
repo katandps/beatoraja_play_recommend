@@ -10,6 +10,7 @@ edition = "2021"
 model = { path = "../model" }
 table = { path = "../table" }
 repository = { path = "../repository" }
+session = { path = "../session" }
 
 tokio = { version = "1.18.1", features = ["full"] }
 log = "0.4.26"

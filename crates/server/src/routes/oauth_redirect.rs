@@ -1,6 +1,7 @@
 use crate::config::config;
 use crate::error::HandleError;
 use crate::filter::with_db;
+use chrono::Duration;
 use model::GoogleId;
 use mysql::MySqlPool;
 use oauth_google::{GoogleProfile, RegisterUser};
@@ -19,6 +20,7 @@ pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
         .and_then(oauth_handler)
         .boxed()
 }
+const EXPIRE_DAYS: i64 = 30;
 
 async fn oauth_handler<C: RegisterUser + AccountByGoogleId>(
     mut repos: C,
@@ -32,7 +34,9 @@ async fn oauth_handler<C: RegisterUser + AccountByGoogleId>(
         .user(&GoogleId::new(profile.user_id))
         .await
         .map_err(HandleError::OtherError)?;
-    let key = crate::session::save_user_id(account.user_id).map_err(HandleError::OtherError)?;
+    let key = session::generate_session_jwt(account.user_id, Duration::days(EXPIRE_DAYS))
+        .map_err(HandleError::OtherError)?;
+
     let header = format!(
         "session-token={};domain={};max-age=2592000",
         key,

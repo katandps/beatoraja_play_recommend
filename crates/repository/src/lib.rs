@@ -16,7 +16,7 @@ pub trait HealthCheck {
 }
 
 pub trait AccountByUserId {
-    async fn user(&mut self, user_id: i32) -> Result<Account>;
+    async fn user(&mut self, user_id: UserId) -> Result<Account>;
 }
 
 pub trait AccountByGoogleId {

@@ -1,18 +1,16 @@
-use crate::filter::account_by_session;
-use model::Account;
+use crate::filter::{with_db, with_login};
+use crate::json;
 use mysql::MySqlPool;
 use warp::filters::BoxedFilter;
 use warp::path;
-use warp::{Filter, Rejection, Reply};
+use warp::{Filter, Reply};
 
 pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("account"))
-        .and(account_by_session(db_pool))
-        .and_then(account_handler)
+        .and(with_db(db_pool))
+        .and(with_login())
+        .then(service::users::my)
+        .then(json)
         .boxed()
-}
-
-async fn account_handler(account: Account) -> Result<impl Reply, Rejection> {
-    Ok(serde_json::to_string(&account).unwrap())
 }

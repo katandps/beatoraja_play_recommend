@@ -91,6 +91,6 @@ fn cors_header() -> Builder {
             "accept-encoding",
             "accept-language",
             "user-agent",
-            crate::session::SESSION_KEY,
+            crate::SESSION_KEY,
         ])
 }

@@ -4,6 +4,7 @@ use model::*;
 use mysql::{MySQLClient, MySqlPool};
 use repository::{AccountByUserId, GetTables};
 use service::songs::SongsTag;
+use session::Claims;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::sync::Arc;
@@ -41,8 +42,11 @@ pub fn receive_sqlite_file() -> impl Filter<Extract = (FormData,), Error = Rejec
     warp::multipart::form().max_length(100 * 1024 * 1024)
 }
 
-pub fn receive_session_key() -> impl Filter<Extract = (String,), Error = Rejection> + Clone {
-    warp::header::<String>(crate::session::SESSION_KEY)
+pub fn with_login() -> impl Filter<Extract = (Claims,), Error = Rejection> + Clone {
+    async fn parse(jwt: String) -> Claims {
+        session::verify_session_jwt(&jwt).unwrap()
+    }
+    warp::header::<String>(crate::SESSION_KEY).then(parse)
 }
 
 pub fn account_id_query(
@@ -64,18 +68,10 @@ async fn get_account_by_query<C: AccountByUserId>(
         .parse::<i32>()
         .map_err(HandleError::AccountSelectionIsInvalid)?;
     let account = repos
-        .user(user_id)
+        .user(UserId::new(user_id))
         .await
         .map_err(HandleError::AccountIsNotFound)?;
     Ok(account)
-}
-
-pub fn account_by_session(
-    db_pool: &MySqlPool,
-) -> impl Filter<Extract = (Account,), Error = Rejection> + Clone {
-    with_db(db_pool)
-        .and(receive_session_key())
-        .and_then(crate::session::get_account_by_session)
 }
 
 pub fn changed_name_by_query() -> impl Filter<Extract = (String,), Error = Rejection> + Clone {

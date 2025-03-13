@@ -9,7 +9,7 @@ pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("users"))
         .and(with_db(db_pool))
-        .then(service::user::list)
+        .then(service::users::list)
         .then(json)
         .boxed()
 }

@@ -1,5 +1,6 @@
 use crate::error::HandleError;
 use crate::filter::with_db;
+use model::UserId;
 use mysql::MySqlPool;
 use repository::{AccountByUserId, StatsByAccount};
 use warp::filters::BoxedFilter;
@@ -17,7 +18,10 @@ async fn stats_handler<C: AccountByUserId + StatsByAccount>(
     user_id: i32,
     mut repos: C,
 ) -> Result<impl Reply, Rejection> {
-    let account = repos.user(user_id).await.map_err(HandleError::from)?;
+    let account = repos
+        .user(UserId::new(user_id))
+        .await
+        .map_err(HandleError::from)?;
     let stats = repos.stats(&account).await.map_err(HandleError::from)?;
     Ok(serde_json::to_string(&stats).unwrap())
 }

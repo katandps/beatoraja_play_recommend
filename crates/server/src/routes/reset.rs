@@ -1,29 +1,16 @@
-use crate::error::HandleError;
-use crate::filter::*;
-use model::*;
+use crate::filter::{with_db, with_login};
+use crate::json;
 use mysql::MySqlPool;
-use repository::ResetScore;
 use warp::filters::BoxedFilter;
-use warp::http::StatusCode;
 use warp::path;
-use warp::{Filter, Rejection, Reply};
+use warp::{Filter, Reply};
 
 pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::post()
         .and(path!("reset"))
         .and(with_db(db_pool))
-        .and(account_by_session(db_pool))
-        .and_then(reset_handler)
+        .and(with_login())
+        .then(service::scores::reset_all)
+        .then(json)
         .boxed()
-}
-
-async fn reset_handler<C: ResetScore>(
-    mut repository: C,
-    account: Account,
-) -> Result<impl Reply, Rejection> {
-    repository
-        .reset_score(&account)
-        .await
-        .map_err(HandleError::from)?;
-    Ok(StatusCode::OK)
 }

@@ -1,6 +1,6 @@
 use crate::Response;
 use anyhow::Result;
-use model::{Chart, CustomTableHeader, TablesInfo};
+use model::{Chart, CustomTableHeader, TablesInfo, UserId};
 use repository::{AccountByUserId, ScoresByAccount, SongDataForTables};
 
 pub async fn header(
@@ -25,7 +25,7 @@ pub async fn body<C: AccountByUserId + ScoresByAccount + SongDataForTables>(
 ) -> Result<Response<Vec<Chart>>> {
     let songs = repos.song_data(&tables.tables).await?;
 
-    let account = repos.user(user_id).await?;
+    let account = repos.user(UserId::new(user_id)).await?;
     let score = repos.score(&account).await?;
     let table = tables.tables.get(table_index).unwrap();
     let charts = table

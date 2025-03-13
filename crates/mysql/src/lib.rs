@@ -122,8 +122,8 @@ impl RegisterUser for MySQLClient {
 }
 
 impl AccountByUserId for MySQLClient {
-    async fn user(&mut self, id: i32) -> Result<Account> {
-        Ok(User::by_user_id(&mut self.connection, id)?.into())
+    async fn user(&mut self, id: UserId) -> Result<Account> {
+        Ok(User::by_user_id(&mut self.connection, id.get())?.into())
     }
 }
 

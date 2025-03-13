@@ -2226,6 +2226,7 @@ dependencies = [
  "model",
  "rand 0.9.0",
  "repository",
+ "session",
  "table",
  "tokio",
 ]

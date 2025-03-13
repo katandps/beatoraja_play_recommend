@@ -7,9 +7,11 @@ use futures::TryStreamExt;
 use model::*;
 use mysql::MySqlPool;
 use repository::{
-    AccountByGoogleId, RegisterUpload, SavePlayerStateData, SaveScoreData, SaveSongData,
+    AccountByGoogleId, AccountByUserId, RegisterUpload, SavePlayerStateData, SaveScoreData,
+    SaveSongData,
 };
 use service::songs::SongsTag;
+use session::Claims;
 use sqlite::SqliteClient;
 use std::collections::HashMap;
 use std::io::Write;
@@ -25,8 +27,8 @@ pub fn play_data_upload_route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)>
     warp::post()
         .and(path!("upload" / "play_data"))
         .and(with_db(db_pool))
+        .and(with_login())
         .and(receive_sqlite_file())
-        .and(account_by_session(db_pool))
         .and_then(play_data_upload_handler)
         .boxed()
 }
@@ -45,12 +47,15 @@ pub fn song_data_upload_route(
 }
 
 async fn play_data_upload_handler<
-    C: SaveScoreData + SavePlayerStateData + AccountByGoogleId + RegisterUpload,
+    C: SaveScoreData + SavePlayerStateData + AccountByGoogleId + RegisterUpload + AccountByUserId,
 >(
     mut repository: C,
+    claims: Claims,
     form: FormData,
-    account: Account,
 ) -> Result<impl Reply, Rejection> {
+    let account = AccountByUserId::user(&mut repository, claims.user_id)
+        .await
+        .map_err(HandleError::from)?;
     log::info!("start to upload");
     let mut score_db = NamedTempFile::new().map_err(HandleError::from)?;
     let mut scorelog_db = NamedTempFile::new().map_err(HandleError::from)?;

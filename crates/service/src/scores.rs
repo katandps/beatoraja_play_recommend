@@ -4,7 +4,10 @@ use anyhow::Result;
 use model::{
     Account, DetailQuery, DetailResponse, Score, ScoreId, Scores, SongLogQuery, TablesInfo,
 };
-use repository::{ScoreByAccountAndSha256, ScoresByAccount, SongDataForTables};
+use repository::{
+    AccountByUserId, ResetScore, ScoreByAccountAndSha256, ScoresByAccount, SongDataForTables,
+};
+use session::Claims;
 
 use crate::Response;
 
@@ -53,5 +56,17 @@ pub async fn log<C: ScoreByAccountAndSha256>(
     Ok(Response::Ok {
         tag: None,
         body: score_with_log,
+    })
+}
+
+pub async fn reset_all<R: ResetScore + AccountByUserId>(
+    mut repository: R,
+    claims: Claims,
+) -> Result<Response<()>> {
+    let account = repository.user(claims.user_id).await?;
+    repository.reset_score(&account).await?;
+    Ok(Response::Ok {
+        tag: None,
+        body: (),
     })
 }

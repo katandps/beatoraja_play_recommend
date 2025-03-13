@@ -2,7 +2,6 @@ mod config;
 mod error;
 mod filter;
 mod routes;
-pub mod session;
 
 use config::config;
 use error::HandleError;
@@ -70,3 +69,4 @@ pub async fn json<T: Serialize>(result: anyhow::Result<service::Response<T>>) ->
 pub async fn query<T>(query: anyhow::Result<T>) -> Result<T, Rejection> {
     Ok(query.map_err(HandleError::from)?)
 }
+pub const SESSION_KEY: &str = "session-token";
