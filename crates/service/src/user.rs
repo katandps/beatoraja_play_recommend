@@ -1,6 +1,6 @@
 use anyhow::Result;
-use model::Account;
-use repository::{ChangeAccountVisibility, RenameAccount};
+use model::{Account, VisibleAccount};
+use repository::{ChangeAccountVisibility, PublishedUsers, RenameAccount};
 
 use crate::Response;
 
@@ -27,5 +27,12 @@ pub async fn change_visibility<C: ChangeAccountVisibility>(
     Ok(Response::Ok {
         tag: None,
         body: account,
+    })
+}
+
+pub async fn list<C: PublishedUsers>(mut repos: C) -> Result<Response<Vec<VisibleAccount>>> {
+    Ok(Response::Ok {
+        tag: None,
+        body: repos.fetch_users().await?,
     })
 }
