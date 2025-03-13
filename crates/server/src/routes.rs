@@ -32,6 +32,7 @@ pub fn routes(db_pool: &MySqlPool, tables: &TableClient) -> BoxedFilter<(impl Re
 
     api_routes(db_pool, tables, &songs_tag)
         .or(table_routes(db_pool, tables))
+        .with(cors_header())
         .recover(crate::error::handle_rejection)
         .boxed()
 }
@@ -57,17 +58,19 @@ pub fn api_routes(
         .or(song_data_upload_route(db_pool, songs_tag))
         .or(reset::route(db_pool))
         .or(oauth_redirect::route(db_pool))
-        .with(cors_header())
         .with(warp::compression::gzip())
         .with(warp::log("api_access"))
         .boxed()
 }
 
+/**
+ * # 難易度表系ルート
+ * beatorajaはgzip compressionされたresponseに対応していないため、別のグループを用意する
+ */
 pub fn table_routes(db_pool: &MySqlPool, tables: &TableClient) -> BoxedFilter<(impl Reply,)> {
     custom_table::header_route(tables)
         .or(custom_table::body_route(db_pool, tables))
         .or(custom_table::table_route())
-        .with(cors_header())
         .with(warp::log("table_access"))
         .boxed()
 }
