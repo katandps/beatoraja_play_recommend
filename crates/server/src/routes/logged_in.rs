@@ -32,8 +32,7 @@ fn account(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
 
 fn change_visibility(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::post()
-        .and(path("user"))
-        .and(path("visibility"))
+        .and(path!("user" / "visibility"))
         .and(with_db(db_pool))
         .and(with_login())
         .and(warp::body::json())
@@ -44,8 +43,7 @@ fn change_visibility(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
 
 fn change_name(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::post()
-        .and(path("user"))
-        .and(path("name"))
+        .and(path!("user" / "name"))
         .and(with_db(db_pool))
         .and(with_login())
         .and(warp::body::json())
