@@ -55,6 +55,7 @@ pub async fn json<T: Serialize>(result: anyhow::Result<service::Response<T>>) ->
             builder.body(json).unwrap()
         }
         Ok(service::Response::Cached { tag }) => http::Response::builder()
+            .status(http::StatusCode::NOT_MODIFIED)
             .header("Content-type", "application/json; charset=utf-8")
             .header("ETag", tag)
             .body("".to_string())
