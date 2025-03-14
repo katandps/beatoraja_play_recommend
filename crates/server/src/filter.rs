@@ -3,7 +3,7 @@ use bytes::Buf;
 use futures::lock::Mutex;
 use model::*;
 use mysql::{MySQLClient, MySqlPool};
-use repository::{AccountByUserId, GetTables};
+use repository::GetTables;
 use service::songs::SongsTag;
 use session::Claims;
 use std::collections::HashMap;
@@ -35,7 +35,7 @@ pub fn with_songs_tag(
     warp::any().map(move || songs_tag.clone())
 }
 
-pub fn with_tag() -> impl Filter<Extract = (Option<String>,), Error = Rejection> + Clone {
+pub fn with_cache_tag() -> impl Filter<Extract = (Option<String>,), Error = Rejection> + Clone {
     warp::header::optional::<String>("If-None-Match")
 }
 
@@ -68,31 +68,6 @@ pub fn with_login() -> impl Filter<Extract = (Claims,), Error = Rejection> + Clo
         session::verify_session_jwt(&jwt).unwrap()
     }
     warp::header::<String>(crate::SESSION_KEY).then(parse)
-}
-
-pub fn account_id_query(
-    db_pool: &MySqlPool,
-) -> impl Filter<Extract = (Account,), Error = Rejection> + Clone {
-    with_db(db_pool)
-        .and(warp::query::<HashMap<String, String>>())
-        .and_then(get_account_by_query)
-}
-
-async fn get_account_by_query<C: AccountByUserId>(
-    mut repos: C,
-    query: HashMap<String, String>,
-) -> Result<Account, Rejection> {
-    let user_id = query
-        .get("user_id")
-        .ok_or(HandleError::AccountIsNotSelected)?;
-    let user_id = user_id
-        .parse::<i32>()
-        .map_err(HandleError::AccountSelectionIsInvalid)?;
-    let account = repos
-        .user(UserId::new(user_id))
-        .await
-        .map_err(HandleError::AccountIsNotFound)?;
-    Ok(account)
 }
 
 pub fn changed_name_by_query() -> impl Filter<Extract = (String,), Error = Rejection> + Clone {

@@ -1,9 +1,8 @@
 use std::sync::Arc;
 
-use crate::filter::{account_id_query, with_db, with_songs_tag, with_table, with_tag};
-use crate::{json, query};
+use crate::filter::{with_cache_tag, with_db, with_songs_tag, with_table};
+use crate::json;
 use futures::lock::Mutex;
-use model::{DetailQuery, RankingQuery, SongLogQuery};
 use mysql::MySqlPool;
 use repository::HealthCheck;
 use service::songs::SongsTag;
@@ -56,7 +55,7 @@ fn tables(tables: &TableClient) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("tables"))
         .and(with_table(tables))
-        .and(with_tag())
+        .and(with_cache_tag())
         .then(service::tables::get)
         .then(json)
         .boxed()
@@ -81,7 +80,7 @@ fn songs(
         .and(with_db(db_pool))
         .and(with_table(tables))
         .and(with_songs_tag(songs_tag))
-        .and(with_tag())
+        .and(with_cache_tag())
         .then(service::songs::list)
         .then(json)
         .boxed()
@@ -92,7 +91,7 @@ fn ranking(db_pool: &MySqlPool, tables: &TableClient) -> BoxedFilter<(impl Reply
         .and(path("ranking"))
         .and(with_db(db_pool))
         .and(with_table(tables))
-        .and(warp::query().then(RankingQuery::parse).and_then(query))
+        .and(warp::query())
         .then(service::songs::ranking)
         .then(json)
         .boxed()
@@ -103,8 +102,7 @@ fn detail(db_pool: &MySqlPool, tables: &TableClient) -> BoxedFilter<(impl Reply,
         .and(path("detail"))
         .and(with_db(db_pool))
         .and(with_table(tables))
-        .and(warp::query().then(DetailQuery::parse).and_then(query))
-        .and(account_id_query(db_pool))
+        .and(warp::query())
         .then(service::scores::list)
         .then(json)
         .boxed()
@@ -114,8 +112,7 @@ fn song_log(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("score"))
         .and(with_db(db_pool))
-        .and(account_id_query(db_pool))
-        .and(warp::query::<SongLogQuery>())
+        .and(warp::query())
         .then(service::scores::log)
         .then(json)
         .boxed()

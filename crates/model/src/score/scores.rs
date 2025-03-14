@@ -1,8 +1,5 @@
-use anyhow::Result;
-use chrono::Duration;
-
 use crate::*;
-use std::{collections::HashMap, str::FromStr};
+use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct Scores(HashMap<ScoreId, Score>);
@@ -57,29 +54,8 @@ pub struct DetailResponse {
 #[derive(Deserialize)]
 #[allow(unused)]
 pub struct DetailQuery {
+    pub user_id: UserId,
     pub date: UpdatedAt,
     #[serde(default)]
     pub play_mode: PlayMode,
-}
-
-impl DetailQuery {
-    pub async fn parse(query: HashMap<String, String>) -> Result<Self> {
-        let date = query
-            .get("date")
-            .map(|u| {
-                UpdatedAt::from_str(u)
-                    .map(|u| &u - Duration::days(-1))
-                    .unwrap_or_else(|_| UpdatedAt::default())
-            })
-            .unwrap_or_default();
-        let play_mode = if let Some(mode) = query.get("mode") {
-            match mode.parse::<i32>() {
-                Ok(mode) => PlayMode::from(mode),
-                Err(_) => PlayMode::default(),
-            }
-        } else {
-            PlayMode::default()
-        };
-        Ok(DetailQuery { date, play_mode })
-    }
 }

@@ -1,7 +1,6 @@
 use crate::error::HandleError::*;
 use serde::Serialize;
 use std::convert::Infallible;
-use std::num::ParseIntError;
 use thiserror::Error;
 use warp::{http::StatusCode, Rejection, Reply};
 
@@ -9,13 +8,6 @@ use warp::{http::StatusCode, Rejection, Reply};
 pub enum HandleError {
     #[error("AuthorizationCodeIsNotFound")]
     AuthorizationCodeIsNotFound,
-
-    #[error("AccountIsNotFound: {0:?}")]
-    AccountIsNotFound(anyhow::Error),
-    #[error("AccountIsNotSelected")]
-    AccountIsNotSelected,
-    #[error("AccountSelectionIsInvalid")]
-    AccountSelectionIsInvalid(ParseIntError),
 
     #[error("IOError: {0:?}")]
     IOError(std::io::Error),
@@ -53,9 +45,6 @@ pub async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> 
         (
             match e {
                 AuthorizationCodeIsNotFound => StatusCode::BAD_REQUEST,
-                AccountIsNotFound(_) => StatusCode::BAD_REQUEST,
-                AccountIsNotSelected => StatusCode::BAD_REQUEST,
-                AccountSelectionIsInvalid(_) => StatusCode::BAD_REQUEST,
                 WarpError(_) => StatusCode::BAD_REQUEST,
                 _ => StatusCode::INTERNAL_SERVER_ERROR,
             },

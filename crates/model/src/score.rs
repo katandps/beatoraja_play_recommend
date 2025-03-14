@@ -174,6 +174,7 @@ pub trait ParamSnap: SnapCmp {
 
 #[derive(Deserialize)]
 pub struct SongLogQuery {
+    pub user_id: UserId,
     #[serde(default)]
     pub play_mode: PlayMode,
     pub sha256: HashSha256,
