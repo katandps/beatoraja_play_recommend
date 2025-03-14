@@ -1,9 +1,22 @@
-use crate::{filter::*, json};
+/**
+ * # 難易度表系ルート
+ * beatorajaはgzip compressionされたresponseに対応していない
+ */
+use crate::filter::{with_db, with_table};
+use crate::json;
 use mysql::MySqlPool;
 use table::TableClient;
 use warp::filters::BoxedFilter;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
+
+pub fn routes(db_pool: &MySqlPool, tables: &TableClient) -> BoxedFilter<(impl Reply,)> {
+    header_route(tables)
+        .or(body_route(db_pool, tables))
+        .or(table_route())
+        .with(warp::log("table_access"))
+        .boxed()
+}
 
 pub fn table_route() -> BoxedFilter<(impl Reply,)> {
     warp::get()

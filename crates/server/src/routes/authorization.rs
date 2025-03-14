@@ -8,11 +8,34 @@ use oauth_google::{GoogleProfile, RegisterUser};
 use repository::AccountByGoogleId;
 use std::collections::HashMap;
 use warp::filters::BoxedFilter;
+use warp::http::StatusCode;
 use warp::http::Uri;
 use warp::path;
 use warp::{Filter, Rejection, Reply};
 
-pub fn route(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
+pub fn routes(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
+    oauth_redirect(db_pool)
+        .or(logout())
+        .with(warp::compression::gzip())
+        .boxed()
+}
+
+pub fn logout() -> BoxedFilter<(impl Reply,)> {
+    async fn logout_handler() -> Result<impl Reply, Rejection> {
+        let header = format!("session-token=;domain={};max-age=0", config().client_domain);
+        Ok(warp::reply::with_header(
+            StatusCode::OK,
+            warp::http::header::SET_COOKIE,
+            header,
+        ))
+    }
+    warp::get()
+        .and(path("logout"))
+        .and_then(logout_handler)
+        .boxed()
+}
+
+pub fn oauth_redirect(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("oauth"))
         .and(with_db(db_pool))
