@@ -65,7 +65,7 @@ pub async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> 
         )
     };
 
-    log::error!("{} {}", code, message);
+    log::error!("{} {} {:?}", code, message, err);
     let json = warp::reply::json(&ErrorResponse { error: message });
     Ok(warp::reply::with_status(json, code))
 }
