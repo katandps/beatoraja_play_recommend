@@ -1,9 +1,6 @@
 use std::sync::Arc;
 
-use crate::filter::{
-    changed_name_by_query, changed_visibility_by_query, receive_sqlite_file, with_db, with_login,
-    with_songs_tag,
-};
+use crate::filter::{receive_sqlite_file, with_db, with_login, with_songs_tag};
 use crate::json;
 use futures::lock::Mutex;
 use mysql::MySqlPool;
@@ -39,7 +36,7 @@ fn change_visibility(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
         .and(path("visibility"))
         .and(with_db(db_pool))
         .and(with_login())
-        .and(changed_visibility_by_query())
+        .and(warp::body::json())
         .then(service::users::change_visibility)
         .then(json)
         .boxed()
@@ -51,7 +48,7 @@ fn change_name(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
         .and(path("name"))
         .and(with_db(db_pool))
         .and(with_login())
-        .and(changed_name_by_query())
+        .and(warp::body::json())
         .then(service::users::change_name)
         .then(json)
         .boxed()

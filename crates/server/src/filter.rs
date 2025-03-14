@@ -1,4 +1,3 @@
-use crate::error::HandleError;
 use bytes::Buf;
 use futures::lock::Mutex;
 use model::*;
@@ -68,26 +67,4 @@ pub fn with_login() -> impl Filter<Extract = (Claims,), Error = Rejection> + Clo
         session::verify_session_jwt(&jwt).unwrap()
     }
     warp::header::<String>(crate::SESSION_KEY).then(parse)
-}
-
-pub fn changed_name_by_query() -> impl Filter<Extract = (String,), Error = Rejection> + Clone {
-    warp::body::json().and_then(get_changed_name_query)
-}
-
-pub fn changed_visibility_by_query() -> impl Filter<Extract = (bool,), Error = Rejection> + Clone {
-    warp::body::json().and_then(get_changed_visibility_query)
-}
-
-async fn get_changed_name_query(body: HashMap<String, String>) -> Result<String, Rejection> {
-    let changed_name = body
-        .get("changed_name")
-        .ok_or(HandleError::ChangedNameNotFound)?;
-    Ok(changed_name.clone())
-}
-
-async fn get_changed_visibility_query(body: HashMap<String, String>) -> Result<bool, Rejection> {
-    let changed_visibility = body
-        .get("visibility")
-        .ok_or(HandleError::ChangedVisibilityNotFound)?;
-    Ok(changed_visibility == &"true".to_string())
 }

@@ -16,8 +16,8 @@ pub use {
     visibility::Visibility,
 };
 
-use chrono::NaiveDateTime;
 use serde::Serialize;
+use {chrono::NaiveDateTime, serde::Deserialize};
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Account {
@@ -79,4 +79,14 @@ impl Account {
     pub fn set_visibility(&mut self, new_visibility: bool) {
         self.visibility = Visibility::new(new_visibility)
     }
+}
+
+#[derive(Deserialize)]
+pub struct ChangeNameQuery {
+    pub changed_name: String,
+}
+
+#[derive(Deserialize)]
+pub struct ChangeVisibilityQuery {
+    pub visibility: bool,
 }

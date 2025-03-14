@@ -19,11 +19,6 @@ pub enum HandleError {
     #[error("WarpError: {0:?}")]
     WarpError(warp::Error),
 
-    #[error("ChangedNameNotFound")]
-    ChangedNameNotFound,
-    #[error("ChangedVisibilityNotFound")]
-    ChangedVisibilityNotFound,
-
     #[error("OAuthGoogleError: {0:?}")]
     OAuthGoogleError(oauth_google::Error),
     #[error("OtherError: {0:?}")]
