@@ -1438,6 +1438,7 @@ dependencies = [
  "chrono",
  "diesel",
  "envy",
+ "futures",
  "itertools",
  "log",
  "model",

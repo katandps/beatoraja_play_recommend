@@ -222,7 +222,8 @@ impl SongDataForTables for MySQLClient {
                 .map(|c| c.md5().as_str())
                 .collect::<Vec<_>>(),
             &mut self.connection,
-        )?;
+        )
+        .await?;
         let record = models::Song::by_hashes(
             &mut self.connection,
             &hash

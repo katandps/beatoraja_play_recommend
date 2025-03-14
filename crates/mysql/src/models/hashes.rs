@@ -1,14 +1,12 @@
-use std::sync::atomic::AtomicBool;
-use std::sync::atomic::Ordering;
-use std::sync::Arc;
-use std::sync::Mutex;
-use std::sync::OnceLock;
-use std::sync::RwLock;
-
 use crate::models::DieselResult;
 use crate::schema::*;
 use crate::MySqlPooledConnection;
 use diesel::prelude::*;
+use futures::lock::Mutex;
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::Ordering;
+use std::sync::Arc;
+use std::sync::OnceLock;
 
 #[derive(Debug, Clone, Queryable, Insertable)]
 #[diesel(table_name = hashes)]
@@ -23,7 +21,7 @@ impl Hash {
         hashes.load(connection)
     }
 
-    pub fn for_tables(
+    pub async fn for_tables(
         md5list: &[&str],
         connection: &mut MySqlPooledConnection,
     ) -> DieselResult<Vec<Self>> {
@@ -33,9 +31,9 @@ impl Hash {
             .map(|cached| cached.load(Ordering::Relaxed))
             .unwrap_or_default();
         if cached {
-            Ok(for_tables_cache().try_read().unwrap().clone())
+            Ok(for_tables_cache().lock().await.clone())
         } else {
-            let mut cache = for_tables_cache().try_write().unwrap();
+            let mut cache = for_tables_cache().lock().await;
             let result = hashes.filter(md5.eq_any(md5list)).load(connection).unwrap();
             *cache = result.clone();
             let mut cached = for_tables_is_cached().try_lock().unwrap();
@@ -69,7 +67,7 @@ fn for_tables_is_cached() -> &'static Arc<Mutex<AtomicBool>> {
     static INSTANCE: OnceLock<Arc<Mutex<AtomicBool>>> = OnceLock::new();
     INSTANCE.get_or_init(Arc::default)
 }
-fn for_tables_cache() -> &'static Arc<RwLock<Vec<Hash>>> {
-    static INSTANCE: OnceLock<Arc<RwLock<Vec<Hash>>>> = OnceLock::new();
+fn for_tables_cache() -> &'static Arc<Mutex<Vec<Hash>>> {
+    static INSTANCE: OnceLock<Arc<Mutex<Vec<Hash>>>> = OnceLock::new();
     INSTANCE.get_or_init(Arc::default)
 }
