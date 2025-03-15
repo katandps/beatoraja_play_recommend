@@ -17,6 +17,7 @@ use thiserror::Error;
 use url::Url;
 use TableParseError::*;
 
+#[derive(Default)]
 pub struct TableClient {
     tables: Arc<Mutex<TablesInfo>>,
 }

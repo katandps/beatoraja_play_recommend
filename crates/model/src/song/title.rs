@@ -1,6 +1,5 @@
 use parse_display::Display;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, Display)]
 pub struct Title(String);
