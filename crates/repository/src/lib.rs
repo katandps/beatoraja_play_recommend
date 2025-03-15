@@ -35,7 +35,7 @@ pub trait ScoreByAccountAndSha256 {
     async fn score_with_log(&mut self, account: &Account, score_id: &ScoreId) -> Result<Score>;
 }
 
-pub trait StatsByAccount {
+pub trait StatsByDays {
     async fn stats(&mut self, account: &Account) -> Result<PlayerStats>;
 }
 

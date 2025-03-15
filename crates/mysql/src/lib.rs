@@ -504,7 +504,7 @@ impl SavePlayerStateData for MySQLClient {
     }
 }
 
-impl StatsByAccount for MySQLClient {
+impl StatsByDays for MySQLClient {
     async fn stats(&mut self, account: &Account) -> Result<PlayerStats> {
         let user = User::by_account(&mut self.connection, account)?;
         let record = models::PlayerStat::by_user_id(&mut self.connection, user.id)?;
