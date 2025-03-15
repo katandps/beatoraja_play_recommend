@@ -5,19 +5,20 @@ use futures::lock::Mutex;
 use model::RankingQuery;
 use model::RankingResponse;
 use model::SongFormat;
-use model::TablesInfo;
+use repository::GetTables;
 use repository::PublishedUsers;
 use repository::ScoresBySha256;
 use repository::SongDataForTables;
 
 use crate::Response;
 
-pub async fn list<C: SongDataForTables>(
+pub async fn list<C: SongDataForTables, T: GetTables>(
     mut repos: C,
-    tables: TablesInfo,
+    tables: T,
     saved_tag: Arc<Mutex<SongsTag>>,
     tag: Option<String>,
 ) -> Result<Response<Vec<SongFormat>>> {
+    let tables = tables.get().await;
     let saved_tag: futures::lock::MutexGuard<'_, SongsTag> = saved_tag.lock().await;
 
     if saved_tag.is_saved(&tag) {
@@ -56,11 +57,12 @@ impl SongsTag {
     }
 }
 
-pub async fn ranking<C: ScoresBySha256 + PublishedUsers + SongDataForTables>(
+pub async fn ranking<C: ScoresBySha256 + PublishedUsers + SongDataForTables, T: GetTables>(
     mut repos: C,
-    tables: TablesInfo,
+    tables: T,
     query: RankingQuery,
 ) -> Result<Response<RankingResponse>> {
+    let tables = tables.get().await;
     let songs = repos.song_data(&tables.tables).await?;
     let scores = repos.score(&query.sha256).await?;
     let users = repos.fetch_users().await?;

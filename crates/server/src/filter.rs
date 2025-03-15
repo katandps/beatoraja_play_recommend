@@ -1,14 +1,13 @@
 use bytes::Buf;
 use futures::lock::Mutex;
-use model::*;
 use mysql::{MySQLClient, MySqlPool};
-use repository::GetTables;
 use service::songs::SongsTag;
 use session::Claims;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::sync::Arc;
 use table::TableClient;
+use warp::filters::BoxedFilter;
 
 use warp::filters::multipart::FormData;
 use warp::{Filter, Rejection};
@@ -20,11 +19,8 @@ pub fn with_db(
     warp::any().map(move || MySQLClient::new(db_pool.get().unwrap()))
 }
 
-pub fn with_table(
-    tables: &TableClient,
-) -> impl Filter<Extract = (TablesInfo,), Error = Infallible> + Clone {
-    let tables = tables.get().clone();
-    warp::any().map(move || tables.clone())
+pub fn with_table(tables: TableClient) -> BoxedFilter<(TableClient,)> {
+    warp::any().map(move || tables.clone()).boxed()
 }
 
 pub fn with_songs_tag(
@@ -42,7 +38,7 @@ pub fn receive_sqlite_file(
 ) -> impl Filter<Extract = (HashMap<String, Vec<u8>>,), Error = Rejection> + Clone {
     async fn parse(form: FormData) -> HashMap<String, Vec<u8>> {
         use futures::TryStreamExt;
-        let res = <FormData as TryStreamExt>::and_then(form, |mut part| async move {
+        <FormData as TryStreamExt>::and_then(form, |mut part| async move {
             let name = part.name().to_string();
             log::info!("{name}");
             let mut data: Vec<u8> = Vec::new();
@@ -53,8 +49,7 @@ pub fn receive_sqlite_file(
         })
         .try_collect()
         .await
-        .unwrap();
-        res
+        .unwrap()
     }
 
     warp::multipart::form()

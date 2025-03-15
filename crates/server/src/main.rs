@@ -19,7 +19,7 @@ async fn main() {
     let tables = TableClient::new();
     let _ = tables.init().await;
 
-    let route = routes::routes(&db_pool, &tables);
+    let route = routes::routes(&db_pool, tables.clone());
 
     let (http_addr, http_warp) = warp::serve(route.clone()).bind_ephemeral(([0, 0, 0, 0], 8000));
     let (https_addr, https_warp) = warp::serve(route)

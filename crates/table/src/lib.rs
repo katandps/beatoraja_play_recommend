@@ -2,10 +2,11 @@ mod config;
 
 use std::fs::create_dir_all;
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::Arc;
 
 use anyhow::{anyhow, Context, Result};
 use config::{config, TableSetting};
+use futures::lock::Mutex;
 use futures::stream::StreamExt;
 use model::*;
 use rand::distr::{Alphanumeric, SampleString};
@@ -17,7 +18,7 @@ use thiserror::Error;
 use url::Url;
 use TableParseError::*;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct TableClient {
     tables: Arc<Mutex<TablesInfo>>,
 }
@@ -31,22 +32,22 @@ impl TableClient {
 
     pub async fn update(&self) -> Result<()> {
         log::info!("Starting to update difficulty tables.");
-        let mut tables = self.tables.lock().unwrap();
+        let mut tables = self.tables.lock().await;
         from_web(&mut tables).await;
         Ok(())
     }
 
     pub async fn init(&self) -> Result<()> {
         log::info!("Starting to load difficulty tables.");
-        let mut tables = self.tables.lock().unwrap();
+        let mut tables = self.tables.lock().await;
         from_with_cache(&mut tables).await;
         Ok(())
     }
 }
 
 impl GetTables for TableClient {
-    fn get(&self) -> MutexGuard<'_, TablesInfo> {
-        self.tables.lock().unwrap()
+    async fn get(&self) -> TablesInfo {
+        self.tables.lock().await.clone()
     }
 }
 

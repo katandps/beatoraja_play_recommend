@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
 use anyhow::Result;
-use model::{DetailQuery, DetailResponse, Score, ScoreId, Scores, SongLogQuery, TablesInfo};
+use model::{DetailQuery, DetailResponse, Score, ScoreId, Scores, SongLogQuery};
 use repository::{
-    AccountByUserId, ResetScore, ScoreByAccountAndSha256, ScoresByAccount, SongDataForTables,
+    AccountByUserId, GetTables, ResetScore, ScoreByAccountAndSha256, ScoresByAccount,
+    SongDataForTables,
 };
 use session::Claims;
 
@@ -19,11 +20,12 @@ macro_rules! log_duration {
     }};
 }
 
-pub async fn list<C: ScoresByAccount + SongDataForTables + AccountByUserId>(
+pub async fn list<C: ScoresByAccount + SongDataForTables + AccountByUserId, T: GetTables>(
     mut repos: C,
-    tables: TablesInfo,
+    tables: T,
     query: DetailQuery,
 ) -> Result<crate::Response<DetailResponse>> {
+    let tables = tables.get().await;
     let account = repos.user(query.user_id).await?;
     let songs = repos.song_data(&tables.tables).await?;
     let scores = log_duration!(

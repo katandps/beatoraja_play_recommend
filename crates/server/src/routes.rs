@@ -11,10 +11,10 @@ use warp::filters::cors::Builder;
 use warp::filters::BoxedFilter;
 use warp::{Filter, Reply};
 
-pub fn routes(db_pool: &MySqlPool, tables: &TableClient) -> BoxedFilter<(impl Reply,)> {
+pub fn routes(db_pool: &MySqlPool, tables: TableClient) -> BoxedFilter<(impl Reply,)> {
     let songs_tag = Arc::new(Mutex::new(SongsTag::new()));
 
-    general::routes(db_pool, tables, &songs_tag)
+    general::routes(db_pool, tables.clone(), &songs_tag)
         .or(logged_in::routes(db_pool, &songs_tag))
         .or(authorization::routes(db_pool))
         .or(custom_table::routes(db_pool, tables))

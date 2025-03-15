@@ -19,7 +19,7 @@ pub async fn change_name<C: RenameAccount + AccountByUserId>(
 ) -> Result<Response<Account>> {
     let mut account = repos.user(claims.user_id).await?;
     account.set_name(&query.changed_name);
-    let _ = repos.rename(&account).await?;
+    repos.rename(&account).await?;
     Ok(Response::Ok {
         tag: None,
         body: account,

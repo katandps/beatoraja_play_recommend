@@ -1,8 +1,11 @@
 use crate::Response;
 use anyhow::Result;
-use model::{TablesFormat, TablesInfo};
+use model::TablesFormat;
+use repository::GetTables;
+use table::TableClient;
 
-pub async fn get(tables: TablesInfo, tag: Option<String>) -> Result<Response<TablesFormat>> {
+pub async fn get(table_client: TableClient, tag: Option<String>) -> Result<Response<TablesFormat>> {
+    let tables = table_client.get().await;
     if tables.tag == tag {
         // 変更がない場合、ステータスコードだけを返す
         log::info!("table_handler ETag matched: {:?}", tag);

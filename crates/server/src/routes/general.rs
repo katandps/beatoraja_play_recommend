@@ -14,15 +14,15 @@ use warp::{Filter, Rejection, Reply};
 
 pub fn routes(
     db_pool: &MySqlPool,
-    t: &TableClient,
+    t: TableClient,
     songs_tag: &Arc<Mutex<SongsTag>>,
 ) -> BoxedFilter<(impl Reply,)> {
     health(db_pool)
         .or(users(db_pool))
-        .or(tables(t))
+        .or(tables(t.clone()))
         .or(stats(db_pool))
-        .or(songs(db_pool, t, songs_tag))
-        .or(ranking(db_pool, t))
+        .or(songs(db_pool, t.clone(), songs_tag))
+        .or(ranking(db_pool, t.clone()))
         .or(detail(db_pool, t))
         .or(song_log(db_pool))
         .with(warp::compression::gzip())
@@ -51,7 +51,7 @@ fn users(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
         .boxed()
 }
 
-fn tables(tables: &TableClient) -> BoxedFilter<(impl Reply,)> {
+fn tables(tables: TableClient) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("tables"))
         .and(with_table(tables))
@@ -72,7 +72,7 @@ fn stats(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
 
 fn songs(
     db_pool: &MySqlPool,
-    tables: &TableClient,
+    tables: TableClient,
     songs_tag: &Arc<Mutex<SongsTag>>,
 ) -> BoxedFilter<(impl Reply,)> {
     warp::get()
@@ -86,7 +86,7 @@ fn songs(
         .boxed()
 }
 
-fn ranking(db_pool: &MySqlPool, tables: &TableClient) -> BoxedFilter<(impl Reply,)> {
+fn ranking(db_pool: &MySqlPool, tables: TableClient) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("ranking"))
         .and(with_db(db_pool))
@@ -97,7 +97,7 @@ fn ranking(db_pool: &MySqlPool, tables: &TableClient) -> BoxedFilter<(impl Reply
         .boxed()
 }
 
-fn detail(db_pool: &MySqlPool, tables: &TableClient) -> BoxedFilter<(impl Reply,)> {
+fn detail(db_pool: &MySqlPool, tables: TableClient) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("detail"))
         .and(with_db(db_pool))
