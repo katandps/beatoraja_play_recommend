@@ -1,8 +1,8 @@
 use crate::*;
+use parse_display::Display;
 use std::cmp::Ordering;
-use std::fmt;
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq, Display)]
 pub struct MinBP(pub i32);
 
 impl Default for MinBP {
@@ -14,12 +14,6 @@ impl Default for MinBP {
 impl MinBP {
     pub fn from_bp(bp: i32) -> MinBP {
         MinBP(bp)
-    }
-}
-
-impl fmt::Display for MinBP {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
     }
 }
 

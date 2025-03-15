@@ -4,15 +4,11 @@ mod charts;
 pub use {chart::Chart, charts::Charts};
 
 use crate::*;
+use std::collections::HashMap;
+use std::fmt::Display;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Display)]
 pub struct TableId(i64);
-
-impl Display for TableId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
 
 #[derive(Debug, Clone, Default)]
 pub struct TablesInfo {
@@ -178,11 +174,10 @@ impl TableLevel {
 }
 
 use itertools::Itertools;
+use parse_display::Display;
 /// フロント出力用フォーマット
 /// name: 難易度表名
 /// levels: HashMap<レベル名, 曲のHashMd5>
-use std::collections::HashMap;
-use std::fmt::Display;
 
 #[derive(Serialize)]
 pub struct TableFormat {

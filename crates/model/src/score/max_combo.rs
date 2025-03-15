@@ -1,17 +1,11 @@
 use crate::*;
-use std::fmt;
+use parse_display::Display;
 
-#[derive(Clone, Debug, Serialize, Deserialize, Default)]
+#[derive(Clone, Debug, Serialize, Deserialize, Default, Display)]
 pub struct MaxCombo(pub i32);
 
 impl MaxCombo {
     pub fn from_combo(combo: i32) -> MaxCombo {
         MaxCombo(combo)
-    }
-}
-
-impl fmt::Display for MaxCombo {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
     }
 }

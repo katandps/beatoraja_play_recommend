@@ -1,9 +1,9 @@
 use crate::Response;
 use anyhow::Result;
 use model::{PlayerStats, UserId};
-use repository::{AccountByUserId, StatsByAccount};
+use repository::{AccountByUserId, StatsByDays};
 
-pub async fn by_user<C: AccountByUserId + StatsByAccount>(
+pub async fn by_user<C: AccountByUserId + StatsByDays>(
     user_id: i32,
     mut repos: C,
 ) -> Result<Response<PlayerStats>> {

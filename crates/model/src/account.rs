@@ -1,21 +1,8 @@
-mod gmail_address;
-mod google_id;
-mod registered_date;
 mod score_upload;
-mod user_id;
-mod user_name;
-mod visibility;
 
-pub use {
-    gmail_address::GmailAddress,
-    google_id::GoogleId,
-    registered_date::RegisteredDate,
-    score_upload::{ScoreUpload, UploadAt, UploadId},
-    user_id::UserId,
-    user_name::UserName,
-    visibility::Visibility,
-};
+pub use score_upload::{ScoreUpload, UploadAt, UploadId};
 
+use parse_display::Display;
 use serde::Serialize;
 use {chrono::NaiveDateTime, serde::Deserialize};
 
@@ -78,6 +65,72 @@ impl Account {
 
     pub fn set_visibility(&mut self, new_visibility: bool) {
         self.visibility = Visibility::new(new_visibility)
+    }
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct RegisteredDate(NaiveDateTime);
+
+impl RegisteredDate {
+    pub fn new(date: NaiveDateTime) -> Self {
+        Self(date)
+    }
+
+    pub fn to_naive_date_time(&self) -> NaiveDateTime {
+        self.0
+    }
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
+pub struct UserId(i32);
+
+impl UserId {
+    pub fn new(id: i32) -> Self {
+        UserId(id)
+    }
+
+    pub fn get(&self) -> i32 {
+        self.0
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Display)]
+pub struct GoogleId(String);
+
+impl GoogleId {
+    pub fn new(id: String) -> Self {
+        GoogleId(id)
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Display)]
+pub struct GmailAddress(String);
+
+impl GmailAddress {
+    pub fn new(email: String) -> Self {
+        GmailAddress(email)
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Display)]
+pub struct UserName(String);
+
+impl UserName {
+    pub fn new(name: String) -> Self {
+        UserName(name)
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Display)]
+pub struct Visibility(bool);
+
+impl Visibility {
+    pub fn new(v: bool) -> Visibility {
+        Visibility(v)
+    }
+
+    pub fn to_bool(&self) -> bool {
+        self.0
     }
 }
 

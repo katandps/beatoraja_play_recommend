@@ -1,8 +1,8 @@
 use crate::*;
+use parse_display::Display;
 use std::cmp::Ordering;
-use std::fmt;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize, Default, Display)]
 pub struct ExScore(i32);
 
 impl ExScore {
@@ -12,12 +12,6 @@ impl ExScore {
 
     pub fn ex_score(&self) -> i32 {
         self.0
-    }
-}
-
-impl fmt::Display for ExScore {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.ex_score())
     }
 }
 

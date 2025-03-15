@@ -1,13 +1,8 @@
-use std::fmt::Display;
+use parse_display::Display;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Display)]
 pub struct SessionKey(String);
 
-impl Display for SessionKey {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
 impl SessionKey {
     pub fn as_str(&self) -> &str {
         &self.0
