@@ -6,9 +6,6 @@ use warp::{http::StatusCode, Rejection, Reply};
 
 #[derive(Debug, Error)]
 pub enum HandleError {
-    #[error("AuthorizationCodeIsNotFound")]
-    AuthorizationCodeIsNotFound,
-
     #[error("IOError: {0:?}")]
     IOError(std::io::Error),
     #[error("MySqlError: {0:?}")]
@@ -18,9 +15,6 @@ pub enum HandleError {
 
     #[error("WarpError: {0:?}")]
     WarpError(warp::Error),
-
-    #[error("OAuthGoogleError: {0:?}")]
-    OAuthGoogleError(oauth_google::Error),
     #[error("OtherError: {0:?}")]
     OtherError(anyhow::Error),
     #[error("SerdeJsonError: {0:?}")]
@@ -39,7 +33,6 @@ pub async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> 
         use HandleError::*;
         (
             match e {
-                AuthorizationCodeIsNotFound => StatusCode::BAD_REQUEST,
                 WarpError(_) => StatusCode::BAD_REQUEST,
                 _ => StatusCode::INTERNAL_SERVER_ERROR,
             },

@@ -1,6 +1,7 @@
 use anyhow::Result;
 use repository::HealthCheck;
 
+pub mod authorization;
 pub mod custom_table;
 pub mod play_data;
 pub mod scores;

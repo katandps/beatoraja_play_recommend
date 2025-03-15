@@ -5,15 +5,9 @@ use anyhow::Result;
 use base64::{alphabet, engine, read};
 use config::config;
 pub use error::Error;
+use serde::Deserialize;
 use serde_json::{Map, Value};
 use std::collections::HashMap;
-
-pub async fn verify(code: String) -> Result<GoogleProfile, Error> {
-    let body = make_token_request_body(code);
-    let obj = token_request(body).await?;
-    let payload = get_payload(&obj)?;
-    make_google_profile(&payload)
-}
 
 fn make_google_profile(payload: &Map<String, Value>) -> Result<GoogleProfile, Error> {
     let user_id = payload
@@ -96,4 +90,18 @@ pub trait RegisterUser {
         &mut self,
         profile: &GoogleProfile,
     ) -> impl std::future::Future<Output = Result<()>> + Send;
+}
+
+#[derive(Deserialize)]
+pub struct AuthorizationQuery {
+    pub code: String,
+}
+
+impl AuthorizationQuery {
+    pub async fn get_profile(self) -> Result<GoogleProfile, Error> {
+        let body = make_token_request_body(self.code);
+        let obj = token_request(body).await?;
+        let payload = get_payload(&obj)?;
+        make_google_profile(&payload)
+    }
 }

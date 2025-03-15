@@ -1,12 +1,7 @@
 use crate::config::config;
-use crate::error::HandleError;
 use crate::filter::with_db;
-use chrono::Duration;
-use model::GoogleId;
 use mysql::MySqlPool;
-use oauth_google::{GoogleProfile, RegisterUser};
-use repository::AccountByGoogleId;
-use std::collections::HashMap;
+use service::authorization::Registered;
 use warp::filters::BoxedFilter;
 use warp::http::StatusCode;
 use warp::http::Uri;
@@ -39,49 +34,32 @@ pub fn oauth_redirect(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::get()
         .and(path("oauth"))
         .and(with_db(db_pool))
-        .and(warp::query::<HashMap<String, String>>().and_then(verify))
-        .and_then(oauth_handler)
+        .and(warp::query())
+        .then(service::authorization::register)
+        .then(redirect)
         .boxed()
 }
-const EXPIRE_DAYS: i64 = 30;
 
-async fn oauth_handler<C: RegisterUser + AccountByGoogleId>(
-    mut repos: C,
-    profile: GoogleProfile,
-) -> Result<impl Reply, Rejection> {
-    repos
-        .register(&profile)
-        .await
-        .map_err(HandleError::OtherError)?;
-    let account = repos
-        .user(&GoogleId::new(profile.user_id))
-        .await
-        .map_err(HandleError::OtherError)?;
-    let key = session::generate_session_jwt(account.user_id, Duration::days(EXPIRE_DAYS))
-        .map_err(HandleError::OtherError)?;
+pub async fn redirect(result: anyhow::Result<Registered>) -> impl Reply {
+    match result {
+        Ok(Registered {
+            session_key,
+            session_period,
+        }) => {
+            let header = format!(
+                "session-token={};domain={};max-age={}",
+                session_key,
+                config().client_domain,
+                session_period.num_seconds()
+            );
+            let uri = Uri::from_maybe_shared(config().client_url.clone()).unwrap();
+            let redirect = warp::redirect(uri);
+            warp::reply::with_header(redirect, warp::http::header::SET_COOKIE, header)
+        }
 
-    let header = format!(
-        "session-token={};domain={};max-age=2592000",
-        key,
-        config().client_domain
-    );
-
-    let uri = Uri::from_maybe_shared(config().client_url.clone()).unwrap();
-    let redirect = warp::redirect(uri);
-    Ok(warp::reply::with_header(
-        redirect,
-        warp::http::header::SET_COOKIE,
-        header,
-    ))
-}
-
-async fn verify(query: HashMap<String, String>) -> Result<GoogleProfile, Rejection> {
-    let code = query
-        .get("code")
-        .cloned()
-        .ok_or(HandleError::AuthorizationCodeIsNotFound)?;
-    let profile = oauth_google::verify(code)
-        .await
-        .map_err(HandleError::OAuthGoogleError)?;
-    Ok(profile)
+        Err(e) => {
+            log::error!("registration error: {:?}", e);
+            panic!();
+        }
+    }
 }
