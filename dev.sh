@@ -1,2 +1,3 @@
 #!/usr/bin/env bash
-eval $(cat .env) cargo run server --color always
+cargo build --release
+eval $(cat .env) /tmp/target/release/server

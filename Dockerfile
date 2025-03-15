@@ -3,7 +3,6 @@ WORKDIR /app
 COPY Cargo.toml Cargo.toml
 COPY crates crates
 RUN cargo build --release
-RUN strip /app/target/release/server
 
 FROM debian:stable-slim AS deploy
 RUN apt update -y \
