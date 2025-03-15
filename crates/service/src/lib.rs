@@ -1,3 +1,6 @@
+use anyhow::Result;
+use repository::HealthCheck;
+
 pub mod custom_table;
 pub mod play_data;
 pub mod scores;
@@ -11,4 +14,10 @@ pub mod users;
 pub enum Response<T> {
     Ok { tag: Option<String>, body: T },
     Cached { tag: String },
+}
+pub async fn health_check<C: HealthCheck>(mut client: C) -> Result<Response<()>> {
+    Ok(Response::Ok {
+        tag: None,
+        body: client.health().await?,
+    })
 }

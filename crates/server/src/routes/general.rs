@@ -4,13 +4,11 @@ use crate::filter::{with_cache_tag, with_db, with_songs_tag, with_table};
 use crate::json;
 use futures::lock::Mutex;
 use mysql::MySqlPool;
-use repository::HealthCheck;
 use service::songs::SongsTag;
 use table::TableClient;
 use warp::filters::BoxedFilter;
-use warp::http::StatusCode;
 use warp::path;
-use warp::{Filter, Rejection, Reply};
+use warp::{Filter, Reply};
 
 pub fn routes(
     db_pool: &MySqlPool,
@@ -30,16 +28,11 @@ pub fn routes(
 }
 
 fn health(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
-    async fn health_handler<C: HealthCheck>(mut client: C) -> Result<impl Reply, Rejection> {
-        match client.health().await {
-            Ok(_) => Ok(StatusCode::OK),
-            Err(_) => Ok(StatusCode::INTERNAL_SERVER_ERROR),
-        }
-    }
     warp::get()
         .and(path("health"))
         .and(with_db(db_pool))
-        .and_then(health_handler)
+        .then(service::health_check)
+        .then(json)
         .boxed()
 }
 fn users(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
