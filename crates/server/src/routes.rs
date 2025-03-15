@@ -19,7 +19,6 @@ pub fn routes(db_pool: &MySqlPool, tables: TableClient) -> BoxedFilter<(impl Rep
         .or(authorization::routes(db_pool))
         .or(custom_table::routes(db_pool, tables))
         .with(cors_header())
-        .recover(crate::error::handle_rejection)
         .with(warp::log("api_access"))
         .boxed()
 }

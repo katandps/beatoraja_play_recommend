@@ -1,10 +1,8 @@
 mod config;
-mod error;
 mod filter;
 mod routes;
 
 use config::config;
-use error::HandleError;
 use serde::Serialize;
 use std::time::Duration;
 use table::TableClient;
@@ -62,12 +60,15 @@ pub async fn json<T: Serialize>(result: anyhow::Result<service::Response<T>>) ->
             .unwrap(),
         Err(e) => {
             log::error!("{:?}", e);
-            panic!();
+            http::Response::builder()
+                .status(warp::http::StatusCode::INTERNAL_SERVER_ERROR)
+                .body("Internal server error".to_string())
+                .unwrap()
         }
     }
 }
 
 pub async fn query<T>(query: anyhow::Result<T>) -> Result<T, Rejection> {
-    Ok(query.map_err(HandleError::from)?)
+    Ok(query.unwrap())
 }
 pub const SESSION_KEY: &str = "session-token";
