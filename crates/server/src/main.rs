@@ -12,7 +12,10 @@ use warp::reply::Reply;
 
 #[tokio::main]
 async fn main() {
-    env_logger::init();
+    match std::env::var("RUST_JSON_LOG") {
+        Ok(str) if &str != "0" => tracing_subscriber::fmt::init(),
+        _ => tracing_subscriber::fmt().json().init(),
+    }
     let db_pool = mysql::get_db_pool();
     let tables = TableClient::new();
     let _ = tables.init().await;
