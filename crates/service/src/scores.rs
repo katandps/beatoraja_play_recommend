@@ -37,7 +37,7 @@ pub async fn list<C: ScoresByAccount + SongDataForTables + AccountByUserId, T: G
     );
     Ok(Response::Ok {
         tag: None,
-        body: scores.table_scores(&tables.tables, &songs, &query.date, &account),
+        body: DetailResponse::new(&tables.tables, &songs, scores, &query.date, &account),
     })
 }
 

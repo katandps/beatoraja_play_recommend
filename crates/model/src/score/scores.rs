@@ -17,15 +17,27 @@ impl Scores {
     pub fn get_map(&self) -> &HashMap<ScoreId, Score> {
         &self.0
     }
+    pub fn remove(&mut self, song_id: &ScoreId) -> Option<Score> {
+        self.0.remove(song_id)
+    }
+}
 
-    pub fn table_scores<'a>(
-        mut self,
-        tables: &'a Tables,
-        songs: &'a Songs,
-        date: &'a UpdatedAt,
-        account: &'a Account,
-    ) -> DetailResponse {
-        DetailResponse {
+#[derive(Debug, Clone, Serialize)]
+pub struct DetailResponse {
+    user_id: UserId,
+    user_name: String,
+    score: HashMap<HashMd5, ScoreDetail>,
+}
+
+impl DetailResponse {
+    pub fn new(
+        tables: &Tables,
+        songs: &Songs,
+        mut scores: Scores,
+        date: &UpdatedAt,
+        account: &Account,
+    ) -> Self {
+        Self {
             user_id: account.user_id(),
             user_name: account.user_name(),
             score: tables
@@ -35,20 +47,13 @@ impl Scores {
                         .song(chart)
                         .map(|song| song.song_id())
                         .unwrap_or_default();
-                    self.0
+                    scores
                         .remove(&score_id)
                         .map(|score| (chart.md5().clone(), score.make_detail(date)))
                 })
                 .collect(),
         }
     }
-}
-
-#[derive(Debug, Clone, Serialize)]
-pub struct DetailResponse {
-    user_id: UserId,
-    user_name: String,
-    score: HashMap<HashMd5, ScoreDetail>,
 }
 
 #[derive(Deserialize, Clone, Debug, PartialEq)]
