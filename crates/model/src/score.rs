@@ -72,7 +72,14 @@ impl Score {
                     self.play_count.clone()
                 },
             },
-            None => Default::default(),
+            None => ScoreDetail {
+                max_combo: self.max_combo,
+                score: Some(ScoreSnap::from(self.score)),
+                min_bp: Some(MinBPSnap::from(self.min_bp)),
+                clear_type: Some(ClearTypeSnap::from(self.clear)),
+                updated_at: self.updated_at,
+                play_count: self.play_count,
+            },
         }
     }
 }
@@ -92,6 +99,15 @@ pub struct ScoreSnap {
     pub current: ExScore,
     pub updated_at: UpdatedAt,
     pub before: ExScore,
+}
+
+impl From<ExScore> for ScoreSnap {
+    fn from(value: ExScore) -> Self {
+        ScoreSnap {
+            current: value,
+            ..Default::default()
+        }
+    }
 }
 
 impl ParamSnap for ScoreSnap {
@@ -120,6 +136,15 @@ pub struct MinBPSnap {
     pub before: MinBP,
 }
 
+impl From<MinBP> for MinBPSnap {
+    fn from(value: MinBP) -> Self {
+        MinBPSnap {
+            current: value,
+            ..Default::default()
+        }
+    }
+}
+
 impl ParamSnap for MinBPSnap {
     fn make(current: &SnapShot, updated_at: UpdatedAt, before_snap: Option<&SnapShot>) -> Self {
         MinBPSnap {
@@ -144,6 +169,15 @@ pub struct ClearTypeSnap {
     pub current: i32,
     pub updated_at: UpdatedAt,
     pub before: i32,
+}
+
+impl From<ClearType> for ClearTypeSnap {
+    fn from(value: ClearType) -> Self {
+        ClearTypeSnap {
+            current: value.to_integer(),
+            ..Default::default()
+        }
+    }
 }
 
 impl ParamSnap for ClearTypeSnap {
