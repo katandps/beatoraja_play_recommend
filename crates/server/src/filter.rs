@@ -42,16 +42,8 @@ pub fn receive_sqlite_file(
             let name = part.name().to_string();
             log::info!("{name}");
             let mut data: Vec<u8> = Vec::new();
-            if let Some(content) = part.data().await {
-                match content {
-                    Ok(content) => {
-                        log::info!("Received part data of length: {}", content.remaining());
-                        data.extend_from_slice(content.chunk());
-                    }
-                    Err(e) => {
-                        log::warn!("Error reading {} part data: {:?}", name, e);
-                    }
-                }
+            while let Some(content) = part.data().await {
+                data.extend_from_slice(content.unwrap().chunk());
             }
             Ok((name, data))
         })
