@@ -7,7 +7,7 @@ use crate::*;
 use std::collections::HashMap;
 use std::fmt::Display;
 
-#[derive(Debug, Clone, Deserialize, Display)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, Display, PartialEq, Eq)]
 pub struct TableId(i64);
 
 #[derive(Debug, Clone, Default)]
@@ -51,14 +51,21 @@ impl Tables {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Table {
     title: TableName,
+    id: TableId,
     symbol: TableSymbol,
     levels: TableLevels,
 }
 
 impl Table {
-    pub fn make(title: impl Into<String>, symbol: impl Into<String>, levels: TableLevels) -> Self {
+    pub fn make(
+        id: TableId,
+        title: impl Into<String>,
+        symbol: impl Into<String>,
+        levels: TableLevels,
+    ) -> Self {
         Table {
             title: TableName(title.into()),
+            id,
             symbol: TableSymbol(symbol.into()),
             levels,
         }
@@ -182,6 +189,7 @@ use parse_display::Display;
 #[derive(Serialize)]
 pub struct TableFormat {
     name: String,
+    id: i64,
     level_list: Vec<String>,
     levels: HashMap<String, Vec<String>>,
 }
@@ -201,6 +209,7 @@ impl From<&Table> for TableFormat {
         }
         TableFormat {
             name: t.title.0.clone(),
+            id: t.id.0,
             level_list: t.levels.v.iter().map(|l| l.get_label(t)).collect(),
             levels: map,
         }

@@ -118,7 +118,7 @@ async fn fetch(setting: &TableSetting) -> anyhow::Result<Table> {
     let data_url = make_data_url(&header_url, &header)?;
     let charts = get_charts(&data_url).await?;
     let levels = make_levels(&header, charts);
-    Ok(Table::make(header.name, header.symbol, levels))
+    Ok(Table::make(setting.id, header.name, header.symbol, levels))
 }
 
 fn create_cache_dir(setting: &TableSetting) -> anyhow::Result<PathBuf> {
