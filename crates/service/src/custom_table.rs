@@ -1,16 +1,16 @@
 use crate::Response;
 use anyhow::Result;
-use model::{Chart, CustomTableHeader, UserId};
+use model::{Chart, CustomTableHeader, TableId, UserId};
 use repository::{AccountByUserId, GetTables, ScoresByAccount, SongDataForTables};
 
 pub async fn header<T: GetTables>(
     _user_id: i32,
-    table_index: usize,
+    table_id: TableId,
     tables: T,
 ) -> Result<Response<CustomTableHeader>> {
     let tables = tables.get().await;
-    let table = tables.tables.get(table_index).unwrap();
-    let header =
+    let table = tables.get_by_id(table_id).unwrap();
+    let header: CustomTableHeader =
         CustomTableHeader::from(table).set_name(format!("おすすめ譜面表: {}", table.title()));
     Ok(Response::Ok {
         tag: None,
@@ -20,7 +20,7 @@ pub async fn header<T: GetTables>(
 
 pub async fn body<C: AccountByUserId + ScoresByAccount + SongDataForTables, T: GetTables>(
     user_id: i32,
-    table_index: usize,
+    table_id: TableId,
     tables: T,
     mut repos: C,
 ) -> Result<Response<Vec<Chart>>> {
@@ -29,7 +29,7 @@ pub async fn body<C: AccountByUserId + ScoresByAccount + SongDataForTables, T: G
 
     let account = repos.user(UserId::new(user_id)).await?;
     let score = repos.score(&account).await?;
-    let table = tables.tables.get(table_index).unwrap();
+    let table = tables.get_by_id(table_id).unwrap();
     let charts = table
         .filter_score(&score, &songs)
         .into_iter()

@@ -6,9 +6,23 @@ pub use {chart::Chart, charts::Charts};
 use crate::*;
 use std::collections::HashMap;
 use std::fmt::Display;
+use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, Display, PartialEq, Eq)]
 pub struct TableId(i64);
+
+impl TableId {
+    pub fn new(id: i64) -> Self {
+        TableId(id)
+    }
+}
+impl FromStr for TableId {
+    type Err = std::num::ParseIntError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        s.parse::<i64>().map(TableId::new)
+    }
+}
 
 #[derive(Debug, Clone, Default)]
 pub struct TablesInfo {
@@ -26,6 +40,10 @@ impl TablesInfo {
             Some(tag) => tag.as_str(),
             _ => "",
         }
+    }
+
+    pub fn get_by_id(&self, id: TableId) -> Option<&Table> {
+        self.tables.get_by_id(id)
     }
 }
 
@@ -45,6 +63,10 @@ impl Tables {
 
     pub fn get(&self, index: usize) -> Option<&Table> {
         self.v.get(&index)
+    }
+
+    pub fn get_by_id(&self, id: TableId) -> Option<&Table> {
+        self.v.values().find(|t| t.id == id)
     }
 }
 

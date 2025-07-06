@@ -4,6 +4,7 @@
  */
 use crate::filter::{with_db, with_table};
 use crate::json;
+use model::TableId;
 use mysql::MySqlPool;
 use table::TableClient;
 use warp::filters::BoxedFilter;
@@ -25,7 +26,7 @@ pub fn table_route() -> BoxedFilter<(impl Reply,)> {
         .boxed()
 }
 
-async fn table_handler(_user_id: i32, _table_index: usize) -> Result<impl Reply, Rejection> {
+async fn table_handler(_user_id: i32, _table_id: usize) -> Result<impl Reply, Rejection> {
     let body = r#"
         <html>
           <head>
@@ -41,7 +42,7 @@ async fn table_handler(_user_id: i32, _table_index: usize) -> Result<impl Reply,
 
 pub fn header_route(tables: TableClient) -> BoxedFilter<(impl Reply,)> {
     warp::get()
-        .and(path!("recommend_table" / i32 / usize / "header.json"))
+        .and(path!("recommend_table" / i32 / TableId / "header.json"))
         .and(with_table(tables))
         .then(service::custom_table::header)
         .then(json)
@@ -50,7 +51,7 @@ pub fn header_route(tables: TableClient) -> BoxedFilter<(impl Reply,)> {
 
 pub fn body_route(db_pool: &MySqlPool, tables: TableClient) -> BoxedFilter<(impl Reply,)> {
     warp::get()
-        .and(path!("recommend_table" / i32 / usize / "score.json"))
+        .and(path!("recommend_table" / i32 / TableId / "score.json"))
         .and(with_table(tables))
         .and(with_db(db_pool))
         .then(service::custom_table::body)
