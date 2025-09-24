@@ -35,6 +35,7 @@ impl DetailResponse {
         songs: &Songs,
         mut scores: Scores,
         date: &UpdatedAt,
+        after_date: &UpdatedAt,
         account: &Account,
     ) -> Self {
         Self {
@@ -49,6 +50,7 @@ impl DetailResponse {
                         .unwrap_or_default();
                     scores
                         .remove(&score_id)
+                        .filter(|score| &score.updated_at >= after_date)
                         .map(|score| (chart.md5().clone(), score.make_detail(date)))
                 })
                 .collect(),
@@ -61,6 +63,8 @@ impl DetailResponse {
 pub struct DetailQuery {
     pub user_id: UserId,
     pub date: UpdatedAt,
+    #[serde(default)]
+    pub after_date: UpdatedAt,
     #[serde(default)]
     pub play_mode: PlayMode,
 }
@@ -82,6 +86,7 @@ mod test {
             DetailQuery {
                 user_id: UserId::new(9),
                 date: UpdatedAt::from_str("2025-03-14").unwrap(),
+                after_date: UpdatedAt::from_timestamp(0),
                 play_mode: PlayMode::from(0)
             }
         )
