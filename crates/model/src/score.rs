@@ -52,20 +52,12 @@ impl Score {
         Score { log, ..self }
     }
 
-    pub fn snap(&self, period: &SnapPeriod) -> Option<&SnapShot> {
-        self.log.snap(period)
-    }
-
-    pub fn param_snap<T: ParamSnap>(&self, period: &SnapPeriod) -> Option<T> {
-        self.log.param_snap::<T>(period)
-    }
-
     pub fn make_detail(self, period: &SnapPeriod) -> Option<ScoreDetail> {
-        match self.snap(period) {
+        match self.log.snap(period) {
             Some(snap) => Some(ScoreDetail {
-                clear_type: self.param_snap(period),
-                min_bp: self.param_snap(period),
-                score: self.param_snap(period),
+                clear_type: self.log.param_snap(period),
+                min_bp: self.log.param_snap(period),
+                score: self.log.param_snap(period),
                 max_combo: snap.max_combo.clone(),
                 updated_at: snap.updated_at.clone(),
                 play_count: if period.is_past_range() {

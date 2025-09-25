@@ -14,11 +14,11 @@ impl SnapShots {
         self.0.insert(snapshot);
     }
 
-    pub fn snap(&self, date: &SnapPeriod) -> Option<&SnapShot> {
+    pub fn snap(&self, period: &SnapPeriod) -> Option<&SnapShot> {
         self.0
             .iter()
             .rev()
-            .find(|&s| s.updated_at.is_contained(date))
+            .find(|&s| s.updated_at.is_contained(period))
     }
 
     pub fn has_snap(&self) -> bool {
