@@ -516,8 +516,7 @@ impl StatsByDays for MySQLClient {
 
 impl ScoresByAccount for MySQLClient {
     async fn score(&mut self, account: &Account) -> Result<Scores> {
-        let user = User::by_account(&mut self.connection, account)?;
-        let record = models::Score::by_user_id(&mut self.connection, user.id)?;
+        let record = models::Score::by_user_id(&mut self.connection, account.user_id().get())?;
         let mut score_log = self.score_log(account)?;
         Ok(Scores::create_by_map(
             record
