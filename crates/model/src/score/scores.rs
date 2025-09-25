@@ -37,6 +37,12 @@ impl DetailResponse {
         period: &SnapPeriod,
         account: &Account,
     ) -> Self {
+        let charts = tables.get_charts().count();
+        println!(
+            "DetailResponse: charts={}, scores={}",
+            charts,
+            scores.count()
+        );
         Self {
             user_id: account.user_id(),
             user_name: account.user_name(),
