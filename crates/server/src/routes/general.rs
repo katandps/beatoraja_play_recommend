@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::filter::{with_cache_tag, with_db, with_songs_tag, with_table};
+use crate::filter::{with_cache_tag, with_db, with_login, with_songs_tag, with_table};
 use crate::json;
 use futures::lock::Mutex;
 use mysql::MySqlPool;
@@ -23,6 +23,7 @@ pub fn routes(
         .or(ranking(db_pool, t.clone()))
         .or(detail(db_pool, t))
         .or(song_log(db_pool))
+        .or(my_song_log(db_pool))
         .with(warp::compression::gzip())
         .boxed()
 }
@@ -56,8 +57,9 @@ fn tables(tables: TableClient) -> BoxedFilter<(impl Reply,)> {
 
 fn stats(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::get()
-        .and(path!("stats" / i32))
+        .and(path!("stats" / "my"))
         .and(with_db(db_pool))
+        .and(with_login())
         .then(service::status::by_user)
         .then(json)
         .boxed()
@@ -107,6 +109,17 @@ fn song_log(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
         .and(with_db(db_pool))
         .and(warp::query())
         .then(service::scores::log)
+        .then(json)
+        .boxed()
+}
+
+fn my_song_log(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
+    warp::get()
+        .and(path("score"))
+        .and(with_db(db_pool))
+        .and(with_login())
+        .and(warp::query())
+        .then(service::scores::my_log)
         .then(json)
         .boxed()
 }

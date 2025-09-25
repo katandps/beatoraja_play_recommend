@@ -34,8 +34,7 @@ impl DetailResponse {
         tables: &Tables,
         songs: &Songs,
         mut scores: Scores,
-        date: &UpdatedAt,
-        after_date: &UpdatedAt,
+        period: &SnapPeriod,
         account: &Account,
     ) -> Self {
         Self {
@@ -50,8 +49,12 @@ impl DetailResponse {
                         .unwrap_or_default();
                     scores
                         .remove(&score_id)
-                        .filter(|score| &score.updated_at >= after_date)
-                        .map(|score| (chart.md5().clone(), score.make_detail(date)))
+                        .map(|score| {
+                            score
+                                .make_detail(period)
+                                .map(|detail| (chart.md5().clone(), detail))
+                        })
+                        .flatten()
                 })
                 .collect(),
         }
@@ -62,9 +65,8 @@ impl DetailResponse {
 #[allow(unused)]
 pub struct DetailQuery {
     pub user_id: UserId,
-    pub date: UpdatedAt,
-    #[serde(default)]
-    pub after_date: UpdatedAt,
+    #[serde(flatten)]
+    pub period: SnapPeriod,
     #[serde(default)]
     pub play_mode: PlayMode,
 }
@@ -72,12 +74,13 @@ pub struct DetailQuery {
 #[cfg(test)]
 mod test {
     use super::*;
-    use std::str::FromStr;
+    use chrono::DateTime;
 
     #[test]
     fn detail_query() {
         let json = r#"{
-          "date": "2025-03-14T00:00:00Z",
+          "since": "2025-03-14T00:00:00Z",
+          "until": "2025-03-16T00:00:00Z",
           "user_id": 9
         }"#;
         let q: DetailQuery = serde_json::from_str(json).unwrap();
@@ -85,8 +88,14 @@ mod test {
             q,
             DetailQuery {
                 user_id: UserId::new(9),
-                date: UpdatedAt::from_str("2025-03-14").unwrap(),
-                after_date: UpdatedAt::from_timestamp(0),
+                period: SnapPeriod {
+                    since: DateTime::parse_from_rfc3339("2025-03-14T00:00:00+00:00")
+                        .unwrap()
+                        .into(),
+                    until: DateTime::parse_from_rfc3339("2025-03-16T00:00:00+00:00")
+                        .unwrap()
+                        .into(),
+                },
                 play_mode: PlayMode::from(0)
             }
         )

@@ -8,6 +8,7 @@ mod play_count;
 mod rank;
 mod ranking;
 mod scores;
+mod snap_range;
 mod snapshot;
 mod snapshots;
 mod song_id;
@@ -24,6 +25,7 @@ pub use {
     rank::ClearRank,
     ranking::{RankedScore, RankingQuery, RankingResponse},
     scores::{DetailQuery, DetailResponse, Scores},
+    snap_range::SnapPeriod,
     snapshot::SnapShot,
     snapshots::SnapShots,
     song_id::{PlayMode, ScoreId},
@@ -50,36 +52,44 @@ impl Score {
         Score { log, ..self }
     }
 
-    pub fn snap(&self, date: &UpdatedAt) -> Option<&SnapShot> {
-        self.log.snap(date)
+    pub fn snap(&self, period: &SnapPeriod) -> Option<&SnapShot> {
+        self.log.snap(period)
     }
 
-    pub fn param_snap<T: ParamSnap>(&self, date: &UpdatedAt) -> Option<T> {
-        self.log.param_snap::<T>(date)
+    pub fn param_snap<T: ParamSnap>(&self, period: &SnapPeriod) -> Option<T> {
+        self.log.param_snap::<T>(period)
     }
 
-    pub fn make_detail(self, date: &UpdatedAt) -> ScoreDetail {
-        match self.snap(date) {
-            Some(snap) => ScoreDetail {
-                clear_type: self.param_snap(date),
-                min_bp: self.param_snap(date),
-                score: self.param_snap(date),
+    pub fn make_detail(self, period: &SnapPeriod) -> Option<ScoreDetail> {
+        match self.snap(period) {
+            Some(snap) => Some(ScoreDetail {
+                clear_type: self.param_snap(period),
+                min_bp: self.param_snap(period),
+                score: self.param_snap(period),
                 max_combo: snap.max_combo.clone(),
                 updated_at: snap.updated_at.clone(),
-                play_count: if !date.is_future() {
+                play_count: if period.is_past_range() {
                     PlayCount::new(-1)
                 } else {
                     self.play_count.clone()
                 },
-            },
-            None => ScoreDetail {
-                max_combo: self.max_combo,
-                score: Some(ScoreSnap::from(self.score)),
-                min_bp: Some(MinBPSnap::from(self.min_bp)),
-                clear_type: Some(ClearTypeSnap::from(self.clear)),
-                updated_at: self.updated_at,
-                play_count: self.play_count,
-            },
+            }),
+            None if !self.log.has_snap() => {
+                // imported but no play
+                if period.contains(&self.updated_at) {
+                    Some(ScoreDetail {
+                        max_combo: self.max_combo,
+                        score: Some(ScoreSnap::from(self.score)),
+                        min_bp: Some(MinBPSnap::from(self.min_bp)),
+                        clear_type: Some(ClearTypeSnap::from(self.clear)),
+                        updated_at: self.updated_at,
+                        play_count: self.play_count,
+                    })
+                } else {
+                    None
+                }
+            }
+            None => None,
         }
     }
 }
@@ -209,6 +219,13 @@ pub trait ParamSnap: SnapCmp {
 #[derive(Deserialize)]
 pub struct SongLogQuery {
     pub user_id: UserId,
+    #[serde(default)]
+    pub play_mode: PlayMode,
+    pub sha256: HashSha256,
+}
+
+#[derive(Deserialize)]
+pub struct SongMyLogQuery {
     #[serde(default)]
     pub play_mode: PlayMode,
     pub sha256: HashSha256,

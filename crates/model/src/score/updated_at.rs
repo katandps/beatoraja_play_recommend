@@ -37,6 +37,17 @@ impl UpdatedAt {
     pub fn from_naive_datetime(time: NaiveDateTime) -> Self {
         Self::from_timestamp(time.and_utc().timestamp())
     }
+
+    pub fn is_contained(&self, range: &SnapPeriod) -> bool {
+        &self.0 >= &range.since && &self.0 <= &range.until
+    }
+
+    pub fn to_one_day_before(&self) -> SnapPeriod {
+        SnapPeriod {
+            since: DateTime::default(),
+            until: self.0 - Duration::days(1),
+        }
+    }
 }
 
 impl FromStr for UpdatedAt {

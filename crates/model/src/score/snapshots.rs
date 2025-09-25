@@ -1,6 +1,5 @@
 use crate::score::score::ParamSnap;
 use crate::*;
-use chrono::Duration;
 use std::collections::BTreeSet;
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
@@ -15,11 +14,18 @@ impl SnapShots {
         self.0.insert(snapshot);
     }
 
-    pub fn snap(&self, date: &UpdatedAt) -> Option<&SnapShot> {
-        self.0.iter().rev().find(|&s| s.updated_at.le(date))
+    pub fn snap(&self, date: &SnapPeriod) -> Option<&SnapShot> {
+        self.0
+            .iter()
+            .rev()
+            .find(|&s| s.updated_at.is_contained(date))
     }
 
-    pub fn param_snap<T: ParamSnap>(&self, date: &UpdatedAt) -> Option<T> {
+    pub fn has_snap(&self) -> bool {
+        !self.0.is_empty()
+    }
+
+    pub fn param_snap<T: ParamSnap>(&self, date: &SnapPeriod) -> Option<T> {
         match self.snap(date) {
             Some(last) => {
                 let mut last_date = &last.updated_at;
@@ -28,7 +34,7 @@ impl SnapShots {
                     if T::cmp(snap, last) {
                         last_date = &snap.updated_at;
                     } else {
-                        one_day_before = self.snap(&(last_date - Duration::days(1)));
+                        one_day_before = self.snap(&last_date.to_one_day_before());
                         break;
                     }
                 }
@@ -58,11 +64,26 @@ mod test {
             shot4.clone(),
         ]);
 
-        assert_eq!(Some(&shot1), shots.snap(&UpdatedAt::from_timestamp(21)));
-        assert_eq!(Some(&shot2), shots.snap(&UpdatedAt::from_timestamp(22)));
-        assert_eq!(Some(&shot2), shots.snap(&UpdatedAt::from_timestamp(23)));
-        assert_eq!(Some(&shot2), shots.snap(&UpdatedAt::from_timestamp(32)));
-        assert_eq!(Some(&shot3), shots.snap(&UpdatedAt::from_timestamp(33)));
+        assert_eq!(
+            Some(&shot1),
+            shots.snap(&SnapPeriod::from_until_timestamp(21))
+        );
+        assert_eq!(
+            Some(&shot2),
+            shots.snap(&SnapPeriod::from_until_timestamp(22))
+        );
+        assert_eq!(
+            Some(&shot2),
+            shots.snap(&SnapPeriod::from_until_timestamp(23))
+        );
+        assert_eq!(
+            Some(&shot2),
+            shots.snap(&SnapPeriod::from_until_timestamp(32))
+        );
+        assert_eq!(
+            Some(&shot3),
+            shots.snap(&SnapPeriod::from_until_timestamp(33))
+        );
     }
 
     #[test]
@@ -71,7 +92,7 @@ mod test {
 
         fn asrt(snapshots: &SnapShots, current: ClearType, before: ClearType, timestamp: i64) {
             let snap = snapshots
-                .param_snap::<ClearTypeSnap>(&UpdatedAt::from_timestamp(timestamp))
+                .param_snap::<ClearTypeSnap>(&SnapPeriod::from_until_timestamp(timestamp))
                 .unwrap_or_default();
             assert_eq!(current.to_integer(), snap.current);
             assert_eq!(before.to_integer(), snap.before);
@@ -90,7 +111,7 @@ mod test {
         let shot_easy = SnapShot::from_data(4, 2, 3, 4, DAY * 22);
         //25日目 normal+hard
         let shot_normal = SnapShot::from_data(5, 2, 3, 4, DAY * 25);
-        let shot_hard = SnapShot::from_data(6, 2, 3, 4, DAY * 25 + DAY - 1);
+        let shot_hard = SnapShot::from_data(6, 2, 3, 4, DAY * 26 - 1);
         //30日目 exhard
         let shot_exhard = SnapShot::from_data(7, 2, 3, 4, DAY * 30);
 

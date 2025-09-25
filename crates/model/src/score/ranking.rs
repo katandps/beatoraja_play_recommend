@@ -12,7 +12,7 @@ impl RankedScore {
     pub fn for_response(
         mut self,
         songs: &Songs,
-        date: &UpdatedAt,
+        date: &SnapPeriod,
         sha256: &HashSha256,
         users: &[VisibleAccount],
     ) -> Option<RankingResponse> {
@@ -23,7 +23,12 @@ impl RankedScore {
                 .filter_map(|va| {
                     self.0
                         .remove(&va.id)
-                        .map(|score| (va.id, (va.name.clone(), score.make_detail(date))))
+                        .map(|score| {
+                            score
+                                .make_detail(date)
+                                .map(|detail| ((va.id, (va.name.clone(), detail))))
+                        })
+                        .flatten()
                 })
                 .collect(),
         })
@@ -39,7 +44,8 @@ pub struct RankingResponse {
 #[derive(Deserialize)]
 #[allow(dead_code)]
 pub struct RankingQuery {
-    pub date: UpdatedAt,
+    #[serde(flatten)]
+    pub date: SnapPeriod,
     #[serde(default)]
     pub play_mode: PlayMode,
     pub sha256: HashSha256,
