@@ -518,6 +518,11 @@ impl ScoresByAccount for MySQLClient {
     async fn score(&mut self, account: &Account) -> Result<Scores> {
         let record = models::Score::by_user_id(&mut self.connection, account.user_id().get())?;
         let mut score_log = self.score_log(account)?;
+        log::info!(
+            "Fetched {} scores, {} score_logs",
+            record.len(),
+            score_log.len()
+        );
         Ok(Scores::create_by_map(
             record
                 .into_iter()
