@@ -26,7 +26,7 @@ impl RankedScore {
                         .map(|score| {
                             score
                                 .make_detail(date)
-                                .map(|detail| ((va.id, (va.name.clone(), detail))))
+                                .map(|detail| (va.id, (va.name.clone(), detail)))
                         })
                         .flatten()
                 })
