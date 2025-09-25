@@ -1,7 +1,5 @@
-use std::collections::HashMap;
-
 use anyhow::Result;
-use model::{DetailQuery, DetailResponse, Score, ScoreId, Scores, SongLogQuery, SongMyLogQuery};
+use model::{DetailQuery, DetailResponse, Score, ScoreId, SongLogQuery, SongMyLogQuery};
 use repository::{
     AccountByUserId, GetTables, ResetScore, ScoreByAccountAndSha256, ScoresByAccount,
     SongDataForTables,
@@ -28,13 +26,7 @@ pub async fn list<C: ScoresByAccount + SongDataForTables + AccountByUserId, T: G
     let tables = tables.get().await;
     let account = repos.user(query.user_id).await?;
     let songs = repos.song_data(&tables.tables).await?;
-    let scores = log_duration!(
-        GetScores,
-        repos
-            .score(&account)
-            .await
-            .unwrap_or_else(|_| Scores::create_by_map(HashMap::new()))
-    );
+    let scores = log_duration!(GetScores, repos.score(&account).await.unwrap());
     Ok(Response::Ok {
         tag: None,
         body: DetailResponse::new(&tables.tables, &songs, scores, &query.period, &account),
@@ -48,10 +40,7 @@ pub async fn log<C: ScoreByAccountAndSha256 + AccountByUserId>(
     let account = repos.user(query.user_id).await?;
     let score_id = ScoreId::new(query.sha256, query.play_mode);
     log::info!("account: {:?}, score_id: {:?}", account, score_id);
-    let score_with_log = repos
-        .score_with_log(&account, &score_id)
-        .await
-        .unwrap_or(Score::default());
+    let score_with_log = repos.score_with_log(&account, &score_id).await.unwrap();
     log::debug!("log: {:?}", score_with_log);
     Ok(Response::Ok {
         tag: None,
@@ -67,10 +56,7 @@ pub async fn my_log<C: ScoreByAccountAndSha256 + AccountByUserId>(
     let account = repos.user(claims.user_id).await?;
     let score_id = ScoreId::new(query.sha256, query.play_mode);
     log::info!("account: {:?}, score_id: {:?}", account, score_id);
-    let score_with_log = repos
-        .score_with_log(&account, &score_id)
-        .await
-        .unwrap_or(Score::default());
+    let score_with_log = repos.score_with_log(&account, &score_id).await.unwrap();
     log::debug!("log: {:?}", score_with_log);
     Ok(Response::Ok {
         tag: None,
