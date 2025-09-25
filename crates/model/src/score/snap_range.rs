@@ -5,15 +5,20 @@ use crate::UpdatedAt;
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct SnapPeriod {
+    #[serde(default)]
     pub since: DateTime<Utc>,
+    #[serde(default = "until_default")]
     pub until: DateTime<Utc>,
+}
+fn until_default() -> DateTime<Utc> {
+    Utc.with_ymd_and_hms(2100, 1, 1, 0, 0, 0).unwrap()
 }
 
 impl Default for SnapPeriod {
     fn default() -> Self {
         SnapPeriod {
             since: DateTime::default(),
-            until: Utc.timestamp_opt(i64::MAX, 0).unwrap(),
+            until: until_default(),
         }
     }
 }

@@ -98,6 +98,19 @@ mod test {
                 },
                 play_mode: PlayMode::from(0)
             }
-        )
+        );
+
+        let json = r#"{
+          "user_id": 9
+        }"#;
+        let q: DetailQuery = serde_json::from_str(json).unwrap();
+        assert_eq!(
+            q,
+            DetailQuery {
+                user_id: UserId::new(9),
+                period: SnapPeriod::default(),
+                play_mode: PlayMode::from(0)
+            }
+        );
     }
 }
