@@ -13,6 +13,7 @@ repository = { path = "../repository" }
 session = { path = "../session" }
 sqlite = { path = "../sqlite" }
 oauth_google = { path = "../oauth_google" }
+schema = { path = "../schema" }
 
 log = "0.4.26"
 anyhow = "1.0.97"

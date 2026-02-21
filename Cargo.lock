@@ -2056,6 +2056,7 @@ dependencies = [
  "model",
  "schemars",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -2266,6 +2267,7 @@ dependencies = [
  "oauth_google",
  "rand 0.9.0",
  "repository",
+ "schema",
  "session",
  "sqlite",
  "table",

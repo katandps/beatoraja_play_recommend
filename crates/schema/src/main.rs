@@ -1,3 +1,6 @@
+use schema::account;
+
 fn main() {
-    println!("This application is create schema for frontend.")
+    let schema = schemars::schema_for!(account::AccountResponse);
+    println!("{}", serde_json::to_string_pretty(&schema).unwrap());
 }

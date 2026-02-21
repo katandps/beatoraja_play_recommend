@@ -6,7 +6,7 @@ use parse_display::Display;
 use serde::Serialize;
 use {chrono::NaiveDateTime, serde::Deserialize};
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct Account {
     pub user_id: UserId,
     pub google_id: GoogleId,
