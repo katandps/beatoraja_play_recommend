@@ -4,6 +4,7 @@ members = [
     "crates/send_slack",
     "crates/table",
     "crates/sqlite",
+    "crates/schema",
     "crates/mysql",
     "crates/server",
     "crates/oauth_google",

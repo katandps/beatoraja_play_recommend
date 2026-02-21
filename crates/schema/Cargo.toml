@@ -1,0 +1,20 @@
+[package]
+name = "schema"
+version = "0.1.0"
+authors = ["katand <katandps@gmail.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+model = { path = "../model" }
+serde = { version = "1", features = ["derive"] }
+schemars = "1.2.1"
+
+[[bin]]
+name = "schema"
+path = "src/main.rs"
+
+[lib]
+name = "schema"
+path = "src/lib.rs"
