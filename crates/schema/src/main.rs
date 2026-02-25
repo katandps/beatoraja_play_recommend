@@ -1,8 +1,12 @@
 use schema::account;
+use schema::song;
 use schemars::schema_for;
 
 fn main() {
-    let schemas = vec![("account", schema_for!(account::AccountResponse))];
+    let schemas = vec![
+        ("account", schema_for!(account::AccountResponse)),
+        ("song", schema_for!(song::SongResponse)),
+    ];
 
     for (name, schema) in schemas {
         write_schema_file(&schema, "target/schemas", &format!("{}.json", name));

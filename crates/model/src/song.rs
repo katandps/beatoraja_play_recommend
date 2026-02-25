@@ -26,12 +26,12 @@ use crate::*;
 ///
 #[derive(Clone, Debug)]
 pub struct Song {
-    md5: HashMd5,
-    sha256: HashSha256,
-    title: Title,
-    artist: Artist,
-    notes: i32,
-    include_features: IncludeFeatures,
+    pub md5: HashMd5,
+    pub sha256: HashSha256,
+    pub title: Title,
+    pub artist: Artist,
+    pub notes: i32,
+    pub include_features: IncludeFeatures,
 }
 
 impl Song {
