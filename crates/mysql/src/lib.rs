@@ -669,7 +669,12 @@ impl ScoreUploadInfoSource for MySQLClient {
         &mut self,
         user_id: UserId,
         upload_id: UploadId,
-    ) -> Result<(UploadAt, UserName, PlayerStatDiff, HashMap<HashMd5, model::ScoreDetail>)> {
+    ) -> Result<(
+        UploadAt,
+        UserName,
+        PlayerStatDiff,
+        HashMap<HashMd5, model::ScoreDetail>,
+    )> {
         let upload = models::ScoreUpload::by_user_id_and_upload_id(
             &mut self.connection,
             user_id.get(),

@@ -53,14 +53,11 @@ impl DetailResponse {
                         .song(chart)
                         .map(|song| song.song_id())
                         .unwrap_or_default();
-                    scores
-                        .remove(&score_id)
-                        .map(|score| {
-                            score
-                                .make_detail(period)
-                                .map(|detail| (chart.md5().clone(), detail))
-                        })
-                        .flatten()
+                    scores.remove(&score_id).and_then(|score| {
+                        score
+                            .make_detail(period)
+                            .map(|detail| (chart.md5().clone(), detail))
+                    })
                 })
                 .collect(),
         }

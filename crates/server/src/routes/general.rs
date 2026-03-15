@@ -22,6 +22,7 @@ pub fn routes(
         .or(songs(db_pool, t.clone(), songs_tag))
         .or(ranking(db_pool, t.clone()))
         .or(detail(db_pool, t))
+        .or(score_upload_info(db_pool))
         .or(song_log(db_pool))
         .or(my_song_log(db_pool))
         .with(warp::compression::gzip())
@@ -99,6 +100,17 @@ fn detail(db_pool: &MySqlPool, tables: TableClient) -> BoxedFilter<(impl Reply,)
         .and(with_table(tables))
         .and(warp::query())
         .then(service::scores::list)
+        .then(json)
+        .boxed()
+}
+
+fn score_upload_info(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
+    warp::get()
+        .and(path!("score_upload_info" / i32 / i32))
+        .and(with_db(db_pool))
+        .then(|user_id: i32, upload_id: i32, repository| {
+            service::scores::upload_info(repository, user_id, upload_id)
+        })
         .then(json)
         .boxed()
 }

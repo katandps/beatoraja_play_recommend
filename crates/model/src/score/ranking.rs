@@ -21,14 +21,11 @@ impl RankedScore {
             score: users
                 .iter()
                 .filter_map(|va| {
-                    self.0
-                        .remove(&va.id)
-                        .map(|score| {
-                            score
-                                .make_detail(date)
-                                .map(|detail| (va.id, (va.name.clone(), detail)))
-                        })
-                        .flatten()
+                    self.0.remove(&va.id).and_then(|score| {
+                        score
+                            .make_detail(date)
+                            .map(|detail| (va.id, (va.name.clone(), detail)))
+                    })
                 })
                 .collect(),
         })

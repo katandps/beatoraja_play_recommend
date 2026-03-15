@@ -43,7 +43,7 @@ impl UpdatedAt {
     }
 
     pub fn is_contained(&self, range: &SnapPeriod) -> bool {
-        &self.0 >= &range.since && &self.0 <= &range.until
+        self.0 >= range.since && self.0 <= range.until
     }
 
     pub fn to_one_day_before(&self) -> SnapPeriod {

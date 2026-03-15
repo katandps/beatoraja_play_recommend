@@ -1,9 +1,10 @@
 use anyhow::Result;
 use model::{DetailQuery, DetailResponse, Score, ScoreId, SongLogQuery, SongMyLogQuery};
 use repository::{
-    AccountByUserId, GetTables, ResetScore, ScoreByAccountAndSha256, ScoresByAccount,
-    SongDataForTables,
+    AccountByUserId, GetTables, ResetScore, ScoreByAccountAndSha256, ScoreUploadInfoSource,
+    ScoresByAccount, SongDataForTables,
 };
+use schema::score::ScoreUploadInfo;
 use session::Claims;
 
 use crate::Response;
@@ -73,5 +74,21 @@ pub async fn reset_all<R: ResetScore + AccountByUserId>(
     Ok(Response::Ok {
         tag: None,
         body: (),
+    })
+}
+
+pub async fn upload_info<C: ScoreUploadInfoSource>(
+    mut repository: C,
+    user_id: i32,
+    upload_id: i32,
+) -> Result<Response<ScoreUploadInfo>> {
+    let user_id = model::UserId::new(user_id);
+    let upload_id = model::UploadId(upload_id);
+    let (upload_at, user_name, stat, score) = repository
+        .score_upload_info_source(user_id, upload_id.clone())
+        .await?;
+    Ok(Response::Ok {
+        tag: None,
+        body: ScoreUploadInfo::new(upload_id, upload_at, user_id, user_name, stat, score),
     })
 }
