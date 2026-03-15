@@ -19,5 +19,17 @@ impl ScoreUpload {
 #[derive(Clone, Debug, Serialize)]
 pub struct UploadId(pub i32);
 
+impl UploadId {
+    pub fn get(&self) -> i32 {
+        self.0
+    }
+}
+
 #[derive(Clone, Debug, Serialize)]
 pub struct UploadAt(pub DateTime<Utc>);
+
+impl UploadAt {
+    pub fn to_rfc3339(&self) -> String {
+        self.0.to_rfc3339()
+    }
+}

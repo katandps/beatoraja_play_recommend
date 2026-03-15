@@ -95,6 +95,30 @@ impl PlayerStatDiff {
             total_judge,
         }
     }
+
+    pub fn before_date(&self) -> &UpdatedAt {
+        &self.before_date
+    }
+
+    pub fn after_date(&self) -> &UpdatedAt {
+        &self.after_date
+    }
+
+    pub fn play_count(&self) -> &PlayCount {
+        &self.play_count
+    }
+
+    pub fn clear_count(&self) -> &PlayCount {
+        &self.clear_count
+    }
+
+    pub fn play_time(&self) -> &PlayTime {
+        &self.play_time
+    }
+
+    pub fn total_judge(&self) -> &TotalJudge {
+        &self.total_judge
+    }
 }
 
 /// PlayTime(seconds)

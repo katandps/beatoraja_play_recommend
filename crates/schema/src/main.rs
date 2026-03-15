@@ -1,4 +1,5 @@
 use schema::account;
+use schema::score;
 use schema::song;
 use schemars::schema_for;
 
@@ -6,6 +7,7 @@ fn main() {
     let schemas = vec![
         ("account", schema_for!(account::AccountResponse)),
         ("song", schema_for!(song::SongResponse)),
+        ("score_upload_info", schema_for!(score::ScoreUploadInfo)),
     ];
 
     for (name, schema) in schemas {

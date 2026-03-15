@@ -96,6 +96,32 @@ pub struct ScoreDetail {
     play_count: PlayCount,
 }
 
+impl ScoreDetail {
+    pub fn max_combo(&self) -> &MaxCombo {
+        &self.max_combo
+    }
+
+    pub fn score(&self) -> Option<&ScoreSnap> {
+        self.score.as_ref()
+    }
+
+    pub fn min_bp(&self) -> Option<&MinBPSnap> {
+        self.min_bp.as_ref()
+    }
+
+    pub fn clear_type(&self) -> Option<&ClearTypeSnap> {
+        self.clear_type.as_ref()
+    }
+
+    pub fn updated_at(&self) -> &UpdatedAt {
+        &self.updated_at
+    }
+
+    pub fn play_count(&self) -> &PlayCount {
+        &self.play_count
+    }
+}
+
 #[derive(Deserialize, Serialize, Clone, Debug, Default)]
 pub struct ScoreSnap {
     pub current: ExScore,

@@ -38,6 +38,10 @@ impl UpdatedAt {
         Self::from_timestamp(time.and_utc().timestamp())
     }
 
+    pub fn to_rfc3339(&self) -> String {
+        self.0.to_rfc3339()
+    }
+
     pub fn is_contained(&self, range: &SnapPeriod) -> bool {
         &self.0 >= &range.since && &self.0 <= &range.until
     }
