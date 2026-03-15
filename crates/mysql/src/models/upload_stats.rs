@@ -1,4 +1,6 @@
+use crate::models::DieselResult;
 use crate::schema::*;
+use crate::MySqlPooledConnection;
 use diesel::prelude::*;
 
 #[derive(Debug, Clone, Queryable, Insertable)]
@@ -22,6 +24,20 @@ pub struct UploadStats {
     pub ems: i32,
     pub lms: i32,
     pub playtime: i32,
+}
+
+impl UploadStats {
+    pub fn by_upload_id_and_user_id(
+        connection: &mut MySqlPooledConnection,
+        query_upload_id: i32,
+        query_user_id: i32,
+    ) -> DieselResult<Self> {
+        use crate::schema::upload_log_stats::dsl::*;
+        upload_log_stats
+            .filter(upload_log_id.eq(query_upload_id))
+            .filter(user_id.eq(query_user_id))
+            .first(connection)
+    }
 }
 
 #[derive(Debug, Clone, Insertable)]

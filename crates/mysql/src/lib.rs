@@ -664,6 +664,119 @@ impl RegisterUpload for MySQLClient {
     }
 }
 
+impl ScoreUploadInfoSource for MySQLClient {
+    async fn score_upload_info_source(
+        &mut self,
+        user_id: UserId,
+        upload_id: UploadId,
+    ) -> Result<(UploadAt, UserName, PlayerStatDiff, HashMap<HashMd5, model::ScoreDetail>)> {
+        let upload = models::ScoreUpload::by_user_id_and_upload_id(
+            &mut self.connection,
+            user_id.get(),
+            upload_id.get(),
+        )?;
+        let user = User::by_user_id(&mut self.connection, user_id.get())?;
+
+        let current_stat = models::UploadStats::by_upload_id_and_user_id(
+            &mut self.connection,
+            upload_id.get(),
+            user_id.get(),
+        )?;
+
+        let previous = models::ScoreUpload::prev_by_user_id_before_upload_id(
+            &mut self.connection,
+            user_id.get(),
+            upload_id.get(),
+        )
+        .ok();
+
+        let (before_date, before_stat) = match previous {
+            Some(prev_upload) => {
+                let prev_stat = models::UploadStats::by_upload_id_and_user_id(
+                    &mut self.connection,
+                    prev_upload.id,
+                    user_id.get(),
+                )?;
+                (prev_upload.date, Some(prev_stat))
+            }
+            None => (upload.date, None),
+        };
+
+        let before_playcount = before_stat.as_ref().map(|s| s.playcount).unwrap_or(0);
+        let before_clear = before_stat.as_ref().map(|s| s.clear).unwrap_or(0);
+        let before_playtime = before_stat.as_ref().map(|s| s.playtime).unwrap_or(0);
+
+        let before_judge = before_stat
+            .as_ref()
+            .map(|s| Judge {
+                early_pgreat: s.epg,
+                late_pgreat: s.lpg,
+                early_great: s.egr,
+                late_great: s.lgr,
+                early_good: s.egd,
+                late_good: s.lgd,
+                early_bad: s.ebd,
+                late_bad: s.lbd,
+                early_poor: s.epr,
+                late_poor: s.lpr,
+                early_miss: s.ems,
+                late_miss: s.lms,
+            })
+            .unwrap_or_default();
+
+        let current_judge = Judge {
+            early_pgreat: current_stat.epg,
+            late_pgreat: current_stat.lpg,
+            early_great: current_stat.egr,
+            late_great: current_stat.lgr,
+            early_good: current_stat.egd,
+            late_good: current_stat.lgd,
+            early_bad: current_stat.ebd,
+            late_bad: current_stat.lbd,
+            early_poor: current_stat.epr,
+            late_poor: current_stat.lpr,
+            early_miss: current_stat.ems,
+            late_miss: current_stat.lms,
+        };
+
+        let stat = PlayerStatDiff::new(
+            UpdatedAt::from_naive_datetime(before_date),
+            UpdatedAt::from_naive_datetime(upload.date),
+            PlayCount::new(current_stat.playcount - before_playcount),
+            PlayCount::new(current_stat.clear - before_clear),
+            PlayTime::new(current_stat.playtime - before_playtime),
+            TotalJudge::new(current_judge - before_judge),
+        );
+
+        let scores = models::Score::by_user_id_and_upload_id(
+            &mut self.connection,
+            user_id.get(),
+            upload_id.get(),
+        )?;
+        let hash_map = Hash::all(&mut self.connection)?
+            .into_iter()
+            .filter_map(|h| HashMd5::from_str(&h.md5).ok().map(|md5| (h.sha256, md5)))
+            .collect::<HashMap<String, HashMd5>>();
+
+        let score = scores
+            .into_iter()
+            .filter_map(|row| {
+                let md5 = hash_map.get(&row.sha256)?.clone();
+                row.to_score()
+                    .make_detail(&SnapPeriod::default())
+                    .map(|detail| (md5, detail))
+            })
+            .collect::<HashMap<HashMd5, model::ScoreDetail>>();
+
+        Ok((
+            UploadAt(upload.date.and_utc()),
+            UserName::new(user.name),
+            stat,
+            score,
+        ))
+    }
+}
+
 impl RevokeSession for MySQLClient {
     async fn is_revoked(&mut self, session_key: &SessionKey, user_id: UserId) -> Result<bool> {
         let revokes = models::RevokedSession::revoked(
