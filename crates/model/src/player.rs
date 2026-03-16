@@ -67,7 +67,7 @@ impl PlayerStat {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Default)]
 pub struct PlayerStatDiff {
     before_date: UpdatedAt,
     after_date: UpdatedAt,
@@ -122,7 +122,7 @@ impl PlayerStatDiff {
 }
 
 /// PlayTime(seconds)
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Default)]
 pub struct PlayTime(pub i32);
 
 impl PlayTime {
@@ -138,7 +138,7 @@ impl std::ops::Sub<PlayTime> for PlayTime {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Default)]
 pub struct TotalJudge(Judge);
 
 impl TotalJudge {

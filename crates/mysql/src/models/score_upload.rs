@@ -27,26 +27,29 @@ impl ScoreUpload {
 
     pub fn by_user_id_and_upload_id(
         connection: &mut MySqlPooledConnection,
-        _query_user_id: i32,
+        query_user_id: i32,
         query_upload_id: i32,
-    ) -> DieselResult<Self> {
+    ) -> DieselResult<Option<Self>> {
         use crate::schema::score_upload_logs::dsl::*;
         score_upload_logs
+            .filter(user_id.eq(query_user_id))
             .filter(id.eq(query_upload_id))
             .first(connection)
+            .optional()
     }
 
     pub fn prev_by_user_id_before_upload_id(
         connection: &mut MySqlPooledConnection,
         query_user_id: i32,
         query_upload_id: i32,
-    ) -> DieselResult<Self> {
+    ) -> DieselResult<Option<Self>> {
         use crate::schema::score_upload_logs::dsl::*;
         score_upload_logs
             .filter(user_id.eq(query_user_id))
             .filter(id.lt(query_upload_id))
             .order_by(id.desc())
             .first(connection)
+            .optional()
     }
 }
 

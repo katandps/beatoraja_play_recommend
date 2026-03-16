@@ -488,7 +488,7 @@ impl SavePlayerStateData for MySQLClient {
                 playtime: last.play_time.0,
             };
             log::info!("Insert stat this time");
-            diesel::replace_into(schema::upload_log_stats::table)
+            diesel::insert_into(schema::upload_log_stats::table)
                 .values(stat)
                 .execute(&mut self.connection)?;
         }
@@ -679,7 +679,8 @@ impl ScoreUploadInfoSource for MySQLClient {
             &mut self.connection,
             user_id.get(),
             upload_id.get(),
-        )?;
+        )?
+        .unwrap();
         let user = User::by_user_id(&mut self.connection, user_id.get())?;
 
         let current_stat = models::UploadStats::by_upload_id_and_user_id(
@@ -692,8 +693,7 @@ impl ScoreUploadInfoSource for MySQLClient {
             &mut self.connection,
             user_id.get(),
             upload_id.get(),
-        )
-        .ok();
+        )?;
 
         let (before_date, before_stat) = match previous {
             Some(prev_upload) => {
@@ -702,7 +702,10 @@ impl ScoreUploadInfoSource for MySQLClient {
                     prev_upload.id,
                     user_id.get(),
                 )?;
-                (prev_upload.date, Some(prev_stat))
+                match prev_stat {
+                    Some(stat) => (prev_upload.date, Some(stat)),
+                    None => (prev_upload.date, None),
+                }
             }
             None => (upload.date, None),
         };
@@ -729,29 +732,37 @@ impl ScoreUploadInfoSource for MySQLClient {
             })
             .unwrap_or_default();
 
-        let current_judge = Judge {
-            early_pgreat: current_stat.epg,
-            late_pgreat: current_stat.lpg,
-            early_great: current_stat.egr,
-            late_great: current_stat.lgr,
-            early_good: current_stat.egd,
-            late_good: current_stat.lgd,
-            early_bad: current_stat.ebd,
-            late_bad: current_stat.lbd,
-            early_poor: current_stat.epr,
-            late_poor: current_stat.lpr,
-            early_miss: current_stat.ems,
-            late_miss: current_stat.lms,
-        };
+        let current_judge = current_stat
+            .as_ref()
+            .map(|current_stat| Judge {
+                early_pgreat: current_stat.epg,
+                late_pgreat: current_stat.lpg,
+                early_great: current_stat.egr,
+                late_great: current_stat.lgr,
+                early_good: current_stat.egd,
+                late_good: current_stat.lgd,
+                early_bad: current_stat.ebd,
+                late_bad: current_stat.lbd,
+                early_poor: current_stat.epr,
+                late_poor: current_stat.lpr,
+                early_miss: current_stat.ems,
+                late_miss: current_stat.lms,
+            })
+            .unwrap_or_default();
 
-        let stat = PlayerStatDiff::new(
-            UpdatedAt::from_naive_datetime(before_date),
-            UpdatedAt::from_naive_datetime(upload.date),
-            PlayCount::new(current_stat.playcount - before_playcount),
-            PlayCount::new(current_stat.clear - before_clear),
-            PlayTime::new(current_stat.playtime - before_playtime),
-            TotalJudge::new(current_judge - before_judge),
-        );
+        let stat = current_stat
+            .as_ref()
+            .map(|current_stat| {
+                PlayerStatDiff::new(
+                    UpdatedAt::from_naive_datetime(before_date),
+                    UpdatedAt::from_naive_datetime(upload.date),
+                    PlayCount::new(current_stat.playcount - before_playcount),
+                    PlayCount::new(current_stat.clear - before_clear),
+                    PlayTime::new(current_stat.playtime - before_playtime),
+                    TotalJudge::new(current_judge.clone() - before_judge),
+                )
+            })
+            .unwrap_or_default();
 
         let scores = models::Score::by_user_id_and_upload_id(
             &mut self.connection,
@@ -776,7 +787,7 @@ impl ScoreUploadInfoSource for MySQLClient {
         Ok((
             UploadAt(upload.date.and_utc()),
             UserName::new(user.name),
-            stat,
+            stat.clone(),
             score,
         ))
     }

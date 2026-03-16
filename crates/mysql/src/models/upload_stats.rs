@@ -31,12 +31,13 @@ impl UploadStats {
         connection: &mut MySqlPooledConnection,
         query_upload_id: i32,
         query_user_id: i32,
-    ) -> DieselResult<Self> {
+    ) -> DieselResult<Option<Self>> {
         use crate::schema::upload_log_stats::dsl::*;
         upload_log_stats
             .filter(upload_log_id.eq(query_upload_id))
             .filter(user_id.eq(query_user_id))
             .first(connection)
+            .optional()
     }
 }
 
