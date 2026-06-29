@@ -1327,6 +1327,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "itertools",
+ "log",
  "num-derive",
  "num-traits",
  "parse-display",

@@ -38,7 +38,7 @@ impl DetailResponse {
         account: &Account,
     ) -> Self {
         let charts = tables.get_charts().count();
-        println!(
+        log::info!(
             "DetailResponse: charts={}, scores={}",
             charts,
             scores.count()
