@@ -4,6 +4,7 @@ mod routes;
 
 use config::config;
 use serde::Serialize;
+use std::backtrace::Backtrace;
 use std::time::Duration;
 use table::TableClient;
 use warp::http;
@@ -15,6 +16,8 @@ async fn main() {
         Ok(str) if &str != "0" => tracing_subscriber::fmt::init(),
         _ => tracing_subscriber::fmt().json().init(),
     }
+    install_single_line_panic_hook();
+
     let db_pool = mysql::get_db_pool();
     let tables = TableClient::new();
     let _ = tables.init().await;
@@ -30,6 +33,36 @@ async fn main() {
 
     log::info!("Starting Listen with {:?} and {:?}", http_addr, https_addr);
     futures::future::join3(http_warp, https_warp, table_update(&tables)).await;
+}
+
+fn install_single_line_panic_hook() {
+    std::panic::set_hook(Box::new(|panic_info| {
+        let location = panic_info
+            .location()
+            .map(|loc| format!("{}:{}:{}", loc.file(), loc.line(), loc.column()))
+            .unwrap_or_else(|| "unknown".to_string());
+
+        let message = if let Some(message) = panic_info.payload().downcast_ref::<&str>() {
+            (*message).to_string()
+        } else if let Some(message) = panic_info.payload().downcast_ref::<String>() {
+            message.clone()
+        } else {
+            "non-string panic payload".to_string()
+        }
+        .replace('\n', "\\n")
+        .replace('\r', "\\r");
+
+        let trace = format!("{:?}", Backtrace::force_capture())
+            .replace('\n', "\\n")
+            .replace('\r', "\\r");
+
+        log::error!(
+            "panic captured location={} message={} backtrace={}",
+            location,
+            message,
+            trace
+        );
+    }));
 }
 
 async fn table_update(tables: &TableClient) {
