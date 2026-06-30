@@ -293,7 +293,7 @@ pub struct Trophy {
 pub struct Chart {
     title: String,
     artist: Option<String>,
-    md5: HashMd5,
+    md5: Option<HashMd5>,
     level: Value,
     url: Option<String>,
     url_diff: Option<String>,
@@ -305,7 +305,7 @@ impl From<Chart> for model::Chart {
         model::Chart::new(
             chart.title,
             chart.artist,
-            chart.md5,
+            chart.md5.unwrap_or_default(),
             match chart.level {
                 Value::String(s) => s,
                 p => p.to_string(),
@@ -319,7 +319,9 @@ impl From<Chart> for model::Chart {
 
 #[cfg(test)]
 mod test {
-    use crate::Header;
+    use model::TableId;
+
+    use crate::{config::TableSetting, fetch, Header};
 
     #[test]
     fn test_header() {
@@ -360,5 +362,17 @@ mod test {
         let header: Header =
             serde_json::from_str(header_text.trim_start_matches('\u{feff}')).unwrap();
         dbg!(header);
+    }
+
+    #[test]
+    fn fetch_test() {
+        let setting = TableSetting {
+            id: TableId::new(1),
+            title: "New Generation 難易度表".to_string(),
+            url: "http://rattoto10.jounin.jp/table.html".to_string(),
+        };
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let table = rt.block_on(fetch(&setting)).unwrap();
+        dbg!(table);
     }
 }
