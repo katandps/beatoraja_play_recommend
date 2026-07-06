@@ -1,4 +1,4 @@
-use crate::{Judge, PlayCount, UpdatedAt, UserId};
+use crate::{Judge, PlayCount, UpdatedAt, UserId, UserName};
 use serde::Serialize;
 use std::cmp::Ordering;
 
@@ -161,5 +161,5 @@ impl std::ops::Sub<TotalJudge> for TotalJudge {
 #[derive(Serialize)]
 pub struct VisibleAccount {
     pub id: UserId,
-    pub name: String,
+    pub name: UserName,
 }

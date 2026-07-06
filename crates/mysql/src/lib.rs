@@ -599,7 +599,7 @@ impl PublishedUsers for MySQLClient {
         for (_status, user) in list {
             res.push(VisibleAccount {
                 id: UserId::new(user.id),
-                name: user.name,
+                name: UserName::new(user.name),
             })
         }
         Ok(res)
