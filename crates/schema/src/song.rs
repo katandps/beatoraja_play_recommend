@@ -2,7 +2,7 @@ use model::Song;
 use schemars::JsonSchema;
 use serde::Serialize;
 
-#[derive(Serialize, JsonSchema)]
+#[derive(Clone, Debug, Serialize, JsonSchema)]
 pub struct SongResponse {
     pub md5: String,
     pub sha256: String,
@@ -22,5 +22,11 @@ impl SongResponse {
             notes: song.notes,
             include_features: song.include_features.clone().into(),
         }
+    }
+}
+
+impl Default for SongResponse {
+    fn default() -> Self {
+        Self::from_song(&Song::default())
     }
 }

@@ -1,7 +1,7 @@
 use parse_display::Display;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, Display)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize, Display)]
 pub struct Title(String);
 
 impl Title {

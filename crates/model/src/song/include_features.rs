@@ -1,5 +1,5 @@
 /// 各種特殊ノートを含む譜面かどうか
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct IncludeFeatures {
     undefined_ln: UndefinedLn,
     mine_note: MineNote,
@@ -43,19 +43,19 @@ impl From<IncludeFeatures> for i32 {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct UndefinedLn(bool);
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct MineNote(bool);
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Random(bool);
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct LongNote(bool);
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct ChargeNote(bool);
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct HellChargeNote(bool);
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct StopSequence(bool);
 
 #[cfg(test)]

@@ -24,7 +24,7 @@ use crate::*;
 /// 楽曲データ
 /// 所持しているのでsha256がわかっている
 ///
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Song {
     pub md5: HashMd5,
     pub sha256: HashSha256,

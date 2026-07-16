@@ -6,6 +6,7 @@ use schemars::schema_for;
 fn main() {
     let schemas = vec![
         ("account", schema_for!(account::AccountResponse)),
+        ("ranking", schema_for!(schema::ranking::RankingResponse)),
         ("song", schema_for!(song::SongResponse)),
         ("score_upload_info", schema_for!(score::ScoreUploadInfo)),
     ];
