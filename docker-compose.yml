@@ -8,6 +8,9 @@ services:
     volumes:
       # - ~/.aws/:/root/.aws/ro
       - ./:/app
+      - cargo-target:/tmp/target
+      - cargo-registry:/usr/local/cargo/registry
+      - cargo-git:/usr/local/cargo/git
     environment:
       - CARGO_BUILD_TARGET_DIR=/tmp/target
     env_file:
@@ -41,3 +44,8 @@ services:
       MYSQL_DATABASE: user_data
       MYSQL_USER: docker
       MYSQL_PASSWORD: docker
+
+volumes:
+  cargo-target:
+  cargo-registry:
+  cargo-git:
