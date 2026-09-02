@@ -55,11 +55,13 @@ pub async fn redirect(result: anyhow::Result<Registered>) -> impl Reply {
             let uri = Uri::from_maybe_shared(config().client_url.clone()).unwrap();
             let redirect = warp::redirect(uri);
             warp::reply::with_header(redirect, warp::http::header::SET_COOKIE, header)
+                .into_response()
         }
 
         Err(e) => {
-            log::error!("registration error: {:?}", e);
-            panic!();
+            log::error!("registration error: {}", e);
+            warp::reply::with_status("registration error", StatusCode::INTERNAL_SERVER_ERROR)
+                .into_response()
         }
     }
 }
