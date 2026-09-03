@@ -14,15 +14,21 @@ pub struct ScoreUpload {
 }
 
 impl ScoreUpload {
+    fn latest_by_user_id_query(
+        query_id: i32,
+    ) -> crate::schema::score_upload_logs::BoxedQuery<'static, diesel::mysql::Mysql> {
+        use crate::schema::score_upload_logs::dsl::*;
+        score_upload_logs
+            .filter(user_id.eq(query_id))
+            .order_by(id.desc())
+            .into_boxed()
+    }
+
     pub fn last_by_user_id(
         connection: &mut MySqlPooledConnection,
         query_id: i32,
     ) -> DieselResult<Self> {
-        use crate::schema::score_upload_logs::dsl::*;
-        score_upload_logs
-            .filter(user_id.eq(query_id))
-            .order_by(date)
-            .first(connection)
+        Self::latest_by_user_id_query(query_id).first(connection)
     }
 
     pub fn by_user_id_and_upload_id(
@@ -66,5 +72,18 @@ impl RegisteringScoreLog {
             user_id: user_id.get(),
             date: upload_at.0.naive_utc(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn last_by_user_id_orders_upload_logs_descending() {
+        let query = ScoreUpload::latest_by_user_id_query(1);
+        let sql = diesel::debug_query::<diesel::mysql::Mysql, _>(&query).to_string();
+
+        assert!(sql.contains("ORDER BY `score_upload_logs`.`id` DESC"));
     }
 }
