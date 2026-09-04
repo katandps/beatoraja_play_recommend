@@ -30,6 +30,16 @@ impl ScoreSnap {
         score_snaps.filter(user_id.eq(query_id)).load(connection)
     }
 
+    pub fn by_upload_id(
+        connection: &mut MySqlPooledConnection,
+        query_upload_id: i32,
+    ) -> DieselResult<Vec<ScoreSnap>> {
+        use crate::schema::score_snaps::dsl::*;
+        score_snaps
+            .filter(score_upload_log_id.eq(query_upload_id))
+            .load(connection)
+    }
+
     pub fn by_user_id_and_score_id(
         connection: &mut MySqlPooledConnection,
         query_id: i32,

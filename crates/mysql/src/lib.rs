@@ -57,6 +57,26 @@ impl MySQLClient {
         Ok(map)
     }
 
+    fn score_log_by_upload_id(
+        &mut self,
+        upload_id: &UploadId,
+    ) -> Result<HashMap<ScoreId, SnapShots>, Error> {
+        let records = models::ScoreSnap::by_upload_id(&mut self.connection, upload_id.get())?;
+        let mut map: HashMap<ScoreId, SnapShots> = HashMap::new();
+        for row in records {
+            let score_id = ScoreId::new(row.sha256.parse().unwrap(), PlayMode::from(row.mode));
+            let snap = SnapShot::from_data(
+                row.clear,
+                row.score,
+                row.combo,
+                row.min_bp,
+                row.date.and_utc().timestamp(),
+            );
+            map.entry(score_id).or_default().add(snap);
+        }
+        Ok(map)
+    }
+
     fn score_log_by_sha256(
         &mut self,
         sha256: &HashSha256,
@@ -514,6 +534,17 @@ impl StatsByDays for MySQLClient {
     }
 }
 
+impl UploadsByDays for MySQLClient {
+    async fn uploads(&mut self, account: &Account) -> Result<Vec<ScoreUpload>> {
+        let user = User::by_account(&mut self.connection, account)?;
+        let records = models::ScoreUpload::list_by_user_id(&mut self.connection, user.id)?;
+        Ok(records
+            .into_iter()
+            .map(|row| row.to_score_upload())
+            .collect())
+    }
+}
+
 impl ScoresByAccount for MySQLClient {
     async fn score(&mut self, account: &Account) -> Result<Scores> {
         let record = models::Score::by_user_id(&mut self.connection, account.user_id().get())?;
@@ -523,6 +554,28 @@ impl ScoresByAccount for MySQLClient {
             record.len(),
             score_log.len()
         );
+        Ok(Scores::create_by_map(
+            record
+                .into_iter()
+                .filter_map(|row| {
+                    row.sha256
+                        .parse()
+                        .map(|sha256| {
+                            let score_id = ScoreId::new(sha256, PlayMode::from(row.mode));
+                            let log = score_log.remove(&score_id).unwrap_or_default();
+                            (score_id, row.to_score().with_log(log))
+                        })
+                        .ok()
+                })
+                .collect::<HashMap<ScoreId, Score>>(),
+        ))
+    }
+}
+
+impl ScoresByUpload for MySQLClient {
+    async fn score(&mut self, upload_id: &UploadId) -> Result<Scores> {
+        let record = models::Score::by_upload_id(&mut self.connection, upload_id.get())?;
+        let mut score_log = self.score_log_by_upload_id(upload_id)?;
         Ok(Scores::create_by_map(
             record
                 .into_iter()

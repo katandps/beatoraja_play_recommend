@@ -27,6 +27,10 @@ pub trait ScoresByAccount {
     async fn score(&mut self, account: &Account) -> Result<Scores>;
 }
 
+pub trait ScoresByUpload {
+    async fn score(&mut self, upload_id: &UploadId) -> Result<Scores>;
+}
+
 pub trait ScoresBySha256 {
     async fn score(&mut self, hash: &HashSha256) -> Result<RankedScore>;
 }
@@ -37,6 +41,10 @@ pub trait ScoreByAccountAndSha256 {
 
 pub trait StatsByDays {
     async fn stats(&mut self, account: &Account) -> Result<PlayerStats>;
+}
+
+pub trait UploadsByDays {
+    async fn uploads(&mut self, account: &Account) -> Result<Vec<ScoreUpload>>;
 }
 
 pub trait RenameAccount {

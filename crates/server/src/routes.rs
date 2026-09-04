@@ -41,6 +41,9 @@ async fn handle_rejection(err: Rejection) -> Result<impl Reply, std::convert::In
         .is_some()
     {
         (StatusCode::BAD_REQUEST, "Invalid request body")
+    } else if err.find::<warp::reject::InvalidQuery>().is_some() {
+        log::warn!("invalid query parameters: {:?}", err);
+        (StatusCode::BAD_REQUEST, "Invalid query parameters")
     } else if err.find::<warp::reject::PayloadTooLarge>().is_some() {
         (StatusCode::PAYLOAD_TOO_LARGE, "Payload too large")
     } else {
@@ -75,6 +78,7 @@ fn cors_header() -> Builder {
 #[cfg(test)]
 mod tests {
     use super::handle_rejection;
+    use serde::Deserialize;
     use serde_json::Value;
     use warp::http::StatusCode;
     use warp::Filter;
@@ -112,6 +116,31 @@ mod tests {
 
         let json: Value = serde_json::from_slice(response.body()).unwrap();
         assert_eq!(json["error"], "Missing authentication header");
+    }
+
+    #[tokio::test]
+    async fn invalid_query_rejection_maps_to_400() {
+        #[derive(Deserialize)]
+        struct Query {
+            page: u32,
+        }
+
+        let route = warp::path::end()
+            .and(warp::query::<Query>())
+            .map(|query: Query| {
+                let _ = query.page;
+                warp::reply()
+            })
+            .recover(handle_rejection);
+
+        let response = warp::test::request()
+            .path("/?page=invalid")
+            .reply(&route)
+            .await;
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+
+        let json: Value = serde_json::from_slice(response.body()).unwrap();
+        assert_eq!(json["error"], "Invalid query parameters");
     }
 
     #[tokio::test]

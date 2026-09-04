@@ -31,6 +31,17 @@ impl ScoreUpload {
         Self::latest_by_user_id_query(query_id).first(connection)
     }
 
+    pub fn list_by_user_id(
+        connection: &mut MySqlPooledConnection,
+        query_id: i32,
+    ) -> DieselResult<Vec<Self>> {
+        use crate::schema::score_upload_logs::dsl::*;
+        score_upload_logs
+            .filter(user_id.eq(query_id))
+            .order_by(id.desc())
+            .load(connection)
+    }
+
     pub fn by_user_id_and_upload_id(
         connection: &mut MySqlPooledConnection,
         query_user_id: i32,
@@ -56,6 +67,13 @@ impl ScoreUpload {
             .order_by(id.desc())
             .first(connection)
             .optional()
+    }
+
+    pub fn to_score_upload(self) -> model::ScoreUpload {
+        model::ScoreUpload {
+            upload_id: model::UploadId(self.id),
+            upload_at: UploadAt(self.date.and_utc()),
+        }
     }
 }
 

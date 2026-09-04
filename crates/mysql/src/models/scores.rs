@@ -46,6 +46,16 @@ impl Score {
         scores.filter(user_id.eq(query_id)).load(connection)
     }
 
+    pub fn by_upload_id(
+        connection: &mut MySqlPooledConnection,
+        query_upload_id: i32,
+    ) -> DieselResult<Vec<Self>> {
+        use crate::schema::scores::dsl::*;
+        scores
+            .filter(score_upload_log_id.eq(Some(query_upload_id)))
+            .load(connection)
+    }
+
     pub fn by_user_id_and_upload_id(
         connection: &mut MySqlPooledConnection,
         query_user_id: i32,
