@@ -117,11 +117,10 @@ fn detail(db_pool: &MySqlPool, tables: TableClient) -> BoxedFilter<(impl Reply,)
 
 fn score_upload_info(db_pool: &MySqlPool) -> BoxedFilter<(impl Reply,)> {
     warp::get()
-        .and(path!("score_upload_info" / i32 / i32))
+        .and(path!("upload" / i32))
         .and(with_db(db_pool))
-        .then(|user_id: i32, upload_id: i32, repository| {
-            service::scores::upload_info(repository, user_id, upload_id)
-        })
+        .and(with_login())
+        .then(service::scores::upload_info)
         .then(json)
         .boxed()
 }

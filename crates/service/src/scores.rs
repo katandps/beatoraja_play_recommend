@@ -1,5 +1,5 @@
 use anyhow::Result;
-use model::{DetailQuery, DetailResponse, Score, ScoreId, SongLogQuery, SongMyLogQuery};
+use model::{DetailQuery, DetailResponse, Score, ScoreId, SongLogQuery, SongMyLogQuery, UserId};
 use repository::{
     AccountByUserId, GetTables, ResetScore, ScoreByAccountAndSha256, ScoreUploadInfoSource,
     ScoresByAccount, SongDataForTables,
@@ -78,11 +78,11 @@ pub async fn reset_all<R: ResetScore + AccountByUserId>(
 }
 
 pub async fn upload_info<C: ScoreUploadInfoSource>(
-    mut repository: C,
-    user_id: i32,
     upload_id: i32,
+    mut repository: C,
+    claims: Claims,
 ) -> Result<Response<ScoreUploadInfo>> {
-    let user_id = model::UserId::new(user_id);
+    let user_id = claims.user_id;
     let upload_id = model::UploadId(upload_id);
     let (upload_at, user_name, stat, score) = repository
         .score_upload_info_source(user_id, upload_id.clone())
