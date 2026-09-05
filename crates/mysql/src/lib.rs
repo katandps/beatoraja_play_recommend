@@ -537,11 +537,62 @@ impl StatsByDays for MySQLClient {
 impl UploadsByDays for MySQLClient {
     async fn uploads(&mut self, account: &Account) -> Result<Vec<ScoreUpload>> {
         let user = User::by_account(&mut self.connection, account)?;
-        let records = models::ScoreUpload::list_by_user_id(&mut self.connection, user.id)?;
-        Ok(records
+        let mut records = models::ScoreUpload::list_by_user_id(&mut self.connection, user.id)?;
+        records.sort_by_key(|record| record.id);
+        let stats_by_upload_id =
+            models::UploadStats::list_by_user_id(&mut self.connection, user.id)?
+                .into_iter()
+                .map(|stat| (stat.upload_log_id, stat))
+                .collect::<HashMap<_, _>>();
+
+        let mut previous_stat = None;
+        let mut previous_date = None;
+        let mut uploads = records
             .into_iter()
-            .map(|row| row.to_score_upload())
-            .collect())
+            .filter_map(|record| {
+                let current_stat = stats_by_upload_id.get(&record.id);
+                let before_playcount = previous_stat
+                    .map(|stat: &models::UploadStats| stat.playcount)
+                    .unwrap_or(0);
+                let before_clear = previous_stat
+                    .map(|stat: &models::UploadStats| stat.clear)
+                    .unwrap_or(0);
+                let before_playtime = previous_stat
+                    .map(|stat: &models::UploadStats| stat.playtime)
+                    .unwrap_or(0);
+                let before_judge = previous_stat
+                    .map(|stat: &models::UploadStats| stat.judge())
+                    .unwrap_or_default();
+                let current_judge = current_stat.map(|stat| stat.judge()).unwrap_or_default();
+                let play_count =
+                    current_stat.map(|stat| stat.playcount).unwrap_or(0) - before_playcount;
+                let stats = PlayerStatDiff::new(
+                    UpdatedAt::from_naive_datetime(previous_date.unwrap_or(record.date)),
+                    UpdatedAt::from_naive_datetime(record.date),
+                    PlayCount::new(play_count),
+                    PlayCount::new(current_stat.map(|stat| stat.clear).unwrap_or(0) - before_clear),
+                    PlayTime::new(
+                        current_stat.map(|stat| stat.playtime).unwrap_or(0) - before_playtime,
+                    ),
+                    TotalJudge::new(current_judge.clone() - before_judge),
+                );
+                previous_stat = current_stat;
+                previous_date = Some(record.date);
+
+                (play_count > 0).then(|| {
+                    let total_stats = PlayerStat::new(
+                        PlayCount::new(current_stat.map(|stat| stat.playcount).unwrap_or(0)),
+                        PlayCount::new(current_stat.map(|stat| stat.clear).unwrap_or(0)),
+                        PlayTime::new(current_stat.map(|stat| stat.playtime).unwrap_or(0)),
+                        UpdatedAt::from_naive_datetime(record.date),
+                        TotalJudge::new(current_judge),
+                    );
+                    record.to_score_upload(i64::from(play_count), stats, total_stats)
+                })
+            })
+            .collect::<Vec<_>>();
+        uploads.reverse();
+        Ok(uploads)
     }
 }
 

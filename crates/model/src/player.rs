@@ -36,7 +36,7 @@ impl PlayerStats {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Default, Serialize)]
 pub struct PlayerStat {
     pub play_count: PlayCount,
     pub clear_count: PlayCount,

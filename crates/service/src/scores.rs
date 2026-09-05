@@ -1,5 +1,5 @@
 use anyhow::Result;
-use model::{DetailQuery, DetailResponse, Score, ScoreId, SongLogQuery, SongMyLogQuery, UserId};
+use model::{DetailQuery, DetailResponse, Score, ScoreId, SongLogQuery, SongMyLogQuery};
 use repository::{
     AccountByUserId, GetTables, ResetScore, ScoreByAccountAndSha256, ScoreUploadInfoSource,
     ScoresByAccount, SongDataForTables,

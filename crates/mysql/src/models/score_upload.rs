@@ -2,7 +2,7 @@ use crate::models::DieselResult;
 use crate::{schema::*, MySqlPooledConnection};
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
-use model::{UploadAt, UserId};
+use model::{PlayerStat, PlayerStatDiff, UploadAt, UserId};
 
 #[derive(Debug, Clone, Queryable)]
 #[diesel(table_name = score_upload_logs)]
@@ -69,11 +69,19 @@ impl ScoreUpload {
             .optional()
     }
 
-    pub fn to_score_upload(self) -> model::ScoreUpload {
-        model::ScoreUpload {
-            upload_id: model::UploadId(self.id),
-            upload_at: UploadAt(self.date.and_utc()),
-        }
+    pub fn to_score_upload(
+        self,
+        song_count: i64,
+        stats: PlayerStatDiff,
+        total_stats: PlayerStat,
+    ) -> model::ScoreUpload {
+        model::ScoreUpload::with_stats(
+            model::UploadId(self.id),
+            UploadAt(self.date.and_utc()),
+            song_count,
+            stats,
+            total_stats,
+        )
     }
 }
 
