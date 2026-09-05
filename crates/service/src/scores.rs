@@ -1,8 +1,8 @@
 use anyhow::Result;
-use model::{DetailQuery, DetailResponse, Score, ScoreId, SnapPeriod, SongLogQuery, SongMyLogQuery};
+use model::{DetailQuery, DetailResponse, Score, ScoreId, SongLogQuery, SongMyLogQuery};
 use repository::{
     AccountByUserId, GetTables, ResetScore, ScoreByAccountAndSha256, ScoreUploadInfoSource,
-    ScoresByAccount, ScoresByUpload, SongDataForTables,
+    ScoresByAccount, SongDataForTables,
 };
 use schema::score::ScoreUploadInfo;
 use session::Claims;
@@ -31,26 +31,6 @@ pub async fn list<C: ScoresByAccount + SongDataForTables + AccountByUserId, T: G
     Ok(Response::Ok {
         tag: None,
         body: DetailResponse::new(&tables.tables, &songs, scores, &query.period, &account),
-    })
-}
-
-pub async fn list_by_upload<
-    C: ScoresByUpload + SongDataForTables + AccountByUserId,
-    T: GetTables,
->(
-    mut repos: C,
-    tables: T,
-    claims: Claims,
-    upload_id: i32,
-) -> Result<crate::Response<DetailResponse>> {
-    let tables = tables.get().await;
-    let account = repos.user(claims.user_id).await?;
-    let upload_id = model::UploadId(upload_id);
-    let songs = repos.song_data(&tables.tables).await?;
-    let scores = log_duration!(GetScores, repos.score(&upload_id).await.unwrap());
-    Ok(Response::Ok {
-        tag: None,
-        body: DetailResponse::new(&tables.tables, &songs, scores, &SnapPeriod::default(), &account),
     })
 }
 
