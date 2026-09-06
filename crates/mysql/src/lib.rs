@@ -57,26 +57,6 @@ impl MySQLClient {
         Ok(map)
     }
 
-    fn score_log_by_upload_id(
-        &mut self,
-        upload_id: &UploadId,
-    ) -> Result<HashMap<ScoreId, SnapShots>, Error> {
-        let records = models::ScoreSnap::by_upload_id(&mut self.connection, upload_id.get())?;
-        let mut map: HashMap<ScoreId, SnapShots> = HashMap::new();
-        for row in records {
-            let score_id = ScoreId::new(row.sha256.parse().unwrap(), PlayMode::from(row.mode));
-            let snap = SnapShot::from_data(
-                row.clear,
-                row.score,
-                row.combo,
-                row.min_bp,
-                row.date.and_utc().timestamp(),
-            );
-            map.entry(score_id).or_default().add(snap);
-        }
-        Ok(map)
-    }
-
     fn score_log_by_sha256(
         &mut self,
         sha256: &HashSha256,
@@ -624,9 +604,9 @@ impl ScoresByAccount for MySQLClient {
 }
 
 impl ScoresByUpload for MySQLClient {
-    async fn score(&mut self, upload_id: &UploadId) -> Result<Scores> {
+    async fn score(&mut self, account: &Account, upload_id: &UploadId) -> Result<Scores> {
         let record = models::Score::by_upload_id(&mut self.connection, upload_id.get())?;
-        let mut score_log = self.score_log_by_upload_id(upload_id)?;
+        let mut score_log = self.score_log(account)?;
         Ok(Scores::create_by_map(
             record
                 .into_iter()
@@ -771,21 +751,16 @@ impl RegisterUpload for MySQLClient {
 impl ScoreUploadInfoSource for MySQLClient {
     async fn score_upload_info_source(
         &mut self,
-        user_id: UserId,
+        account: Account,
         upload_id: UploadId,
-    ) -> Result<(
-        UploadAt,
-        UserName,
-        PlayerStatDiff,
-        HashMap<HashMd5, model::ScoreDetail>,
-    )> {
+    ) -> Result<ScoreUploadInfo> {
+        let user_id = account.user_id();
         let upload = models::ScoreUpload::by_user_id_and_upload_id(
             &mut self.connection,
             user_id.get(),
             upload_id.get(),
         )?
         .unwrap();
-        let user = User::by_user_id(&mut self.connection, user_id.get())?;
 
         let current_stat = models::UploadStats::by_upload_id_and_user_id(
             &mut self.connection,
@@ -868,32 +843,12 @@ impl ScoreUploadInfoSource for MySQLClient {
             })
             .unwrap_or_default();
 
-        let scores = models::Score::by_user_id_and_upload_id(
-            &mut self.connection,
-            user_id.get(),
-            upload_id.get(),
-        )?;
-        let hash_map = Hash::all(&mut self.connection)?
-            .into_iter()
-            .filter_map(|h| HashMd5::from_str(&h.md5).ok().map(|md5| (h.sha256, md5)))
-            .collect::<HashMap<String, HashMd5>>();
-
-        let score = scores
-            .into_iter()
-            .filter_map(|row| {
-                let md5 = hash_map.get(&row.sha256)?.clone();
-                row.to_score()
-                    .make_detail(&SnapPeriod::default())
-                    .map(|detail| (md5, detail))
-            })
-            .collect::<HashMap<HashMd5, model::ScoreDetail>>();
-
-        Ok((
-            UploadAt(upload.date.and_utc()),
-            UserName::new(user.name),
-            stat.clone(),
-            score,
-        ))
+        Ok(ScoreUploadInfo {
+            upload_id,
+            user_id: account.user_id,
+            user_name: account.name,
+            stat: stat,
+        })
     }
 }
 

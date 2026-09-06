@@ -1,11 +1,10 @@
 #![allow(async_fn_in_trait)]
 use anyhow::Result;
 use model::{
-    Account, GoogleId, HashMd5, HashSha256, PlayerStatDiff, PlayerStats, RankedScore, Score,
-    ScoreDetail, ScoreId, ScoreUpload, Scores, SessionKey, Songs, Tables, TablesInfo, UploadAt,
-    UploadId, UserId, UserName, VisibleAccount,
+    Account, GoogleId, HashSha256, PlayerStats, RankedScore, Score, ScoreId, ScoreUpload,
+    ScoreUploadInfo, Scores, SessionKey, Songs, Tables, TablesInfo, UploadAt, UploadId, UserId,
+    VisibleAccount,
 };
-use std::collections::HashMap;
 
 pub trait PublishedUsers {
     async fn fetch_users(&mut self) -> Result<Vec<VisibleAccount>>;
@@ -28,7 +27,7 @@ pub trait ScoresByAccount {
 }
 
 pub trait ScoresByUpload {
-    async fn score(&mut self, upload_id: &UploadId) -> Result<Scores>;
+    async fn score(&mut self, account: &Account, upload_id: &UploadId) -> Result<Scores>;
 }
 
 pub trait ScoresBySha256 {
@@ -74,14 +73,9 @@ pub trait RegisterUpload {
 pub trait ScoreUploadInfoSource {
     async fn score_upload_info_source(
         &mut self,
-        user_id: UserId,
+        account: Account,
         upload_id: UploadId,
-    ) -> Result<(
-        UploadAt,
-        UserName,
-        PlayerStatDiff,
-        HashMap<HashMd5, ScoreDetail>,
-    )>;
+    ) -> Result<ScoreUploadInfo>;
 }
 
 pub trait SaveSongData {

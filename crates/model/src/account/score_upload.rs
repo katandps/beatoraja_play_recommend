@@ -1,4 +1,5 @@
 use crate::{PlayerStat, PlayerStatDiff};
+use crate::{UserId, UserName};
 use chrono::{DateTime, Utc};
 use serde::Serialize;
 
@@ -54,5 +55,28 @@ pub struct UploadAt(pub DateTime<Utc>);
 impl UploadAt {
     pub fn to_rfc3339(&self) -> String {
         self.0.to_rfc3339()
+    }
+}
+
+pub struct ScoreUploadInfo {
+    pub upload_id: UploadId,
+    pub user_id: UserId,
+    pub user_name: UserName,
+    pub stat: PlayerStatDiff,
+}
+
+impl ScoreUploadInfo {
+    pub fn new(
+        upload_id: UploadId,
+        user_id: UserId,
+        user_name: UserName,
+        stat: PlayerStatDiff,
+    ) -> Self {
+        Self {
+            upload_id,
+            user_id,
+            user_name,
+            stat,
+        }
     }
 }

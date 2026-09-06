@@ -1,8 +1,11 @@
 use anyhow::Result;
-use model::{DetailQuery, DetailResponse, Score, ScoreId, SongLogQuery, SongMyLogQuery};
+use model::{
+    DetailQuery, DetailResponse, DetailScore, Score, ScoreId, SnapPeriod, SongLogQuery,
+    SongMyLogQuery,
+};
 use repository::{
     AccountByUserId, GetTables, ResetScore, ScoreByAccountAndSha256, ScoreUploadInfoSource,
-    ScoresByAccount, SongDataForTables,
+    ScoresByAccount, ScoresByUpload, SongDataForTables,
 };
 use schema::score::ScoreUploadInfo;
 use session::Claims;
@@ -77,18 +80,29 @@ pub async fn reset_all<R: ResetScore + AccountByUserId>(
     })
 }
 
-pub async fn upload_info<C: ScoreUploadInfoSource>(
+pub async fn upload_info<
+    C: ScoreUploadInfoSource + SongDataForTables + AccountByUserId + ScoresByUpload,
+    T: GetTables,
+>(
     upload_id: i32,
     mut repository: C,
+    tables: T,
     claims: Claims,
 ) -> Result<Response<ScoreUploadInfo>> {
-    let user_id = claims.user_id;
+    let tables = tables.get().await;
+    let account = repository.user(claims.user_id).await?;
+    let songs = repository.song_data(&tables.tables).await?;
     let upload_id = model::UploadId(upload_id);
-    let (upload_at, user_name, stat, score) = repository
-        .score_upload_info_source(user_id, upload_id.clone())
+    let scores = repository.score(&account, &upload_id).await?;
+
+    let upload_info = repository
+        .score_upload_info_source(account, upload_id.clone())
         .await?;
     Ok(Response::Ok {
         tag: None,
-        body: ScoreUploadInfo::new(upload_id, upload_at, user_id, user_name, stat, score),
+        body: ScoreUploadInfo::new(
+            upload_info,
+            DetailScore::new(&tables.tables, &songs, scores, &SnapPeriod::default()),
+        ),
     })
 }

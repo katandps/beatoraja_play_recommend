@@ -1,6 +1,6 @@
 mod score_upload;
 
-pub use score_upload::{ScoreUpload, UploadAt, UploadId};
+pub use score_upload::{ScoreUpload, ScoreUploadInfo, UploadAt, UploadId};
 
 use parse_display::Display;
 use serde::Serialize;

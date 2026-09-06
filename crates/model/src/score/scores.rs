@@ -26,27 +26,16 @@ impl Scores {
 pub struct DetailResponse {
     user_id: UserId,
     user_name: String,
-    score: HashMap<HashMd5, ScoreDetail>,
+    score: DetailScore,
 }
 
-impl DetailResponse {
-    pub fn new(
-        tables: &Tables,
-        songs: &Songs,
-        mut scores: Scores,
-        period: &SnapPeriod,
-        account: &Account,
-    ) -> Self {
-        let charts = tables.get_charts().count();
-        log::info!(
-            "DetailResponse: charts={}, scores={}",
-            charts,
-            scores.count()
-        );
-        Self {
-            user_id: account.user_id(),
-            user_name: account.user_name(),
-            score: tables
+#[derive(Debug, Clone, Serialize)]
+pub struct DetailScore(pub HashMap<HashMd5, ScoreDetail>);
+
+impl DetailScore {
+    pub fn new(tables: &Tables, songs: &Songs, mut scores: Scores, period: &SnapPeriod) -> Self {
+        Self(
+            tables
                 .get_charts()
                 .filter_map(|chart| {
                     let score_id = songs
@@ -60,6 +49,22 @@ impl DetailResponse {
                     })
                 })
                 .collect(),
+        )
+    }
+}
+
+impl DetailResponse {
+    pub fn new(
+        tables: &Tables,
+        songs: &Songs,
+        scores: Scores,
+        period: &SnapPeriod,
+        account: &Account,
+    ) -> Self {
+        Self {
+            user_id: account.user_id(),
+            user_name: account.user_name(),
+            score: DetailScore::new(tables, songs, scores, period),
         }
     }
 }

@@ -24,7 +24,7 @@ pub use {
     play_count::PlayCount,
     rank::ClearRank,
     ranking::{RankedScore, RankingQuery},
-    scores::{DetailQuery, DetailResponse, Scores},
+    scores::{DetailQuery, DetailResponse, DetailScore, Scores},
     snap_range::SnapPeriod,
     snapshot::SnapShot,
     snapshots::SnapShots,

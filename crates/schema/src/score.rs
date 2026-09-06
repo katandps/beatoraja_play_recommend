@@ -1,37 +1,24 @@
-use std::collections::HashMap;
-
 use schemars::JsonSchema;
 use serde::Serialize;
+use std::collections::HashMap;
 
 #[derive(Clone, Debug, Serialize, JsonSchema)]
 pub struct ScoreUploadInfo {
     upload_id: UploadID,
-    upload_at: UploadAt,
     user_id: UserId,
     user_name: UserName,
     stats: PlayerStatDiff,
-    score: HashMap<String, ScoreDetail>,
+    score: DetailScore,
 }
 
 impl ScoreUploadInfo {
-    pub fn new(
-        upload_id: model::UploadId,
-        upload_at: model::UploadAt,
-        user_id: model::UserId,
-        user_name: model::UserName,
-        stats: model::PlayerStatDiff,
-        score: HashMap<model::HashMd5, model::ScoreDetail>,
-    ) -> Self {
+    pub fn new(upload: model::ScoreUploadInfo, scores: model::DetailScore) -> Self {
         Self {
-            upload_id: upload_id.get(),
-            upload_at: upload_at.to_rfc3339(),
-            user_id: user_id.get(),
-            user_name: user_name.to_string(),
-            stats: PlayerStatDiff::new(stats),
-            score: score
-                .into_iter()
-                .map(|(k, v)| (k.to_string(), ScoreDetail::new(v)))
-                .collect::<HashMap<String, ScoreDetail>>(),
+            upload_id: upload.upload_id.get(),
+            user_id: upload.user_id.get(),
+            user_name: upload.user_name.to_string(),
+            stats: PlayerStatDiff::new(upload.stat),
+            score: DetailScore::new(scores),
         }
     }
 }
@@ -165,6 +152,21 @@ impl ScoreSnap {
             updated_at: snap.updated_at.to_rfc3339(),
             before: snap.before.ex_score(),
         }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, JsonSchema)]
+pub struct DetailScore(HashMap<String, ScoreDetail>);
+
+impl DetailScore {
+    fn new(scores: model::DetailScore) -> Self {
+        Self(
+            scores
+                .0
+                .into_iter()
+                .map(|(k, v)| (k.to_string(), ScoreDetail::new(v)))
+                .collect(),
+        )
     }
 }
 
