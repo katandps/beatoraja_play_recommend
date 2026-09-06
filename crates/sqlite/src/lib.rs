@@ -53,6 +53,7 @@ impl SqliteClient {
                 row.combo,
                 row.minbp,
                 row.date as i64,
+                0,
             ));
             map
         }))

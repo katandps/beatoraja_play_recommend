@@ -51,6 +51,7 @@ impl MySQLClient {
                 row.combo,
                 row.min_bp,
                 row.date.and_utc().timestamp(),
+                row.score_upload_log_id.unwrap_or(0),
             );
             map.entry(song_id).or_default().add(snap);
         }
@@ -71,6 +72,7 @@ impl MySQLClient {
                 row.combo,
                 row.min_bp,
                 row.date.and_utc().timestamp(),
+                row.score_upload_log_id.unwrap_or(0),
             );
             map.entry(user_id).or_default().add(snap);
         }
@@ -616,9 +618,14 @@ impl ScoresByUpload for MySQLClient {
                         .map(|sha256| {
                             let score_id = ScoreId::new(sha256, PlayMode::from(row.mode));
                             let log = score_log.remove(&score_id).unwrap_or_default();
-                            (score_id, row.to_score().with_log(log))
+                            if log.has_snap_with_upload_id(upload_id) {
+                                Some((score_id, row.to_score().with_log(log)))
+                            } else {
+                                None
+                            }
                         })
                         .ok()
+                        .flatten()
                 })
                 .collect::<HashMap<ScoreId, Score>>(),
         ))
@@ -650,6 +657,7 @@ impl ScoreByAccountAndSha256 for MySQLClient {
                     row.combo,
                     row.min_bp,
                     row.date.and_utc().timestamp(),
+                    row.score_upload_log_id.unwrap_or(0),
                 );
                 snapshots.add(snap);
             }

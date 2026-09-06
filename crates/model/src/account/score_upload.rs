@@ -1,7 +1,7 @@
 use crate::{PlayerStat, PlayerStatDiff};
 use crate::{UserId, UserName};
 use chrono::{DateTime, Utc};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize)]
 pub struct ScoreUpload {
@@ -40,12 +40,16 @@ impl ScoreUpload {
     }
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 pub struct UploadId(pub i32);
 
 impl UploadId {
     pub fn get(&self) -> i32 {
         self.0
+    }
+
+    pub fn from_integer(id: i32) -> Self {
+        UploadId(id)
     }
 }
 

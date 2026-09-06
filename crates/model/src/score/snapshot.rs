@@ -8,6 +8,7 @@ pub struct SnapShot {
     pub max_combo: MaxCombo,
     pub min_bp: MinBP,
     pub updated_at: UpdatedAt,
+    pub upload_id: UploadId,
 }
 
 impl SnapShot {
@@ -17,6 +18,7 @@ impl SnapShot {
         combo: i32,
         minbp: i32,
         timestamp: i64,
+        upload_id: i32,
     ) -> SnapShot {
         SnapShot {
             clear_type: ClearType::from_integer(clear_type),
@@ -24,6 +26,7 @@ impl SnapShot {
             max_combo: MaxCombo::from_combo(combo),
             min_bp: MinBP::from_bp(minbp),
             updated_at: UpdatedAt::from_timestamp(timestamp),
+            upload_id: UploadId::from_integer(upload_id),
         }
     }
 

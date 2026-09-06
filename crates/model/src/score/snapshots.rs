@@ -25,6 +25,10 @@ impl SnapShots {
         !self.0.is_empty()
     }
 
+    pub fn has_snap_with_upload_id(&self, id: &UploadId) -> bool {
+        self.0.iter().rev().find(|&s| &s.upload_id == id).is_some()
+    }
+
     pub fn param_snap<T: ParamSnap>(&self, date: &SnapPeriod) -> Option<T> {
         match self.snap(date) {
             Some(last) => {
@@ -52,10 +56,10 @@ mod test {
 
     #[test]
     pub fn test() {
-        let shot1 = SnapShot::from_data(1, 2, 3, 4, 11);
-        let shot2 = SnapShot::from_data(1, 2, 3, 4, 22);
-        let shot3 = SnapShot::from_data(1, 2, 3, 4, 33);
-        let shot4 = SnapShot::from_data(1, 2, 3, 4, 44);
+        let shot1 = SnapShot::from_data(1, 2, 3, 4, 11, 1);
+        let shot2 = SnapShot::from_data(1, 2, 3, 4, 22, 1);
+        let shot3 = SnapShot::from_data(1, 2, 3, 4, 33, 1);
+        let shot4 = SnapShot::from_data(1, 2, 3, 4, 44, 1);
 
         let shots = SnapShots::create_by_snaps(vec![
             shot1.clone(),
@@ -99,21 +103,21 @@ mod test {
         }
 
         //10日目 failed
-        let shot_failed = SnapShot::from_data(1, 2, 3, 4, DAY * 10);
+        let shot_failed = SnapShot::from_data(1, 2, 3, 4, DAY * 10, 1);
         //15日目 failed継続
-        let shot_failed2 = SnapShot::from_data(1, 2, 3, 4, DAY * 15);
+        let shot_failed2 = SnapShot::from_data(1, 2, 3, 4, DAY * 15, 2);
         //17日目 assist + la
-        let shot_assist = SnapShot::from_data(2, 2, 3, 4, DAY * 17);
-        let shot_la = SnapShot::from_data(3, 2, 3, 4, DAY * 17 + 1);
+        let shot_assist = SnapShot::from_data(2, 2, 3, 4, DAY * 17, 3);
+        let shot_la = SnapShot::from_data(3, 2, 3, 4, DAY * 17 + 1, 4);
         //20日目 assist継続
-        let shot_la2 = SnapShot::from_data(3, 2, 3, 4, DAY * 20);
+        let shot_la2 = SnapShot::from_data(3, 2, 3, 4, DAY * 20, 5);
         //22日目 easy
-        let shot_easy = SnapShot::from_data(4, 2, 3, 4, DAY * 22);
+        let shot_easy = SnapShot::from_data(4, 2, 3, 4, DAY * 22, 6);
         //25日目 normal+hard
-        let shot_normal = SnapShot::from_data(5, 2, 3, 4, DAY * 25);
-        let shot_hard = SnapShot::from_data(6, 2, 3, 4, DAY * 26 - 1);
+        let shot_normal = SnapShot::from_data(5, 2, 3, 4, DAY * 25, 7);
+        let shot_hard = SnapShot::from_data(6, 2, 3, 4, DAY * 26 - 1, 8);
         //30日目 exhard
-        let shot_exhard = SnapShot::from_data(7, 2, 3, 4, DAY * 30);
+        let shot_exhard = SnapShot::from_data(7, 2, 3, 4, DAY * 30, 9);
 
         let shots = SnapShots::create_by_snaps(vec![
             shot_failed.clone(),
