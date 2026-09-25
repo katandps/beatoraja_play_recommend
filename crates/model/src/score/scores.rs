@@ -51,6 +51,30 @@ impl DetailScore {
                 .collect(),
         )
     }
+
+    pub fn new_by_upload_id(
+        tables: &Tables,
+        songs: &Songs,
+        mut scores: Scores,
+        upload_id: &UploadId,
+    ) -> Self {
+        Self(
+            tables
+                .get_charts()
+                .filter_map(|chart| {
+                    let score_id = songs
+                        .song(chart)
+                        .map(|song| song.song_id())
+                        .unwrap_or_default();
+                    scores.remove(&score_id).and_then(|score| {
+                        score
+                            .make_detail_by_upload_id(upload_id)
+                            .map(|detail| (chart.md5().clone(), detail))
+                    })
+                })
+                .collect(),
+        )
+    }
 }
 
 impl DetailResponse {

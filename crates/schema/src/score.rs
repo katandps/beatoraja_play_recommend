@@ -88,6 +88,7 @@ pub struct ScoreDetail {
     min_bp: Option<MinBPSnap>,
     clear_type: Option<ClearTypeSnap>,
     updated_at: UpdatedAt,
+    updated_at_before_period: UpdatedAt,
     play_count: PlayCount,
 }
 
@@ -99,6 +100,7 @@ impl ScoreDetail {
             min_bp: detail.min_bp().cloned().map(MinBPSnap::new),
             clear_type: detail.clear_type().cloned().map(ClearTypeSnap::new),
             updated_at: detail.updated_at().to_rfc3339(),
+            updated_at_before_period: detail.updated_at_before_period().to_rfc3339(),
             play_count: detail.play_count().0,
         }
     }

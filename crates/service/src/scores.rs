@@ -1,7 +1,6 @@
 use anyhow::Result;
 use model::{
-    DetailQuery, DetailResponse, DetailScore, Score, ScoreId, SnapPeriod, SongLogQuery,
-    SongMyLogQuery,
+    DetailQuery, DetailResponse, DetailScore, Score, ScoreId, SongLogQuery, SongMyLogQuery,
 };
 use repository::{
     AccountByUserId, GetTables, ResetScore, ScoreByAccountAndSha256, ScoreUploadInfoSource,
@@ -102,7 +101,7 @@ pub async fn upload_info<
         tag: None,
         body: ScoreUploadInfo::new(
             upload_info,
-            DetailScore::new(&tables.tables, &songs, scores, &SnapPeriod::default()),
+            DetailScore::new_by_upload_id(&tables.tables, &songs, scores, &upload_id),
         ),
     })
 }

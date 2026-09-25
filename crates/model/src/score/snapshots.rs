@@ -26,7 +26,22 @@ impl SnapShots {
     }
 
     pub fn has_snap_with_upload_id(&self, id: &UploadId) -> bool {
-        self.0.iter().rev().find(|&s| &s.upload_id == id).is_some()
+        self.snap_by_upload_id(id).is_some()
+    }
+
+    pub fn snap_by_upload_id(&self, id: &UploadId) -> Option<&SnapShot> {
+        self.0.iter().rev().find(|snap| &snap.upload_id == id)
+    }
+
+    pub fn snap_before_upload_id(&self, id: &UploadId) -> Option<&SnapShot> {
+        let mut previous = None;
+        for snap in &self.0 {
+            if &snap.upload_id == id {
+                return previous;
+            }
+            previous = Some(snap);
+        }
+        None
     }
 
     pub fn param_snap<T: ParamSnap>(&self, date: &SnapPeriod) -> Option<T> {
@@ -47,12 +62,28 @@ impl SnapShots {
             None => None,
         }
     }
+
+    pub fn param_snap_by_upload_id<T: ParamSnap>(&self, id: &UploadId) -> Option<T> {
+        let last = self.snap_by_upload_id(id)?;
+        let before = self.snap_before_upload_id(id);
+        let mut updated_at = &last.updated_at;
+
+        for snap in self.0.iter().rev().filter(|snap| &snap.upload_id == id) {
+            if T::cmp(snap, last) {
+                updated_at = &snap.updated_at;
+            } else {
+                break;
+            }
+        }
+
+        Some(T::make(last, updated_at.clone(), before))
+    }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::score::score::ClearTypeSnap;
+    use crate::score::score::{ClearTypeSnap, ScoreSnap};
 
     #[test]
     pub fn test() {
@@ -144,5 +175,25 @@ mod test {
         asrt(&shots, Hard, Easy, DAY * 25 + DAY - 1);
         asrt(&shots, Hard, Easy, DAY * 26);
         asrt(&shots, ExHard, Hard, DAY * 30);
+    }
+
+    #[test]
+    fn param_snap_by_upload_id_uses_snap_before_oldest_upload_snap() {
+        let before = SnapShot::from_data(1, 100, 3, 4, 10, 1);
+        let first = SnapShot::from_data(1, 110, 3, 4, 20, 2);
+        let updated = SnapShot::from_data(1, 120, 3, 4, 30, 2);
+        let latest = SnapShot::from_data(1, 120, 3, 4, 40, 2);
+        let after = SnapShot::from_data(1, 130, 3, 4, 50, 3);
+        let shots =
+            SnapShots::create_by_snaps(vec![before, first, updated.clone(), latest.clone(), after]);
+
+        assert_eq!(Some(&latest), shots.snap_by_upload_id(&UploadId(2)));
+
+        let score = shots
+            .param_snap_by_upload_id::<ScoreSnap>(&UploadId(2))
+            .unwrap();
+        assert_eq!(120, score.current.ex_score());
+        assert_eq!(100, score.before.ex_score());
+        assert_eq!(updated.updated_at, score.updated_at);
     }
 }

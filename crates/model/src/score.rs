@@ -89,6 +89,22 @@ impl Score {
             None => None,
         }
     }
+
+    pub fn make_detail_by_upload_id(self, upload_id: &UploadId) -> Option<ScoreDetail> {
+        let snap = self.log.snap_by_upload_id(upload_id)?;
+        Some(ScoreDetail {
+            clear_type: self.log.param_snap_by_upload_id(upload_id),
+            min_bp: self.log.param_snap_by_upload_id(upload_id),
+            score: self.log.param_snap_by_upload_id(upload_id),
+            max_combo: snap.max_combo.clone(),
+            updated_at: snap.updated_at.clone(),
+            updated_at_before_period: self
+                .log
+                .snap_before_upload_id(upload_id)
+                .map_or(Default::default(), |snap| snap.updated_at.clone()),
+            play_count: PlayCount::new(-1),
+        })
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
@@ -121,6 +137,10 @@ impl ScoreDetail {
 
     pub fn updated_at(&self) -> &UpdatedAt {
         &self.updated_at
+    }
+
+    pub fn updated_at_before_period(&self) -> &UpdatedAt {
+        &self.updated_at_before_period
     }
 
     pub fn play_count(&self) -> &PlayCount {

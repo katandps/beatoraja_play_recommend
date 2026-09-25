@@ -607,7 +607,7 @@ impl ScoresByAccount for MySQLClient {
 
 impl ScoresByUpload for MySQLClient {
     async fn score(&mut self, account: &Account, upload_id: &UploadId) -> Result<Scores> {
-        let record = models::Score::by_upload_id(&mut self.connection, upload_id.get())?;
+        let record = models::Score::by_user_id(&mut self.connection, account.user_id().get())?;
         let mut score_log = self.score_log(account)?;
         Ok(Scores::create_by_map(
             record
