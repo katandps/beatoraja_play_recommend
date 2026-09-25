@@ -60,6 +60,10 @@ impl Score {
                 score: self.log.param_snap(period),
                 max_combo: snap.max_combo.clone(),
                 updated_at: snap.updated_at.clone(),
+                updated_at_before_period: self
+                    .log
+                    .snap(&period.to_since_period())
+                    .map_or(Default::default(), |snap| snap.updated_at.clone()),
                 play_count: if period.is_past_range() {
                     PlayCount::new(-1)
                 } else {
@@ -75,6 +79,7 @@ impl Score {
                         min_bp: Some(MinBPSnap::from(self.min_bp)),
                         clear_type: Some(ClearTypeSnap::from(self.clear)),
                         updated_at: self.updated_at,
+                        updated_at_before_period: UpdatedAt::default(),
                         play_count: self.play_count,
                     })
                 } else {
@@ -93,6 +98,7 @@ pub struct ScoreDetail {
     min_bp: Option<MinBPSnap>,
     clear_type: Option<ClearTypeSnap>,
     updated_at: UpdatedAt,
+    updated_at_before_period: UpdatedAt,
     play_count: PlayCount,
 }
 
