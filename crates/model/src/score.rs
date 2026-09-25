@@ -62,7 +62,7 @@ impl Score {
                 updated_at: snap.updated_at.clone(),
                 updated_at_before_period: self
                     .log
-                    .snap(&period.to_since_period())
+                    .snap(&snap.updated_at.to_one_day_before())
                     .map_or(Default::default(), |snap| snap.updated_at.clone()),
                 play_count: if period.is_past_range() {
                     PlayCount::new(-1)

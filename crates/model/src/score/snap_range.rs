@@ -41,11 +41,4 @@ impl SnapPeriod {
             until: Utc.timestamp_opt(timestamp, 0).unwrap(),
         }
     }
-
-    pub fn to_since_period(&self) -> SnapPeriod {
-        SnapPeriod {
-            since: Default::default(),
-            until: self.since,
-        }
-    }
 }
