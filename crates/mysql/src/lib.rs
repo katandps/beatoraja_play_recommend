@@ -79,8 +79,8 @@ impl MySQLClient {
         Ok(map)
     }
 
-    fn saved_song(&mut self, user_id: i32) -> Result<HashMap<ScoreId, models::Score>> {
-        let saved = models::Score::by_user_id(&mut self.connection, user_id)?;
+    fn saved_song(&mut self, user_id: UserId) -> Result<HashMap<ScoreId, models::Score>> {
+        let saved = models::Score::by_user_id(&mut self.connection, user_id.get())?;
         let map = saved
             .into_iter()
             .map(|record| (record.get_score_id(), record))
@@ -90,9 +90,9 @@ impl MySQLClient {
 
     fn saved_snap(
         &mut self,
-        user_id: i32,
+        user_id: UserId,
     ) -> Result<HashMap<(ScoreId, NaiveDateTime), models::ScoreSnap>> {
-        let saved = models::ScoreSnap::by_user_id(&mut self.connection, user_id)?;
+        let saved = models::ScoreSnap::by_user_id(&mut self.connection, user_id.get())?;
         Ok(saved
             .into_iter()
             .map(|record| ((record.get_score_id(), record.date), record))
@@ -261,10 +261,8 @@ impl SaveScoreData for MySQLClient {
         score: &Scores,
         upload: &ScoreUpload,
     ) -> Result<()> {
-        let user = User::by_account(&mut self.connection, account).unwrap();
-        let user_id = user.id;
-        let saved_song = self.saved_song(user_id).unwrap();
-        let saved_snap = self.saved_snap(user_id).unwrap();
+        let saved_song = self.saved_song(account.user_id).unwrap();
+        let saved_snap = self.saved_snap(account.user_id).unwrap();
 
         let hashes = Hash::all(&mut self.connection)
             .unwrap()
@@ -283,14 +281,14 @@ impl SaveScoreData for MySQLClient {
                         songs_for_update.push(models::Score::from_score(
                             saved,
                             score,
-                            user_id,
+                            account.user_id,
                             song_id,
                             &upload.upload_id,
                         ))
                     }
                 }
                 None => songs_for_insert.push(models::RegisteredScore::from_score(
-                    user_id,
+                    account.user_id,
                     score,
                     song_id,
                     &upload.upload_id,
@@ -300,7 +298,7 @@ impl SaveScoreData for MySQLClient {
                 match saved_snap.get(&(song_id.clone(), snapshot.updated_at.naive_datetime())) {
                     Some(_) => (),
                     None => snaps_for_insert.push(ScoreSnapForUpdate {
-                        user_id,
+                        user_id: account.user_id.get(),
                         sha256: song_id.sha256().to_string(),
                         mode: song_id.mode().to_int(),
                         date: snapshot.updated_at.naive_datetime(),

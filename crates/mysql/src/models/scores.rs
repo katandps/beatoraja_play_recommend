@@ -5,7 +5,7 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use model::{
     ClearCount, ClearType, HashSha256, Judge, MaxCombo, MinBP, PlayCount, PlayMode, ScoreId,
-    SnapShots, UpdatedAt, UploadId,
+    SnapShots, UpdatedAt, UploadId, UserId,
 };
 use std::str::FromStr;
 
@@ -101,13 +101,13 @@ impl Score {
     pub fn from_score(
         saved: &Self,
         score: &model::Score,
-        user_id: i32,
+        user_id: UserId,
         song_id: &ScoreId,
         score_upload_log_id: &UploadId,
     ) -> Self {
         Self {
             id: saved.id,
-            user_id,
+            user_id: user_id.get(),
             sha256: song_id.sha256().to_string(),
             mode: song_id.mode().to_int(),
             clear: score.clear.to_integer(),
@@ -203,13 +203,13 @@ pub struct RegisteredScore {
 
 impl RegisteredScore {
     pub fn from_score(
-        user_id: i32,
+        user_id: UserId,
         score: &model::Score,
         song_id: &ScoreId,
         upload_id: &UploadId,
     ) -> Self {
         RegisteredScore {
-            user_id,
+            user_id: user_id.get(),
             sha256: song_id.sha256().to_string(),
             mode: song_id.mode().to_int(),
             clear: score.clear.to_integer(),
