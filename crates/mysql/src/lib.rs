@@ -21,7 +21,7 @@ use oauth_google::{GoogleProfile, RegisterUser};
 use r2d2::Pool;
 use repository::*;
 use schema::revoked_sessions;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::str::FromStr;
 
 pub type MySqlPool = Pool<ConnectionManager<MysqlConnection>>;
@@ -264,12 +264,6 @@ impl SaveScoreData for MySQLClient {
         let saved_song = self.saved_song(account.user_id).unwrap();
         let saved_snap = self.saved_snap(account.user_id).unwrap();
 
-        let hashes = Hash::all(&mut self.connection)
-            .unwrap()
-            .iter()
-            .map(|h| h.sha256.clone())
-            .collect::<HashSet<_>>();
-
         let mut songs_for_insert = Vec::new();
         let mut songs_for_update = Vec::new();
         let mut snaps_for_insert = Vec::new();
@@ -314,26 +308,16 @@ impl SaveScoreData for MySQLClient {
         log::info!("Songs for Insert {} records.", songs_for_insert.len());
         log::info!("Songs for Update {} records.", songs_for_update.len());
         log::info!("Snaps for Insert {} records.", snaps_for_insert.len());
-        fn div<T: Clone + CanGetHash>(v: Vec<T>, hashes: &HashSet<String>) -> Vec<Vec<T>> {
-            let mut index = 0;
-            let mut ret = Vec::new();
-            loop {
-                let mut records = Vec::new();
-                while index < v.len() && records.len() < 1000 {
-                    if hashes.contains(&v[index].hash_sha256()) {
-                        records.push(v[index].clone());
-                    }
-                    index += 1;
-                }
-                if records.is_empty() {
-                    break;
-                }
-                ret.push(records);
-            }
-            ret
+        fn div<T: Clone + CanGetHash>(v: Vec<T>) -> Vec<Vec<T>> {
+            v.into_iter()
+                .filter(|record| record.hash_sha256().len() == 64)
+                .collect::<Vec<_>>()
+                .chunks(1000)
+                .map(|records| records.to_vec())
+                .collect()
         }
 
-        for v in div(songs_for_update, &hashes) {
+        for v in div(songs_for_update) {
             log::info!("Update {} scores.", v.len());
             diesel::replace_into(schema::scores::table)
                 .values(v)
@@ -341,7 +325,7 @@ impl SaveScoreData for MySQLClient {
                 .unwrap();
         }
 
-        for v in div(songs_for_insert, &hashes) {
+        for v in div(songs_for_insert) {
             log::info!("Insert {} scores.", v.len());
             diesel::insert_into(schema::scores::table)
                 .values(v)
@@ -349,7 +333,7 @@ impl SaveScoreData for MySQLClient {
                 .unwrap();
         }
 
-        for v in div(snaps_for_insert, &hashes) {
+        for v in div(snaps_for_insert) {
             log::info!("Insert {} score_snaps", v.len());
             diesel::insert_into(schema::score_snaps::table)
                 .values(v)

@@ -67,11 +67,11 @@ fn install_single_line_panic_hook() {
 
 async fn table_update(tables: &TableClient) {
     loop {
-        tokio::time::sleep(Duration::from_secs(3600)).await;
         let result = tables.update().await;
         if result.is_err() {
             log::warn!("{:?}", result)
         }
+        tokio::time::sleep(Duration::from_secs(3600)).await;
     }
 }
 
