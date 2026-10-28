@@ -20,7 +20,7 @@ serde_json = "1.0.149"
 
 tempfile = "3.18.0"
 
-bytes = "1.10.1"
+bytes = "1.12.1"
 
 chrono = "0.4.40"
 
