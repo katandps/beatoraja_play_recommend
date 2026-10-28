@@ -1,7 +1,6 @@
 [workspace]
 members = [
     "crates/model",
-    "crates/send_slack",
     "crates/table",
     "crates/sqlite",
     "crates/schema",
@@ -13,6 +12,9 @@ members = [
     "crates/session",
 ]
 resolver = "2"
+
+[workspace.dependencies]
+reqwest = { version = "0.13.5", features = ["json"] }
 
 [profile.release]
 debug = 1
