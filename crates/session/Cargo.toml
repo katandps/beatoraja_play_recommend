@@ -7,7 +7,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.97"
+anyhow.workspace = true
 chrono = "0.4.40"
 serde = { version = "1.0.228", features = ["derive"] }
 jsonwebtoken = { version = "9.3.1", features = ["use_pem"] }

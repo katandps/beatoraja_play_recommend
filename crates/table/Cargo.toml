@@ -25,8 +25,8 @@ url = "2.5.4"
 dirs = "6.0.0"
 
 #エラー処理
-anyhow = "1.0.97"
-thiserror = "2.0.12"
+anyhow.workspace = true
+thiserror.workspace = true
 
 #HTMLパーサ
 scraper = "0.23.1"

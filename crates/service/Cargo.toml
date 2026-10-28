@@ -16,7 +16,7 @@ oauth_google = { path = "../oauth_google" }
 schema = { path = "../schema" }
 
 log = "0.4.26"
-anyhow = "1.0.97"
+anyhow.workspace = true
 futures = "0.3.31"
 rand = "0.9.0"
 tempfile = "3.18.0"

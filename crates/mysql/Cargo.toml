@@ -14,8 +14,8 @@ log = "0.4.26"
 futures = "0.3.31"
 
 #エラー処理
-anyhow = "1.0.97"
-thiserror = "2.0.12"
+anyhow.workspace = true
+thiserror.workspace = true
 
 chrono = "0.4.40"
 envy = "0.4.2"

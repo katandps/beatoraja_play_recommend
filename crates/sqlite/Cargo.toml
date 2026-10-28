@@ -8,6 +8,6 @@ edition = "2021"
 
 [dependencies]
 diesel = { version = "2.2.8", features = ["sqlite"] }
-thiserror = "2.0.12"
+thiserror.workspace = true
 
 model = { path = "../model" }
