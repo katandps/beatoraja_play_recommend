@@ -11,7 +11,7 @@ model = { path = "../model" }
 repository = { path = "../repository" }
 
 log = "0.4.26"
-rand = { version = "0.9.0" }
+rand = { version = "0.10.3" }
 
 # JSONのパース
 serde = { version = "1.0.228", features = ["derive"] }
